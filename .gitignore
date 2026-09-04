@@ -1,0 +1,23 @@
+# Dados brutos (microdados baixados do IBGE) — nunca versionados
+data/raw/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Ambiente / segredos
+.env
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
