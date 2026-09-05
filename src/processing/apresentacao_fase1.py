@@ -61,6 +61,12 @@ SECOES = [
         ("topo10_faixa_etaria.png", "Composição por faixa etária do topo 10%, média dos últimos 8 trimestres."),
         ("topo10_geracao.png", "Composição por geração do topo 10% — o topo dos negros pende um pouco mais para Millennial/Geração Z; o dos brancos, para Baby Boomer/Geração X."),
     ]),
+    ("Decomposição dos 4 quartis de renda — Negra vs. Branca", "Generaliza o topo 10% pra toda a distribuição: Q1 (25% mais pobres) a Q4 (25% mais ricos), limiar DENTRO de cada raça", [
+        ("quartis_genero.png", "% de mulheres por quartil — maioria entre as mais pobres, minoria entre as mais ricas, nas duas raças; a distância entre raças é maior no Q4."),
+        ("quartis_escolaridade.png", "% com Superior completo cresce em todos os quartis nas duas raças, mas o hiato racial se abre dramaticamente no Q4 (~72% Branca vs. ~40% Negra)."),
+        ("quartis_faixa_etaria.png", "Composição por faixa etária, um painel por quartil — perfil etário parecido entre as raças em cada quartil."),
+        ("quartis_geracao.png", "Composição por geração, um painel por quartil."),
+    ]),
     ("Raça × Gênero", "Combinado + um por gênero", [
         ("renda_por_raca_genero.png", "O hiato de gênero soma ao de raça, não substitui."),
         ("renda_por_raca_homens.png", "Recorte só Homens."),

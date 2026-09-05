@@ -460,20 +460,39 @@ Ambas as novas funções (`gerar_hiato_por_geracao`, `gerar_renda_por_geracao`,
 microdados quando aplicável, universo de ocupados com renda > 0, amostra mínima de 100
 antes de calcular um quantil). 6 gráficos novos, seção nova na apresentação.
 
+### Correção: faltava a decomposição dos 4 quartis (2026-09-05)
+
+O usuário pediu originalmente "decomposição histórica dos 4 quartis das populações",
+usando o topo 10% só como EXEMPLO de uma coisa que queria ver. A entrega acima cobriu só o
+exemplo (P90/topo 10%), não o pedido completo (P25/P50/P75, os 4 quartis) — usuário
+perguntou de volta se eu tinha entendido que ele queria a quebra dentro de cada raça pra
+toda a distribuição, não só o topo. Corrigido: `gerar_perfil_quartis_racial` generaliza
+`gerar_perfil_topo10_racial` pros 4 quartis (Q1-Q4, limiares P25/P50/P75 calculados DENTRO
+de cada raça, mesmas 4 dimensões de composição, mesma ressalva de heaping documentada
+acima). O topo 10% continua publicado à parte — é um recorte mais estreito (P90) e
+complementar, não foi substituído.
+
+- Gráficos novos: 4 painéis "pequenos múltiplos" (um por quartil, Q1 a Q4 lado a lado),
+  2 em série temporal (gênero, escolaridade) e 2 em snapshot/barras (faixa etária, geração)
+  — generaliza os 4 gráficos de topo 10% já existentes.
+- Achado mais forte: o hiato educacional (% Superior completo) ENTRE Negra e Branca cresce
+  conforme sobe o quartil — de ~6 p.p. no Q1 pra ~32 p.p. no Q4 — confirmando com o painel
+  completo o padrão já visto isoladamente no topo 10%.
+
 ---
 
 ## 🏁 Fase 1 concluída (2026-09-04, expandida em 2026-09-05)
 
 Todas as 7 etapas (0-6) fechadas no mesmo dia, incl. três rodadas de expansão a pedido (a
 segunda com teste de significância formal via Oaxaca-Blinder, hiato regional, segregação
-ocupacional, quebra estrutural e 4 variáveis novas; a terceira com geração e perfil do topo
-10% — ver seções acima). Entregáveis:
+ocupacional, quebra estrutural e 4 variáveis novas; a terceira com geração, perfil do topo
+10% e a decomposição completa dos 4 quartis — ver seções acima). Entregáveis:
 `src/ingestion/{extrator_pnadc,baixar_deflator}.py`,
 `src/processing/{agregacoes_pnadc,graficos_fase1,apresentacao_fase1}.py`,
-`src/utils/pnadc_core.py`, 19 datasets em `data/processed/*.parquet`,
-`docs/{LIMITACOES_E_METODOLOGIA,ANALISE_FASE1}.md`, 59 gráficos em `docs/img/` (galeria
+`src/utils/pnadc_core.py`, 20 datasets em `data/processed/*.parquet`,
+`docs/{LIMITACOES_E_METODOLOGIA,ANALISE_FASE1}.md`, 63 gráficos em `docs/img/` (galeria
 completa em `docs/ANALISE_FASE1.md`, destaques no README), apresentação
-`docs/Datahub_Racial_Brasil_Fase1.pptx` (77 slides). Próximo passo: Fase 2 (Censo
+`docs/Datahub_Racial_Brasil_Fase1.pptx` (82 slides). Próximo passo: Fase 2 (Censo
 Demográfico) — ainda não detalhada.
 
 ---
