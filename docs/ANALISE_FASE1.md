@@ -6,7 +6,7 @@ gênero, faixa etária e escolaridade, para renda habitual real (deflator oficia
 `src/processing/graficos_fase1.py` a partir dos datasets em `data/processed/*.parquet`.
 Também disponível como apresentação: [Datahub_Racial_Brasil_Fase1.pptx](Datahub_Racial_Brasil_Fase1.pptx).
 
-79 gráficos ao todo. Índice:
+87 gráficos ao todo. Índice:
 
 - [Raça](#raça)
 - [Hiato Branca vs. Negra — série histórica](#hiato-branca-vs-negra--série-histórica)
@@ -233,6 +233,13 @@ O achado mais forte desta seção: o topo 10% dos negros ficou muito mais escola
 (~83%). A escolaridade de quem chega ao topo está convergindo, ainda que o nível continue
 bem diferente.
 
+![Topo 10% — composição completa de escolaridade](img/topo10_escolaridade_composicao.png)
+
+A distribuição completa pelos 7 níveis (não só Superior completo): o topo 10% dos negros tem
+mais que o dobro de Médio completo (23%) do que o dos brancos (10%) — quem não chega ao
+Superior completo dentro do topo dos negros, na maioria das vezes, já concluiu o Médio, não
+fica pra trás no Fundamental.
+
 ![Topo 10% — faixa etária](img/topo10_faixa_etaria.png)
 
 Composição por faixa etária do topo 10%, média dos últimos 8 trimestres — o topo dos negros é
@@ -265,6 +272,12 @@ raças, mas o hiato racial se ABRE dramaticamente no topo — no Q4, ~72% de Bra
 completo contra ~40% de Negra (uma diferença de 32 p.p.); no Q1, a diferença é de só ~6 p.p.
 Confirma, com o painel completo, o padrão já visto no gráfico de topo 10%: quanto mais alto
 na distribuição de renda, maior o hiato educacional entre as raças.
+
+![Quartis — composição completa de escolaridade](img/quartis_escolaridade_composicao.png)
+
+Distribuição completa pelos 7 níveis, um painel por quartil — mesmo padrão do topo 10% (Médio
+completo mais presente entre os negros, Superior completo mais presente entre os brancos)
+visível em todas as fatias da distribuição, não só no topo.
 
 ![Quartis — faixa etária](img/quartis_faixa_etaria.png)
 
@@ -461,6 +474,19 @@ Mesmo efeito de abertura em 40-59 anos, visível nos dois gêneros — mais acen
 
 Hiato de conclusão do ensino superior maior que 2× entre Branca (24-29%) e Negra (10-14%).
 Mulheres têm taxa de conclusão maior que homens em todos os três grupos raciais.
+
+<details>
+<summary><strong>Um gráfico por nível de instrução</strong> (os outros 6 níveis — só o Superior
+completo estava publicado antes)</summary>
+
+![Sem instrução](img/escolaridade_por_raca_genero_sem_instrucao.png)
+![Fundamental incompleto](img/escolaridade_por_raca_genero_fundamental_incompl.png)
+![Fundamental completo](img/escolaridade_por_raca_genero_fundamental_compl.png)
+![Médio incompleto](img/escolaridade_por_raca_genero_medio_incompl.png)
+![Médio completo](img/escolaridade_por_raca_genero_medio_compl.png)
+![Superior incompleto](img/escolaridade_por_raca_genero_superior_incompl.png)
+
+</details>
 
 ## Raça × Gênero × Faixa etária × Escolaridade
 
