@@ -140,7 +140,32 @@ CREATE TEMP TABLE base AS
             WHEN '01' THEN TRUE WHEN '03' THEN TRUE WHEN '05' THEN TRUE WHEN '07' THEN TRUE
             WHEN '02' THEN FALSE WHEN '04' THEN FALSE WHEN '06' THEN FALSE
         END AS tem_carteira_assinada,
+        -- setor de trabalho: Público = empregado público (c/ ou s/ carteira) + militar/
+        -- estatutário; Privado = empregado privado/doméstico (c/ ou s/ carteira); NULL
+        -- p/ empregador, conta-própria e familiar auxiliar (não é "público" nem
+        -- "privado" no sentido de posição assalariada).
+        CASE m.VD4009
+            WHEN '05' THEN 'Público' WHEN '06' THEN 'Público' WHEN '07' THEN 'Público'
+            WHEN '01' THEN 'Privado' WHEN '02' THEN 'Privado'
+            WHEN '03' THEN 'Privado' WHEN '04' THEN 'Privado'
+        END AS setor_trabalho,
         CASE m.VD4012 WHEN '1' THEN TRUE WHEN '2' THEN FALSE END AS contribui_previdencia,
+        -- VD4010 tem 12 categorias e vem ZERO-PADDED ('01'..'12') — checado direto no
+        -- parquet bruto antes de usar, mesmo padrão de bug já visto em VD4009/VD4011.
+        CASE m.VD4010
+            WHEN '01' THEN 'Agropecuária, produção florestal, pesca e aquicultura'
+            WHEN '02' THEN 'Indústria geral'
+            WHEN '03' THEN 'Construção'
+            WHEN '04' THEN 'Comércio, reparação de veículos'
+            WHEN '05' THEN 'Transporte, armazenagem e correio'
+            WHEN '06' THEN 'Alojamento e alimentação'
+            WHEN '07' THEN 'Informação, comunicação, financeiro, imobiliário e profissional'
+            WHEN '08' THEN 'Administração pública, defesa e seguridade social'
+            WHEN '09' THEN 'Educação, saúde humana e serviços sociais'
+            WHEN '10' THEN 'Outros serviços'
+            WHEN '11' THEN 'Serviços domésticos'
+            WHEN '12' THEN 'Atividades mal definidas'
+        END AS setor_atividade,
         CASE m.V3001 WHEN '1' THEN TRUE WHEN '2' THEN FALSE END AS alfabetizado,
         -- só definida p/ quem está FORA da força de trabalho (m.VD4001='2')
         CASE m.VD4003 WHEN '1' THEN TRUE WHEN '2' THEN FALSE END AS forca_trabalho_potencial,
@@ -638,6 +663,53 @@ def gerar_hiato_regional(con: duckdb.DuckDBPyConnection) -> None:
     print(f"hiato_regional.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
+def gerar_hiato_setor_publico_privado(con: duckdb.DuckDBPyConnection) -> None:
+    """Hiato Branca vs. Negra DENTRO do setor Público e DENTRO do setor Privado,
+    separadamente, trimestre a trimestre — mesmo método de `gerar_hiato_racial`. Testa
+    uma hipótese conhecida na literatura de economia do trabalho brasileira: como
+    salário de concurso público segue tabela padronizada (não negociação individual), o
+    hiato racial deveria ser menor lá do que no setor privado. Só entram empregados com
+    posição classificável como Público/Privado (`setor_trabalho`) — empregador,
+    conta-própria e familiar auxiliar ficam de fora (não se aplica)."""
+    combinacoes = con.execute(
+        "SELECT DISTINCT ano, trimestre, setor_trabalho FROM base WHERE setor_trabalho IS NOT NULL "
+        "ORDER BY ano, trimestre, setor_trabalho"
+    ).df()
+
+    resultados = []
+    for _, row in combinacoes.iterrows():
+        ano, trimestre, setor = int(row["ano"]), int(row["trimestre"]), row["setor_trabalho"]
+        micro = con.execute(f"""
+            SELECT raca_cor, renda_habitual_real, peso
+            FROM base
+            WHERE ano = {ano} AND trimestre = {trimestre} AND setor_trabalho = '{setor}'
+              AND raca_cor IN ('Branca', 'Preta', 'Parda')
+              AND renda_habitual_real IS NOT NULL
+        """).df()
+        if micro.empty:
+            continue
+        micro["raca_cor"] = micro["raca_cor"].replace({"Preta": "Negra", "Parda": "Negra"})
+        tabela = pnadc_core.tabela_hiatos_significancia(
+            micro, "renda_habitual_real", "raca_cor", grupo_referencia="Negra", peso="peso"
+        )
+        if "Branca" not in tabela.index:
+            continue
+        linha_branca = tabela.loc["Branca"]
+        media_negra = tabela.loc["Negra", "media"]
+        resultados.append({
+            "ano": ano, "trimestre": trimestre, "setor_trabalho": setor,
+            "renda_media_branca": linha_branca["media"], "renda_media_negra": media_negra,
+            "hiato_absoluto": linha_branca["hiato_media"],
+            "hiato_percentual": 100 * linha_branca["hiato_media"] / media_negra if media_negra else None,
+            "p_valor": linha_branca["p_valor"], "significativo": linha_branca["significativo"],
+        })
+
+    df = pd.DataFrame(resultados)
+    destino = OUTPUT_DIR / "hiato_setor_publico_privado.parquet"
+    df.to_parquet(destino, index=False)
+    print(f"hiato_setor_publico_privado.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
+
+
 def gerar_indice_segregacao_ocupacional(con: duckdb.DuckDBPyConnection) -> None:
     """Índice de dissimilaridade de Duncan (1955) entre a distribuição ocupacional
     (grupamento_ocupacional/VD4011) de Branca e de Negra, trimestre a trimestre.
@@ -673,6 +745,41 @@ def gerar_indice_segregacao_ocupacional(con: duckdb.DuckDBPyConnection) -> None:
     resultado_df.to_parquet(destino, index=False)
     print(f"segregacao_ocupacional.parquet: {len(resultado_df)} linhas", flush=True)
     print(f"  Índice de Duncan Branca-Negra (trimestre mais recente): "
+          f"{resultado_df['indice_duncan_branca_negra'].iloc[-1] * 100:.1f}%", flush=True)
+
+
+def gerar_segregacao_setorial(con: duckdb.DuckDBPyConnection) -> None:
+    """Índice de dissimilaridade de Duncan (1955) entre a distribuição por SETOR de
+    atividade econômica (setor_atividade/VD4010) de Branca e de Negra, trimestre a
+    trimestre — paralelo direto de `gerar_indice_segregacao_ocupacional`, só que por
+    setor econômico (agropecuária/indústria/comércio/serviços/administração pública)
+    em vez de por cargo/grupamento ocupacional. Mesma fórmula, mesma interpretação, e
+    Indígena fica de fora pela mesma razão (amostra pequena demais pra uma distribuição
+    de 12 categorias trimestre a trimestre)."""
+    df = con.execute("""
+        SELECT ano, trimestre, raca_cor, setor_atividade, SUM(peso) AS peso
+        FROM base
+        WHERE raca_cor IN ('Branca', 'Preta', 'Parda') AND setor_atividade IS NOT NULL
+        GROUP BY ano, trimestre, raca_cor, setor_atividade
+    """).df()
+    df["raca_cor"] = df["raca_cor"].replace({"Preta": "Negra", "Parda": "Negra"})
+    df = df.groupby(["ano", "trimestre", "raca_cor", "setor_atividade"], as_index=False)["peso"].sum()
+
+    resultados = []
+    for (ano, trimestre), grupo in df.groupby(["ano", "trimestre"]):
+        pivot = grupo.pivot_table(index="setor_atividade", columns="raca_cor", values="peso", fill_value=0.0)
+        if "Branca" not in pivot.columns or "Negra" not in pivot.columns:
+            continue
+        p_branca = pivot["Branca"] / pivot["Branca"].sum()
+        p_negra = pivot["Negra"] / pivot["Negra"].sum()
+        duncan = 0.5 * (p_branca - p_negra).abs().sum()
+        resultados.append({"ano": int(ano), "trimestre": int(trimestre), "indice_duncan_branca_negra": duncan})
+
+    resultado_df = pd.DataFrame(resultados).sort_values(["ano", "trimestre"])
+    destino = OUTPUT_DIR / "segregacao_setorial.parquet"
+    resultado_df.to_parquet(destino, index=False)
+    print(f"segregacao_setorial.parquet: {len(resultado_df)} linhas", flush=True)
+    print(f"  Índice de Duncan setorial Branca-Negra (trimestre mais recente): "
           f"{resultado_df['indice_duncan_branca_negra'].iloc[-1] * 100:.1f}%", flush=True)
 
 
@@ -823,6 +930,29 @@ def gerar_desalento_subutilizacao(con: duckdb.DuckDBPyConnection) -> None:
     print(f"desalento_subutilizacao.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
+def gerar_sobrequalificacao(con: duckdb.DuckDBPyConnection) -> None:
+    """% de pessoas com Superior completo que estão em 'Ocupações elementares'
+    (grupamento_ocupacional/VD4011, categoria 09 — o grupo ISCO major 9, proxy padrão
+    de sobre-qualificação/mismatch credencial-ocupação na literatura de economia do
+    trabalho) — mesmo diploma, resultado profissional diferente por raça? Por raça x
+    gênero, Brasil + geografias."""
+    select_agregado = """
+           ano, trimestre, raca_cor, sexo,
+           COUNT(*) AS n_amostra,
+           SUM(peso) AS populacao_estimada,
+           SUM(peso) FILTER (WHERE nivel_instrucao = 'Superior completo' AND grupamento_ocupacional IS NOT NULL)
+               AS pop_superior_completo_ocupado,
+           100.0 * SUM(peso) FILTER (WHERE nivel_instrucao = 'Superior completo'
+                                        AND grupamento_ocupacional = 'Ocupações elementares')
+               / NULLIF(SUM(peso) FILTER (WHERE nivel_instrucao = 'Superior completo'
+                                             AND grupamento_ocupacional IS NOT NULL), 0)
+               AS pct_sobrequalificado"""
+    df = _agregar_por_geografia(con, select_agregado, incluir_faixa_etaria=False)
+    destino = OUTPUT_DIR / "sobrequalificacao.parquet"
+    df.to_parquet(destino, index=False)
+    print(f"sobrequalificacao.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
+
+
 def gerar_hiato_racial(con: duckdb.DuckDBPyConnection) -> None:
     """Hiato de renda Branca vs. Negra (Preta+Parda), trimestre a trimestre, COM teste
     de significância (Welch) — usa `pnadc_core.tabela_hiatos_significancia`, que precisa
@@ -875,6 +1005,79 @@ def gerar_hiato_racial(con: duckdb.DuckDBPyConnection) -> None:
             f"  aviso: {n_nao_significativo} trimestre(s) com hiato Branca-Negra "
             "NÃO significativo a 95% (checar antes de destacar no gráfico)", flush=True,
         )
+
+
+def gerar_gini_por_raca(con: duckdb.DuckDBPyConnection) -> None:
+    """Coeficiente de Gini ponderado da renda habitual real, calculado DENTRO de cada
+    raça — usa `pnadc_core.gini_ponderado_por_grupo`, função já portada do notebook
+    original mas nunca chamada até agora. Pergunta diferente do hiato ENTRE raças: aqui
+    é sobre desigualdade DENTRO de cada grupo — a distribuição de renda entre os
+    próprios negros está ficando mais ou menos desigual ao longo do tempo, e o mesmo
+    pra brancos? Indígena entra com a mesma ressalva de amostra pequena de sempre."""
+    trimestres = con.execute("SELECT DISTINCT ano, trimestre FROM base ORDER BY ano, trimestre").df()
+
+    resultados = []
+    for _, row in trimestres.iterrows():
+        ano, trimestre = int(row["ano"]), int(row["trimestre"])
+        micro = con.execute(f"""
+            SELECT raca_cor, renda_habitual_real, peso
+            FROM base
+            WHERE ano = {ano} AND trimestre = {trimestre}
+              AND raca_cor IN ('Branca', 'Preta', 'Parda', 'Indígena')
+              AND renda_habitual_real IS NOT NULL AND renda_habitual_real > 0
+        """).df()
+        if micro.empty:
+            continue
+        micro["raca_cor"] = micro["raca_cor"].replace({"Preta": "Negra", "Parda": "Negra"})
+        gini = pnadc_core.gini_ponderado_por_grupo(micro, "renda_habitual_real", by=["raca_cor"], peso="peso")
+        gini["ano"] = ano
+        gini["trimestre"] = trimestre
+        resultados.append(gini)
+
+    df = pd.concat(resultados, ignore_index=True)
+    destino = OUTPUT_DIR / "gini_por_raca.parquet"
+    df.to_parquet(destino, index=False)
+    print(f"gini_por_raca.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
+
+
+def gerar_theil_racial(con: duckdb.DuckDBPyConnection, n_trimestres: int | None = None) -> None:
+    """Decompõe a desigualdade TOTAL de renda (índice de Theil T) em quanto vem de
+    diferença ENTRE raças (Branca/Negra/Indígena) vs. quanto vem de desigualdade DENTRO
+    de cada raça — usa `pnadc_core.decomposicao_theil_entre_dentro` (nova, validada com
+    dado sintético antes de rodar aqui). Complementa o Gini por raça acima: aquele mede
+    desigualdade dentro de cada grupo isoladamente; este mede que FATIA da desigualdade
+    total do Brasil o próprio recorte racial explica — e como essa fatia muda ao longo
+    do tempo. `n_trimestres=None` roda todos os 58; passar um número menor pra teste
+    rápido."""
+    trimestres = con.execute("SELECT DISTINCT ano, trimestre FROM base ORDER BY ano, trimestre").df()
+    if n_trimestres:
+        trimestres = trimestres.tail(n_trimestres)
+
+    resultados = []
+    for _, row in trimestres.iterrows():
+        ano, trimestre = int(row["ano"]), int(row["trimestre"])
+        micro = con.execute(f"""
+            SELECT raca_cor, renda_habitual_real, peso
+            FROM base
+            WHERE ano = {ano} AND trimestre = {trimestre}
+              AND raca_cor IN ('Branca', 'Preta', 'Parda', 'Indígena')
+              AND renda_habitual_real IS NOT NULL AND renda_habitual_real > 0
+        """).df()
+        if micro.empty:
+            continue
+        micro["raca_cor"] = micro["raca_cor"].replace({"Preta": "Negra", "Parda": "Negra"})
+        resumo, _ = pnadc_core.decomposicao_theil_entre_dentro(micro, "renda_habitual_real", "raca_cor", "peso")
+        resumo["ano"] = ano
+        resumo["trimestre"] = trimestre
+        resultados.append(resumo)
+
+    df = pd.DataFrame(resultados)
+    destino = OUTPUT_DIR / "theil_racial.parquet"
+    df.to_parquet(destino, index=False)
+    print(f"theil_racial.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
+    print(f"  Trimestre mais recente: {df['pct_entre_grupos'].iloc[-1]:.1f}% da desigualdade "
+          f"total vem de diferenças ENTRE raças, {df['pct_dentro_grupos'].iloc[-1]:.1f}% de "
+          "dentro de cada raça", flush=True)
 
 
 def gerar_renda_completa(con: duckdb.DuckDBPyConnection) -> None:
@@ -943,18 +1146,23 @@ def main() -> None:
     gerar_renda_completa(con)
     gerar_hiato_racial(con)
     gerar_hiato_por_geracao(con)
+    gerar_gini_por_raca(con)
+    gerar_theil_racial(con)
     gerar_quebra_estrutural()
     gerar_hiato_regional(con)
+    gerar_hiato_setor_publico_privado(con)
     gerar_decomposicao_hiato_ocupacional(con)
     gerar_decomposicao_oaxaca_blinder(con)
     gerar_perfil_topo10_racial(con)
     gerar_perfil_quartis_racial(con)
     gerar_indice_segregacao_ocupacional(con)
+    gerar_segregacao_setorial(con)
     gerar_ocupacao(con)
     gerar_informalidade(con)
     gerar_horas_trabalhadas(con)
     gerar_alfabetizacao(con)
     gerar_desalento_subutilizacao(con)
+    gerar_sobrequalificacao(con)
 
 
 if __name__ == "__main__":

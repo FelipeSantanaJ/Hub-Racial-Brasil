@@ -6,7 +6,7 @@ gênero, faixa etária e escolaridade, para renda habitual real (deflator oficia
 `src/processing/graficos_fase1.py` a partir dos datasets em `data/processed/*.parquet`.
 Também disponível como apresentação: [Datahub_Racial_Brasil_Fase1.pptx](Datahub_Racial_Brasil_Fase1.pptx).
 
-63 gráficos ao todo. Índice:
+68 gráficos ao todo. Índice:
 
 - [Raça](#raça)
 - [Hiato Branca vs. Negra — série histórica](#hiato-branca-vs-negra--série-histórica)
@@ -16,6 +16,7 @@ Também disponível como apresentação: [Datahub_Racial_Brasil_Fase1.pptx](Data
 - [Geração: seguindo a mesma coorte, não a mesma faixa etária](#geração-seguindo-a-mesma-coorte-não-a-mesma-faixa-etária)
 - [Quem está no topo 10%? Negra vs. Branca](#quem-está-no-topo-10-negra-vs-branca)
 - [Decomposição dos 4 quartis de renda — Negra vs. Branca](#decomposição-dos-4-quartis-de-renda--negra-vs-branca)
+- [Desigualdade interna, setor público/privado e sobre-qualificação](#desigualdade-interna-setor-públicoprivado-e-sobre-qualificação)
 - [Raça × Gênero](#raça--gênero)
 - [Preta × Parda × Gênero](#preta--parda--gênero)
 - [Raça × Faixa etária](#raça--faixa-etária)
@@ -227,6 +228,46 @@ Branca dentro de cada quartil (diferente da escolaridade, que diverge fortemente
 
 Composição por geração, um painel por quartil — mesmo padrão qualitativo do topo 10%, agora
 visível em todas as fatias da distribuição.
+
+## Desigualdade interna, setor público/privado e sobre-qualificação
+
+Cinco análises sugeridas e validadas com o usuário (via menu de opções) antes de implementar
+— ver [PLANO.md](PLANO.md) pra lista completa das ideias apresentadas e as que ficaram pra
+depois.
+
+![Gini por raça](img/gini_por_raca.png)
+
+Coeficiente de Gini calculado DENTRO de cada raça — pergunta diferente do hiato ENTRE elas.
+Achado que exige leitura cuidadosa: Branca tem Gini mais alto (mais desigualdade interna) que
+Negra. Isso não significa que a população negra está "melhor" — só que sua distribuição de
+renda é mais comprimida perto da base (menos gente muito rica para abrir a distribuição).
+
+![Decomposição de Theil](img/theil_decomposicao.png)
+
+Só ~7% da desigualdade TOTAL de renda no Brasil vem de diferença ENTRE raças — os outros 93%
+são desigualdade DENTRO de cada raça. Isso não diminui o hiato racial (que continua grande e
+significativo, ver seções anteriores) — mostra que a desigualdade brasileira tem várias
+fontes, e raça é uma delas identificável, não a maior fatia isolada.
+
+![Hiato setor público vs. privado](img/hiato_setor_publico_privado.png)
+
+Confirma uma hipótese conhecida da literatura: o hiato racial é sistematicamente menor no
+setor Público (~45-50%, salário de concurso segue tabela padronizada) do que no Privado
+(~58-68%, mais espaço pra negociação individual e discricionariedade).
+
+![Segregação setorial](img/segregacao_setorial.png)
+
+Segregação por SETOR econômico (~10%) é menor que por OCUPAÇÃO/cargo (~17%, ver seção
+anterior) — Branca e Negra se distribuem de forma mais parecida entre setores da economia do
+que entre cargos específicos dentro desses setores.
+
+![Sobre-qualificação](img/sobrequalificacao.png)
+
+Entre quem tem Superior completo, a taxa de "sobre-qualificação" (acabar numa ocupação
+elementar, o proxy padrão de mismatch credencial-ocupação na literatura) é quase o DOBRO para
+Negra em relação a Branca ao longo de quase toda a série — mesmo diploma, resultado
+profissional diferente. Indígena tem amostra pequena aqui (poucas pessoas com Superior
+completo) e a série fica bem ruidosa mesmo suavizada — ler com cautela.
 
 ## Raça × Gênero
 

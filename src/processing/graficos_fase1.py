@@ -1390,6 +1390,140 @@ def grafico_desalento(des: pd.DataFrame) -> Path:
     )
 
 
+def grafico_gini_por_raca(gini: pd.DataFrame) -> Path:
+    """Coeficiente de Gini da renda habitual real, calculado DENTRO de cada raça —
+    desigualdade INTERNA a cada grupo, não o hiato ENTRE eles. Leitura que pede cuidado:
+    Branca tem Gini mais alto (mais desigualdade interna) que Negra — não significa que
+    a população negra está "melhor", só que sua distribuição de renda é mais comprimida
+    perto da base (todo mundo mais pobre = menos variação a medir)."""
+    g = gini.copy()
+    g["data"] = pd.to_datetime(g["ano"].astype(str) + "-" + ((g["trimestre"] - 1) * 3 + 1).astype(str) + "-01")
+    pivot = g.pivot_table(index="data", columns="raca_cor", values="gini").sort_index()
+    pivot = pivot[["Branca", "Negra", "Indígena"]]
+    pivot["Indígena"] = pivot["Indígena"].rolling(4, center=True, min_periods=2).mean()
+    return _grafico_serie_temporal(
+        pivot, CORES_RACA,
+        "Coeficiente de Gini da renda, dentro de cada raça — Brasil (2012–2026)",
+        "Desigualdade DENTRO de cada grupo racial (0 = igualdade perfeita, 1 = desigualdade máxima) — "
+        "não é o hiato ENTRE eles · PNAD Contínua Trimestral",
+        "gini_por_raca.png",
+        rotulos=ROTULOS_RACA_SUAVIZADA,
+        formato_eixo_y=lambda v, _: f"{v:.2f}",
+    )
+
+
+def grafico_theil_decomposicao(theil: pd.DataFrame) -> Path:
+    """Decompõe a desigualdade TOTAL de renda (índice de Theil T) em quanto vem de
+    diferença ENTRE raças vs. quanto vem de desigualdade DENTRO de cada raça, ao longo
+    do tempo — área empilhada até 100%."""
+    t = theil.copy()
+    t["data"] = pd.to_datetime(t["ano"].astype(str) + "-" + ((t["trimestre"] - 1) * 3 + 1).astype(str) + "-01")
+    t = t.sort_values("data")
+
+    fig, ax = _novo_eixo(figsize=(11, 5.5))
+    ax.axvspan(pd.Timestamp("2020-01-01"), pd.Timestamp("2021-12-31"), color=GRADE, alpha=0.6, zorder=0)
+    ax.stackplot(
+        t["data"], t["pct_entre_grupos"], t["pct_dentro_grupos"],
+        colors=[COR_NEGRA, COR_BRANCA], alpha=[1.0, 0.3], zorder=3,
+    )
+    # a faixa "entre raças" é sempre fina (~6-8% do total) — rótulo colado LOGO ACIMA da
+    # fronteira entre as duas áreas, não centralizado dentro da faixa fina (mesmo bug já
+    # visto no gráfico de Oaxaca-Blinder quando um segmento é pequeno demais pro texto).
+    y_fronteira = t["pct_entre_grupos"].iloc[-1]
+    ax.annotate(
+        f"{y_fronteira:.0f}% entre raças", xy=(t["data"].iloc[-1], y_fronteira),
+        xytext=(8, -12), textcoords="offset points", color=COR_NEGRA, fontsize=9.5,
+        fontweight="bold", va="center",
+    )
+    ax.annotate(
+        f"{100 - y_fronteira:.0f}% dentro de cada raça", xy=(t["data"].iloc[-1], (y_fronteira + 100) / 2),
+        xytext=(8, 0), textcoords="offset points", color=TINTA_SECUNDARIA, fontsize=9.5,
+        fontweight="bold", va="center",
+    )
+    ax.set_ylim(0, 100)
+    _titulo(
+        ax, "De onde vem a desigualdade de renda no Brasil: entre raças ou dentro delas?",
+        "Decomposição do índice de Theil T · maior parte vem de DENTRO de cada raça, não entre elas · "
+        "PNAD Contínua Trimestral",
+    )
+    ax.yaxis.set_major_formatter(lambda v, _: f"{v:.0f}%")
+    ax.xaxis.set_major_locator(mdates.YearLocator(2))
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
+    ax.set_xlim(t["data"].min(), t["data"].max() + pd.Timedelta(days=280))
+    _rodape(fig)
+    fig.tight_layout(rect=(0, 0.03, 1, 1))
+    return _salvar(fig, "theil_decomposicao.png")
+
+
+def grafico_hiato_setor_publico_privado(hsp: pd.DataFrame) -> Path:
+    """Hiato Branca vs. Negra DENTRO do setor Público e DENTRO do setor Privado,
+    separadamente — testa se salário de concurso público (tabela padronizada) reduz o
+    hiato racial em relação ao setor privado (negociação individual)."""
+    h = hsp.copy()
+    h["data"] = pd.to_datetime(h["ano"].astype(str) + "-" + ((h["trimestre"] - 1) * 3 + 1).astype(str) + "-01")
+    pivot = h.pivot_table(index="data", columns="setor_trabalho", values="hiato_percentual").sort_index()
+    pivot = pivot[["Público", "Privado"]]
+    cores = {"Público": COR_INDIGENA, "Privado": COR_NEGRA}
+    return _grafico_serie_temporal(
+        pivot, cores,
+        "Hiato de renda Branca vs. Negra — setor Público vs. Privado — Brasil (2012–2026)",
+        "Quanto a mais Branca ganha que Negra, em % · teste de Welch por trimestre e setor · "
+        "PNAD Contínua Trimestral",
+        "hiato_setor_publico_privado.png",
+        formato_eixo_y=lambda v, _: f"{v:.0f}%",
+    )
+
+
+def grafico_segregacao_setorial(seg: pd.DataFrame) -> Path:
+    """Índice de dissimilaridade de Duncan entre a distribuição por setor de atividade
+    econômica de Branca e de Negra — paralelo direto de `grafico_segregacao_ocupacional`,
+    só que por setor (agropecuária/indústria/comércio/serviços/administração pública)
+    em vez de por cargo."""
+    s = seg.copy()
+    s["data"] = pd.to_datetime(s["ano"].astype(str) + "-" + ((s["trimestre"] - 1) * 3 + 1).astype(str) + "-01")
+    s = s.sort_values("data")
+    s["indice_pct"] = s["indice_duncan_branca_negra"] * 100
+
+    fig, ax = _novo_eixo(figsize=(11, 5.5))
+    ax.axvspan(pd.Timestamp("2020-01-01"), pd.Timestamp("2021-12-31"), color=GRADE, alpha=0.6, zorder=0)
+    ax.plot(s["data"], s["indice_pct"], color=COR_PARDA, linewidth=2.2, solid_capstyle="round", zorder=3)
+    ax.annotate(
+        f"{s['indice_pct'].iloc[-1]:.0f}%", xy=(s["data"].iloc[-1], s["indice_pct"].iloc[-1]),
+        xytext=(8, 0), textcoords="offset points", color=COR_PARDA, fontsize=11, fontweight="bold", va="center",
+    )
+    _titulo(
+        ax, "Índice de segregação SETORIAL, Branca vs. Negra — Brasil (2012–2026)",
+        "Índice de dissimilaridade de Duncan por setor de atividade econômica (não por cargo — "
+        "ver segregação ocupacional) · PNAD Contínua Trimestral",
+    )
+    ax.yaxis.set_major_formatter(lambda v, _: f"{v:.0f}%")
+    ax.xaxis.set_major_locator(mdates.YearLocator(2))
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
+    ax.grid(axis="y", color=GRADE, linewidth=0.8, zorder=0)
+    ax.set_xlim(s["data"].min(), s["data"].max() + pd.Timedelta(days=280))
+    ax.set_ylim(0, s["indice_pct"].max() * 1.25)
+    _rodape(fig)
+    fig.tight_layout(rect=(0, 0.03, 1, 1))
+    return _salvar(fig, "segregacao_setorial.png")
+
+
+def grafico_sobrequalificacao(sq: pd.DataFrame) -> Path:
+    """% de pessoas com Superior completo que estão em 'Ocupações elementares', por
+    raça — mesmo diploma, resultado profissional diferente ("brain waste"/mismatch
+    credencial-ocupação)."""
+    serie = _serie_por_raca(sq, ["Branca", "Negra", "Indígena"], coluna_valor="pct_sobrequalificado",
+                             suavizar={"Indígena"})
+    return _grafico_serie_temporal(
+        serie, CORES_RACA,
+        "% com Superior completo em ocupações elementares, por raça — Brasil (2012–2026)",
+        "Entre quem tem Superior completo e está ocupado · 'ocupações elementares' = grupamento "
+        "ocupacional 09 (VD4011) · PNAD Contínua Trimestral",
+        "sobrequalificacao.png",
+        rotulos=ROTULOS_RACA_SUAVIZADA,
+        formato_eixo_y=lambda v, _: f"{v:.1f}%",
+    )
+
+
 def grafico_hiato_por_geracao(hg: pd.DataFrame) -> Path:
     """Hiato Branca vs. Negra DENTRO de cada geração (coorte de nascimento sintética),
     ao longo do tempo. Diferença crucial em relação a um gráfico "por faixa etária":
@@ -1709,6 +1843,11 @@ def main() -> None:
     hiato_geracao = pd.read_parquet(REPO_ROOT / "data" / "processed" / "hiato_por_geracao.parquet")
     perfil_topo10 = pd.read_parquet(REPO_ROOT / "data" / "processed" / "perfil_topo10_racial.parquet")
     perfil_quartis = pd.read_parquet(REPO_ROOT / "data" / "processed" / "perfil_quartis_racial.parquet")
+    gini = pd.read_parquet(REPO_ROOT / "data" / "processed" / "gini_por_raca.parquet")
+    theil = pd.read_parquet(REPO_ROOT / "data" / "processed" / "theil_racial.parquet")
+    hiato_setor = pd.read_parquet(REPO_ROOT / "data" / "processed" / "hiato_setor_publico_privado.parquet")
+    segregacao_setor = pd.read_parquet(REPO_ROOT / "data" / "processed" / "segregacao_setorial.parquet")
+    sobrequalificacao = pd.read_parquet(REPO_ROOT / "data" / "processed" / "sobrequalificacao.parquet")
 
     destinos = [
         # raça
@@ -1743,6 +1882,13 @@ def main() -> None:
         grafico_quartis_escolaridade(perfil_quartis),
         grafico_quartis_faixa_etaria(perfil_quartis),
         grafico_quartis_geracao(perfil_quartis),
+        # desigualdade dentro de cada raça, setor público x privado, segregação
+        # setorial e sobre-qualificação
+        grafico_gini_por_raca(gini),
+        grafico_theil_decomposicao(theil),
+        grafico_hiato_setor_publico_privado(hiato_setor),
+        grafico_segregacao_setorial(segregacao_setor),
+        grafico_sobrequalificacao(sobrequalificacao),
         # raça x gênero: combinado + um por gênero
         grafico_renda_por_raca_genero(renda),
         grafico_renda_por_raca_sexo(renda, "Homem"),

@@ -452,6 +452,62 @@ def gini_ponderado_por_grupo(df, coluna_valor, by, peso=COLUNA_PESO):
     return pd.DataFrame(linhas)
 
 
+def theil_t(valores, pesos):
+    """Índice de Theil T (medida de desigualdade), ponderado — T=0 é igualdade
+    perfeita (todo mundo ganha a mesma coisa), quanto maior mais desigual. Só definido
+    pra valores > 0 (renda zero ou negativa é excluída, mesma convenção do Gini aqui)."""
+    valores = np.asarray(valores, dtype=float)
+    pesos = np.asarray(pesos, dtype=float)
+    valid = ~np.isnan(valores) & ~np.isnan(pesos) & (pesos > 0) & (valores > 0)
+    if not valid.any():
+        return np.nan
+    valores, pesos = valores[valid], pesos[valid]
+    media = np.average(valores, weights=pesos)
+    razao = valores / media
+    termo = np.where(razao > 0, razao * np.log(razao), 0.0)
+    return float(np.average(termo, weights=pesos))
+
+
+def decomposicao_theil_entre_dentro(df, coluna_valor, col_grupo, peso=COLUNA_PESO):
+    """Decompõe o índice de Theil T total em parcela ENTRE grupos (a desigualdade que
+    existiria se todo mundo dentro de cada grupo ganhasse a média do próprio grupo) e
+    DENTRO de grupos (o que sobra de desigualdade mesmo dentro do mesmo grupo).
+    T_total = T_entre + T_dentro (decomposição exata, não aproximada).
+
+    Retorna (resumo: dict com theil_total/entre/dentro e % de cada parcela, detalhe:
+    DataFrame com média/participação populacional/Theil interno de cada grupo).
+    """
+    d = df[[coluna_valor, col_grupo, peso]].dropna()
+    d = d[(d[peso] > 0) & (d[coluna_valor] > 0)]
+    media_geral = np.average(d[coluna_valor], weights=d[peso])
+    peso_total = d[peso].sum()
+
+    t_entre = 0.0
+    t_dentro = 0.0
+    linhas = []
+    for grupo, sub in d.groupby(col_grupo, observed=True):
+        s_g = sub[peso].sum() / peso_total
+        media_g = np.average(sub[coluna_valor], weights=sub[peso])
+        razao_g = media_g / media_geral
+        contrib_entre = s_g * razao_g * np.log(razao_g) if razao_g > 0 else 0.0
+        t_g = theil_t(sub[coluna_valor], sub[peso])
+        contrib_dentro = s_g * razao_g * (t_g if not np.isnan(t_g) else 0.0)
+        t_entre += contrib_entre
+        t_dentro += contrib_dentro
+        linhas.append({
+            col_grupo: grupo, "media": media_g, "participacao_populacao": s_g,
+            "theil_dentro_do_grupo": t_g,
+        })
+
+    t_total = t_entre + t_dentro
+    resumo = {
+        "theil_total": t_total, "theil_entre_grupos": t_entre, "theil_dentro_grupos": t_dentro,
+        "pct_entre_grupos": 100 * t_entre / t_total if t_total else np.nan,
+        "pct_dentro_grupos": 100 * t_dentro / t_total if t_total else np.nan,
+    }
+    return resumo, pd.DataFrame(linhas)
+
+
 def paleta_para_categorias(categorias, mapa_cores=CORES_RACA):
     """Retorna a lista de cores na mesma ordem de `categorias`, útil para
     passar direto a matplotlib/plotly (ex.: color=paleta_para_categorias(ORDEM_RECORTE1))."""

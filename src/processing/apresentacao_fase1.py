@@ -67,6 +67,13 @@ SECOES = [
         ("quartis_faixa_etaria.png", "Composição por faixa etária, um painel por quartil — perfil etário parecido entre as raças em cada quartil."),
         ("quartis_geracao.png", "Composição por geração, um painel por quartil."),
     ]),
+    ("Desigualdade interna, setor público/privado e sobre-qualificação", "Sugestões de análise validadas antes de executar", [
+        ("gini_por_raca.png", "Gini DENTRO de cada raça — Branca tem mais desigualdade interna que Negra (distribuição mais comprimida na base, não 'melhor situação')."),
+        ("theil_decomposicao.png", "Decomposição de Theil: só 7% da desigualdade total do Brasil vem de diferença ENTRE raças — 93% é desigualdade DENTRO de cada uma. Não diminui o hiato racial, mostra que a desigualdade brasileira tem várias causas."),
+        ("hiato_setor_publico_privado.png", "Confirma a hipótese: o hiato racial é menor no setor Público (~45-50%, tabela salarial padronizada) do que no Privado (~58-65%)."),
+        ("segregacao_setorial.png", "Segregação por setor econômico (10%) é menor que por ocupação (17%) — as raças se distribuem mais parecido entre setores do que entre cargos dentro deles."),
+        ("sobrequalificacao.png", "Negros com Superior completo têm taxa de 'sobre-qualificação' (acabar em ocupação elementar) quase o dobro da de brancos com o mesmo diploma."),
+    ]),
     ("Raça × Gênero", "Combinado + um por gênero", [
         ("renda_por_raca_genero.png", "O hiato de gênero soma ao de raça, não substitui."),
         ("renda_por_raca_homens.png", "Recorte só Homens."),

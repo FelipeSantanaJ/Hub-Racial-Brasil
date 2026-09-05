@@ -76,12 +76,24 @@ Generalizando o topo 10% pra toda a distribuição — os 4 quartis (Q1 = 25% ma
 Negra e Branca é de só ~6 p.p. no quartil mais pobre, mas chega a ~32 p.p. no mais rico.
 Quanto mais alto na distribuição de renda, maior o hiato educacional entre as raças.
 
-**63 gráficos ao todo** — raça × gênero × faixa etária × escolaridade em todas as
+### O hiato racial é menor no setor público — mas a desigualdade tem muitas fontes
+
+![Hiato setor público vs. privado](docs/img/hiato_setor_publico_privado.png)
+
+Confirma uma hipótese conhecida: como salário de concurso público segue tabela padronizada,
+o hiato racial é menor lá (~45-50%) do que no setor privado (~58-68%). Ao mesmo tempo, uma
+decomposição do índice de Theil mostra que só ~7% da desigualdade TOTAL de renda no Brasil
+vem de diferença entre raças — os outros 93% são desigualdade dentro de cada raça. Isso não
+diminui o hiato racial (que segue grande e estatisticamente significativo), mas mostra que a
+desigualdade brasileira tem várias fontes ao mesmo tempo.
+
+**68 gráficos ao todo** — raça × gênero × faixa etária × escolaridade em todas as
 combinações (Preta e Parda sempre também separadas), mais aprofundamentos: hiato por região,
-segregação ocupacional (índice de Duncan), teste de quebra estrutural em 3 eventos
-históricos, novas variáveis (informalidade, renda por hora, alfabetização, desalento),
-hiato/renda por geração, e o perfil de quem está no topo 10% e em cada um dos 4 quartis de
-renda de cada raça. Galeria completa, com a leitura de cada gráfico, em
+segregação ocupacional e setorial (índice de Duncan), teste de quebra estrutural em 3 eventos
+históricos, novas variáveis (informalidade, renda por hora, alfabetização, desalento,
+sobre-qualificação), hiato/renda por geração, perfil de quem está no topo 10% e em cada um
+dos 4 quartis de renda de cada raça, Gini e Theil por raça, e hiato no setor público vs.
+privado. Galeria completa, com a leitura de cada gráfico, em
 [docs/ANALISE_FASE1.md](docs/ANALISE_FASE1.md), ou como
 apresentação em
 [docs/Datahub_Racial_Brasil_Fase1.pptx](docs/Datahub_Racial_Brasil_Fase1.pptx).
