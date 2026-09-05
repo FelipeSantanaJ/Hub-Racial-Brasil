@@ -281,6 +281,17 @@ def tabela_hiatos_significancia(df, coluna_valor, col_grupo, grupo_referencia, p
     return pd.DataFrame(resultados).set_index(col_grupo)
 
 
+def quantil_ponderado(valores, pesos, quantil):
+    """Quantil ponderado (ex.: quantil=0.9 -> P90) de `valores`, ponderado por `pesos`.
+    Pré-condição: sem NaN (filtrar antes de chamar)."""
+    valores = np.asarray(valores, dtype=float)
+    pesos = np.asarray(pesos, dtype=float)
+    ordem = np.argsort(valores)
+    cum = np.cumsum(pesos[ordem]) / pesos.sum()
+    pos = np.searchsorted(cum, quantil)
+    return float(valores[ordem][min(pos, len(valores) - 1)])
+
+
 def rif_quantil(valores, pesos, quantil):
     """Recentered Influence Function (Firpo-Fortin-Lemieux, 2009) do quantil `quantil`
     (ex.: 0.1, 0.5, 0.9) de `valores`, ponderada por `pesos`.

@@ -6,13 +6,15 @@ gênero, faixa etária e escolaridade, para renda habitual real (deflator oficia
 `src/processing/graficos_fase1.py` a partir dos datasets em `data/processed/*.parquet`.
 Também disponível como apresentação: [Datahub_Racial_Brasil_Fase1.pptx](Datahub_Racial_Brasil_Fase1.pptx).
 
-53 gráficos ao todo. Índice:
+59 gráficos ao todo. Índice:
 
 - [Raça](#raça)
 - [Hiato Branca vs. Negra — série histórica](#hiato-branca-vs-negra--série-histórica)
 - [É ocupação, ou é cor da pele?](#é-ocupação-ou-é-cor-da-pele)
 - [Aprofundamentos: região, segregação e quebras estruturais](#aprofundamentos-região-segregação-e-quebras-estruturais)
 - [Aprofundamentos: novas variáveis da PNAD](#aprofundamentos-novas-variáveis-da-pnad)
+- [Geração: seguindo a mesma coorte, não a mesma faixa etária](#geração-seguindo-a-mesma-coorte-não-a-mesma-faixa-etária)
+- [Quem está no topo 10%? Negra vs. Branca](#quem-está-no-topo-10-negra-vs-branca)
 - [Raça × Gênero](#raça--gênero)
 - [Preta × Parda × Gênero](#preta--parda--gênero)
 - [Raça × Faixa etária](#raça--faixa-etária)
@@ -140,6 +142,59 @@ Negra vs. 72% Indígena alfabetizados entre 60+ anos (2026 T2).
 Entre quem está fora da força de trabalho, Negra (7,4%) e Indígena (5,9%) desistem de
 procurar emprego a taxas bem maiores que Branca (3,4%, 2026 T2) — desalento vai além da taxa
 de desocupação simples e também tem recorte racial.
+
+## Geração: seguindo a mesma coorte, não a mesma faixa etária
+
+A PNAD Contínua é um corte transversal **repetido**, não um painel longitudinal — "pessoas
+de 14-17 anos" em 2012 e em 2026 são pessoas **diferentes** chegando nessa idade, não as
+mesmas envelhecendo. Um gráfico "por faixa etária" ao longo do tempo mistura coortes de
+nascimento diferentes a cada trimestre. Geração resolve isso agrupando por ano de nascimento
+aproximado (ano da pesquisa − idade) — cada linha abaixo é (aproximadamente) o MESMO grupo de
+pessoas nascidas numa janela, observado envelhecendo dentro da janela 2012-2026 (método de
+coorte sintética, Deaton 1985).
+
+![Hiato por geração](img/hiato_racial_por_geracao.png)
+
+O hiato varia MUITO entre gerações — dos ~30% na Geração Z aos ~90-100% no Baby Boomer — e
+o do Baby Boomer especificamente **cresce** ao longo da janela observada, provavelmente
+porque quem continua trabalhando até os 60-80 anos não é uma amostra aleatória (efeito de
+seleção: divergência racial em quem se aposenta/sai do mercado vs. quem permanece).
+
+![Renda por geração e raça](img/renda_por_geracao_raca.png)
+
+Snapshot do trimestre mais recente, cada geração na idade em que está hoje (não controla por
+idade) — o hiato racial aparece em todas as quatro gerações com amostra suficiente.
+
+## Quem está no topo 10%? Negra vs. Branca
+
+Não é "top 10% do Brasil" (que seria quase todo Branca, dado o hiato) — é o topo 10% **DENTRO**
+de cada raça, com o limiar (P90) calculado separadamente para Branca e para Negra. Responde:
+quem chega ao topo dentro do próprio grupo racial, e como isso mudou ao longo do tempo?
+(Indígena fica de fora — amostra insuficiente pra um P90 confiável por trimestre.)
+
+![Topo 10% — gênero](img/topo10_genero.png)
+
+% de mulheres no topo 10% de cada raça: Branca sempre um pouco à frente da Negra, mas a
+distância vem encolhendo ao longo da série.
+
+![Topo 10% — escolaridade](img/topo10_escolaridade.png)
+
+O achado mais forte desta seção: o topo 10% dos negros ficou muito mais escolarizado — de
+38% com Superior completo em 2012 para ~58% hoje — mas ainda fica atrás do topo dos brancos
+(~83%). A escolaridade de quem chega ao topo está convergindo, ainda que o nível continue
+bem diferente.
+
+![Topo 10% — faixa etária](img/topo10_faixa_etaria.png)
+
+Composição por faixa etária do topo 10%, média dos últimos 8 trimestres — o topo dos negros é
+um pouco mais concentrado em 25-39 anos e um pouco menos em 60+ do que o topo dos brancos.
+
+![Topo 10% — geração](img/topo10_geracao.png)
+
+Composição por geração do topo 10% — o topo dos negros pende um pouco mais para
+Millennial/Geração Z; o topo dos brancos, para Baby Boomer/Geração X. Coerente com o gráfico
+de escolaridade acima: gerações mais novas de negros parecem estar chegando ao topo com
+credenciais mais parecidas às dos brancos do que gerações mais velhas.
 
 ## Raça × Gênero
 
@@ -303,3 +358,15 @@ as outras duas em quase toda célula" segura mesmo nesse nível de detalhe.
   Não conseguimos confirmar dentro do orçamento desta rodada se essa subamostra é aleatória
   (estimativa válida, só com IC mais largo) ou enviesada — preferimos não publicar um número
   sobre evasão escolar sem entender a regra de coleta exata do IBGE pra essa variável.
+- **Geração é uma coorte SINTÉTICA, não um painel real**: "ano de nascimento" é aproximado
+  (ano da pesquisa − idade, sem considerar mês de nascimento x mês de entrevista) e cada
+  trimestre ainda traz PESSOAS DIFERENTES dentro da mesma geração — só o grupo de nascimento
+  se mantém fixo, não os indivíduos. É o método padrão pra estudar coortes em pesquisas
+  transversais repetidas (Deaton, 1985), mas não é o mesmo que acompanhar as mesmas pessoas
+  ano a ano.
+- **"Topo 10%" é aproximado, não exatamente 10%**: renda autodeclarada tem forte concentração
+  em valores redondos (R$1.000, R$2.000, R$5.000, R$10.000 etc.) — quando o limiar do P90
+  cai bem em cima de um desses valores muito populosos, o corte inclui todo mundo empatado
+  ali, capturando um pouco mais que 10% (no trimestre mais recente, ~11,5% de Branca e ~12,8%
+  de Negra, checado manualmente). A coluna `pct_populacao_capturada` em
+  `perfil_topo10_racial.parquet` registra o valor real capturado a cada trimestre.

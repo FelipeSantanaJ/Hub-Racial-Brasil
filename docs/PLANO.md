@@ -411,18 +411,70 @@ recente, e `docs/LIMITACOES_E_METODOLOGIA.md` pra decodificação completa das v
 
 ---
 
-## 🏁 Fase 1 concluída (2026-09-04)
+## Geração e perfil do topo 10% ✅ (2026-09-05)
 
-Todas as 7 etapas (0-6) fechadas no mesmo dia, incl. duas rodadas de expansão a pedido (a
+Duas perguntas do usuário sobre limitações metodológicas dos gráficos por faixa etária e
+sobre decompor quem está no topo da distribuição de renda:
+
+1. **"Faixa etária" não acompanha as mesmas pessoas** — a PNAD Contínua é um corte
+   transversal repetido, não um painel de décadas: "pessoas de 14-17 anos" em 2012 e em 2026
+   são pessoas DIFERENTES chegando nessa idade. Resolvido com **geração** — coorte de
+   nascimento sintética (`ano_nascimento_aprox = ano - V2009`, método de Deaton 1985),
+   adicionada como coluna em `CRIAR_BASE`: Baby Boomer (1946-1964), Geração X (1965-1980),
+   Millennial (1981-1996), Geração Z (1997-2012) têm amostra ao longo de toda a janela
+   2012-2026 (Geração Silenciosa e Alpha ficam de fora, amostra residual/inexistente).
+   - `gerar_hiato_por_geracao`: hiato Branca-Negra (Welch) DENTRO de cada geração, ao longo
+     do tempo — mantém a coorte fixa em vez de misturar coortes diferentes.
+   - Achado: o hiato varia MUITO por geração (30% na Geração Z, ~90-100% no Baby Boomer) e o
+     do Baby Boomer especificamente CRESCE conforme a coorte envelhece dentro da janela —
+     provável efeito de seleção (quem continua trabalhando até os 60-80 anos não é uma
+     amostra aleatória, e essa seleção pode ser diferente por raça).
+   - `gerar_renda_por_geracao`: snapshot de renda por geração x raça na idade atual de cada
+     geração.
+
+2. **Decomposição histórica do topo 10%** — "onde estão os 10% que mais ganham entre os
+   negros em comparação com os brancos" (quebrado por gênero, faixa etária, geração,
+   escolaridade). Implementado como `gerar_perfil_topo10_racial`: calcula o limiar (P90) de
+   renda DENTRO de cada raça separadamente (Branca e Negra — não um corte único pro Brasil,
+   que seria quase todo Branca dado o hiato; Indígena fica de fora, amostra insuficiente pra
+   um P90 confiável por trimestre) e compõe o perfil demográfico de quem está acima desse
+   limiar, trimestre a trimestre desde 2012.
+   - Achado mais forte: o topo 10% dos negros ficou muito mais escolarizado ao longo da
+     série — de 38% com Superior completo em 2012 para ~58% hoje — mas ainda fica atrás do
+     topo dos brancos (~83%). A composição geracional do topo também diverge um pouco: o
+     topo dos negros pende mais para Millennial/Geração Z, o dos brancos para Baby
+     Boomer/Geração X — coerente com a convergência de escolaridade sendo mais forte nas
+     gerações mais novas.
+   - **Limitação encontrada e documentada, não "corrigida"**: renda autodeclarada tem forte
+     concentração em valores redondos (heaping — R$1.000, R$2.000, R$5.000, R$10.000 etc.,
+     checado direto no parquet bruto). Quando o P90 calculado cai bem em cima de um desses
+     valores populosos, o filtro `>= limiar` inclui todo mundo empatado ali, capturando um
+     pouco mais que 10% de fato (checado manualmente no trimestre mais recente: ~11,5% de
+     Branca, ~12,8% de Negra). Em vez de tentar uma correção de desempate mais sofisticada
+     (fora de escopo pra esta rodada), a função grava `pct_populacao_capturada` como
+     diagnóstico transparente — quem for usar o dado sabe exatamente o quão perto de "10%
+     exato" cada linha está.
+
+Ambas as novas funções (`gerar_hiato_por_geracao`, `gerar_renda_por_geracao`,
+`gerar_perfil_topo10_racial`) seguem os mesmos padrões já estabelecidos (Welch via
+microdados quando aplicável, universo de ocupados com renda > 0, amostra mínima de 100
+antes de calcular um quantil). 6 gráficos novos, seção nova na apresentação.
+
+---
+
+## 🏁 Fase 1 concluída (2026-09-04, expandida em 2026-09-05)
+
+Todas as 7 etapas (0-6) fechadas no mesmo dia, incl. três rodadas de expansão a pedido (a
 segunda com teste de significância formal via Oaxaca-Blinder, hiato regional, segregação
-ocupacional, quebra estrutural e 4 variáveis novas — ver seção acima). Entregáveis:
+ocupacional, quebra estrutural e 4 variáveis novas; a terceira com geração e perfil do topo
+10% — ver seções acima). Entregáveis:
 `src/ingestion/{extrator_pnadc,baixar_deflator}.py`,
 `src/processing/{agregacoes_pnadc,graficos_fase1,apresentacao_fase1}.py`,
-`src/utils/pnadc_core.py`, 16 datasets em `data/processed/*.parquet`,
-`docs/{LIMITACOES_E_METODOLOGIA,ANALISE_FASE1}.md`, 54 gráficos em `docs/img/` (galeria
+`src/utils/pnadc_core.py`, 19 datasets em `data/processed/*.parquet`,
+`docs/{LIMITACOES_E_METODOLOGIA,ANALISE_FASE1}.md`, 59 gráficos em `docs/img/` (galeria
 completa em `docs/ANALISE_FASE1.md`, destaques no README), apresentação
-`docs/Datahub_Racial_Brasil_Fase1.pptx`. Próximo passo: Fase 2 (Censo Demográfico) — ainda
-não detalhada.
+`docs/Datahub_Racial_Brasil_Fase1.pptx` (77 slides). Próximo passo: Fase 2 (Censo
+Demográfico) — ainda não detalhada.
 
 ---
 

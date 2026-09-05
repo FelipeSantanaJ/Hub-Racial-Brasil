@@ -820,6 +820,23 @@ def grafico_renda_por_raca_escolaridade(rpe: pd.DataFrame, sexo: str | None = No
 
 FAIXAS_ETARIAS_ORDEM = ["14-17", "18-24", "25-39", "40-59", "60+"]
 
+# Gerações com amostra ao longo de toda a janela 2012-2026 (Geração Silenciosa e Alpha
+# ficam de fora dos gráficos — amostra residual/inexistente, ver agregacoes_pnadc.py).
+GERACOES_ORDEM_GRAFICO = [
+    "Baby Boomer (1946-1964)", "Geração X (1965-1980)",
+    "Millennial (1981-1996)", "Geração Z (1997-2012)",
+]
+ROTULOS_GERACAO_CURTO = {
+    "Baby Boomer (1946-1964)": "Baby Boomer", "Geração X (1965-1980)": "Geração X",
+    "Millennial (1981-1996)": "Millennial", "Geração Z (1997-2012)": "Geração Z",
+}
+# Reaproveita os tons da identidade visual (mesma paleta validada de CORES_REGIAO) —
+# dimensão diferente de raça e de região, mas nunca aparece no mesmo gráfico que elas.
+CORES_GERACAO = {
+    "Baby Boomer (1946-1964)": "#3a5a9a", "Geração X (1965-1980)": "#c8541f",
+    "Millennial (1981-1996)": "#0d9086", "Geração Z (1997-2012)": "#853359",
+}
+
 
 def grafico_renda_por_raca_sexo(renda: pd.DataFrame, sexo: str) -> Path:
     """Renda por raça ao longo do tempo, um único gênero (recorte raça x gênero,
@@ -1373,6 +1390,169 @@ def grafico_desalento(des: pd.DataFrame) -> Path:
     )
 
 
+def grafico_hiato_por_geracao(hg: pd.DataFrame) -> Path:
+    """Hiato Branca vs. Negra DENTRO de cada geração (coorte de nascimento sintética),
+    ao longo do tempo. Diferença crucial em relação a um gráfico "por faixa etária":
+    "pessoas de 25-39 anos" em 2012 e em 2026 são pessoas DIFERENTES (a PNAD Contínua é
+    um corte transversal repetido, não um painel de décadas) — aqui cada linha segue
+    (aproximadamente) a MESMA coorte de nascimento envelhecendo dentro da janela
+    2012-2026."""
+    h = hg.copy()
+    h["data"] = pd.to_datetime(h["ano"].astype(str) + "-" + ((h["trimestre"] - 1) * 3 + 1).astype(str) + "-01")
+    pivot = h.pivot_table(index="data", columns="geracao", values="hiato_percentual").sort_index()
+    pivot = pivot[GERACOES_ORDEM_GRAFICO]
+    pivot.columns = [ROTULOS_GERACAO_CURTO[c] for c in pivot.columns]
+    cores = {ROTULOS_GERACAO_CURTO[k]: v for k, v in CORES_GERACAO.items()}
+    return _grafico_serie_temporal(
+        pivot, cores,
+        "Hiato de renda Branca vs. Negra, por geração — Brasil (2012–2026)",
+        "A MESMA coorte de nascimento envelhecendo, não a mesma faixa etária com pessoas "
+        "diferentes a cada trimestre · PNAD Contínua Trimestral",
+        "hiato_racial_por_geracao.png",
+        formato_eixo_y=lambda v, _: f"{v:.0f}%",
+    )
+
+
+def grafico_renda_por_geracao_raca(rg: pd.DataFrame) -> Path:
+    """Renda por geração e raça, snapshot do trimestre mais recente — cada geração na
+    idade em que está HOJE (Baby Boomer mais velho, Geração Z mais jovem); não controla
+    por idade, serve pra ver se o hiato racial varia de geração pra geração."""
+    ultimo_ano, ultimo_trimestre = _trimestre_mais_recente(rg)
+    r = rg[
+        (rg["nivel_geografico"] == "brasil") & (rg["ano"] == ultimo_ano) & (rg["trimestre"] == ultimo_trimestre)
+    ].copy()
+    combinado = _combinar_negra(r, "renda_habitual_real_media", by=["geracao"])
+
+    ordem_raca = ["Branca", "Negra", "Indígena"]
+    x = np.arange(len(GERACOES_ORDEM_GRAFICO))
+    largura = 0.25
+    fig, ax = _novo_eixo(figsize=(10.5, 5.5))
+    maior_valor = 0.0
+    for i, raca in enumerate(ordem_raca):
+        valores = [
+            combinado[(combinado["raca_cor"] == raca) & (combinado["geracao"] == g)]["renda_habitual_real_media"].sum()
+            for g in GERACOES_ORDEM_GRAFICO
+        ]
+        maior_valor = max(maior_valor, max(valores))
+        deslocamento = (i - 1) * largura
+        ax.bar(x + deslocamento, valores, largura, color=CORES_RACA[raca], zorder=3, label=raca)
+
+    # headroom extra pra legenda não colidir com a barra mais alta (Branca, Baby Boomer)
+    ax.set_ylim(0, maior_valor * 1.18)
+    ax.set_xticks(x)
+    ax.set_xticklabels([ROTULOS_GERACAO_CURTO[g] for g in GERACOES_ORDEM_GRAFICO], fontsize=10)
+    ax.legend(loc="upper left", frameon=False, fontsize=9.5)
+    _titulo(
+        ax, "Renda habitual real por geração e raça — Brasil",
+        f"Cada geração na idade em que está hoje (não controla por idade) · {ultimo_trimestre}º "
+        f"trimestre de {ultimo_ano} · PNAD Contínua Trimestral",
+    )
+    ax.yaxis.set_major_formatter(lambda v, _: f"R$ {v:,.0f}".replace(",", "."))
+    ax.grid(axis="y", color=GRADE, linewidth=0.8, zorder=0)
+    _rodape(fig)
+    fig.tight_layout(rect=(0, 0.03, 1, 1))
+    return _salvar(fig, "renda_por_geracao_raca.png")
+
+
+def _serie_topo10(perfil: pd.DataFrame, dimensao: str, categoria: str) -> pd.DataFrame:
+    p = perfil[(perfil["dimensao"] == dimensao) & (perfil["categoria"] == categoria)].copy()
+    p["data"] = pd.to_datetime(p["ano"].astype(str) + "-" + ((p["trimestre"] - 1) * 3 + 1).astype(str) + "-01")
+    pivot = p.pivot_table(index="data", columns="raca_cor", values="pct_do_topo10").sort_index()
+    return pivot[["Branca", "Negra"]]
+
+
+def grafico_topo10_genero(perfil: pd.DataFrame) -> Path:
+    """% de mulheres entre o topo 10% de renda DENTRO de cada raça (limiar/P90 próprio
+    de cada grupo, não um corte único pro Brasil todo), ao longo do tempo."""
+    pivot = _serie_topo10(perfil, "sexo", "Mulher")
+    return _grafico_serie_temporal(
+        pivot, {"Branca": COR_BRANCA, "Negra": COR_NEGRA},
+        "% de mulheres no topo 10% de renda, dentro de cada raça — Brasil (2012–2026)",
+        "Topo 10% com limiar (P90) PRÓPRIO de cada raça, não um corte único pro Brasil · "
+        "PNAD Contínua Trimestral",
+        "topo10_genero.png",
+        formato_eixo_y=lambda v, _: f"{v:.0f}%",
+    )
+
+
+def grafico_topo10_escolaridade(perfil: pd.DataFrame) -> Path:
+    """% com Superior completo entre o topo 10% de renda DENTRO de cada raça, ao longo
+    do tempo."""
+    pivot = _serie_topo10(perfil, "nivel_instrucao", "Superior completo")
+    return _grafico_serie_temporal(
+        pivot, {"Branca": COR_BRANCA, "Negra": COR_NEGRA},
+        "% com Superior completo no topo 10% de renda, dentro de cada raça — Brasil (2012–2026)",
+        "Topo 10% com limiar (P90) PRÓPRIO de cada raça · PNAD Contínua Trimestral",
+        "topo10_escolaridade.png",
+        formato_eixo_y=lambda v, _: f"{v:.0f}%",
+    )
+
+
+def _snapshot_topo10(perfil: pd.DataFrame, dimensao: str, n_trimestres: int = 8) -> pd.DataFrame:
+    """Média (simples, não ponderada por amostra) dos últimos `n_trimestres` — célula
+    mais robusta que um único trimestre isolado pra uma composição já bem repartida."""
+    p = perfil[perfil["dimensao"] == dimensao].copy()
+    ultimos = p[["ano", "trimestre"]].drop_duplicates().sort_values(["ano", "trimestre"]).tail(n_trimestres)
+    p = p.merge(ultimos, on=["ano", "trimestre"])
+    return p.groupby(["raca_cor", "categoria"], observed=True)["pct_do_topo10"].mean().reset_index()
+
+
+def grafico_topo10_faixa_etaria(perfil: pd.DataFrame) -> Path:
+    """Composição por faixa etária do topo 10% de renda, Negra vs. Branca — média dos
+    últimos 8 trimestres (mais robusto que um trimestre isolado)."""
+    d = _snapshot_topo10(perfil, "faixa_etaria")
+    x = np.arange(len(FAIXAS_ETARIAS_ORDEM))
+    largura = 0.35
+    fig, ax = _novo_eixo(figsize=(10, 5.5))
+    for i, raca in enumerate(["Branca", "Negra"]):
+        valores = [
+            d[(d["raca_cor"] == raca) & (d["categoria"] == f)]["pct_do_topo10"].sum()
+            for f in FAIXAS_ETARIAS_ORDEM
+        ]
+        deslocamento = (i - 0.5) * largura
+        ax.bar(x + deslocamento, valores, largura, color=CORES_RACA[raca], zorder=3, label=raca)
+    ax.set_xticks(x)
+    ax.set_xticklabels(FAIXAS_ETARIAS_ORDEM, fontsize=10.5)
+    ax.legend(loc="upper left", frameon=False, fontsize=9.5)
+    _titulo(
+        ax, "Composição por faixa etária do topo 10% de renda — Negra vs. Branca",
+        "Topo 10% dentro de cada raça · média dos últimos 8 trimestres · PNAD Contínua Trimestral",
+    )
+    ax.yaxis.set_major_formatter(lambda v, _: f"{v:.0f}%")
+    ax.grid(axis="y", color=GRADE, linewidth=0.8, zorder=0)
+    _rodape(fig)
+    fig.tight_layout(rect=(0, 0.03, 1, 1))
+    return _salvar(fig, "topo10_faixa_etaria.png")
+
+
+def grafico_topo10_geracao(perfil: pd.DataFrame) -> Path:
+    """Composição por geração do topo 10% de renda, Negra vs. Branca — média dos
+    últimos 8 trimestres."""
+    d = _snapshot_topo10(perfil, "geracao")
+    x = np.arange(len(GERACOES_ORDEM_GRAFICO))
+    largura = 0.35
+    fig, ax = _novo_eixo(figsize=(10, 5.5))
+    for i, raca in enumerate(["Branca", "Negra"]):
+        valores = [
+            d[(d["raca_cor"] == raca) & (d["categoria"] == g)]["pct_do_topo10"].sum()
+            for g in GERACOES_ORDEM_GRAFICO
+        ]
+        deslocamento = (i - 0.5) * largura
+        ax.bar(x + deslocamento, valores, largura, color=CORES_RACA[raca], zorder=3, label=raca)
+    ax.set_xticks(x)
+    ax.set_xticklabels([ROTULOS_GERACAO_CURTO[g] for g in GERACOES_ORDEM_GRAFICO], fontsize=10.5)
+    ax.legend(loc="upper left", frameon=False, fontsize=9.5)
+    _titulo(
+        ax, "Composição por geração do topo 10% de renda — Negra vs. Branca",
+        "Topo 10% dentro de cada raça · média dos últimos 8 trimestres · PNAD Contínua Trimestral",
+    )
+    ax.yaxis.set_major_formatter(lambda v, _: f"{v:.0f}%")
+    ax.grid(axis="y", color=GRADE, linewidth=0.8, zorder=0)
+    _rodape(fig)
+    fig.tight_layout(rect=(0, 0.03, 1, 1))
+    return _salvar(fig, "topo10_geracao.png")
+
+
 def main() -> None:
     renda = pd.read_parquet(REPO_ROOT / "data" / "processed" / "renda.parquet")
     esc = pd.read_parquet(REPO_ROOT / "data" / "processed" / "escolaridade.parquet")
@@ -1388,6 +1568,9 @@ def main() -> None:
     horas = pd.read_parquet(REPO_ROOT / "data" / "processed" / "horas_trabalhadas.parquet")
     alfabetizacao = pd.read_parquet(REPO_ROOT / "data" / "processed" / "alfabetizacao.parquet")
     desalento = pd.read_parquet(REPO_ROOT / "data" / "processed" / "desalento_subutilizacao.parquet")
+    renda_geracao = pd.read_parquet(REPO_ROOT / "data" / "processed" / "renda_por_geracao.parquet")
+    hiato_geracao = pd.read_parquet(REPO_ROOT / "data" / "processed" / "hiato_por_geracao.parquet")
+    perfil_topo10 = pd.read_parquet(REPO_ROOT / "data" / "processed" / "perfil_topo10_racial.parquet")
 
     destinos = [
         # raça
@@ -1408,6 +1591,15 @@ def main() -> None:
         grafico_renda_por_hora(horas),
         grafico_alfabetizacao(alfabetizacao),
         grafico_desalento(desalento),
+        # aprofundamentos: geração (coorte de nascimento, corrige o viés "não são as
+        # mesmas pessoas" da faixa etária) e perfil de quem está no topo 10% de renda
+        # dentro de cada raça
+        grafico_hiato_por_geracao(hiato_geracao),
+        grafico_renda_por_geracao_raca(renda_geracao),
+        grafico_topo10_genero(perfil_topo10),
+        grafico_topo10_escolaridade(perfil_topo10),
+        grafico_topo10_faixa_etaria(perfil_topo10),
+        grafico_topo10_geracao(perfil_topo10),
         # raça x gênero: combinado + um por gênero
         grafico_renda_por_raca_genero(renda),
         grafico_renda_por_raca_sexo(renda, "Homem"),

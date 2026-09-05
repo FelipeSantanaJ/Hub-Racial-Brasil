@@ -56,12 +56,24 @@ Decomposição por RIF (Firpo-Fortin-Lemieux): o hiato que sobra depois de contr
 idade/escolaridade/ocupação tem formato em U — menor na mediana (~15%), maior na base
 (~31%, "piso pegajoso") e no topo (~36%, "teto de vidro").
 
-**53 gráficos ao todo** — raça × gênero × faixa etária × escolaridade em todas as
-combinações (Preta e Parda sempre também separadas), mais uma rodada de aprofundamento:
-hiato por região, segregação ocupacional (índice de Duncan), teste de quebra estrutural em 3
-eventos históricos, e novas variáveis (informalidade, renda por hora, alfabetização,
-desalento). Galeria completa, com a leitura de cada gráfico, em
-[docs/ANALISE_FASE1.md](docs/ANALISE_FASE1.md), ou como apresentação em
+### O topo 10% dos negros ficou muito mais escolarizado — mas o hiato lá em cima persiste
+
+![Topo 10% por escolaridade](docs/img/topo10_escolaridade.png)
+
+Olhando só pra quem está no topo 10% de renda DENTRO de cada raça (não um corte único pro
+Brasil): a % com Superior completo entre os negros do topo saltou de 38% (2012) para ~58%
+hoje — mas ainda fica atrás do topo dos brancos (~83%). E "faixa etária" não acompanha as
+mesmas pessoas ao longo do tempo (é um corte transversal repetido) — por isso também
+seguimos **gerações** (coortes de nascimento) pra ver o hiato dentro do mesmo grupo
+envelhecendo, não misturado entre gerações diferentes.
+
+**59 gráficos ao todo** — raça × gênero × faixa etária × escolaridade em todas as
+combinações (Preta e Parda sempre também separadas), mais aprofundamentos: hiato por região,
+segregação ocupacional (índice de Duncan), teste de quebra estrutural em 3 eventos
+históricos, novas variáveis (informalidade, renda por hora, alfabetização, desalento),
+hiato/renda por geração e perfil de quem está no topo 10% de cada raça. Galeria completa, com
+a leitura de cada gráfico, em [docs/ANALISE_FASE1.md](docs/ANALISE_FASE1.md), ou como
+apresentação em
 [docs/Datahub_Racial_Brasil_Fase1.pptx](docs/Datahub_Racial_Brasil_Fase1.pptx).
 
 ## Escopo do MVP

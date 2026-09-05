@@ -154,6 +154,29 @@ arquivo trimestral regular não traz essas colunas). Mobilidade/deslocamento par
 não é coletado na PNAD Contínua regular. Ambos ficam para o Censo Demográfico (Fase 2), que
 tem os dois blocos.
 
+## Geração (coorte de nascimento sintética) e "topo 10%" (2026-09-05)
+
+- **Geração**: `ano_nascimento_aprox = ano da pesquisa - V2009` (idade) — aproximado, não
+  considera mês de nascimento x mês de entrevista, pode errar por 1 ano perto de cada
+  fronteira. Fronteiras usadas (convenção internacional/brasileira comum): Geração
+  Silenciosa (antes de 1946), Baby Boomer (1946-1964), Geração X (1965-1980), Millennial
+  (1981-1996), Geração Z (1997-2012), Geração Alpha (2013+, nunca aparece de fato no recorte
+  14+ anos desta base — o mais jovem possível seria alguém que completasse 14 anos em 2027,
+  fora da nossa janela de dados). É uma **coorte sintética** (Deaton, 1985): cada trimestre
+  ainda traz pessoas diferentes dentro da mesma geração, só o grupo de nascimento se mantém
+  fixo — não é o mesmo que acompanhar os mesmos indivíduos ano a ano (a PNAD Contínua tem um
+  painel rotativo real de até 5 entrevistas/15 meses, mas isso não alcança décadas).
+- **"Topo 10%" por raça**: `pnadc_core.quantil_ponderado` calcula o P90 ponderado dentro de
+  Branca e dentro de Negra SEPARADAMENTE (não um corte único pro Brasil). Renda autodeclarada
+  tem heaping forte (checado direto no parquet bruto — ex.: no trimestre mais recente, 3,1%
+  de Branca declara EXATAMENTE R$10.000 e 3,4% de Negra declara EXATAMENTE R$5.000) — quando
+  o P90 cai bem em cima de um valor populoso desses, o filtro `>= limiar` inclui todo mundo
+  empatado ali, capturando mais que 10% de fato (checado manualmente: ~11,5% de Branca,
+  ~12,8% de Negra no trimestre mais recente). A coluna `pct_populacao_capturada` em
+  `perfil_topo10_racial.parquet` registra o valor real capturado a cada trimestre — não
+  tentamos uma correção de desempate mais sofisticada (fracionar a inclusão de quem está
+  exatamente no limiar) por estar fora do escopo desta rodada.
+
 ## Nota técnica: tipos de variável no layout do IBGE
 
 Várias variáveis que parecem numéricas na verdade são **texto** no layout de largura fixa do

@@ -84,6 +84,22 @@ CREATE TEMP TABLE base AS
             WHEN m.V2009 BETWEEN 40 AND 59 THEN '40-59'
             WHEN m.V2009 >= 60 THEN '60+'
         END AS faixa_etaria,
+        -- Geração: ano de nascimento APROXIMADO (ano da pesquisa - idade, sem levar em
+        -- conta mês de nascimento x mês de entrevista — pode errar por 1 ano perto de
+        -- cada fronteira). A PNAD Contínua é um corte transversal repetido, não um
+        -- painel longitudinal de décadas — "pessoas de 14-17 anos" em trimestres
+        -- diferentes são pessoas DIFERENTES chegando nessa idade, não as mesmas
+        -- envelhecendo. Geração agrupa por ano de NASCIMENTO (coorte sintética/pseudo-
+        -- painel, método de Deaton 1985) — isso sim segue aproximadamente o mesmo grupo
+        -- de pessoas ao longo do tempo, envelhecendo dentro da janela 2012-2026.
+        CASE
+            WHEN (m.ano - m.V2009) < 1946 THEN 'Geração Silenciosa (antes de 1946)'
+            WHEN (m.ano - m.V2009) BETWEEN 1946 AND 1964 THEN 'Baby Boomer (1946-1964)'
+            WHEN (m.ano - m.V2009) BETWEEN 1965 AND 1980 THEN 'Geração X (1965-1980)'
+            WHEN (m.ano - m.V2009) BETWEEN 1981 AND 1996 THEN 'Millennial (1981-1996)'
+            WHEN (m.ano - m.V2009) BETWEEN 1997 AND 2012 THEN 'Geração Z (1997-2012)'
+            ELSE 'Geração Alpha (2013+)'
+        END AS geracao,
         CASE m.VD3004
             WHEN '1' THEN 'Sem instrução e menos de 1 ano de estudo'
             WHEN '2' THEN 'Fundamental incompleto ou equivalente'
@@ -218,6 +234,78 @@ def gerar_renda_por_escolaridade(con: duckdb.DuckDBPyConnection) -> None:
     destino = OUTPUT_DIR / "renda_por_escolaridade.parquet"
     df.to_parquet(destino, index=False)
     print(f"renda_por_escolaridade.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
+
+
+def gerar_renda_por_geracao(con: duckdb.DuckDBPyConnection) -> None:
+    """Cruza renda com geração (coorte de nascimento sintética — ver comentário em
+    CRIAR_BASE). Resolve o viés de "não são as mesmas pessoas" da faixa etária: aqui
+    cada geração é (aproximadamente) o MESMO grupo de pessoas nascidas numa janela,
+    acompanhado envelhecendo dentro da janela de observação 2012-2026."""
+    select_agregado = """
+           ano, trimestre, raca_cor, sexo, geracao,
+           COUNT(*) AS n_amostra,
+           SUM(peso) AS populacao_estimada,
+           SUM(renda_habitual_real * peso)
+               / NULLIF(SUM(peso) FILTER (WHERE renda_habitual_real IS NOT NULL), 0)
+               AS renda_habitual_real_media"""
+    df = _agregar_por_geografia(
+        con, select_agregado, group_by_extra="geracao", incluir_faixa_etaria=False
+    )
+    destino = OUTPUT_DIR / "renda_por_geracao.parquet"
+    df.to_parquet(destino, index=False)
+    print(f"renda_por_geracao.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
+
+
+def gerar_hiato_por_geracao(con: duckdb.DuckDBPyConnection) -> None:
+    """Hiato Branca vs. Negra, trimestre a trimestre, DENTRO de cada geração — mesmo
+    método de `gerar_hiato_racial` (Welch via microdados), mas mantendo a coorte de
+    nascimento fixa em vez de misturar coortes diferentes que passam pela mesma faixa
+    etária em anos diferentes. Só gerações com amostra suficiente em quase todos os 58
+    trimestres entram (Baby Boomer, Geração X, Millennial, Geração Z — todas têm alguma
+    parte da coorte com 14+ anos ao longo de toda a janela 2012-2026); Geração
+    Silenciosa e Alpha ficam de fora por amostra residual/inexistente."""
+    geracoes_com_amostra = [
+        "Baby Boomer (1946-1964)", "Geração X (1965-1980)",
+        "Millennial (1981-1996)", "Geração Z (1997-2012)",
+    ]
+    combinacoes = con.execute(f"""
+        SELECT DISTINCT ano, trimestre, geracao FROM base
+        WHERE geracao IN ({', '.join(f"'{g}'" for g in geracoes_com_amostra)})
+        ORDER BY ano, trimestre, geracao
+    """).df()
+
+    resultados = []
+    for _, row in combinacoes.iterrows():
+        ano, trimestre, geracao = int(row["ano"]), int(row["trimestre"]), row["geracao"]
+        micro = con.execute(f"""
+            SELECT raca_cor, renda_habitual_real, peso
+            FROM base
+            WHERE ano = {ano} AND trimestre = {trimestre} AND geracao = '{geracao}'
+              AND raca_cor IN ('Branca', 'Preta', 'Parda')
+              AND renda_habitual_real IS NOT NULL
+        """).df()
+        if micro.empty:
+            continue
+        micro["raca_cor"] = micro["raca_cor"].replace({"Preta": "Negra", "Parda": "Negra"})
+        tabela = pnadc_core.tabela_hiatos_significancia(
+            micro, "renda_habitual_real", "raca_cor", grupo_referencia="Negra", peso="peso"
+        )
+        if "Branca" not in tabela.index:
+            continue
+        linha_branca = tabela.loc["Branca"]
+        media_negra = tabela.loc["Negra", "media"]
+        resultados.append({
+            "ano": ano, "trimestre": trimestre, "geracao": geracao,
+            "renda_media_branca": linha_branca["media"], "renda_media_negra": media_negra,
+            "hiato_absoluto": linha_branca["hiato_media"],
+            "hiato_percentual": 100 * linha_branca["hiato_media"] / media_negra if media_negra else None,
+            "p_valor": linha_branca["p_valor"], "significativo": linha_branca["significativo"],
+        })
+
+    df = pd.DataFrame(resultados)
+    destino = OUTPUT_DIR / "hiato_por_geracao.parquet"
+    df.to_parquet(destino, index=False)
+    print(f"hiato_por_geracao.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
 def gerar_decomposicao_hiato_ocupacional(con: duckdb.DuckDBPyConnection, n_trimestres: int = 8) -> None:
@@ -364,6 +452,74 @@ def gerar_decomposicao_oaxaca_blinder(con: duckdb.DuckDBPyConnection, n_trimestr
     print(df[["ponto", "controles", "pct_explicada", "pct_nao_explicada",
               "residuo_restrito_coef", "residuo_restrito_p_valor",
               "residuo_restrito_significativo"]].to_string(index=False), flush=True)
+
+
+def gerar_perfil_topo10_racial(con: duckdb.DuckDBPyConnection) -> None:
+    """Perfil demográfico de quem está no topo 10% de renda DENTRO de cada raça (Branca
+    e Negra — Indígena fica de fora, amostra insuficiente pra um quantil confiável por
+    trimestre), trimestre a trimestre.
+
+    Importante: não é "top 10% do Brasil" (que seria quase todo Branca, dado o hiato) —
+    é "top 10% ENTRE os brancos" vs. "top 10% ENTRE os negros", cada um com o limiar
+    (P90) calculado dentro do próprio grupo. Composição por sexo, faixa etária, geração
+    e nível de instrução — responde "quem chega ao topo dentro do próprio grupo racial,
+    e como essa composição mudou ao longo do tempo?".
+
+    Universo: pessoas ocupadas com renda habitual real > 0 (mesmo escopo da decomposição
+    do hiato). Formato longo: uma linha por (trimestre, raça, dimensão, categoria).
+
+    Nota sobre "topo 10%": renda autodeclarada tem "heaping" — concentração forte em
+    valores redondos (R$1.000, R$2.000, R$5.000, R$10.000 etc., checado direto no
+    parquet bruto). Quando o limiar do P90 cai bem em cima de um desses valores muito
+    populosos, o filtro `>= limiar` inclui TODO mundo empatado naquele valor, capturando
+    um pouco mais que 10% de fato (no 2026 T2, por exemplo, ~11,5% de Branca e ~12,8% de
+    Negra — checado manualmente). Por isso a função grava `pct_populacao_capturada`
+    (peso do grupo "topo" / peso total do grupo racial naquele trimestre) — use essa
+    coluna pra saber o quão perto de "exatamente 10%" cada linha está de fato.
+    """
+    dimensoes = ["sexo", "faixa_etaria", "geracao", "nivel_instrucao"]
+    trimestres = con.execute("SELECT DISTINCT ano, trimestre FROM base ORDER BY ano, trimestre").df()
+
+    resultados = []
+    for _, row in trimestres.iterrows():
+        ano, trimestre = int(row["ano"]), int(row["trimestre"])
+        micro = con.execute(f"""
+            SELECT raca_cor, sexo, faixa_etaria, geracao, nivel_instrucao,
+                   renda_habitual_real, peso
+            FROM base
+            WHERE ano = {ano} AND trimestre = {trimestre}
+              AND raca_cor IN ('Branca', 'Preta', 'Parda')
+              AND renda_habitual_real IS NOT NULL AND renda_habitual_real > 0
+        """).df()
+        if micro.empty:
+            continue
+        micro["raca_cor"] = micro["raca_cor"].replace({"Preta": "Negra", "Parda": "Negra"})
+
+        for raca in ("Branca", "Negra"):
+            grupo = micro[micro["raca_cor"] == raca]
+            if len(grupo) < 100:  # amostra mínima pra um P90 confiável
+                continue
+            peso_grupo = grupo["peso"].sum()
+            limiar = pnadc_core.quantil_ponderado(grupo["renda_habitual_real"], grupo["peso"], 0.9)
+            topo = grupo[grupo["renda_habitual_real"] >= limiar]
+            peso_topo = topo["peso"].sum()
+            if peso_topo == 0:
+                continue
+            pct_capturado = 100 * peso_topo / peso_grupo
+            for dimensao in dimensoes:
+                for categoria, sub in topo.groupby(dimensao, observed=True):
+                    resultados.append({
+                        "ano": ano, "trimestre": trimestre, "raca_cor": raca,
+                        "limiar_p90": limiar, "n_topo10": len(topo),
+                        "pct_populacao_capturada": pct_capturado,
+                        "dimensao": dimensao, "categoria": categoria,
+                        "pct_do_topo10": 100 * sub["peso"].sum() / peso_topo,
+                    })
+
+    df = pd.DataFrame(resultados)
+    destino = OUTPUT_DIR / "perfil_topo10_racial.parquet"
+    df.to_parquet(destino, index=False)
+    print(f"perfil_topo10_racial.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
 def gerar_hiato_regional(con: duckdb.DuckDBPyConnection) -> None:
@@ -711,12 +867,15 @@ def main() -> None:
     gerar_renda(con)
     gerar_escolaridade(con)
     gerar_renda_por_escolaridade(con)
+    gerar_renda_por_geracao(con)
     gerar_renda_completa(con)
     gerar_hiato_racial(con)
+    gerar_hiato_por_geracao(con)
     gerar_quebra_estrutural()
     gerar_hiato_regional(con)
     gerar_decomposicao_hiato_ocupacional(con)
     gerar_decomposicao_oaxaca_blinder(con)
+    gerar_perfil_topo10_racial(con)
     gerar_indice_segregacao_ocupacional(con)
     gerar_ocupacao(con)
     gerar_informalidade(con)
