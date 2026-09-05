@@ -279,15 +279,23 @@ def _serie_por_raca(
 
 def _grafico_serie_temporal(
     serie: pd.DataFrame, cores: dict[str, str], titulo: str, subtitulo: str, nome_arquivo: str,
-    rotulos: dict[str, str] | None = None,
+    rotulos: dict[str, str] | None = None, formato_eixo_y=None, teto_pct: bool = False,
 ) -> Path:
-    """Plota uma série temporal (colunas = raças) no estilo padrão do projeto —
-    linhas, rótulos diretos sem colisão, faixa da pandemia, grade horizontal."""
+    """Plota uma série temporal (colunas = raças, ou qualquer outra categoria — ex.:
+    região) no estilo padrão do projeto — linhas, rótulos diretos sem colisão, faixa da
+    pandemia, grade horizontal. `formato_eixo_y` (opcional) troca o formato padrão em
+    R$ por outro (ex.: `lambda v, _: f"{v:.0f}%"` pra séries em percentual). `teto_pct`
+    limita o topo do eixo a 100% — usar em séries percentuais cujo máximo já está perto
+    de 100 (sem isso, o `* 1.22` padrão criaria uma grade acima de 100%, sem sentido
+    pra uma métrica limitada a esse teto)."""
     rotulos = rotulos or {c: c for c in serie.columns}
+    formato_eixo_y = formato_eixo_y or (lambda v, _: f"R$ {v:,.0f}".replace(",", "."))
     fig, ax = _novo_eixo(figsize=(11, 5.5))
     ax.axvspan(pd.Timestamp("2020-01-01"), pd.Timestamp("2021-12-31"), color=GRADE, alpha=0.6, zorder=0)
 
     topo = serie.max().max() * 1.22
+    if teto_pct:
+        topo = min(topo, 100)
     base = serie.min().min() * 0.9 if serie.min().min() > 0 else 0
     ax.set_ylim(base, topo)
 
@@ -316,7 +324,7 @@ def _grafico_serie_temporal(
     )
 
     _titulo(ax, titulo, subtitulo)
-    ax.yaxis.set_major_formatter(lambda v, _: f"R$ {v:,.0f}".replace(",", "."))
+    ax.yaxis.set_major_formatter(formato_eixo_y)
     ax.xaxis.set_major_locator(mdates.YearLocator(2))
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
     ax.grid(axis="y", color=GRADE, linewidth=0.8, zorder=0)
@@ -1090,6 +1098,271 @@ def grafico_renda_completa_heatmap(rc: pd.DataFrame) -> Path:
     return _salvar(fig, "renda_completa_heatmap.png")
 
 
+ROTULOS_OB_CONTROLES = {
+    "faixa_etaria": "+ faixa\netária",
+    "faixa_etaria + nivel_instrucao": "+ escolaridade",
+    "faixa_etaria + nivel_instrucao + grupamento_ocupacional": "+ ocupação",
+}
+
+
+def grafico_oaxaca_blinder_decomposicao(ob: pd.DataFrame) -> Path:
+    """Decomposição de Oaxaca-Blinder do hiato Branca-Negra (log-renda) em parcela
+    explicada (composição — idade/escolaridade/ocupação) vs. não-explicada (mesmas
+    características, retorno diferente) — ver `pnadc_core.decomposicao_oaxaca_blinder`.
+    Complementa `decomposicao_hiato_ocupacional.png` (padronização direta, mais fácil
+    de ler em R$) com o teste de significância formal da parte residual."""
+    d = ob[ob["ponto"] == "média"].copy()
+    d["rotulo"] = d["controles"].map(ROTULOS_OB_CONTROLES)
+
+    fig, ax = _novo_eixo(figsize=(9.5, 5.8))
+    x = np.arange(len(d))
+    ax.bar(x, d["pct_explicada"], width=0.5, color=COR_BRANCA, alpha=0.55, zorder=3,
+           label="Explicada (composição)")
+    ax.bar(x, d["pct_nao_explicada"], width=0.5, bottom=d["pct_explicada"], color=COR_NEGRA, zorder=3,
+           label="Não-explicada (retorno)")
+
+    for i, (exp_, nexp) in enumerate(zip(d["pct_explicada"], d["pct_nao_explicada"])):
+        # fatia fina (< 8pp, caso da barra "+ faixa etária") recebe rótulo ACIMA da
+        # própria fatia, não centralizado dentro dela — texto não cabe numa fatia de
+        # poucos pixels de altura (bug visto no primeiro render: rótulo vazava pro
+        # eixo x e colidia com o tick label).
+        if exp_ < 8:
+            ax.text(i, exp_ + 2, f"{exp_:.0f}%", ha="center", va="bottom", fontsize=9,
+                    color=TINTA_PRIMARIA, fontweight="bold")
+        else:
+            ax.text(i, exp_ / 2, f"{exp_:.0f}%", ha="center", va="center", fontsize=10,
+                    color=SUPERFICIE, fontweight="bold")
+        ax.text(i, exp_ + nexp / 2, f"{nexp:.0f}%", ha="center", va="center", fontsize=10,
+                color=SUPERFICIE, fontweight="bold")
+
+    ax.set_xticks(x)
+    ax.set_xticklabels(d["rotulo"], fontsize=10.5)
+    ax.set_ylim(0, 100)
+    ax.yaxis.set_major_formatter(lambda v, _: f"{v:.0f}%")
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.13), ncol=2, frameon=False, fontsize=9.5)
+
+    p_valor_final = d["residuo_restrito_p_valor"].iloc[-1]
+    coef_final = d["residuo_restrito_coef"].iloc[-1]
+    hiato_residual_pct = (np.exp(coef_final) - 1) * 100
+    p_txt = "p < 0,001" if p_valor_final < 0.001 else f"p = {p_valor_final:.3f}"
+    _titulo(
+        ax, "Decomposição de Oaxaca-Blinder do hiato Branca vs. Negra",
+        "% do hiato de log-renda por composição vs. por retorno às mesmas características · "
+        f"resíduo final de +{hiato_residual_pct:.0f}% ({p_txt})",
+    )
+    _rodape(fig)
+    fig.tight_layout(rect=(0, 0.15, 1, 1))
+    return _salvar(fig, "oaxaca_blinder_decomposicao.png")
+
+
+def grafico_oaxaca_blinder_quantis(ob: pd.DataFrame) -> Path:
+    """Decomposição de Oaxaca-Blinder via RIF (Firpo-Fortin-Lemieux 2009) em três
+    pontos da distribuição de renda — base (P10), mediana (P50) e topo (P90) — com os
+    mesmos controles (idade+escolaridade+ocupação). Responde: o hiato residual entre
+    Branca e Negra é maior no topo ou na base da distribuição de renda?"""
+    d = ob[ob["ponto"].isin(["p10", "p50", "p90"])].copy()
+    ordem = {"p10": 0, "p50": 1, "p90": 2}
+    d = d.assign(ordem=d["ponto"].map(ordem)).sort_values("ordem")
+    d["hiato_residual_pct"] = (np.exp(d["residuo_restrito_coef"]) - 1) * 100
+    rotulos_ponto = {"p10": "P10\n(base)", "p50": "P50\n(mediana)", "p90": "P90\n(topo)"}
+
+    fig, ax = _novo_eixo(figsize=(8.5, 5.5))
+    x = np.arange(len(d))
+    barras = ax.bar(x, d["hiato_residual_pct"], width=0.5, color=COR_NEGRA, zorder=3)
+    for barra, v, p in zip(barras, d["hiato_residual_pct"], d["residuo_restrito_p_valor"]):
+        marca = "***" if p < 0.001 else ("**" if p < 0.01 else ("*" if p < 0.05 else "n.s."))
+        ax.text(barra.get_x() + barra.get_width() / 2, v + d["hiato_residual_pct"].max() * 0.02,
+                f"{v:.0f}%\n{marca}", ha="center", fontsize=10.5, fontweight="bold", color=TINTA_PRIMARIA)
+
+    ax.set_xticks(x)
+    ax.set_xticklabels([rotulos_ponto[p] for p in d["ponto"]], fontsize=10.5)
+    ax.set_ylim(0, d["hiato_residual_pct"].max() * 1.3)
+    ax.yaxis.set_major_formatter(lambda v, _: f"{v:.0f}%")
+    _titulo(
+        ax, "Hiato residual Branca vs. Negra, por ponto da distribuição de renda",
+        "Regressão RIF com idade+escolaridade+ocupação controladas · *** p<0,001 · "
+        "últimos 8 trimestres, ocupados",
+    )
+    ax.grid(axis="y", color=GRADE, linewidth=0.8, zorder=0)
+    _rodape(fig)
+    fig.tight_layout(rect=(0, 0.03, 1, 1))
+    return _salvar(fig, "oaxaca_blinder_quantis.png")
+
+
+REGIOES_ORDEM = ["Norte", "Nordeste", "Centro-Oeste", "Sudeste", "Sul"]
+# Paleta de 5 cores validada à parte (all-pairs PASS) — dimensão diferente de raça
+# (região), de propósito não reaproveita CORES_RACA pra não confundir as duas.
+CORES_REGIAO = {
+    "Norte": "#2a78d6", "Nordeste": "#eb6834", "Sudeste": "#1baf7a",
+    "Sul": "#4a3aa7", "Centro-Oeste": "#c9376b",
+}
+
+
+def grafico_hiato_regional(hr: pd.DataFrame) -> Path:
+    """Hiato de renda Branca vs. Negra, em %, por Região — mesmo teste de Welch de
+    `grafico_hiato_percentual`, quebrado por região pra ver se a desigualdade regional
+    do Brasil (Norte/Nordeste vs. Sul/Sudeste) também aparece especificamente no hiato
+    racial, ou se é uniforme pelo país."""
+    h = hr.copy()
+    h["data"] = pd.to_datetime(h["ano"].astype(str) + "-" + ((h["trimestre"] - 1) * 3 + 1).astype(str) + "-01")
+    pivot = h.pivot_table(index="data", columns="regiao", values="hiato_percentual").sort_index()
+    pivot = pivot[REGIOES_ORDEM]
+    return _grafico_serie_temporal(
+        pivot, CORES_REGIAO,
+        "Hiato de renda Branca vs. Negra, por Região — Brasil (2012–2026)",
+        "Quanto a mais Branca ganha que Negra, em % · teste de Welch por trimestre e região · "
+        "PNAD Contínua Trimestral",
+        "hiato_racial_por_regiao.png",
+        formato_eixo_y=lambda v, _: f"{v:.0f}%",
+    )
+
+
+def grafico_segregacao_ocupacional(seg: pd.DataFrame) -> Path:
+    """Índice de dissimilaridade de Duncan entre a distribuição ocupacional de Branca e
+    de Negra — % de um dos grupos que precisaria trocar de categoria ocupacional pra
+    igualar a distribuição do outro. Mede segregação ocupacional em si, à parte do seu
+    efeito na renda (já coberto pela decomposição do hiato)."""
+    s = seg.copy()
+    s["data"] = pd.to_datetime(s["ano"].astype(str) + "-" + ((s["trimestre"] - 1) * 3 + 1).astype(str) + "-01")
+    s = s.sort_values("data")
+    s["indice_pct"] = s["indice_duncan_branca_negra"] * 100
+
+    fig, ax = _novo_eixo(figsize=(11, 5.5))
+    ax.axvspan(pd.Timestamp("2020-01-01"), pd.Timestamp("2021-12-31"), color=GRADE, alpha=0.6, zorder=0)
+    ax.plot(s["data"], s["indice_pct"], color=COR_NEGRA, linewidth=2.2, solid_capstyle="round", zorder=3)
+    ax.annotate(
+        f"{s['indice_pct'].iloc[-1]:.0f}%", xy=(s["data"].iloc[-1], s["indice_pct"].iloc[-1]),
+        xytext=(8, 0), textcoords="offset points", color=COR_NEGRA, fontsize=11, fontweight="bold", va="center",
+    )
+    _titulo(
+        ax, "Índice de segregação ocupacional, Branca vs. Negra — Brasil (2012–2026)",
+        "Índice de dissimilaridade de Duncan · % que precisaria trocar de categoria ocupacional "
+        "pra igualar a distribuição do outro grupo · PNAD Contínua Trimestral",
+    )
+    ax.yaxis.set_major_formatter(lambda v, _: f"{v:.0f}%")
+    ax.xaxis.set_major_locator(mdates.YearLocator(2))
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
+    ax.grid(axis="y", color=GRADE, linewidth=0.8, zorder=0)
+    ax.set_xlim(s["data"].min(), s["data"].max() + pd.Timedelta(days=280))
+    ax.set_ylim(0, s["indice_pct"].max() * 1.25)
+    _rodape(fig)
+    fig.tight_layout(rect=(0, 0.03, 1, 1))
+    return _salvar(fig, "segregacao_ocupacional.png")
+
+
+ROTULOS_EVENTO_ESTRUTURAL = {
+    "reforma_trabalhista_2017": "Reforma\ntrabalhista",
+    "reforma_previdencia_2019": "Reforma da\nprevidência",
+    "recessao_2015": "Recessão\n2015-16",
+}
+
+
+def grafico_quebra_estrutural(hiato: pd.DataFrame, quebra: pd.DataFrame) -> Path:
+    """Mesma série do hiato % (`grafico_hiato_percentual`), com os 3 eventos testados
+    em `agregacoes_pnadc.gerar_quebra_estrutural` marcados — teste simplificado tipo
+    Chow (mudança de patamar e/ou inclinação), não busca por múltiplas quebras."""
+    h = _preparar_hiato(hiato)
+    topo = h["hiato_percentual"].max() * 1.28
+
+    fig, ax = _novo_eixo(figsize=(11.5, 5.8))
+    ax.axvspan(pd.Timestamp("2020-01-01"), pd.Timestamp("2021-12-31"), color=GRADE, alpha=0.6, zorder=0)
+    ax.plot(h["data"], h["hiato_percentual"], color=COR_BRANCA, linewidth=2.2, solid_capstyle="round", zorder=3)
+
+    for _, linha in quebra.iterrows():
+        data_evento = pd.Timestamp(f"{int(linha['ano_evento'])}-{(int(linha['trimestre_evento']) - 1) * 3 + 1:02d}-01")
+        ax.axvline(data_evento, color=TINTA_MUTED, linewidth=1, linestyle=":", zorder=2)
+        marca = "significativo" if linha["significativo_a_5pct"] else "não-significativo"
+        ax.text(
+            data_evento, topo * 0.98, f"{ROTULOS_EVENTO_ESTRUTURAL[linha['evento']]}\n({marca})",
+            fontsize=7.5, color=TINTA_SECUNDARIA, ha="center", va="top",
+        )
+
+    ax.set_ylim(0, topo * 1.05)
+    _titulo(
+        ax, "Hiato racial e possíveis pontos de inflexão — Brasil (2012–2026)",
+        "Teste de quebra estrutural simplificado (nível + inclinação, tipo Chow) em cada evento · "
+        "PNAD Contínua Trimestral",
+    )
+    ax.yaxis.set_major_formatter(lambda v, _: f"{v:.0f}%")
+    ax.xaxis.set_major_locator(mdates.YearLocator(2))
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
+    ax.grid(axis="y", color=GRADE, linewidth=0.8, zorder=0)
+    ax.set_xlim(h["data"].min(), h["data"].max() + pd.Timedelta(days=280))
+    _rodape(fig)
+    fig.tight_layout(rect=(0, 0.03, 1, 1))
+    return _salvar(fig, "hiato_quebra_estrutural.png")
+
+
+ROTULOS_RACA_SUAVIZADA = {"Branca": "Branca", "Negra": "Negra", "Indígena": "Indígena (média móvel 4 trim.)"}
+
+
+def grafico_informalidade(inf: pd.DataFrame) -> Path:
+    """% de empregados com carteira de trabalho assinada (entre privado/doméstico/
+    público — ver decodificação de VD4009 em docs/LIMITACOES_E_METODOLOGIA.md), por
+    raça, Brasil. Indígena suavizado (amostra pequena)."""
+    serie = _serie_por_raca(inf, ["Branca", "Negra", "Indígena"], coluna_valor="pct_com_carteira",
+                             suavizar={"Indígena"})
+    return _grafico_serie_temporal(
+        serie, CORES_RACA,
+        "% de empregados com carteira assinada, por raça — Brasil (2012–2026)",
+        "Entre empregados no setor privado, doméstico ou público (VD4009) · PNAD Contínua Trimestral",
+        "informalidade_carteira_assinada.png",
+        rotulos=ROTULOS_RACA_SUAVIZADA,
+        formato_eixo_y=lambda v, _: f"{v:.0f}%",
+    )
+
+
+def grafico_renda_por_hora(horas: pd.DataFrame) -> Path:
+    """Renda real por hora trabalhada (aproximada: renda habitual mensal / (horas
+    semanais x 4,345)), por raça — testa se o hiato de renda vem de jornada diferente
+    ou de remuneração por hora efetivamente menor."""
+    serie = _serie_por_raca(horas, ["Branca", "Negra", "Indígena"], coluna_valor="renda_por_hora_real_media",
+                             suavizar={"Indígena"})
+    return _grafico_serie_temporal(
+        serie, CORES_RACA,
+        "Renda real por hora trabalhada, por raça — Brasil (2012–2026)",
+        "Renda habitual mensal ÷ (horas semanais x 4,345) · a preços do trimestre mais recente · "
+        "PNAD Contínua Trimestral",
+        "renda_por_hora.png",
+        rotulos=ROTULOS_RACA_SUAVIZADA,
+    )
+
+
+def grafico_alfabetizacao(alf: pd.DataFrame) -> Path:
+    """% alfabetizado (V3001), por raça, população 60+ anos — cohort onde o
+    analfabetismo residual ainda é mensurável no Brasil (nas faixas mais jovens já está
+    perto de 100% pros três grupos)."""
+    serie = _serie_por_raca(alf, ["Branca", "Negra", "Indígena"], coluna_valor="pct_alfabetizado",
+                             filtro_extra={"faixa_etaria": "60+"}, suavizar={"Indígena"})
+    return _grafico_serie_temporal(
+        serie, CORES_RACA,
+        "% alfabetizado, população 60+ anos, por raça — Brasil (2012–2026)",
+        "Sabe ler e escrever (V3001) · Indígena com amostra pequena nessa faixa etária, suavizado · "
+        "PNAD Contínua Trimestral",
+        "alfabetizacao_60mais.png",
+        rotulos=ROTULOS_RACA_SUAVIZADA,
+        formato_eixo_y=lambda v, _: f"{v:.0f}%",
+        teto_pct=True,
+    )
+
+
+def grafico_desalento(des: pd.DataFrame) -> Path:
+    """% da população fora da força de trabalho que está desalentada (desistiu de
+    procurar emprego, VD4005), por raça — vai além da taxa de desocupação simples
+    (ocupacao.parquet)."""
+    serie = _serie_por_raca(des, ["Branca", "Negra", "Indígena"], coluna_valor="pct_desalento",
+                             suavizar={"Indígena"})
+    return _grafico_serie_temporal(
+        serie, CORES_RACA,
+        "% de desalento entre quem está fora da força de trabalho, por raça — Brasil (2012–2026)",
+        "Desistiu de procurar emprego (VD4005), entre quem está fora da força de trabalho · "
+        "PNAD Contínua Trimestral",
+        "desalento.png",
+        rotulos=ROTULOS_RACA_SUAVIZADA,
+        formato_eixo_y=lambda v, _: f"{v:.0f}%",
+    )
+
+
 def main() -> None:
     renda = pd.read_parquet(REPO_ROOT / "data" / "processed" / "renda.parquet")
     esc = pd.read_parquet(REPO_ROOT / "data" / "processed" / "escolaridade.parquet")
@@ -1097,6 +1370,14 @@ def main() -> None:
     rc = pd.read_parquet(REPO_ROOT / "data" / "processed" / "renda_completa.parquet")
     hiato = pd.read_parquet(REPO_ROOT / "data" / "processed" / "hiato_racial.parquet")
     decomp = pd.read_parquet(REPO_ROOT / "data" / "processed" / "decomposicao_hiato_ocupacional.parquet")
+    ob = pd.read_parquet(REPO_ROOT / "data" / "processed" / "decomposicao_oaxaca_blinder.parquet")
+    hiato_regional = pd.read_parquet(REPO_ROOT / "data" / "processed" / "hiato_regional.parquet")
+    segregacao = pd.read_parquet(REPO_ROOT / "data" / "processed" / "segregacao_ocupacional.parquet")
+    quebra = pd.read_parquet(REPO_ROOT / "data" / "processed" / "quebra_estrutural.parquet")
+    informalidade = pd.read_parquet(REPO_ROOT / "data" / "processed" / "informalidade.parquet")
+    horas = pd.read_parquet(REPO_ROOT / "data" / "processed" / "horas_trabalhadas.parquet")
+    alfabetizacao = pd.read_parquet(REPO_ROOT / "data" / "processed" / "alfabetizacao.parquet")
+    desalento = pd.read_parquet(REPO_ROOT / "data" / "processed" / "desalento_subutilizacao.parquet")
 
     destinos = [
         # raça
@@ -1106,6 +1387,17 @@ def main() -> None:
         grafico_hiato_percentual(hiato),
         grafico_hiato_absoluto(hiato),
         grafico_decomposicao_hiato(decomp),
+        # aprofundamentos: regressão (Oaxaca-Blinder), região, segregação, quebra estrutural
+        grafico_oaxaca_blinder_decomposicao(ob),
+        grafico_oaxaca_blinder_quantis(ob),
+        grafico_hiato_regional(hiato_regional),
+        grafico_segregacao_ocupacional(segregacao),
+        grafico_quebra_estrutural(hiato, quebra),
+        # aprofundamentos: novas variáveis (informalidade, horas, alfabetização, desalento)
+        grafico_informalidade(informalidade),
+        grafico_renda_por_hora(horas),
+        grafico_alfabetizacao(alfabetizacao),
+        grafico_desalento(desalento),
         # raça x gênero: combinado + um por gênero
         grafico_renda_por_raca_genero(renda),
         grafico_renda_por_raca_sexo(renda, "Homem"),

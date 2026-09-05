@@ -35,6 +35,19 @@ SECOES = [
     ]),
     ("É ocupação, ou é cor da pele?", "Decomposição: quanto idade, escolaridade e ocupação explicam do hiato", [
         ("decomposicao_hiato_ocupacional.png", "Hiato bruto 67% → 64% (só idade) → 30% (+escolaridade) → 24% (+ocupação, residual)."),
+        ("oaxaca_blinder_decomposicao.png", "Mesma pergunta via regressão (Oaxaca-Blinder), com teste de significância: resíduo de +22% (p<0,001) — bate com a padronização direta."),
+        ("oaxaca_blinder_quantis.png", "O hiato residual não é uniforme: menor na mediana (~15%), maior na base (~31%, 'piso pegajoso') e no topo (~36%, 'teto de vidro')."),
+    ]),
+    ("Aprofundamentos: região, segregação e quebras estruturais", "Rodada 3 — a pedido do usuário", [
+        ("hiato_racial_por_regiao.png", "O hiato racial varia MUITO por região: ~65-85% no Sudeste vs. ~45-55% no Sul."),
+        ("segregacao_ocupacional.png", "Índice de Duncan: ~17% da população Branca ou Negra precisaria trocar de categoria ocupacional pra igualar a distribuição do outro grupo."),
+        ("hiato_quebra_estrutural.png", "Teste tipo Chow: mudança de patamar/inclinação estatisticamente significativa nos 3 eventos testados (reforma trabalhista, reforma da previdência, recessão 2015-16)."),
+    ]),
+    ("Aprofundamentos: novas variáveis da PNAD", "Informalidade, jornada, alfabetização, desalento", [
+        ("informalidade_carteira_assinada.png", "% com carteira assinada: Branca 72%, Negra 63%, Indígena 52% (2026 T2)."),
+        ("renda_por_hora.png", "O hiato sobrevive quase intacto na renda POR HORA — não vem de jornada menor, é remuneração por hora menor mesmo."),
+        ("alfabetizacao_60mais.png", "Analfabetismo residual (60+ anos): Branca 93%, Negra 80%, Indígena 72% alfabetizados."),
+        ("desalento.png", "Entre quem está fora da força de trabalho, Negra e Indígena desistem de procurar emprego a taxas 2-4x maiores que Branca."),
     ]),
     ("Raça × Gênero", "Combinado + um por gênero", [
         ("renda_por_raca_genero.png", "O hiato de gênero soma ao de raça, não substitui."),

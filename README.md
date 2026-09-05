@@ -44,11 +44,24 @@ série são estatisticamente significativos — o hiato caiu de ~76% para ~66% e
 
 Controlando por idade, escolaridade e ocupação (mesma categoria ocupacional), o hiato bruto
 de 67% cai para 24% — mas não desaparece. Boa parte do hiato racial de renda não se explica
-por "estar em ocupações diferentes".
+por "estar em ocupações diferentes". Confirmado por um segundo método (regressão de
+Oaxaca-Blinder, com teste de significância formal — p < 0,001): resíduo de +22%, muito perto
+do resultado da padronização direta acima.
 
-**44 gráficos ao todo** — raça × gênero × faixa etária × escolaridade em todas as
-combinações, Preta e Parda sempre também separadas. Galeria completa, com a leitura de cada
-gráfico, em [docs/ANALISE_FASE1.md](docs/ANALISE_FASE1.md), ou como apresentação em
+### O hiato residual é maior no topo E na base da distribuição de renda
+
+![Hiato residual por quantil](docs/img/oaxaca_blinder_quantis.png)
+
+Decomposição por RIF (Firpo-Fortin-Lemieux): o hiato que sobra depois de controlar
+idade/escolaridade/ocupação tem formato em U — menor na mediana (~15%), maior na base
+(~31%, "piso pegajoso") e no topo (~36%, "teto de vidro").
+
+**53 gráficos ao todo** — raça × gênero × faixa etária × escolaridade em todas as
+combinações (Preta e Parda sempre também separadas), mais uma rodada de aprofundamento:
+hiato por região, segregação ocupacional (índice de Duncan), teste de quebra estrutural em 3
+eventos históricos, e novas variáveis (informalidade, renda por hora, alfabetização,
+desalento). Galeria completa, com a leitura de cada gráfico, em
+[docs/ANALISE_FASE1.md](docs/ANALISE_FASE1.md), ou como apresentação em
 [docs/Datahub_Racial_Brasil_Fase1.pptx](docs/Datahub_Racial_Brasil_Fase1.pptx).
 
 ## Escopo do MVP

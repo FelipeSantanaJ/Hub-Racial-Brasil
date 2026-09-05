@@ -99,6 +99,61 @@ maldefinidas). Corrigido no extrator e a série histórica completa foi **reextr
 trimestres) para trazer essa coluna — usada na decomposição do hiato racial por ocupação
 (ver `docs/PLANO.md`, seção "Decomposição do hiato").
 
+## Aprofundamento estatístico (2026-09-04): Oaxaca-Blinder, RIF, segregação, quebra estrutural
+
+- **Decomposição de Oaxaca-Blinder** (`pnadc_core.decomposicao_oaxaca_blinder`): os pesos
+  amostrais (V1028) entram como pesos analíticos da regressão WLS (statsmodels), não como
+  pesos de desenho amostral complexo (réplicas/bootstrap de desenho, que a PNAD Contínua
+  pública não distribui). Os erros-padrão tendem a ser um pouco otimistas (mais estreitos
+  que o "correto" sob desenho complexo) — a direção e a ordem de grandeza do coeficiente não
+  mudam, mas o p-valor exato deve ser lido como aproximado, não exato ao terceiro dígito.
+- **RIF por quantil** (`pnadc_core.rif_quantil`, Firpo-Fortin-Lemieux 2009): a densidade no
+  ponto do quantil é estimada por kernel gaussiano ponderado sobre a distribuição CONJUNTA
+  (Branca+Negra), não separadamente por grupo — é assim que a definição de RIF garante que a
+  média da RIF recupera o quantil da distribuição de referência correta.
+- **Teste de quebra estrutural** (`agregacoes_pnadc.gerar_quebra_estrutural`): é um teste de
+  Chow simplificado — uma quebra conhecida a priori (a data do evento), testada isoladamente
+  na série inteira (58 pontos trimestrais). NÃO é uma busca por múltiplas quebras
+  desconhecidas (ex.: Bai-Perron) e não controla por outros eventos concorrentes no mesmo
+  período (ex.: a pandemia caiu perto da reforma da previdência) — tratar como evidência de
+  correlação temporal, não de causalidade.
+- **Índice de segregação de Duncan**: só calculado para Branca vs. Negra na série trimestral
+  — Indígena fica de fora (amostra pequena demais pra uma distribuição de 11 categorias
+  ocupacionais trimestre a trimestre).
+
+## Novas variáveis (2026-09-04): informalidade, horas, alfabetização, desalento
+
+Decodificação (ver `data/raw/pnadc_extraido/_tmp/dicionario/` pro dicionário completo do
+IBGE):
+
+- **VD4009** (posição na ocupação, detalhada) → `tem_carteira_assinada`: `TRUE` p/
+  empregado privado/doméstico/público COM carteira e militar/servidor estatutário (sempre
+  "protegido"); `FALSE` p/ empregado privado/doméstico/público SEM carteira; `NULL`
+  (não aplicável) p/ empregador, conta-própria e trabalhador familiar auxiliar — o conceito
+  de "carteira assinada" não existe pra essas posições. `pct_com_carteira` em
+  `informalidade.parquet` é calculado só sobre quem tem o conceito aplicável (empregados).
+- **VD4012** (contribuição previdenciária) → `contribui_previdencia`: cobre TODOS os
+  ocupados, inclusive conta-própria/empregador — é o indicador mais amplo de proteção
+  social, complementar a `tem_carteira_assinada`.
+- **V3001** (alfabetização) e **V3014** (frequência escolar atual): perguntas feitas pra
+  toda a população 14+, não têm a ambiguidade de "sem instrução" (não são código de
+  não-resposta).
+- **VD4003** (força de trabalho potencial) e **VD4005** (desalento): só têm valor definido
+  para quem está FORA da força de trabalho (VD4001='2') — dentro da força de trabalho o
+  conceito não se aplica e a coluna vem NULL, por desenho.
+- **Horas trabalhadas → renda por hora**: `renda_por_hora_real_media` é uma aproximação
+  (renda habitual mensal ÷ (horas semanais habituais × 4,345 semanas/mês)), calculada pessoa
+  a pessoa e depois ponderada — não é uma medida oficial do IBGE, é derivada aqui.
+
+## Moradia e deslocamento — não disponíveis nesta base (2026-09-04)
+
+Características de domicílio (água, esgoto, tipo de domicílio etc.) só existem no bloco
+"Visita 1" da PNAD Contínua — uma sub-amostra menor (1/5 dos domicílios, só na primeira
+entrevista do painel rotativo), que exigiria uma extração SEPARADA da que já temos (o
+arquivo trimestral regular não traz essas colunas). Mobilidade/deslocamento para o trabalho
+não é coletado na PNAD Contínua regular. Ambos ficam para o Censo Demográfico (Fase 2), que
+tem os dois blocos.
+
 ## Nota técnica: tipos de variável no layout do IBGE
 
 Várias variáveis que parecem numéricas na verdade são **texto** no layout de largura fixa do
