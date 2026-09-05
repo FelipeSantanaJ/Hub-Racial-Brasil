@@ -1085,6 +1085,161 @@ def gerar_hiato_racial(con: duckdb.DuckDBPyConnection) -> None:
         )
 
 
+def gerar_hiato_preta_parda(con: duckdb.DuckDBPyConnection) -> None:
+    """Espelha `gerar_hiato_racial`, mas DENTRO da população negra: Preta vs. Parda,
+    sem combinar as duas (a regra do projeto é nunca pré-combinar Preta+Parda na base —
+    só combina na hora de montar 'Negra' pra comparar com Branca/Indígena). Referência é
+    Parda (o maior dos dois grupos); o hiato reportado é o quanto Preta ganha a mais/menos
+    que Parda."""
+    trimestres = con.execute("SELECT DISTINCT ano, trimestre FROM base ORDER BY ano, trimestre").df()
+
+    resultados = []
+    for _, row in trimestres.iterrows():
+        ano, trimestre = int(row["ano"]), int(row["trimestre"])
+        micro = con.execute(f"""
+            SELECT raca_cor, renda_habitual_real, peso
+            FROM base
+            WHERE ano = {ano} AND trimestre = {trimestre}
+              AND raca_cor IN ('Preta', 'Parda')
+              AND renda_habitual_real IS NOT NULL
+        """).df()
+        if micro.empty:
+            continue
+
+        tabela = pnadc_core.tabela_hiatos_significancia(
+            micro, "renda_habitual_real", "raca_cor", grupo_referencia="Parda", peso="peso"
+        )
+        if "Preta" not in tabela.index:
+            continue
+        linha_preta = tabela.loc["Preta"]
+        media_parda = tabela.loc["Parda", "media"]
+        resultados.append({
+            "ano": ano, "trimestre": trimestre,
+            "renda_media_preta": linha_preta["media"],
+            "renda_media_parda": media_parda,
+            "hiato_absoluto": linha_preta["hiato_media"],
+            "hiato_percentual": 100 * linha_preta["hiato_media"] / media_parda if media_parda else None,
+            "ic_inferior": linha_preta["ic_inferior"],
+            "ic_superior": linha_preta["ic_superior"],
+            "p_valor": linha_preta["p_valor"],
+            "significativo": linha_preta["significativo"],
+        })
+
+    df = pd.DataFrame(resultados)
+    destino = OUTPUT_DIR / "hiato_preta_parda.parquet"
+    df.to_parquet(destino, index=False)
+    n_nao_significativo = (~df["significativo"]).sum()
+    print(f"hiato_preta_parda.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
+    if n_nao_significativo:
+        print(
+            f"  aviso: {n_nao_significativo} trimestre(s) com hiato Preta-Parda "
+            "NÃO significativo a 95% (checar antes de destacar no gráfico)", flush=True,
+        )
+
+
+# As 11 combinações de dimensões (além de raça sozinha, já coberta por
+# gerar_hiato_racial/gerar_hiato_preta_parda acima) pedidas pra seção "Renda média" do
+# PPT — cada uma vira um parquet de hiato com teste de Welch, pro cruzamento raça x
+# essas dimensões. Roda num só trimestre (o mais recente) em vez da série histórica
+# inteira: gerar Welch por célula pra TODAS as combinações em TODOS os 58 trimestres
+# seria caro e a maioria das células já fica fina o bastante com 1 trimestre só quando
+# cruza 3 dimensões (sexo x faixa/geração x escolaridade).
+DIMENSOES_HIATO_MULTIDIMENSIONAL: list[tuple[str, ...]] = [
+    ("sexo",),
+    ("faixa_etaria",),
+    ("geracao",),
+    ("nivel_instrucao",),
+    ("sexo", "faixa_etaria"),
+    ("sexo", "geracao"),
+    ("sexo", "nivel_instrucao"),
+    ("faixa_etaria", "nivel_instrucao"),
+    ("geracao", "nivel_instrucao"),
+    ("sexo", "faixa_etaria", "nivel_instrucao"),
+    ("sexo", "geracao", "nivel_instrucao"),
+]
+
+
+def _nome_hiato_multidimensional(dims: tuple[str, ...], sufixo: str) -> str:
+    apelidos = {
+        "sexo": "genero", "faixa_etaria": "faixa_etaria", "geracao": "geracao",
+        "nivel_instrucao": "escolaridade",
+    }
+    return "hiato_" + "_".join(apelidos[d] for d in dims) + f"_{sufixo}.parquet"
+
+
+def _gerar_hiato_multidimensional_para_escopo(
+    con: duckdb.DuckDBPyConnection, racas_incluidas: list[str], combinar_negra: bool,
+    grupo_referencia: str, grupo_nao_referencia: str, sufixo: str,
+) -> None:
+    """Um único pull de microdados (trimestre mais recente) pro escopo (racas_incluidas
+    + se combina Preta/Parda em Negra ou não), reaproveitado pra calcular o hiato de
+    TODAS as 11 combinações de dimensões de uma vez (evita 11 queries repetidas no
+    DuckDB pra cada escopo)."""
+    (ultimo_ano, ultimo_trimestre) = con.execute(
+        "SELECT ano, trimestre FROM base ORDER BY ano DESC, trimestre DESC LIMIT 1"
+    ).fetchone()
+    racas_sql = "', '".join(racas_incluidas)
+    micro = con.execute(f"""
+        SELECT raca_cor, sexo, faixa_etaria, geracao, nivel_instrucao, renda_habitual_real, peso
+        FROM base
+        WHERE ano = {ultimo_ano} AND trimestre = {ultimo_trimestre}
+          AND raca_cor IN ('{racas_sql}')
+          AND renda_habitual_real IS NOT NULL
+    """).df()
+    if combinar_negra:
+        micro["raca_cor"] = micro["raca_cor"].replace({"Preta": "Negra", "Parda": "Negra"})
+
+    for dims in DIMENSOES_HIATO_MULTIDIMENSIONAL:
+        resultados = []
+        for chave, grupo_df in micro.groupby(list(dims), dropna=True):
+            chave = chave if isinstance(chave, tuple) else (chave,)
+            racas_presentes = set(grupo_df["raca_cor"].unique())
+            if grupo_referencia not in racas_presentes or grupo_nao_referencia not in racas_presentes:
+                continue
+            tabela = pnadc_core.tabela_hiatos_significancia(
+                grupo_df, "renda_habitual_real", "raca_cor",
+                grupo_referencia=grupo_referencia, peso="peso",
+            )
+            if grupo_nao_referencia not in tabela.index or grupo_referencia not in tabela.index:
+                continue
+            linha = tabela.loc[grupo_nao_referencia]
+            media_ref = tabela.loc[grupo_referencia, "media"]
+            linha_resultado = dict(zip(dims, chave))
+            linha_resultado.update({
+                "ano": ultimo_ano, "trimestre": ultimo_trimestre,
+                "n_amostra": len(grupo_df),
+                f"renda_media_{grupo_nao_referencia.lower()}": linha["media"],
+                f"renda_media_{grupo_referencia.lower()}": media_ref,
+                "hiato_absoluto": linha["hiato_media"],
+                "hiato_percentual": 100 * linha["hiato_media"] / media_ref if media_ref else None,
+                "p_valor": linha["p_valor"],
+                "significativo": linha["significativo"],
+            })
+            resultados.append(linha_resultado)
+
+        df = pd.DataFrame(resultados)
+        nome_arquivo = _nome_hiato_multidimensional(dims, sufixo)
+        df.to_parquet(OUTPUT_DIR / nome_arquivo, index=False)
+        n_nao_significativo = int((~df["significativo"]).sum()) if not df.empty else 0
+        aviso = f" ({n_nao_significativo} célula(s) não-significativa(s))" if n_nao_significativo else ""
+        print(f"{nome_arquivo}: {len(df):,} linhas".replace(",", ".") + aviso, flush=True)
+
+
+def gerar_hiatos_multidimensionais(con: duckdb.DuckDBPyConnection) -> None:
+    """Gera as 22 combinações de hiato (11 combinações de dimensões x 2 escopos:
+    Branca-vs-Negra e Preta-vs-Parda) pedidas pra seção "Renda média" do PPT, todas com
+    teste de Welch — ver `DIMENSOES_HIATO_MULTIDIMENSIONAL` e
+    `_gerar_hiato_multidimensional_para_escopo`."""
+    _gerar_hiato_multidimensional_para_escopo(
+        con, racas_incluidas=["Branca", "Preta", "Parda"], combinar_negra=True,
+        grupo_referencia="Negra", grupo_nao_referencia="Branca", sufixo="todas",
+    )
+    _gerar_hiato_multidimensional_para_escopo(
+        con, racas_incluidas=["Preta", "Parda"], combinar_negra=False,
+        grupo_referencia="Parda", grupo_nao_referencia="Preta", sufixo="pretaparda",
+    )
+
+
 def gerar_gini_por_raca(con: duckdb.DuckDBPyConnection) -> None:
     """Coeficiente de Gini ponderado da renda habitual real, calculado DENTRO de cada
     raça — usa `pnadc_core.gini_ponderado_por_grupo`, função já portada do notebook
@@ -1241,6 +1396,30 @@ def gerar_renda_completa(con: duckdb.DuckDBPyConnection) -> None:
     print(f"renda_completa.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
+def gerar_renda_completa_geracao(con: duckdb.DuckDBPyConnection) -> None:
+    """Espelha `gerar_renda_completa`, trocando faixa_etaria por geracao — cruzamento
+    raça x sexo x geração x nível de instrução, universo amplo (sem restrição de
+    ocupação), Brasil, série histórica completa. Preenche a lacuna que
+    `renda_multidimensional_geracao.parquet` deixa (aquele é só últimos 8 trimestres e
+    só ocupados, porque também cruza com ocupação — aqui não precisamos de ocupação)."""
+    select_agregado = """
+           ano, trimestre, raca_cor, sexo, geracao, nivel_instrucao,
+           COUNT(*) AS n_amostra,
+           SUM(peso) AS populacao_estimada,
+           SUM(renda_habitual_real * peso)
+               / NULLIF(SUM(peso) FILTER (WHERE renda_habitual_real IS NOT NULL), 0)
+               AS renda_habitual_real_media"""
+    query = f"""
+        SELECT 'brasil' AS nivel_geografico, 'Brasil' AS geografia, {select_agregado}
+        FROM base
+        GROUP BY ano, trimestre, raca_cor, sexo, geracao, nivel_instrucao"""
+    df = con.execute(query).df()
+    df = df[df["nivel_instrucao"].notna()]
+    destino = OUTPUT_DIR / "renda_completa_geracao.parquet"
+    df.to_parquet(destino, index=False)
+    print(f"renda_completa_geracao.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
+
+
 def gerar_escolaridade(con: duckdb.DuckDBPyConnection) -> None:
     select_agregado = """
            ano, trimestre, raca_cor, sexo, faixa_etaria, nivel_instrucao,
@@ -1282,9 +1461,12 @@ def main() -> None:
     gerar_renda_por_escolaridade(con)
     gerar_renda_por_geracao(con)
     gerar_renda_completa(con)
+    gerar_renda_completa_geracao(con)
     gerar_renda_multidimensional_faixa(con)
     gerar_renda_multidimensional_geracao(con)
     gerar_hiato_racial(con)
+    gerar_hiato_preta_parda(con)
+    gerar_hiatos_multidimensionais(con)
     gerar_hiato_por_geracao(con)
     gerar_gini_por_raca(con)
     gerar_theil_racial(con)

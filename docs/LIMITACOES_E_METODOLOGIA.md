@@ -249,3 +249,34 @@ IBGE (formato `$N.`), incluindo `V2010` (raça), `V2007` (sexo), `UF`, `Capital`
 Isso já causou um bug real (ver `docs/PLANO.md`, Etapa 3) — qualquer código novo que compare
 essas colunas com valores literais precisa usar strings (`'1'`, `'35'`), não inteiros.
 `V2009` (idade) e as variáveis de renda (`VD4016/17/19/20`) são numéricas de verdade.
+
+## Seção "Renda média" do PPT: hiato multidimensional com Welch (2026-09-05)
+
+- **Snapshot de 1 trimestre, não série histórica.** As 22 combinações de hiato que cruzam
+  dimensões (gênero, faixa etária/geração, escolaridade — ver
+  `agregacoes_pnadc.gerar_hiatos_multidimensionais`) usam só o trimestre mais recente, não
+  os 58 trimestres inteiros como `hiato_racial.parquet`/`hiato_preta_parda.parquet` (esses
+  dois, a combinação "Raça" sozinha, seguem sendo série histórica completa). Rodar Welch por
+  célula em 58 trimestres pras combinações de 3 dimensões (até 70 células cada) seria caro e
+  a maioria das células já fica fina o bastante com 1 trimestre só — não valia o custo extra
+  pra um gráfico que já é, por natureza, um corte fino.
+- **Preta vs. Parda: referência é Parda.** `gerar_hiato_preta_parda` e a família
+  multidimensional usam Parda como grupo de referência (é o maior dos dois grupos) e reportam
+  o hiato de Preta em relação a ela — sinal negativo significa Preta ganha MENOS que Parda.
+  Achado novo: esse sinal **mudou ao longo da série histórica** — Preta chegou a ganhar mais
+  que Parda em vários trimestres até ~2015, mas hoje ganha consistentemente menos (-6% no
+  trimestre mais recente, ver `hiato_preta_parda_percentual.png`).
+- **Categorias residuais excluídas do cálculo da escala de cor.** Os heatmaps de hiato
+  restringem os dados às categorias que aparecem nos eixos (`METADADOS_DIM_HIATO[...]["ordem"]`)
+  ANTES de calcular o limite da escala divergente — sem isso, uma célula de amostra mínima
+  fora do que é mostrado (ex.: Geração Silenciosa/Alpha, quase sem observações) ainda entrava
+  no `.abs().max()` e esticava a escala, lavando o contraste do resto do mapa.
+- **Universo de dados nem sempre idêntico entre "Todas as raças" e "Apenas negros" do mesmo
+  cruzamento.** Pra Raça×Faixa Etária×Escolaridade e Raça×Geração×Escolaridade, a versão
+  "Todas as raças" reaproveita `renda_multidimensional_faixa/geracao.parquet` (últimos 8
+  trimestres, só ocupados — porque também cruza com ocupação em outros gráficos da mesma
+  tabela), enquanto a versão "Apenas negros" usa as tabelas novas de universo amplo
+  (`renda_completa.parquet`/`renda_completa_geracao.parquet`, sem restrição de ocupação,
+  trimestre mais recente). Os valores dos dois escopos não são estritamente comparáveis
+  célula a célula por causa dessa diferença de universo — cada um é internamente consistente,
+  mas não foram construídos com a mesma base exata.
