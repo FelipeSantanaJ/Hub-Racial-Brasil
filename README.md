@@ -87,13 +87,24 @@ vem de diferença entre raças — os outros 93% são desigualdade dentro de cad
 diminui o hiato racial (que segue grande e estatisticamente significativo), mas mostra que a
 desigualdade brasileira tem várias fontes ao mesmo tempo.
 
-**68 gráficos ao todo** — raça × gênero × faixa etária × escolaridade em todas as
+### R$3.000 é uma renda "do meio" pra Branca — mas quase o topo pra Negra
+
+![Percentil de um valor de renda, por raça](docs/img/percentil_de_valor_racial.png)
+
+A mesma quantia em R$ representa posições bem diferentes conforme a raça: R$3.000 está no
+P57 da distribuição de Branca (pouco acima da mediana), mas no P76 da distribuição de Negra
+(perto do topo dos 25% que mais ganham dentro do próprio grupo). Na direção oposta — quanto
+ganha quem está em cada percentil —, os 10% mais pobres entre os brancos ganham R$1.500,
+contra R$720 entre os 10% mais pobres dos negros.
+
+**71 gráficos ao todo** — raça × gênero × faixa etária × escolaridade em todas as
 combinações (Preta e Parda sempre também separadas), mais aprofundamentos: hiato por região,
 segregação ocupacional e setorial (índice de Duncan), teste de quebra estrutural em 3 eventos
 históricos, novas variáveis (informalidade, renda por hora, alfabetização, desalento,
 sobre-qualificação), hiato/renda por geração, perfil de quem está no topo 10% e em cada um
-dos 4 quartis de renda de cada raça, Gini e Theil por raça, e hiato no setor público vs.
-privado. Galeria completa, com a leitura de cada gráfico, em
+dos 4 quartis de renda de cada raça, Gini e Theil por raça, hiato no setor público vs.
+privado, e a função quantil da renda em R$ (e sua inversa) por raça. Galeria completa, com a
+leitura de cada gráfico, em
 [docs/ANALISE_FASE1.md](docs/ANALISE_FASE1.md), ou como
 apresentação em
 [docs/Datahub_Racial_Brasil_Fase1.pptx](docs/Datahub_Racial_Brasil_Fase1.pptx).

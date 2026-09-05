@@ -547,6 +547,74 @@ def gerar_perfil_topo10_racial(con: duckdb.DuckDBPyConnection) -> None:
     print(f"perfil_topo10_racial.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
+PERCENTIS_DECIS = [10, 20, 30, 40, 50, 60, 70, 80, 90]
+VALORES_REFERENCIA_RENDA = [1000, 1500, 2000, 3000, 5000, 7500, 10000, 15000, 20000]
+
+
+def gerar_funcao_quantil_racial(con: duckdb.DuckDBPyConnection) -> None:
+    """Função quantil da renda (percentil -> R$) e sua INVERSA (R$ -> percentil),
+    calculadas DENTRO de cada raça (Branca e Negra — Indígena fica de fora, mesma razão
+    de sempre: amostra insuficiente pra deciles confiáveis por trimestre), trimestre a
+    trimestre. Complementa `gerar_perfil_quartis_racial` (que olha QUEM está em cada
+    fatia — composição demográfica) respondendo em R$ de fato:
+
+    - "Percentil -> R$": os 10% mais pobres entre os negros ganham quanto, comparado
+      aos 10% mais pobres entre os brancos? E os 20% mais pobres? E assim por diante,
+      até os 90% mais ricos — a função quantil inteira das duas raças, lado a lado.
+    - "R$ -> percentil" (inversa): quem ganha R$3.000 está em que posição da
+      distribuição de CADA raça? A mesma quantia pode ser mediana pra uma raça e estar
+      entre os mais ricos da outra, dado o hiato.
+
+    Universo: ocupados com renda habitual real > 0 (mesmo escopo de sempre — igual à
+    decomposição do hiato e ao topo 10%). Gera dois parquets, cada um em formato longo.
+    """
+    trimestres = con.execute("SELECT DISTINCT ano, trimestre FROM base ORDER BY ano, trimestre").df()
+
+    resultado_percentil_para_valor = []
+    resultado_valor_para_percentil = []
+    for _, row in trimestres.iterrows():
+        ano, trimestre = int(row["ano"]), int(row["trimestre"])
+        micro = con.execute(f"""
+            SELECT raca_cor, renda_habitual_real, peso
+            FROM base
+            WHERE ano = {ano} AND trimestre = {trimestre}
+              AND raca_cor IN ('Branca', 'Preta', 'Parda')
+              AND renda_habitual_real IS NOT NULL AND renda_habitual_real > 0
+        """).df()
+        if micro.empty:
+            continue
+        micro["raca_cor"] = micro["raca_cor"].replace({"Preta": "Negra", "Parda": "Negra"})
+
+        for raca in ("Branca", "Negra"):
+            grupo = micro[micro["raca_cor"] == raca]
+            if len(grupo) < 100:
+                continue
+            valores = grupo["renda_habitual_real"].to_numpy()
+            pesos = grupo["peso"].to_numpy()
+            for p in PERCENTIS_DECIS:
+                valor = pnadc_core.quantil_ponderado(valores, pesos, p / 100)
+                resultado_percentil_para_valor.append({
+                    "ano": ano, "trimestre": trimestre, "raca_cor": raca,
+                    "percentil": p, "renda_no_percentil": valor,
+                })
+            for valor_ref in VALORES_REFERENCIA_RENDA:
+                percentil_correspondente = pnadc_core.percentil_ponderado_de_valor(valores, pesos, valor_ref)
+                resultado_valor_para_percentil.append({
+                    "ano": ano, "trimestre": trimestre, "raca_cor": raca,
+                    "valor_referencia": valor_ref, "percentil_correspondente": percentil_correspondente,
+                })
+
+    df1 = pd.DataFrame(resultado_percentil_para_valor)
+    destino1 = OUTPUT_DIR / "funcao_quantil_racial.parquet"
+    df1.to_parquet(destino1, index=False)
+    print(f"funcao_quantil_racial.parquet: {len(df1):,} linhas".replace(",", "."), flush=True)
+
+    df2 = pd.DataFrame(resultado_valor_para_percentil)
+    destino2 = OUTPUT_DIR / "percentil_de_valor_racial.parquet"
+    df2.to_parquet(destino2, index=False)
+    print(f"percentil_de_valor_racial.parquet: {len(df2):,} linhas".replace(",", "."), flush=True)
+
+
 def gerar_perfil_quartis_racial(con: duckdb.DuckDBPyConnection) -> None:
     """Perfil demográfico de cada QUARTIL de renda (Q1 = 25% que menos ganham, ..., Q4 =
     25% que mais ganham) DENTRO de cada raça (Branca e Negra — Indígena fica de fora,
@@ -1155,6 +1223,7 @@ def main() -> None:
     gerar_decomposicao_oaxaca_blinder(con)
     gerar_perfil_topo10_racial(con)
     gerar_perfil_quartis_racial(con)
+    gerar_funcao_quantil_racial(con)
     gerar_indice_segregacao_ocupacional(con)
     gerar_segregacao_setorial(con)
     gerar_ocupacao(con)

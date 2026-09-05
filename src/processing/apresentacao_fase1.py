@@ -74,6 +74,11 @@ SECOES = [
         ("segregacao_setorial.png", "Segregação por setor econômico (10%) é menor que por ocupação (17%) — as raças se distribuem mais parecido entre setores do que entre cargos dentro deles."),
         ("sobrequalificacao.png", "Negros com Superior completo têm taxa de 'sobre-qualificação' (acabar em ocupação elementar) quase o dobro da de brancos com o mesmo diploma."),
     ]),
+    ("A função quantil da renda, em R$, e sua inversa", "'Os 10% mais pobres entre os negros ganham quanto comparado aos 10% mais pobres entre os brancos?'", [
+        ("funcao_quantil_racial.png", "Em R$: no P10, Branca ganha R$1.500 e Negra R$720. No P50 (mediana), R$3.000 vs. R$2.000. No P90, R$10.000 vs. R$5.000."),
+        ("hiato_por_percentil.png", "O hiato bruto (sem controles) por percentil não é uniforme — é maior na base (108% no P10) e no topo (100% no P90) do que no meio da distribuição."),
+        ("percentil_de_valor_racial.png", "A pergunta inversa: quem ganha R$3.000 está no P57 entre os brancos (mediano/meio da distribuição), mas já no P76 entre os negros (quase o topo)."),
+    ]),
     ("Raça × Gênero", "Combinado + um por gênero", [
         ("renda_por_raca_genero.png", "O hiato de gênero soma ao de raça, não substitui."),
         ("renda_por_raca_homens.png", "Recorte só Homens."),

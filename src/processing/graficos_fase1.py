@@ -1524,6 +1524,117 @@ def grafico_sobrequalificacao(sq: pd.DataFrame) -> Path:
     )
 
 
+def grafico_funcao_quantil_racial(fq: pd.DataFrame) -> Path:
+    """Função quantil da renda: quanto ganha quem está em cada percentil, dentro de
+    cada raça. Responde diretamente "os 10% mais pobres entre os negros ganham quanto,
+    comparado aos 10% mais pobres entre os brancos? E os 20%? E assim por diante" —
+    valores reais em R$, não composição demográfica (isso já está nos gráficos de
+    quartil acima). Snapshot do trimestre mais recente."""
+    ultimo_ano, ultimo_trimestre = _trimestre_mais_recente(fq)
+    f = fq[(fq["ano"] == ultimo_ano) & (fq["trimestre"] == ultimo_trimestre)].copy()
+    pivot = f.pivot_table(index="percentil", columns="raca_cor", values="renda_no_percentil").sort_index()
+    x = pivot.index.to_numpy()
+
+    fig, ax = _novo_eixo(figsize=(11, 6.2))
+    for raca, cor, desloc in [("Branca", COR_BRANCA, 10), ("Negra", COR_NEGRA, -14)]:
+        ax.plot(x, pivot[raca], color=cor, linewidth=2.2, marker="o", markersize=5, zorder=3)
+        for xi, yi in zip(x, pivot[raca]):
+            ax.annotate(
+                f"R$ {yi:,.0f}".replace(",", "."), xy=(xi, yi), xytext=(0, desloc),
+                textcoords="offset points", ha="center", fontsize=7.5, color=cor, fontweight="bold",
+            )
+        ax.annotate(
+            raca, xy=(x[-1], pivot[raca].iloc[-1]), xytext=(12, 0), textcoords="offset points",
+            color=cor, fontsize=11, fontweight="bold", va="center",
+        )
+
+    ax.set_xticks(x)
+    ax.set_xticklabels([f"P{p}" for p in x], fontsize=10)
+    ax.set_xlim(x.min() - 5, x.max() + 15)
+    ax.set_ylim(0, pivot["Branca"].max() * 1.15)
+    _titulo(
+        ax, "Quanto ganha quem está em cada percentil de renda, dentro de cada raça",
+        f"R$ reais, a preços do trimestre mais recente · {ultimo_trimestre}º tri {ultimo_ano} · "
+        "PNAD Contínua Trimestral",
+    )
+    ax.yaxis.set_major_formatter(lambda v, _: f"R$ {v:,.0f}".replace(",", "."))
+    ax.grid(axis="y", color=GRADE, linewidth=0.8, zorder=0)
+    _rodape(fig)
+    fig.tight_layout(rect=(0, 0.03, 1, 1))
+    return _salvar(fig, "funcao_quantil_racial.png")
+
+
+def grafico_hiato_por_percentil(fq: pd.DataFrame) -> Path:
+    """Hiato BRUTO (sem nenhum controle) entre Branca e Negra em cada percentil de
+    renda — versão "crua" do hiato residual por quantil já visto (que controla por
+    idade/escolaridade/ocupação); aqui é só a diferença de nível entre as duas
+    distribuições, ponto a ponto."""
+    ultimo_ano, ultimo_trimestre = _trimestre_mais_recente(fq)
+    f = fq[(fq["ano"] == ultimo_ano) & (fq["trimestre"] == ultimo_trimestre)].copy()
+    pivot = f.pivot_table(index="percentil", columns="raca_cor", values="renda_no_percentil").sort_index()
+    pivot["hiato_pct"] = 100 * (pivot["Branca"] / pivot["Negra"] - 1)
+
+    fig, ax = _novo_eixo(figsize=(10, 5.5))
+    x = np.arange(len(pivot))
+    barras = ax.bar(x, pivot["hiato_pct"], color=COR_NEGRA, width=0.55, zorder=3)
+    for barra, v in zip(barras, pivot["hiato_pct"]):
+        ax.text(barra.get_x() + barra.get_width() / 2, v + 2, f"{v:.0f}%", ha="center", fontsize=9.5,
+                fontweight="bold", color=TINTA_PRIMARIA)
+
+    ax.set_xticks(x)
+    ax.set_xticklabels([f"P{p}" for p in pivot.index], fontsize=10)
+    ax.set_ylim(0, pivot["hiato_pct"].max() * 1.2)
+    _titulo(
+        ax, "Hiato de renda Branca vs. Negra em cada percentil da distribuição",
+        f"Sem nenhum controle (idade/escolaridade/ocupação) · {ultimo_trimestre}º tri {ultimo_ano} · "
+        "PNAD Contínua Trimestral",
+    )
+    ax.yaxis.set_major_formatter(lambda v, _: f"{v:.0f}%")
+    ax.grid(axis="y", color=GRADE, linewidth=0.8, zorder=0)
+    _rodape(fig)
+    fig.tight_layout(rect=(0, 0.03, 1, 1))
+    return _salvar(fig, "hiato_por_percentil.png")
+
+
+def grafico_percentil_de_valor_racial(pv: pd.DataFrame) -> Path:
+    """Pergunta INVERSA: quem ganha R$X está em que posição da distribuição de CADA
+    raça? A mesma quantia pode ser mediana pra uma raça e estar entre os mais ricos da
+    outra — ex.: R$3.000 é uma renda "do meio" pra Branca, mas já entra no quarto
+    quartil (25% mais ricos) pra Negra, dado o hiato."""
+    ultimo_ano, ultimo_trimestre = _trimestre_mais_recente(pv)
+    p = pv[(pv["ano"] == ultimo_ano) & (pv["trimestre"] == ultimo_trimestre)].copy()
+    valores_ordem = sorted(p["valor_referencia"].unique())
+    x = np.arange(len(valores_ordem))
+    largura = 0.35
+
+    fig, ax = _novo_eixo(figsize=(11.5, 5.8))
+    for i, raca in enumerate(["Branca", "Negra"]):
+        valores = [
+            p[(p["raca_cor"] == raca) & (p["valor_referencia"] == v)]["percentil_correspondente"].sum()
+            for v in valores_ordem
+        ]
+        deslocamento = (i - 0.5) * largura
+        barras = ax.bar(x + deslocamento, valores, largura, color=CORES_RACA[raca], zorder=3, label=raca)
+        for barra, v in zip(barras, valores):
+            ax.text(barra.get_x() + barra.get_width() / 2, v + 1.5, f"P{v:.0f}", ha="center",
+                    fontsize=8, color=TINTA_SECUNDARIA)
+
+    ax.set_xticks(x)
+    ax.set_xticklabels([f"R$ {v:,.0f}".replace(",", ".") for v in valores_ordem], fontsize=9)
+    ax.legend(loc="upper left", frameon=False, fontsize=9.5)
+    ax.set_ylim(0, 112)
+    _titulo(
+        ax, "Quem ganha essa quantia está em que percentil de renda de cada raça?",
+        f"Percentil correspondente a cada valor de renda, dentro de cada raça · {ultimo_trimestre}º "
+        f"tri {ultimo_ano} · PNAD Contínua Trimestral",
+    )
+    ax.yaxis.set_major_formatter(lambda v, _: f"P{v:.0f}")
+    ax.grid(axis="y", color=GRADE, linewidth=0.8, zorder=0)
+    _rodape(fig)
+    fig.tight_layout(rect=(0, 0.03, 1, 1))
+    return _salvar(fig, "percentil_de_valor_racial.png")
+
+
 def grafico_hiato_por_geracao(hg: pd.DataFrame) -> Path:
     """Hiato Branca vs. Negra DENTRO de cada geração (coorte de nascimento sintética),
     ao longo do tempo. Diferença crucial em relação a um gráfico "por faixa etária":
@@ -1848,6 +1959,8 @@ def main() -> None:
     hiato_setor = pd.read_parquet(REPO_ROOT / "data" / "processed" / "hiato_setor_publico_privado.parquet")
     segregacao_setor = pd.read_parquet(REPO_ROOT / "data" / "processed" / "segregacao_setorial.parquet")
     sobrequalificacao = pd.read_parquet(REPO_ROOT / "data" / "processed" / "sobrequalificacao.parquet")
+    funcao_quantil = pd.read_parquet(REPO_ROOT / "data" / "processed" / "funcao_quantil_racial.parquet")
+    percentil_de_valor = pd.read_parquet(REPO_ROOT / "data" / "processed" / "percentil_de_valor_racial.parquet")
 
     destinos = [
         # raça
@@ -1889,6 +2002,10 @@ def main() -> None:
         grafico_hiato_setor_publico_privado(hiato_setor),
         grafico_segregacao_setorial(segregacao_setor),
         grafico_sobrequalificacao(sobrequalificacao),
+        # função quantil da renda em R$ (não composição demográfica) e sua inversa
+        grafico_funcao_quantil_racial(funcao_quantil),
+        grafico_hiato_por_percentil(funcao_quantil),
+        grafico_percentil_de_valor_racial(percentil_de_valor),
         # raça x gênero: combinado + um por gênero
         grafico_renda_por_raca_genero(renda),
         grafico_renda_por_raca_sexo(renda, "Homem"),
