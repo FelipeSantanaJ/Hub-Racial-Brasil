@@ -964,6 +964,14 @@ CMAP_SEQUENCIAL = LinearSegmentedColormap.from_list(
     "terroso_sequencial", ["#f6e8cf", "#d19a12", "#8a3d17", "#2b1509"]
 )
 
+# Diverging (polaridade) pros heatmaps de HIATO — hiato é positivo/negativo em torno de
+# zero, não uma magnitude só-positiva como renda, então usa um par quente/frio com meio
+# neutro (não o sequencial acima) — mesmas cores já validadas (Branca/Negra), só
+# reaproveitadas como polos em vez de identidade categórica.
+CMAP_DIVERGENTE_HIATO = LinearSegmentedColormap.from_list(
+    "terroso_divergente_hiato", [COR_BRANCA, SUPERFICIE, COR_NEGRA]
+)
+
 
 def _preparar_hiato(hiato: pd.DataFrame) -> pd.DataFrame:
     h = hiato.copy()
@@ -1031,6 +1039,264 @@ def grafico_hiato_absoluto(hiato: pd.DataFrame) -> Path:
     _rodape(fig)
     fig.tight_layout(rect=(0, 0.03, 1, 1))
     return _salvar(fig, "hiato_racial_absoluto.png")
+
+
+def grafico_hiato_preta_parda_percentual(hpp: pd.DataFrame) -> Path:
+    """Hiato de renda Preta vs. Parda, série histórica, com IC 95% (Welch) — espelha
+    `grafico_hiato_percentual`, mas DENTRO da população negra (a versão pretaparda da
+    combinação "Raça" sozinha, que faltava)."""
+    h = _preparar_hiato(hpp)
+    h["ic_inferior_pct"] = 100 * h["ic_inferior"] / h["renda_media_parda"]
+    h["ic_superior_pct"] = 100 * h["ic_superior"] / h["renda_media_parda"]
+
+    fig, ax = _novo_eixo(figsize=(11, 5.5))
+    ax.axvspan(pd.Timestamp("2020-01-01"), pd.Timestamp("2021-12-31"), color=GRADE, alpha=0.6, zorder=0)
+    ax.fill_between(h["data"], h["ic_inferior_pct"], h["ic_superior_pct"], color=COR_PRETA, alpha=0.15, zorder=2)
+    ax.plot(h["data"], h["hiato_percentual"], color=COR_PRETA, linewidth=2.2, solid_capstyle="round", zorder=3)
+    ax.axhline(0, color=EIXO, linewidth=1)
+
+    ax.annotate(
+        f"{h['hiato_percentual'].iloc[-1]:.0f}%", xy=(h["data"].iloc[-1], h["hiato_percentual"].iloc[-1]),
+        xytext=(8, 0), textcoords="offset points", color=COR_PRETA, fontsize=11, fontweight="bold", va="center",
+    )
+    _titulo(
+        ax, "Hiato de renda Preta vs. Parda, em % — Brasil (2012–2026)",
+        "Quanto a mais/menos Preta ganha que Parda · faixa = IC 95% (teste de Welch) · PNAD Contínua Trimestral",
+    )
+    ax.yaxis.set_major_formatter(lambda v, _: f"{v:.0f}%")
+    ax.xaxis.set_major_locator(mdates.YearLocator(2))
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
+    ax.grid(axis="y", color=GRADE, linewidth=0.8, zorder=0)
+    ax.set_xlim(h["data"].min(), h["data"].max() + pd.Timedelta(days=280))
+    _rodape(fig)
+    fig.tight_layout(rect=(0, 0.03, 1, 1))
+    return _salvar(fig, "hiato_preta_parda_percentual.png")
+
+
+# --- Hiato de renda por combinações de dimensões (seção "Renda média" do PPT) ---
+#
+# `agregacoes_pnadc.gerar_hiatos_multidimensionais` já calculou, com teste de Welch, o
+# hiato de cada célula de 11 combinações de dimensões x 2 escopos (Branca-vs-Negra e
+# Preta-vs-Parda) — aqui só falta escolher o tipo de gráfico certo (barra/heatmap/
+# heatmap com painéis) conforme o número de dimensões e desenhar.
+
+ROTULOS_DIM_HIATO = {
+    "sexo": "gênero", "faixa_etaria": "faixa etária", "geracao": "geração",
+    "nivel_instrucao": "escolaridade",
+}
+METADADOS_DIM_HIATO = {
+    "sexo": {"ordem": ["Homem", "Mulher"], "rotulos": {"Homem": "Homens", "Mulher": "Mulheres"}, "apelido": "genero"},
+    "faixa_etaria": {"ordem": FAIXAS_ETARIAS_ORDEM, "rotulos": {f: f for f in FAIXAS_ETARIAS_ORDEM},
+                      "apelido": "faixa_etaria"},
+    "geracao": {"ordem": GERACOES_ORDEM_GRAFICO, "rotulos": ROTULOS_GERACAO_CURTO, "apelido": "geracao"},
+    "nivel_instrucao": {"ordem": NIVEIS_INSTRUCAO_ORDEM, "rotulos": NIVEIS_INSTRUCAO_ROTULO_CURTO,
+                         "apelido": "escolaridade"},
+}
+DIMENSOES_HIATO_MULTIDIMENSIONAL: list[tuple[str, ...]] = [
+    ("sexo",), ("faixa_etaria",), ("geracao",), ("nivel_instrucao",),
+    ("sexo", "faixa_etaria"), ("sexo", "geracao"), ("sexo", "nivel_instrucao"),
+    ("faixa_etaria", "nivel_instrucao"), ("geracao", "nivel_instrucao"),
+    ("sexo", "faixa_etaria", "nivel_instrucao"), ("sexo", "geracao", "nivel_instrucao"),
+]
+
+
+def _descricao_dims(dims: tuple[str, ...]) -> str:
+    rotulos = [ROTULOS_DIM_HIATO[d] for d in dims]
+    if len(rotulos) == 1:
+        return rotulos[0]
+    if len(rotulos) == 2:
+        return f"{rotulos[0]} e {rotulos[1]}"
+    return f"{rotulos[0]}, {rotulos[1]} e {rotulos[2]}"
+
+
+def _marca_significancia(p: float) -> str:
+    if pd.isna(p):
+        return ""
+    if p < 0.001:
+        return "***"
+    if p < 0.01:
+        return "**"
+    if p < 0.05:
+        return "*"
+    return "n.s."
+
+
+def _grafico_hiato_bar(dados: pd.DataFrame, dim: str, titulo: str, subtitulo: str, nome_arquivo: str, cor: str) -> Path:
+    meta = METADADOS_DIM_HIATO[dim]
+    ordem, rotulos = meta["ordem"], meta["rotulos"]
+    d = dados.set_index(dim).reindex(ordem).reset_index()
+
+    fig, ax = _novo_eixo(figsize=(max(11, 1.15 * len(ordem) + 3), 5.5))
+    x = np.arange(len(ordem))
+    valores = d["hiato_percentual"]
+    ax.bar(x, valores.fillna(0), width=0.55, color=cor, zorder=3)
+    minv, maxv = min(0, valores.min()), max(0, valores.max())
+    margem = (maxv - minv) * 0.18 or 1
+    ax.set_ylim(minv - margem * (1.1 if minv < 0 else 0), maxv + margem)
+    for i, (v, p) in enumerate(zip(valores, d["p_valor"])):
+        if pd.isna(v):
+            continue
+        marca = _marca_significancia(p)
+        deslocamento = margem * 0.15 if v >= 0 else -margem * 0.25
+        ax.text(x[i], v + deslocamento, f"{v:.0f}%\n{marca}",
+                ha="center", va="bottom" if v >= 0 else "top", fontsize=9.5, fontweight="bold", color=TINTA_PRIMARIA)
+    ax.axhline(0, color=EIXO, linewidth=1)
+    ax.set_xticks(x)
+    ax.set_xticklabels([rotulos.get(c, c) for c in ordem], fontsize=10)
+    ax.yaxis.set_major_formatter(lambda v, _: f"{v:.0f}%")
+    ax.grid(axis="y", color=GRADE, linewidth=0.8, zorder=0)
+    _titulo(ax, titulo, subtitulo)
+    _rodape(fig)
+    fig.tight_layout(rect=(0, 0.03, 1, 1))
+    return _salvar(fig, nome_arquivo)
+
+
+def _grafico_hiato_heatmap(
+    dados: pd.DataFrame, dim_linha: str, dim_coluna: str, titulo: str, subtitulo: str, nome_arquivo: str,
+    figsize: tuple[float, float] = (10, 6.5),
+) -> Path:
+    meta_l, meta_c = METADADOS_DIM_HIATO[dim_linha], METADADOS_DIM_HIATO[dim_coluna]
+    ordem_linha, ordem_coluna = meta_l["ordem"], meta_c["ordem"]
+    rotulos_linha, rotulos_coluna = meta_l["rotulos"], meta_c["rotulos"]
+
+    matriz = dados.pivot_table(index=dim_linha, columns=dim_coluna, values="hiato_percentual")
+    matriz = matriz.reindex(index=ordem_linha, columns=ordem_coluna)
+    matriz_p = dados.pivot_table(index=dim_linha, columns=dim_coluna, values="p_valor")
+    matriz_p = matriz_p.reindex(index=ordem_linha, columns=ordem_coluna)
+
+    valores_validos = matriz.values[np.isfinite(matriz.values.astype(float))]
+    limite = np.abs(valores_validos).max() if len(valores_validos) else 1
+    fig, ax = plt.subplots(figsize=figsize, dpi=150)
+    fig.patch.set_facecolor(SUPERFICIE)
+    ax.set_facecolor(SUPERFICIE)
+    im = ax.imshow(matriz.values.astype(float), cmap=CMAP_DIVERGENTE_HIATO, vmin=-limite, vmax=limite, aspect="auto")
+
+    ax.set_xticks(range(len(ordem_coluna)))
+    ax.set_xticklabels([rotulos_coluna.get(c, c) for c in ordem_coluna], fontsize=8.5, color=TINTA_MUTED,
+                        rotation=35, ha="right")
+    ax.set_yticks(range(len(ordem_linha)))
+    ax.set_yticklabels([rotulos_linha.get(r, r) for r in ordem_linha], fontsize=8.5, color=TINTA_MUTED)
+    for spine in ax.spines.values():
+        spine.set_visible(False)
+    ax.tick_params(length=0)
+
+    for yi in range(matriz.shape[0]):
+        for xi in range(matriz.shape[1]):
+            v = matriz.values[yi, xi]
+            if pd.notna(v):
+                marca = _marca_significancia(matriz_p.values[yi, xi])
+                cor_txt = TINTA_PRIMARIA if abs(v) < limite * 0.55 else SUPERFICIE
+                ax.text(xi, yi, f"{v:.0f}%\n{marca}", ha="center", va="center", fontsize=7.5, color=cor_txt)
+
+    fig.colorbar(im, ax=ax, fraction=0.046, pad=0.03).ax.tick_params(labelsize=8, colors=TINTA_MUTED)
+    fig.suptitle(titulo, fontsize=13, fontweight="bold", color=TINTA_PRIMARIA, x=0.02, ha="left", y=0.99)
+    fig.text(0.02, 0.935, subtitulo, fontsize=8.5, color=TINTA_SECUNDARIA)
+    _rodape(fig)
+    fig.tight_layout(rect=(0, 0.03, 1, 0.9))
+    return _salvar(fig, nome_arquivo)
+
+
+def _grafico_hiato_heatmap_paineis(
+    dados: pd.DataFrame, dim_painel: str, dim_linha: str, dim_coluna: str, titulo: str, subtitulo: str,
+    nome_arquivo: str, figsize_painel: tuple[float, float] = (5.2, 5.4),
+) -> Path:
+    meta_p = METADADOS_DIM_HIATO[dim_painel]
+    meta_l, meta_c = METADADOS_DIM_HIATO[dim_linha], METADADOS_DIM_HIATO[dim_coluna]
+    ordem_painel, ordem_linha, ordem_coluna = meta_p["ordem"], meta_l["ordem"], meta_c["ordem"]
+    rotulos_painel, rotulos_linha, rotulos_coluna = meta_p["rotulos"], meta_l["rotulos"], meta_c["rotulos"]
+
+    valores_validos = dados["hiato_percentual"].dropna()
+    limite = valores_validos.abs().max() if len(valores_validos) else 1
+    fig, axes = plt.subplots(
+        1, len(ordem_painel), figsize=(figsize_painel[0] * len(ordem_painel), figsize_painel[1] + 1), dpi=150,
+    )
+    fig.patch.set_facecolor(SUPERFICIE)
+    if len(ordem_painel) == 1:
+        axes = [axes]
+
+    im = None
+    for j, val_painel in enumerate(ordem_painel):
+        ax = axes[j]
+        ax.set_facecolor(SUPERFICIE)
+        sub = dados[dados[dim_painel] == val_painel]
+        matriz = sub.pivot_table(index=dim_linha, columns=dim_coluna, values="hiato_percentual")
+        matriz = matriz.reindex(index=ordem_linha, columns=ordem_coluna)
+        matriz_p = sub.pivot_table(index=dim_linha, columns=dim_coluna, values="p_valor")
+        matriz_p = matriz_p.reindex(index=ordem_linha, columns=ordem_coluna)
+        im = ax.imshow(matriz.values.astype(float), cmap=CMAP_DIVERGENTE_HIATO, vmin=-limite, vmax=limite, aspect="auto")
+
+        ax.set_xticks(range(len(ordem_coluna)))
+        ax.set_xticklabels([rotulos_coluna.get(c, c) for c in ordem_coluna], fontsize=7.5, color=TINTA_MUTED,
+                            rotation=35, ha="right")
+        if j == 0:
+            ax.set_yticks(range(len(ordem_linha)))
+            ax.set_yticklabels([rotulos_linha.get(r, r) for r in ordem_linha], fontsize=7.5, color=TINTA_MUTED)
+        else:
+            ax.set_yticks([])
+        for spine in ax.spines.values():
+            spine.set_visible(False)
+        ax.tick_params(length=0)
+        ax.set_title(rotulos_painel.get(val_painel, val_painel), fontsize=10, color=TINTA_SECUNDARIA)
+
+        for yi in range(matriz.shape[0]):
+            for xi in range(matriz.shape[1]):
+                v = matriz.values[yi, xi]
+                if pd.notna(v):
+                    marca = _marca_significancia(matriz_p.values[yi, xi])
+                    cor_txt = TINTA_PRIMARIA if abs(v) < limite * 0.55 else SUPERFICIE
+                    ax.text(xi, yi, f"{v:.0f}%\n{marca}", ha="center", va="center", fontsize=6.5, color=cor_txt)
+
+    fig.suptitle(titulo, fontsize=13, fontweight="bold", color=TINTA_PRIMARIA, x=0.02, ha="left", y=0.99)
+    fig.text(0.02, 0.93, subtitulo, fontsize=8.5, color=TINTA_SECUNDARIA)
+    _rodape(fig)
+    # tight_layout ANTES da colorbar: chamado depois, com `ax=axes` (lista), os dois
+    # brigam pelo mesmo espaço e a colorbar acaba desenhada por cima do último painel.
+    fig.tight_layout(rect=(0, 0.08, 1, 0.88))
+    fig.colorbar(im, ax=axes[-1], fraction=0.09, pad=0.03).ax.tick_params(labelsize=8, colors=TINTA_MUTED)
+    return _salvar(fig, nome_arquivo)
+
+
+def graficos_hiatos_multidimensionais(hiatos: dict[str, pd.DataFrame]) -> list[Path]:
+    """Gera os 22 gráficos de hiato (11 combinações de dimensões x 2 escopos) a partir
+    dos parquets de `agregacoes_pnadc.gerar_hiatos_multidimensionais` — `hiatos` é um
+    dict {nome_base_do_arquivo: DataFrame}. Escolhe barra (1 dimensão), heatmap (2) ou
+    heatmap com painéis (3) conforme o número de dimensões da combinação."""
+    destinos = []
+    escopos = [
+        ("todas", "Branca vs. Negra", COR_BRANCA),
+        ("pretaparda", "Preta vs. Parda", COR_PRETA),
+    ]
+    for dims in DIMENSOES_HIATO_MULTIDIMENSIONAL:
+        for sufixo, rotulo_escopo, cor in escopos:
+            nome_base = "hiato_" + "_".join(METADADOS_DIM_HIATO[d]["apelido"] for d in dims) + f"_{sufixo}"
+            dados = hiatos.get(nome_base)
+            if dados is None or dados.empty:
+                continue
+            # restringe às categorias que de fato aparecem nos eixos do gráfico —
+            # sem isso, uma categoria residual fora de `ordem` (ex.: Geração
+            # Silenciosa/Alpha, quase sem amostra) fica de fora do heatmap mas ainda
+            # entra no cálculo do limite da escala de cor (via .abs().max()), e um
+            # hiato instável de amostra mínima estica a escala e lava o resto do mapa.
+            for d in dims:
+                dados = dados[dados[d].isin(METADADOS_DIM_HIATO[d]["ordem"])]
+            if dados.empty:
+                continue
+            desc = _descricao_dims(dims)
+            titulo = f"Hiato de renda {rotulo_escopo}, por {desc} — Brasil"
+            subtitulo = (
+                "% de diferença de renda · Welch: ***p<0,001 **p<0,01 *p<0,05 n.s.=não signif. · "
+                "trimestre mais recente"
+            )
+            nome_arquivo = f"{nome_base}.png"
+            if len(dims) == 1:
+                destinos.append(_grafico_hiato_bar(dados, dims[0], titulo, subtitulo, nome_arquivo, cor))
+            elif len(dims) == 2:
+                destinos.append(_grafico_hiato_heatmap(dados, dims[0], dims[1], titulo, subtitulo, nome_arquivo))
+            else:
+                destinos.append(
+                    _grafico_hiato_heatmap_paineis(dados, dims[0], dims[1], dims[2], titulo, subtitulo, nome_arquivo)
+                )
+    return destinos
 
 
 ROTULOS_DECOMPOSICAO = {
@@ -1746,15 +2012,19 @@ def _grafico_heatmap_raca(
     dados: pd.DataFrame, dim_linha: str, dim_coluna: str, ordem_linha: list[str], ordem_coluna: list[str],
     rotulos_linha: dict[str, str], rotulos_coluna: dict[str, str], col_valor: str,
     titulo: str, subtitulo: str, nome_arquivo: str, figsize_painel: tuple[float, float] = (4.2, 4.6),
+    ordem_raca: list[str] = ["Branca", "Negra", "Indígena"],
 ) -> Path:
-    """Heatmap com um painel por raça (Branca/Negra/Indígena, sempre os 3, lado a lado)
-    — `dim_linha` nas linhas e `dim_coluna` nas colunas de cada painel, cor = valor.
-    Generaliza `grafico_renda_completa_heatmap` (um caso particular disto) pra qualquer
-    par de dimensões — reaproveitado nas combinações raça×A×B que ainda faltavam."""
-    ordem_raca = ["Branca", "Negra", "Indígena"]
+    """Heatmap com um painel por raça (por padrão Branca/Negra/Indígena lado a lado,
+    mas `ordem_raca` aceita qualquer lista — usado com ["Preta", "Parda"] pras versões
+    "apenas negros" das mesmas combinações) — `dim_linha` nas linhas e `dim_coluna` nas
+    colunas de cada painel, cor = valor. Generaliza `grafico_renda_completa_heatmap` (um
+    caso particular disto) pra qualquer par de dimensões."""
+    n_paineis = len(ordem_raca)
     vmin, vmax = dados[col_valor].min(), dados[col_valor].max()
 
-    fig, axes = plt.subplots(1, 3, figsize=(figsize_painel[0] * 3, figsize_painel[1] + 1.3), dpi=150)
+    fig, axes = plt.subplots(1, n_paineis, figsize=(figsize_painel[0] * n_paineis, figsize_painel[1] + 1.3), dpi=150)
+    if n_paineis == 1:
+        axes = [axes]
     fig.patch.set_facecolor(SUPERFICIE)
 
     for j, raca in enumerate(ordem_raca):
@@ -1886,6 +2156,257 @@ def grafico_raca_escolaridade_ocupacao(rm: pd.DataFrame) -> Path:
         subtitulo="R$ reais (milhares), últimos 8 trimestres, ocupados · PNAD Contínua Trimestral",
         nome_arquivo="raca_escolaridade_ocupacao.png",
         figsize_painel=(4.6, 6.5),
+    )
+
+
+def _grafico_heatmap_4vias(
+    dados: pd.DataFrame, dim_linha: str, dim_coluna: str, ordem_linha: list[str], ordem_coluna: list[str],
+    rotulos_linha: dict[str, str], rotulos_coluna: dict[str, str], col_valor: str,
+    titulo: str, subtitulo: str, nome_arquivo: str, ordem_raca: list[str] = ["Branca", "Negra", "Indígena"],
+    figsize_painel: tuple[float, float] = (5.5, 4.4),
+) -> Path:
+    """Generaliza `grafico_renda_completa_heatmap`: grade de heatmaps com um painel por
+    raça x gênero (`ordem_raca`, 2 ou 3 raças, sempre x Homem/Mulher), e dentro de cada
+    painel `dim_linha` x `dim_coluna`, cor = valor. Usado pras combinações de 4
+    dimensões (raça x gênero x [faixa/geração] x escolaridade)."""
+    generos = ["Homem", "Mulher"]
+    vmin, vmax = dados[col_valor].min(), dados[col_valor].max()
+
+    fig, axes = plt.subplots(
+        len(ordem_raca), len(generos),
+        figsize=(figsize_painel[0] * len(generos), figsize_painel[1] * len(ordem_raca)), dpi=150,
+    )
+    fig.patch.set_facecolor(SUPERFICIE)
+
+    for i, raca in enumerate(ordem_raca):
+        for j, sexo in enumerate(generos):
+            ax = axes[i, j]
+            ax.set_facecolor(SUPERFICIE)
+            sub = dados[(dados["raca_cor"] == raca) & (dados["sexo"] == sexo)]
+            matriz = sub.pivot_table(index=dim_linha, columns=dim_coluna, values=col_valor)
+            matriz = matriz.reindex(index=ordem_linha, columns=ordem_coluna)
+            ax.imshow(matriz.values, cmap=CMAP_SEQUENCIAL, vmin=vmin, vmax=vmax, aspect="auto")
+
+            ax.set_xticks(range(len(ordem_coluna)))
+            if i == len(ordem_raca) - 1:
+                ax.set_xticklabels([rotulos_coluna.get(c, c) for c in ordem_coluna], fontsize=7.5,
+                                    color=TINTA_MUTED, rotation=35, ha="right")
+            else:
+                ax.set_xticklabels([])
+            if j == 0:
+                ax.set_yticks(range(len(ordem_linha)))
+                ax.set_yticklabels([rotulos_linha.get(r, r) for r in ordem_linha], fontsize=7.5, color=TINTA_MUTED)
+            else:
+                ax.set_yticks([])
+            for spine in ax.spines.values():
+                spine.set_visible(False)
+            ax.tick_params(length=0)
+            rotulo_sexo = "Homens" if sexo == "Homem" else "Mulheres"
+            ax.set_title(f"{raca.split(' ')[0]} · {rotulo_sexo}", fontsize=9.5, color=TINTA_SECUNDARIA)
+
+            for yi in range(matriz.shape[0]):
+                for xi in range(matriz.shape[1]):
+                    v = matriz.values[yi, xi]
+                    if pd.notna(v):
+                        cor_txt = SUPERFICIE if v > (vmin + vmax) / 2 else TINTA_PRIMARIA
+                        ax.text(xi, yi, f"{v / 1000:.1f}k", ha="center", va="center", fontsize=6, color=cor_txt)
+
+    # posições de título/subtítulo em fração da altura da figura — não podem ser
+    # frações fixas (0.995/0.975 etc.): com só 2 raças (Preta/Parda) a figura fica bem
+    # mais baixa que com 3 (Branca/Negra/Indígena), e a MESMA fração vira uma distância
+    # em polegadas menor, colando título e subtítulo um no outro.
+    altura_fig = figsize_painel[1] * len(ordem_raca)
+    y_titulo = 1 - 0.32 / altura_fig
+    y_subtitulo = 1 - 0.62 / altura_fig
+    y_rect_topo = 1 - 0.82 / altura_fig
+    fig.suptitle(titulo, fontsize=13.5, fontweight="bold", color=TINTA_PRIMARIA, x=0.02, ha="left", y=y_titulo)
+    fig.text(0.02, y_subtitulo, subtitulo, fontsize=9, color=TINTA_SECUNDARIA)
+    _rodape(fig)
+    fig.tight_layout(rect=(0, 0.02, 1, y_rect_topo))
+    return _salvar(fig, nome_arquivo)
+
+
+# --- Seção "Renda média" (todas as combinações raça x A x B, escopo Preta/Parda) ---
+#
+# As combinações que já existem em outro lugar do módulo (raça sozinha, raça x gênero,
+# raça x faixa etária, raça x escolaridade — todas com sua versão Preta/Parda também já
+# construída) não são repetidas aqui; só as que faltavam pra fechar as 12 combinações x
+# 2 escopos pedidas.
+
+def grafico_raca_genero_geracao_escolaridade(rcg: pd.DataFrame) -> Path:
+    """Raça x gênero x geração x escolaridade — a única combinação de 4 dimensões que
+    ainda faltava pro escopo "todas" (a outra, raça x gênero x faixa x escolaridade, já
+    é `grafico_renda_completa_heatmap`)."""
+    ultimo_ano, ultimo_trimestre = _trimestre_mais_recente(rcg)
+    snapshot = rcg[(rcg["ano"] == ultimo_ano) & (rcg["trimestre"] == ultimo_trimestre)]
+    combinado = _combinar_negra(snapshot, "renda_habitual_real_media", by=["sexo", "geracao", "nivel_instrucao"])
+    return _grafico_heatmap_4vias(
+        combinado, dim_linha="nivel_instrucao", dim_coluna="geracao",
+        ordem_linha=NIVEIS_INSTRUCAO_ORDEM, ordem_coluna=GERACOES_ORDEM_GRAFICO,
+        rotulos_linha=NIVEIS_INSTRUCAO_ROTULO_CURTO, rotulos_coluna=ROTULOS_GERACAO_CURTO,
+        col_valor="renda_habitual_real_media",
+        titulo="Renda habitual real por raça, gênero, geração e escolaridade — Brasil",
+        subtitulo=f"R$ reais (milhares) · {ultimo_trimestre}º trimestre de {ultimo_ano} · PNAD Contínua Trimestral",
+        nome_arquivo="raca_genero_geracao_escolaridade.png",
+    )
+
+
+def grafico_preta_parda_geracao_combinada(rg: pd.DataFrame) -> Path:
+    """Preta vs. Parda por geração, snapshot do trimestre mais recente — espelha
+    `grafico_preta_parda_faixa_etaria_combinada`, trocando faixa etária por geração."""
+    ultimo_ano, ultimo_trimestre = _trimestre_mais_recente(rg)
+    r = rg[
+        (rg["nivel_geografico"] == "brasil") & (rg["ano"] == ultimo_ano) & (rg["trimestre"] == ultimo_trimestre)
+        & (rg["raca_cor"].isin(["Preta", "Parda"]))
+    ].copy()
+    combinado = _media_ponderada_por_grupo(r, "renda_habitual_real_media", by=["raca_cor", "geracao"])
+
+    x = np.arange(len(GERACOES_ORDEM_GRAFICO))
+    largura = 0.32
+    fig, ax = _novo_eixo(figsize=(9.5, 5.5))
+    maior_valor = 0.0
+    for i, raca in enumerate(["Preta", "Parda"]):
+        valores = [
+            combinado[(combinado["raca_cor"] == raca) & (combinado["geracao"] == g)]["renda_habitual_real_media"].sum()
+            for g in GERACOES_ORDEM_GRAFICO
+        ]
+        maior_valor = max(maior_valor, max(valores))
+        deslocamento = (i - 0.5) * largura
+        cor = COR_PRETA if raca == "Preta" else COR_PARDA
+        ax.bar(x + deslocamento, valores, largura, color=cor, zorder=3, label=raca)
+
+    ax.set_ylim(0, maior_valor * 1.18)
+    ax.set_xticks(x)
+    ax.set_xticklabels([ROTULOS_GERACAO_CURTO[g] for g in GERACOES_ORDEM_GRAFICO], fontsize=10)
+    ax.legend(loc="upper left", frameon=False, fontsize=9.5)
+    _titulo(
+        ax, "Renda habitual real por geração — Preta vs. Parda — Brasil",
+        f"Cada geração na idade em que está hoje · {ultimo_trimestre}º trimestre de {ultimo_ano} "
+        "· PNAD Contínua Trimestral",
+    )
+    ax.yaxis.set_major_formatter(lambda v, _: f"R$ {v:,.0f}".replace(",", "."))
+    ax.grid(axis="y", color=GRADE, linewidth=0.8, zorder=0)
+    _rodape(fig)
+    fig.tight_layout(rect=(0, 0.03, 1, 1))
+    return _salvar(fig, "renda_preta_parda_geracao.png")
+
+
+def grafico_preta_parda_genero_faixa_etaria(renda: pd.DataFrame) -> Path:
+    ultimo_ano, ultimo_trimestre = _trimestre_mais_recente(renda)
+    r = renda[
+        (renda["nivel_geografico"] == "brasil") & (renda["ano"] == ultimo_ano) & (renda["trimestre"] == ultimo_trimestre)
+        & (renda["raca_cor"].isin(["Preta", "Parda"]))
+    ].copy()
+    return _grafico_heatmap_raca(
+        r, dim_linha="faixa_etaria", dim_coluna="sexo",
+        ordem_linha=FAIXAS_ETARIAS_ORDEM, ordem_coluna=["Homem", "Mulher"],
+        rotulos_linha={f: f for f in FAIXAS_ETARIAS_ORDEM}, rotulos_coluna={"Homem": "Homens", "Mulher": "Mulheres"},
+        col_valor="renda_habitual_real_media",
+        titulo="Renda habitual real por gênero e faixa etária — Preta vs. Parda — Brasil",
+        subtitulo=f"R$ reais (milhares) · {ultimo_trimestre}º trimestre de {ultimo_ano} · PNAD Contínua Trimestral",
+        nome_arquivo="preta_parda_genero_faixa_etaria.png",
+        ordem_raca=["Preta", "Parda"],
+    )
+
+
+def grafico_preta_parda_genero_geracao(rg: pd.DataFrame) -> Path:
+    ultimo_ano, ultimo_trimestre = _trimestre_mais_recente(rg)
+    combinado = rg[
+        (rg["nivel_geografico"] == "brasil") & (rg["ano"] == ultimo_ano) & (rg["trimestre"] == ultimo_trimestre)
+        & (rg["raca_cor"].isin(["Preta", "Parda"]))
+    ]
+    return _grafico_heatmap_raca(
+        combinado, dim_linha="geracao", dim_coluna="sexo",
+        ordem_linha=GERACOES_ORDEM_GRAFICO, ordem_coluna=["Homem", "Mulher"],
+        rotulos_linha=ROTULOS_GERACAO_CURTO, rotulos_coluna={"Homem": "Homens", "Mulher": "Mulheres"},
+        col_valor="renda_habitual_real_media",
+        titulo="Renda habitual real por gênero e geração — Preta vs. Parda — Brasil",
+        subtitulo=f"R$ reais (milhares) · {ultimo_trimestre}º trimestre de {ultimo_ano} · PNAD Contínua Trimestral",
+        nome_arquivo="preta_parda_genero_geracao.png",
+        ordem_raca=["Preta", "Parda"],
+    )
+
+
+def grafico_preta_parda_genero_escolaridade(rpe: pd.DataFrame) -> Path:
+    ultimo_ano, ultimo_trimestre = _trimestre_mais_recente(rpe)
+    r = rpe[
+        (rpe["nivel_geografico"] == "brasil") & (rpe["ano"] == ultimo_ano) & (rpe["trimestre"] == ultimo_trimestre)
+        & (rpe["raca_cor"].isin(["Preta", "Parda"]))
+    ].copy()
+    return _grafico_heatmap_raca(
+        r, dim_linha="nivel_instrucao", dim_coluna="sexo",
+        ordem_linha=NIVEIS_INSTRUCAO_ORDEM, ordem_coluna=["Homem", "Mulher"],
+        rotulos_linha=NIVEIS_INSTRUCAO_ROTULO_CURTO, rotulos_coluna={"Homem": "Homens", "Mulher": "Mulheres"},
+        col_valor="renda_habitual_real_media",
+        titulo="Renda habitual real por gênero e escolaridade — Preta vs. Parda — Brasil",
+        subtitulo=f"R$ reais (milhares) · {ultimo_trimestre}º trimestre de {ultimo_ano} · PNAD Contínua Trimestral",
+        nome_arquivo="preta_parda_genero_escolaridade.png",
+        ordem_raca=["Preta", "Parda"],
+        figsize_painel=(4.2, 5.6),
+    )
+
+
+def grafico_preta_parda_faixa_etaria_escolaridade(rc: pd.DataFrame) -> Path:
+    ultimo_ano, ultimo_trimestre = _trimestre_mais_recente(rc)
+    r = rc[(rc["ano"] == ultimo_ano) & (rc["trimestre"] == ultimo_trimestre) & (rc["raca_cor"].isin(["Preta", "Parda"]))]
+    combinado = _media_ponderada_por_grupo(r, "renda_habitual_real_media", by=["raca_cor", "faixa_etaria", "nivel_instrucao"])
+    return _grafico_heatmap_raca(
+        combinado, dim_linha="nivel_instrucao", dim_coluna="faixa_etaria",
+        ordem_linha=NIVEIS_INSTRUCAO_ORDEM, ordem_coluna=FAIXAS_ETARIAS_ORDEM,
+        rotulos_linha=NIVEIS_INSTRUCAO_ROTULO_CURTO, rotulos_coluna={f: f for f in FAIXAS_ETARIAS_ORDEM},
+        col_valor="renda_habitual_real_media",
+        titulo="Renda habitual real por faixa etária e escolaridade — Preta vs. Parda — Brasil",
+        subtitulo=f"R$ reais (milhares) · {ultimo_trimestre}º trimestre de {ultimo_ano} · PNAD Contínua Trimestral",
+        nome_arquivo="preta_parda_faixa_etaria_escolaridade.png",
+        ordem_raca=["Preta", "Parda"],
+        figsize_painel=(4.2, 5.4),
+    )
+
+
+def grafico_preta_parda_geracao_escolaridade(rcg: pd.DataFrame) -> Path:
+    ultimo_ano, ultimo_trimestre = _trimestre_mais_recente(rcg)
+    r = rcg[(rcg["ano"] == ultimo_ano) & (rcg["trimestre"] == ultimo_trimestre) & (rcg["raca_cor"].isin(["Preta", "Parda"]))]
+    combinado = _media_ponderada_por_grupo(r, "renda_habitual_real_media", by=["raca_cor", "geracao", "nivel_instrucao"])
+    return _grafico_heatmap_raca(
+        combinado, dim_linha="nivel_instrucao", dim_coluna="geracao",
+        ordem_linha=NIVEIS_INSTRUCAO_ORDEM, ordem_coluna=GERACOES_ORDEM_GRAFICO,
+        rotulos_linha=NIVEIS_INSTRUCAO_ROTULO_CURTO, rotulos_coluna=ROTULOS_GERACAO_CURTO,
+        col_valor="renda_habitual_real_media",
+        titulo="Renda habitual real por geração e escolaridade — Preta vs. Parda — Brasil",
+        subtitulo=f"R$ reais (milhares) · {ultimo_trimestre}º trimestre de {ultimo_ano} · PNAD Contínua Trimestral",
+        nome_arquivo="preta_parda_geracao_escolaridade.png",
+        ordem_raca=["Preta", "Parda"],
+        figsize_painel=(4.2, 5.4),
+    )
+
+
+def grafico_preta_parda_genero_faixa_etaria_escolaridade(rc: pd.DataFrame) -> Path:
+    ultimo_ano, ultimo_trimestre = _trimestre_mais_recente(rc)
+    r = rc[(rc["ano"] == ultimo_ano) & (rc["trimestre"] == ultimo_trimestre) & (rc["raca_cor"].isin(["Preta", "Parda"]))]
+    return _grafico_heatmap_4vias(
+        r, dim_linha="nivel_instrucao", dim_coluna="faixa_etaria",
+        ordem_linha=NIVEIS_INSTRUCAO_ORDEM, ordem_coluna=FAIXAS_ETARIAS_ORDEM,
+        rotulos_linha=NIVEIS_INSTRUCAO_ROTULO_CURTO, rotulos_coluna={f: f for f in FAIXAS_ETARIAS_ORDEM},
+        col_valor="renda_habitual_real_media",
+        titulo="Renda por gênero, faixa etária e escolaridade — Preta vs. Parda — Brasil",
+        subtitulo="R$ reais (milhares), a preços do trimestre mais recente · PNAD Contínua Trimestral",
+        nome_arquivo="preta_parda_genero_faixa_etaria_escolaridade.png",
+        ordem_raca=["Preta", "Parda"],
+    )
+
+
+def grafico_preta_parda_genero_geracao_escolaridade(rcg: pd.DataFrame) -> Path:
+    ultimo_ano, ultimo_trimestre = _trimestre_mais_recente(rcg)
+    r = rcg[(rcg["ano"] == ultimo_ano) & (rcg["trimestre"] == ultimo_trimestre) & (rcg["raca_cor"].isin(["Preta", "Parda"]))]
+    return _grafico_heatmap_4vias(
+        r, dim_linha="nivel_instrucao", dim_coluna="geracao",
+        ordem_linha=NIVEIS_INSTRUCAO_ORDEM, ordem_coluna=GERACOES_ORDEM_GRAFICO,
+        rotulos_linha=NIVEIS_INSTRUCAO_ROTULO_CURTO, rotulos_coluna=ROTULOS_GERACAO_CURTO,
+        col_valor="renda_habitual_real_media",
+        titulo="Renda por gênero, geração e escolaridade — Preta vs. Parda — Brasil",
+        subtitulo="R$ reais (milhares), a preços do trimestre mais recente · PNAD Contínua Trimestral",
+        nome_arquivo="preta_parda_genero_geracao_escolaridade.png",
+        ordem_raca=["Preta", "Parda"],
     )
 
 
@@ -2260,6 +2781,16 @@ def main() -> None:
     percentil_de_valor = pd.read_parquet(REPO_ROOT / "data" / "processed" / "percentil_de_valor_racial.parquet")
     renda_multi_faixa = pd.read_parquet(REPO_ROOT / "data" / "processed" / "renda_multidimensional_faixa.parquet")
     renda_multi_geracao = pd.read_parquet(REPO_ROOT / "data" / "processed" / "renda_multidimensional_geracao.parquet")
+    rcg = pd.read_parquet(REPO_ROOT / "data" / "processed" / "renda_completa_geracao.parquet")
+    hiato_pp = pd.read_parquet(REPO_ROOT / "data" / "processed" / "hiato_preta_parda.parquet")
+    hiatos_multi = {
+        arq.stem: pd.read_parquet(arq)
+        for dims in DIMENSOES_HIATO_MULTIDIMENSIONAL
+        for sufixo in ("todas", "pretaparda")
+        for arq in [REPO_ROOT / "data" / "processed" / (
+            "hiato_" + "_".join(METADADOS_DIM_HIATO[d]["apelido"] for d in dims) + f"_{sufixo}.parquet"
+        )]
+    }
 
     destinos = [
         # raça
@@ -2347,6 +2878,24 @@ def main() -> None:
         *[grafico_escolaridade_por_raca_genero(esc, nivel=n) for n in NIVEIS_INSTRUCAO_ORDEM],
         # raça x gênero x faixa etária x escolaridade
         grafico_renda_completa_heatmap(rc),
+        # raça x gênero x geração x escolaridade (a outra combinação de 4 dimensões)
+        grafico_raca_genero_geracao_escolaridade(rcg),
+        # "apenas negros" (Preta vs. Parda): combinações que ainda faltavam pra fechar
+        # a matriz de 12 combinações também nesse escopo
+        grafico_preta_parda_geracao_combinada(renda_geracao),
+        grafico_preta_parda_genero_faixa_etaria(renda),
+        grafico_preta_parda_genero_geracao(renda_geracao),
+        grafico_preta_parda_genero_escolaridade(rpe),
+        grafico_preta_parda_faixa_etaria_escolaridade(rc),
+        grafico_preta_parda_geracao_escolaridade(rcg),
+        grafico_preta_parda_genero_faixa_etaria_escolaridade(rc),
+        grafico_preta_parda_genero_geracao_escolaridade(rcg),
+        # hiato Preta vs. Parda, série histórica, com significância (a versão pretaparda
+        # da combinação "Raça" sozinha)
+        grafico_hiato_preta_parda_percentual(hiato_pp),
+        # hiato de renda por combinação de dimensões (22 = 11 combinações x 2 escopos),
+        # todos com teste de Welch
+        *graficos_hiatos_multidimensionais(hiatos_multi),
     ]
     for destino in destinos:
         print(f"Gráfico salvo em: {destino.relative_to(REPO_ROOT)}")

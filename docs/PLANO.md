@@ -652,22 +652,70 @@ vezes, já concluiu o Médio, não fica pra trás no Fundamental. Mesmo padrão 
 
 ---
 
+## Oitava rodada de expansão (2026-09-05): seção "Renda média" no PPT, reordenada pra frente
+
+Pedido do usuário: reorganizar o PPT com uma seção "Renda média" logo no início, cobrindo as
+12 combinações de dimensões (Raça; ×Gênero; ×Faixa Etária; ×Geração; ×Escolaridade; e as
+combinações de 3-4 dimensões) × 2 escopos (Todas as raças / Apenas negros, Preta vs. Parda
+separadas) × 2 métricas (Valores / Hiato) = **48 subseções**, com um índice no início do
+deck pra conferência, e teste de Welch em **todas** as 24 combinações de hiato (não só a
+Branca-vs-Negra histórica que já existia). O que já existia no deck foi pra o final, não
+apagado.
+
+Descoberta ao mapear: boa parte das 48 subseções já podia ser montada com dados/gráficos que
+já existiam (`renda.parquet`, `renda_por_escolaridade.parquet`, `renda_por_geracao.parquet`,
+`renda_completa.parquet` já guardam Preta/Parda sem combinar, então servem tanto pro escopo
+"Todas" quanto "Apenas negros"). Faltava mesmo: 1 dataset novo
+(`renda_completa_geracao.parquet`, espelha `renda_completa.parquet` trocando faixa etária por
+geração), 9 gráficos de valores novos (1 Todas + 8 Preta/Parda) e a família toda de hiato com
+Welch pras 22 combinações que cruzam dimensões (nova função genérica
+`agregacoes_pnadc.gerar_hiatos_multidimensionais`, que puxa os microdados do trimestre mais
+recente uma vez por escopo e calcula o teste pra 11 combinações de dimensões de uma vez) mais
+1 análise histórica dedicada nova (`gerar_hiato_preta_parda`, espelha `gerar_hiato_racial`).
+
+Achado novo: o hiato Preta vs. Parda **mudou de sinal ao longo do tempo** — Preta chegou a
+ganhar mais que Parda em vários trimestres até ~2015, mas hoje ganha consistentemente menos
+(-6% no trimestre mais recente) — ver `hiato_preta_parda_percentual.png`.
+
+Bugs de renderização pegos e corrigidos na auditoria visual (mesma disciplina de sempre: olhar
+cada tipo de gráfico novo, não só rodar sem erro): subtítulo cortado na borda da figura em
+todos os gráficos de hiato (texto longo demais pro figsize; encurtado + figuras mais largas);
+anotação de valor sem espaço vertical (headroom) e colidindo com o subtítulo nos gráficos de
+barra; escala de cor de um heatmap "esticada" por uma célula de amostra residual (Geração
+Silenciosa/Alpha) que nem aparecia no heatmap final mas ainda entrava no cálculo do limite da
+escala — corrigido filtrando pras categorias válidas ANTES de calcular o limite; colorbar
+desenhada por cima do último painel num heatmap com múltiplos painéis (ordem errada entre
+`tight_layout` e `colorbar(ax=lista_de_eixos)` — corrigido calculando o layout primeiro e
+anexando a colorbar só no último eixo); título cortado/colado no subtítulo no heatmap de 4
+dimensões quando usado com só 2 raças (Preta/Parda) em vez de 3 (Branca/Negra/Indígena) — as
+posições eram frações fixas da altura da figura, e a figura fica mais baixa com 2 painéis de
+raça em vez de 3; corrigido calculando a posição em função da altura real.
+
+32 gráficos novos (119 no total, era 87). 24 datasets novos (53 no total, era 29). PPT
+reestruturado: 208 slides (era 109) — título + 2 slides de índice + 69 divisores (48 novas
+subseções de "Renda média" + as 21 seções antigas, movidas pro final, sem apagar nada) + 136
+slides de gráfico (alguns gráficos aparecem em mais de um slide — reaproveitados tanto na
+seção nova quanto na antiga).
+
+---
+
 ## 🏁 Fase 1 concluída (2026-09-04, expandida em 2026-09-05)
 
-Todas as 7 etapas (0-6) fechadas no mesmo dia, incl. sete rodadas de expansão a pedido (a
+Todas as 7 etapas (0-6) fechadas no mesmo dia, incl. oito rodadas de expansão a pedido (a
 segunda com teste de significância formal via Oaxaca-Blinder, hiato regional, segregação
 ocupacional, quebra estrutural e 4 variáveis novas; a terceira com geração, perfil do topo
 10% e a decomposição completa dos 4 quartis; a quarta com Gini/Theil por raça, setor
 econômico, setor público/privado e sobre-qualificação; a quinta com a função quantil da
 renda em R$ e sua inversa; a sexta fechando a matriz completa de combinações raça × A × B e
 quantificando quanto ocupação sozinha explica do hiato; a sétima corrigindo um gap real na
-seção Escolaridade × Raça × Gênero — ver seções acima). Entregáveis:
-`src/ingestion/{extrator_pnadc,baixar_deflator}.py`,
+seção Escolaridade × Raça × Gênero; a oitava reorganizando o PPT com a seção "Renda média"
+(48 subseções, índice no início, hiato com Welch nas 24 combinações) na frente — ver seções
+acima). Entregáveis: `src/ingestion/{extrator_pnadc,baixar_deflator}.py`,
 `src/processing/{agregacoes_pnadc,graficos_fase1,apresentacao_fase1}.py`,
-`src/utils/pnadc_core.py`, 29 datasets em `data/processed/*.parquet`,
-`docs/{LIMITACOES_E_METODOLOGIA,ANALISE_FASE1}.md`, 87 gráficos em `docs/img/` (galeria
+`src/utils/pnadc_core.py`, 53 datasets em `data/processed/*.parquet`,
+`docs/{LIMITACOES_E_METODOLOGIA,ANALISE_FASE1}.md`, 119 gráficos em `docs/img/` (galeria
 completa em `docs/ANALISE_FASE1.md`, destaques no README), apresentação
-`docs/Datahub_Racial_Brasil_Fase1.pptx` (109 slides). Próximo passo: Fase 2 (Censo
+`docs/Datahub_Racial_Brasil_Fase1.pptx` (208 slides). Próximo passo: Fase 2 (Censo
 Demográfico) — ainda não detalhada.
 
 ---

@@ -6,7 +6,10 @@ gênero, faixa etária e escolaridade, para renda habitual real (deflator oficia
 `src/processing/graficos_fase1.py` a partir dos datasets em `data/processed/*.parquet`.
 Também disponível como apresentação: [Datahub_Racial_Brasil_Fase1.pptx](Datahub_Racial_Brasil_Fase1.pptx).
 
-87 gráficos ao todo. Índice:
+119 gráficos ao todo (a apresentação em PPTX também abre com uma seção "Renda média" de 48
+subseções — 12 combinações de dimensões × Todas as raças/Apenas negros × Valores/Hiato, com
+teste de Welch nas 24 combinações de hiato — que reaproveita gráficos já listados nas seções
+temáticas abaixo, sem galeria separada aqui). Índice:
 
 - [Raça](#raça)
 - [Hiato Branca vs. Negra — série histórica](#hiato-branca-vs-negra--série-histórica)
