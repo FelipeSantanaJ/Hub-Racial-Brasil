@@ -481,18 +481,66 @@ complementar, não foi substituído.
 
 ---
 
+## Sugestões de análise validadas antes de executar (2026-09-05)
+
+Usuário pediu explicitamente "sugere mais algum tipo de análise... me traga antes de
+executar". Antes de implementar, mapeei o que já temos extraído mas nunca usado, e
+apresentei um menu (AskUserQuestion) separado em "fáceis" (dado já pronto, função já
+existente ou barata de fazer) e "custosas" (mais esforço/risco). Usuário escolheu as 4
+fáceis inteiras + 1 das custosas (Theil), não escolheu: hiato Capital/Interior nem o painel
+rotativo real de curto prazo (ficam registrados abaixo como candidatos futuros).
+
+- **Gini por raça** (`gerar_gini_por_raca`): `pnadc_core.gini_ponderado_por_grupo` já
+  existia, portada do notebook original, mas nunca tinha sido chamada em nenhuma rodada
+  anterior. Achado que exige leitura cuidadosa: Branca tem Gini mais alto (mais
+  desigualdade DENTRO do grupo) que Negra — não é "a população negra está melhor", é que a
+  distribuição de renda dela é mais comprimida perto da base.
+- **Índice de Theil, decomposição entre/dentro** (`gerar_theil_racial`): nova função
+  `pnadc_core.decomposicao_theil_entre_dentro`, validada com 3 casos sintéticos antes de
+  rodar nos dados reais (grupos idênticos → theil_entre≈0; médias diferentes com variância
+  interna zero → theil_entre=100%; grupo único → bate exatamente com `theil_t` direto).
+  Achado: só ~7% da desigualdade total de renda do Brasil vem de diferença ENTRE raças — 93%
+  é DENTRO de cada raça. Não diminui o hiato racial, mostra que a desigualdade brasileira é
+  multifatorial.
+- **Setor de atividade econômica** (VD4010, `setor_atividade` em `CRIAR_BASE`): variável já
+  extraída desde o início (junto com VD4011), nunca decodificada nem usada. **Bug de
+  decodificação encontrado e corrigido ANTES de usar** (mesmo padrão de VD4009/VD4011): 12
+  categorias, zero-padded (`'01'`..`'12'`) — checado direto no parquet bruto antes de
+  escrever o `CASE`. `gerar_segregacao_setorial` aplica o mesmo índice de Duncan já usado
+  pra ocupação, agora por setor — resultado: segregação setorial (~10%) é menor que
+  ocupacional (~17%), as raças se distribuem mais parecido entre setores do que entre cargos
+  dentro deles.
+- **Hiato no setor Público vs. Privado** (`setor_trabalho`, derivado de VD4009;
+  `gerar_hiato_setor_publico_privado`): confirma a hipótese da literatura — hiato menor no
+  Público (~45-50%, tabela salarial padronizada) que no Privado (~58-68%).
+- **Sobre-qualificação/"brain waste"** (`gerar_sobrequalificacao`): % de quem tem Superior
+  completo e está em "Ocupações elementares" (ISCO grupo 9, proxy padrão de mismatch
+  credencial-ocupação). Achado: taxa de Negra é quase o dobro da de Branca ao longo de quase
+  toda a série — mesmo diploma, resultado profissional diferente.
+
+**Candidatos registrados pra uma rodada futura, se fizer sentido** (não escolhidos desta
+vez): painel rotativo REAL de curto prazo (usar UPA/V1008/V2003/painel — já extraídos — pra
+medir taxa de transição desemprego→emprego por raça usando o vínculo real entre entrevistas,
+não mais coorte sintética); hiato Capital vs. Interior (extensão barata do hiato regional).
+
+5 gráficos novos nesta rodada (68 no total, era 63), apresentação com 88 slides (era 82), 25
+datasets (era 20).
+
+---
+
 ## 🏁 Fase 1 concluída (2026-09-04, expandida em 2026-09-05)
 
-Todas as 7 etapas (0-6) fechadas no mesmo dia, incl. três rodadas de expansão a pedido (a
+Todas as 7 etapas (0-6) fechadas no mesmo dia, incl. quatro rodadas de expansão a pedido (a
 segunda com teste de significância formal via Oaxaca-Blinder, hiato regional, segregação
 ocupacional, quebra estrutural e 4 variáveis novas; a terceira com geração, perfil do topo
-10% e a decomposição completa dos 4 quartis — ver seções acima). Entregáveis:
+10% e a decomposição completa dos 4 quartis; a quarta com Gini/Theil por raça, setor
+econômico, setor público/privado e sobre-qualificação — ver seções acima). Entregáveis:
 `src/ingestion/{extrator_pnadc,baixar_deflator}.py`,
 `src/processing/{agregacoes_pnadc,graficos_fase1,apresentacao_fase1}.py`,
-`src/utils/pnadc_core.py`, 20 datasets em `data/processed/*.parquet`,
-`docs/{LIMITACOES_E_METODOLOGIA,ANALISE_FASE1}.md`, 63 gráficos em `docs/img/` (galeria
+`src/utils/pnadc_core.py`, 25 datasets em `data/processed/*.parquet`,
+`docs/{LIMITACOES_E_METODOLOGIA,ANALISE_FASE1}.md`, 68 gráficos em `docs/img/` (galeria
 completa em `docs/ANALISE_FASE1.md`, destaques no README), apresentação
-`docs/Datahub_Racial_Brasil_Fase1.pptx` (82 slides). Próximo passo: Fase 2 (Censo
+`docs/Datahub_Racial_Brasil_Fase1.pptx` (88 slides). Próximo passo: Fase 2 (Censo
 Demográfico) — ainda não detalhada.
 
 ---

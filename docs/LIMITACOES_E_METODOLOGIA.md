@@ -186,6 +186,41 @@ tem os dois blocos.
   trimestre mais recente: entre 22% e 31% conforme quartil/raça) — mesma coluna de
   diagnóstico (`pct_populacao_capturada`), sem correção de desempate.
 
+## Gini/Theil por raça, setor econômico e sobre-qualificação (2026-09-05)
+
+- **Gini por raça**: `pnadc_core.gini_ponderado_por_grupo`, já existente (portada do
+  notebook original), calcula o Gini DENTRO de cada raça — não confundir com o hiato ENTRE
+  raças. Um Gini mais baixo dentro de um grupo não indica "situação melhor" — pode
+  simplesmente refletir uma distribuição mais comprimida perto da base (é o caso de Negra
+  vs. Branca aqui: Negra tem Gini mais baixo, mas renda média bem menor).
+- **Theil T, decomposição entre/dentro**: `pnadc_core.decomposicao_theil_entre_dentro`
+  (nova) usa a fórmula clássica de decomposição exata (T_total = T_entre + T_dentro, com
+  T_entre ponderado pela participação populacional de cada grupo). Validada com 3 casos
+  sintéticos antes de usar em dados reais: grupos com distribuições idênticas →
+  T_entre ≈ 0; grupos com médias diferentes mas variância interna zero → T_entre = 100% do
+  total; um único grupo → decomposição bate exatamente com o `theil_t` calculado direto.
+  Achado (2026 T2): ~7% da desigualdade total vem de diferença ENTRE raças, ~93% é DENTRO —
+  isso é um resultado esperado na literatura de decomposição de desigualdade (recortes
+  demográficos amplos como raça/gênero tipicamente explicam uma fatia pequena da
+  desigualdade total, mesmo quando o hiato entre os grupos é grande e significativo) — não
+  é evidência de que a diferença racial "não importa".
+- **`setor_atividade` (VD4010)**: 12 categorias, vem ZERO-PADDED (`'01'`..`'12'`) no layout
+  do IBGE — checado direto no parquet bruto (`value_counts()`) ANTES de escrever o `CASE`,
+  já que os dois bugs anteriores (VD4009, também zero-padded) ensinaram a desconfiar por
+  padrão. Estava extraído desde o início (junto com VD4011) mas nunca tinha sido decodificado.
+- **`setor_trabalho`** (derivado de VD4009): `'Público'` = empregado público c/ ou s/
+  carteira + militar/servidor estatutário (códigos `'05'`,`'06'`,`'07'`); `'Privado'` =
+  empregado privado ou doméstico c/ ou s/ carteira (`'01'`-`'04'`); `NULL` p/ empregador,
+  conta-própria e familiar auxiliar (não é uma posição assalariada "pública" nem "privada").
+- **Sobre-qualificação**: proxy = ter Superior completo E estar em "Ocupações elementares"
+  (grupamento_ocupacional categoria 09, VD4011 — corresponde ao ISCO major group 9, o proxy
+  padrão de mismatch credencial-ocupação na literatura). É um proxy conservador — não
+  captura sobre-qualificação em ocupações intermediárias (ex.: alguém com mestrado
+  trabalhando em apoio administrativo também seria "sobrequalificado" em um sentido mais
+  amplo, mas não entra nesse indicador). Indígena tem amostra pequena aqui (poucas pessoas
+  com Superior completo nesse grupo) — a série fica ruidosa mesmo com média móvel de 4
+  trimestres, ler com cautela.
+
 ## Nota técnica: tipos de variável no layout do IBGE
 
 Várias variáveis que parecem numéricas na verdade são **texto** no layout de largura fixa do
