@@ -10,7 +10,9 @@ pnadc_core.ipynb (projeto original no Drive).
 
 import numpy as np
 import pandas as pd
+import statsmodels.formula.api as smf
 from scipy import stats
+from scipy.stats import gaussian_kde
 
 COLUNA_PESO = 'V1028'
 # V2010/V2007/UF/Capital/RM_RIDE são lidos do layout fixo do IBGE como TEXTO (largura
@@ -277,6 +279,105 @@ def tabela_hiatos_significancia(df, coluna_valor, col_grupo, grupo_referencia, p
         })
 
     return pd.DataFrame(resultados).set_index(col_grupo)
+
+
+def rif_quantil(valores, pesos, quantil):
+    """Recentered Influence Function (Firpo-Fortin-Lemieux, 2009) do quantil `quantil`
+    (ex.: 0.1, 0.5, 0.9) de `valores`, ponderada por `pesos`.
+
+    RIF(y; q) = q + (quantil - 1{y <= q}) / f_Y(q), onde f_Y(q) é a densidade estimada
+    (kernel gaussiano ponderado) no ponto do quantil q. Regredir a RIF em covariáveis
+    (WLS) e decompor via Oaxaca-Blinder (ver `decomposicao_oaxaca_blinder`) dá a
+    decomposição do hiato NAQUELE PONTO da distribuição, não só na média — permite
+    perguntar "o hiato racial é maior no topo ou na base da distribuição de renda?".
+
+    Pré-condição: `valores`/`pesos` sem NaN (filtrar antes de chamar). Retorna
+    (array de RIF na mesma ordem de `valores`, valor do quantil, densidade estimada).
+    """
+    valores = np.asarray(valores, dtype=float)
+    pesos = np.asarray(pesos, dtype=float)
+    ordem = np.argsort(valores)
+    cum = np.cumsum(pesos[ordem]) / pesos.sum()
+    pos = np.searchsorted(cum, quantil)
+    q = valores[ordem][min(pos, len(valores) - 1)]
+    densidade = float(gaussian_kde(valores, weights=pesos)(q)[0])
+    rif = q + (quantil - (valores <= q).astype(float)) / densidade
+    return rif, q, densidade
+
+
+def decomposicao_oaxaca_blinder(micro, outcome, controles, peso, col_grupo, grupo_favorecido, grupo_desfavorecido):
+    """Decomposição de Oaxaca-Blinder (twofold) do hiato médio de `outcome` entre
+    `grupo_favorecido` e `grupo_desfavorecido`, controlando por `controles` (lista de
+    colunas categóricas). `outcome` já deve estar na escala desejada — passar
+    log(renda) pra hiato multiplicativo/log-pontos, ou a RIF de um quantil (ver
+    `rif_quantil`) pra decompor naquele ponto da distribuição em vez da média.
+
+    Coeficientes de referência = média dos dois grupos (convenção Reimers, 1983) — evita
+    a arbitrariedade de usar só um dos dois grupos como "estrutura não-discriminatória"
+    (a alternativa clássica de Blinder/Oaxaca original).
+
+    - `parcela_explicada`: quanto do hiato vem de os dois grupos terem características
+      (idade/escolaridade/ocupação) diferentes.
+    - `parcela_nao_explicada`: quanto sobra mesmo com as MESMAS características — os
+      grupos têm retornos (coeficientes) diferentes pra elas. Proxy de discriminação,
+      não prova direta (outras variáveis não observadas aqui também caem aqui dentro).
+
+    Teste de significância: ajusta também um modelo único (mesmos coeficientes pros
+    controles nos dois grupos, só o intercepto de grupo muda) — o coeficiente de
+    `col_grupo` nesse modelo restrito já sai com erro-padrão e p-valor prontos, sem
+    precisar de bootstrap. É uma versão mais simples (assume retornos iguais aos
+    controles) do resíduo "não-explicado" acima — reportar os dois é intencional: um dá
+    o tamanho da decomposição completa, o outro dá o teste formal de significância.
+
+    Limitação: os pesos amostrais (V1028) entram como pesos analíticos do WLS
+    (statsmodels), não como pesos de desenho amostral complexo (replicação/bootstrap de
+    desenho) — os erros-padrão tendem a ser um pouco otimistas (mais estreitos que o
+    "correto" sob desenho complexo), mas a direção/magnitude do coeficiente não muda.
+    """
+    formula_controles = " + ".join(f"C({c})" for c in controles)
+    micro = micro.dropna(subset=[outcome, peso, col_grupo] + controles)
+    df_fav = micro[micro[col_grupo] == grupo_favorecido]
+    df_desf = micro[micro[col_grupo] == grupo_desfavorecido]
+
+    modelo_fav = smf.wls(f"{outcome} ~ {formula_controles}", data=df_fav, weights=df_fav[peso]).fit()
+    modelo_desf = smf.wls(f"{outcome} ~ {formula_controles}", data=df_desf, weights=df_desf[peso]).fit()
+
+    # Reindexa pro conjunto UNIÃO de colunas dummy (caso alguma categoria não apareça
+    # num dos dois grupos) preenchendo com 0 — trata ausência de dados como "grupo não
+    # observado nessa categoria", não como erro.
+    exog_fav = pd.DataFrame(modelo_fav.model.exog, columns=modelo_fav.model.exog_names, index=df_fav.index)
+    exog_desf = pd.DataFrame(modelo_desf.model.exog, columns=modelo_desf.model.exog_names, index=df_desf.index)
+    colunas_comuns = exog_fav.columns.union(exog_desf.columns)
+
+    xbar_fav = exog_fav.reindex(columns=colunas_comuns, fill_value=0.0).mul(df_fav[peso], axis=0).sum() / df_fav[peso].sum()
+    xbar_desf = exog_desf.reindex(columns=colunas_comuns, fill_value=0.0).mul(df_desf[peso], axis=0).sum() / df_desf[peso].sum()
+    beta_fav = modelo_fav.params.reindex(colunas_comuns, fill_value=0.0)
+    beta_desf = modelo_desf.params.reindex(colunas_comuns, fill_value=0.0)
+    beta_pooled = 0.5 * (beta_fav + beta_desf)
+
+    explicada = float((xbar_fav - xbar_desf) @ beta_pooled)
+    nao_explicada = float(xbar_fav @ (beta_fav - beta_pooled) + xbar_desf @ (beta_pooled - beta_desf))
+    hiato_total = float(xbar_fav @ beta_fav - xbar_desf @ beta_desf)
+
+    micro_pooled = micro[micro[col_grupo].isin([grupo_favorecido, grupo_desfavorecido])]
+    modelo_restrito = smf.wls(
+        f"{outcome} ~ C({col_grupo}, Treatment(reference='{grupo_desfavorecido}')) + {formula_controles}",
+        data=micro_pooled, weights=micro_pooled[peso],
+    ).fit()
+    nome_coef = next(c for c in modelo_restrito.params.index if col_grupo in c)
+
+    return {
+        "hiato_total": hiato_total,
+        "parcela_explicada": explicada,
+        "parcela_nao_explicada": nao_explicada,
+        "pct_explicada": 100 * explicada / hiato_total if hiato_total else np.nan,
+        "pct_nao_explicada": 100 * nao_explicada / hiato_total if hiato_total else np.nan,
+        "residuo_restrito_coef": float(modelo_restrito.params[nome_coef]),
+        "residuo_restrito_erro_padrao": float(modelo_restrito.bse[nome_coef]),
+        "residuo_restrito_p_valor": float(modelo_restrito.pvalues[nome_coef]),
+        "residuo_restrito_significativo": bool(modelo_restrito.pvalues[nome_coef] < 0.05),
+        "n_favorecido": int(len(df_fav)), "n_desfavorecido": int(len(df_desf)),
+    }
 
 
 def calcular_gini_ponderado(valores, pesos):

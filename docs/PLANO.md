@@ -266,17 +266,163 @@ mesmo dentro da mesma ocupação?
   `tabela_hiatos_significancia` ao recorte final (mesma idade/escolaridade/ocupação) é um
   refinamento natural para uma futura rodada.
 
+## Aprofundamento estatístico e novas variáveis ✅ (2026-09-04, terceira rodada)
+
+A pedido do usuário: (1) aplicar teste de significância formal ao resíduo da decomposição
+do hiato por ocupação (pendência deixada em aberto na seção anterior); (2) pensar em outras
+análises/cruzamentos/metodologias; (3) pensar em outras variáveis da PNAD ainda não usadas.
+Antes de implementar, apresentei um menu de opções (AskUserQuestion) e o usuário escolheu
+TUDO: regressão Oaxaca-Blinder (não a alternativa mais simples de só adaptar o teste de
+Welch), as 4 variáveis novas sugeridas (+ moradia/deslocamento, que não existem na PNAD
+Contínua trimestral — ver nota abaixo), e os 4 métodos extra sugeridos.
+
+**Moradia/deslocamento — não disponível nesta base**: características de domicílio só
+existem no bloco "Visita 1" da PNAD Contínua (sub-amostra menor, 1/5 dos domicílios,
+extração separada da que já temos) e mobilidade/deslocamento para o trabalho não é
+coletado na PNAD Contínua regular. Continua no escopo do Censo (Fase 2), não entrou nesta
+rodada.
+
+### Novas funções em `pnadc_core.py`
+
+- **`decomposicao_oaxaca_blinder`**: decomposição twofold clássica (Blinder 1973, Oaxaca
+  1973) do hiato médio de log-renda entre dois grupos, controlando por covariáveis
+  categóricas — regressão WLS separada por grupo, coeficientes de referência = média dos
+  dois grupos (convenção Reimers 1983, evita a arbitrariedade de usar só um grupo como
+  "estrutura não-discriminatória"). Separa o hiato em **parcela explicada** (diferença de
+  composição — idade/escolaridade/ocupação) e **parcela não-explicada** (mesma composição,
+  retorno diferente — proxy de discriminação, não prova direta). Ajusta TAMBÉM um modelo
+  único restrito (mesmos coeficientes de controle nos dois grupos, só o intercepto de grupo
+  muda) — o coeficiente de raça desse modelo já sai com erro-padrão e p-valor prontos, sem
+  precisar de bootstrap: é o teste de significância formal que faltava.
+- **`rif_quantil`**: Recentered Influence Function (Firpo-Fortin-Lemieux 2009) de um
+  quantil — permite rodar a MESMA decomposição de Oaxaca-Blinder em qualquer ponto da
+  distribuição de renda (não só na média), respondendo "o hiato residual é maior no topo
+  ou na base da distribuição?".
+- Validadas com dado sintético (grupo com composição de escolaridade diferente E retorno
+  diferente à escolaridade, gerado com parâmetros conhecidos) antes de rodar nos dados
+  reais — `decomposicao_oaxaca_blinder` recuperou o hiato bruto exatamente e a proporção
+  explicada/não-explicada bateu com a conta manual; `rif_quantil` passou no teste de
+  consistência interna (média da RIF ≈ o próprio quantil).
+- Limitação documentada: os pesos amostrais entram como pesos analíticos do WLS
+  (statsmodels), não como pesos de desenho amostral complexo (réplicas/bootstrap de
+  desenho) — os erros-padrão tendem a ser um pouco otimistas, mas a direção/magnitude do
+  coeficiente não muda.
+
+### Resultado: decomposição de Oaxaca-Blinder (com teste de significância)
+
+Mesmo universo da decomposição por padronização direta (últimos 8 trimestres, ocupados
+com ocupação identificada, Branca vs. Negra):
+
+| Controles | Explicada | Não-explicada | Coef. residual (log) | p-valor |
+|---|---|---|---|---|
+| + faixa etária | 1,6% | 98,4% | 0,422 | < 0,001 |
+| + faixa etária + escolaridade | 44,8% | 55,2% | 0,235 | < 0,001 |
+| + faixa etária + escolaridade + ocupação | 52,6% | 47,4% | 0,202 | < 0,001 |
+
+O coeficiente residual final (0,202 em log-pontos) converte pra um hiato de **~22,4%**
+(e^0,202 − 1) — **muito próximo dos 24,3% da padronização direta** feita na rodada
+anterior. Dois métodos diferentes (padronização direta vs. regressão) convergindo pro mesmo
+número é uma checagem de robustez útil: o achado "sobra ~1/4 do hiato mesmo controlando
+idade/escolaridade/ocupação" não é artefato de um método específico, e agora tem teste de
+significância formal (p < 0,001) confirmando que o resíduo não é zero.
+
+**RIF por quantil** (mesmos controles completos, Branca vs. Negra):
+
+| Ponto da distribuição | Não-explicada | Hiato residual (convertido) |
+|---|---|---|
+| P10 (base) | 58,2% | ~30,6% |
+| P50 (mediana) | 45,5% | ~14,9% |
+| P90 (topo) | 41,1% | ~36,1% |
+
+Achado novo: o hiato residual tem formato em **U** — menor na mediana (~15%), mas maior
+tanto na base (P10, ~31% — indício de "piso pegajoso": mesmo no topo da pirâmide de baixa
+renda, negros ganham menos que brancos comparáveis) quanto no topo (P90, ~36% — "teto de
+vidro", consistente com o achado já visto de que o hiato se abre dramaticamente no Superior
+completo). O grosso do hiato NÃO está concentrado num único ponto da distribuição.
+
+### Resultado: hiato por Região
+
+`gerar_hiato_regional` aplica o mesmo teste de Welch trimestre a trimestre, quebrado pelas
+5 Grandes Regiões (`data/processed/hiato_regional.parquet`, 290 linhas = 58 trimestres × 5
+regiões). Ver `docs/img/hiato_racial_por_regiao.png` pra leitura visual.
+
+### Resultado: índice de segregação ocupacional (Duncan)
+
+`gerar_indice_segregacao_ocupacional` calcula o índice de dissimilaridade de Duncan (1955)
+entre a distribuição de Branca e Negra nas 11 categorias de `grupamento_ocupacional`,
+trimestre a trimestre. No trimestre mais recente: **17,0%** — ou seja, 17% de um dos grupos
+precisaria trocar de categoria ocupacional pra igualar a distribuição do outro. Isso mede
+segregação ocupacional EM SI (quem trabalha em quê), diferente da decomposição do hiato
+(que mede o EFEITO da ocupação na renda) — os dois se complementam.
+
+### Resultado: quebra estrutural nos 3 eventos já mapeados
+
+`gerar_quebra_estrutural` testa (OLS com dummy pós-evento + interação com tendência,
+equivalente a um teste de Chow simplificado — uma quebra conhecida a priori, não busca por
+múltiplas quebras como Bai-Perron) se a trajetória do hiato % muda de patamar/inclinação:
+
+| Evento | Mudança de patamar | Mudança de inclinação | Significativo? |
+|---|---|---|---|
+| Reforma trabalhista (2017 T3) | +9,45 p.p. (p<0,001) | −0,43 p.p./trim. (p<0,001) | Sim |
+| Reforma da previdência (2019 T4) | +8,87 p.p. (p=0,004) | −0,37 p.p./trim. (p<0,001) | Sim |
+| Recessão (2015 T1) | +5,58 p.p. (p=0,004) | −0,08 p.p./trim. (p=0,74, NS) | Sim (só no patamar) |
+
+Interpretação cuidadosa: o teste aponta mudança estatisticamente detectável na trajetória
+ao redor dos 3 eventos, mas é uma correlação temporal simples (regressão numa série
+agregada de 58 pontos), não inferência causal — outros fatores concorrentes no mesmo
+período (ex.: a própria pandemia, perto da reforma da previdência) não são controlados
+aqui. Ver `docs/img/hiato_quebra_estrutural.png`.
+
+### Novas variáveis da PNAD (já extraídas, sem necessidade de reextração)
+
+Quatro novos `data/processed/*.parquet`, todos por raça × gênero × faixa etária (Brasil +
+geografias, exceto alfabetização que é Brasil apenas):
+
+- **`informalidade.parquet`**: % com carteira assinada (VD4009, entre empregados) e % que
+  contribui para previdência (VD4012, entre todos os ocupados). **Bug real encontrado e
+  corrigido**: `VD4009` tem 10 categorias e vem ZERO-PADDED (`'01'`..`'10'`) no layout do
+  IBGE — o código inicial usava `'1'`,`'2'` sem padding, o que fazia `pct_com_carteira` sair
+  inteiramente NULO sem nenhum erro (`CASE` sem match = NULL, silencioso). Só percebido ao
+  conferir a distribuição bruta dos valores (`value_counts()`) em vez de confiar que "rodou
+  sem erro" = "está certo" — mais uma vez, o padrão de bug deste projeto (ver Etapa 3 e o bug
+  do erro padrão): decodificação de código categórico do layout do IBGE que não é o que se
+  assume à primeira vista.
+- **`horas_trabalhadas.parquet`**: horas semanais habituais (VD4031) e uma renda-por-hora
+  aproximada — testa se o hiato de renda reflete jornada diferente ou remuneração por hora
+  menor. Resultado (2026 T2): jornada é parecida entre os grupos (38,8h Branca vs. 37,7h
+  Negra vs. 36,7h Indígena), mas o hiato na renda POR HORA (~65%) é quase idêntico ao hiato
+  mensal (67%) — não é sobre jornada, é remuneração por hora mesmo.
+- **`alfabetizacao.parquet`**: % alfabetizado (V3001), mais relevante em 60+ anos —
+  complementa `nivel_instrucao` (que só mostra o nível JÁ concluído). **Frequência escolar
+  (V3014) foi DESCARTADA desta rodada**: checando a cobertura bruta antes de publicar
+  qualquer número (mesmo hábito de validação), a % de população 14-17 anos com V3014
+  não-nulo é de só ~6-8% em vários trimestres (2018 a 2026) — bem menor que o ~95% de V3001
+  ou os ~20% que uma rotação padrão de painel (1 de 5 grupos por trimestre) explicaria. Não
+  conseguimos confirmar dentro do orçamento desta rodada se essa subamostra pequena é
+  aleatória (estimativa ainda válida, só com IC mais largo) ou enviesada por algum critério
+  de coleta que não identificamos — preferimos não publicar em vez de arriscar um número
+  errado sobre evasão escolar.
+- **`desalento_subutilizacao.parquet`**: % em força de trabalho potencial (VD4003) e % de
+  desalento (VD4005, desistiu de procurar emprego) entre quem está fora da força de
+  trabalho — vai além da taxa de desocupação simples já existente em `ocupacao.parquet`.
+
+Ver `docs/ANALISE_FASE1.md` pra leitura de cada gráfico com os números do trimestre mais
+recente, e `docs/LIMITACOES_E_METODOLOGIA.md` pra decodificação completa das variáveis.
+
+---
+
 ## 🏁 Fase 1 concluída (2026-09-04)
 
-Todas as 7 etapas (0-6) fechadas no mesmo dia, incl. uma segunda rodada de expansão a
-pedido. Entregáveis: `src/ingestion/{extrator_pnadc,baixar_deflator}.py`,
+Todas as 7 etapas (0-6) fechadas no mesmo dia, incl. duas rodadas de expansão a pedido (a
+segunda com teste de significância formal via Oaxaca-Blinder, hiato regional, segregação
+ocupacional, quebra estrutural e 4 variáveis novas — ver seção acima). Entregáveis:
+`src/ingestion/{extrator_pnadc,baixar_deflator}.py`,
 `src/processing/{agregacoes_pnadc,graficos_fase1,apresentacao_fase1}.py`,
-`src/utils/pnadc_core.py`,
-`data/processed/{renda,escolaridade,ocupacao,deflator_ibge,renda_por_escolaridade,renda_completa,hiato_racial,decomposicao_hiato_ocupacional}.parquet`,
-`docs/{LIMITACOES_E_METODOLOGIA,ANALISE_FASE1}.md`, 44 gráficos em `docs/img/` (galeria
+`src/utils/pnadc_core.py`, 16 datasets em `data/processed/*.parquet`,
+`docs/{LIMITACOES_E_METODOLOGIA,ANALISE_FASE1}.md`, 54 gráficos em `docs/img/` (galeria
 completa em `docs/ANALISE_FASE1.md`, destaques no README), apresentação
-`docs/Datahub_Racial_Brasil_Fase1.pptx` (58 slides). Próximo passo: Fase 2 (Censo
-Demográfico) — ainda não detalhada.
+`docs/Datahub_Racial_Brasil_Fase1.pptx`. Próximo passo: Fase 2 (Censo Demográfico) — ainda
+não detalhada.
 
 ---
 

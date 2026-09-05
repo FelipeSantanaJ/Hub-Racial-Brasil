@@ -3,15 +3,16 @@
 Galeria completa dos gráficos exploratórios da Fase 1 — todas as interseções entre raça,
 gênero, faixa etária e escolaridade, para renda habitual real (deflator oficial do IBGE, ver
 [PLANO.md](PLANO.md)), Brasil, salvo indicação contrária. Gerados por
-`src/processing/graficos_fase1.py` a partir de
-`data/processed/{renda,escolaridade,renda_por_escolaridade,renda_completa,hiato_racial,decomposicao_hiato_ocupacional}.parquet`.
+`src/processing/graficos_fase1.py` a partir dos datasets em `data/processed/*.parquet`.
 Também disponível como apresentação: [Datahub_Racial_Brasil_Fase1.pptx](Datahub_Racial_Brasil_Fase1.pptx).
 
-44 gráficos ao todo. Índice:
+53 gráficos ao todo. Índice:
 
 - [Raça](#raça)
 - [Hiato Branca vs. Negra — série histórica](#hiato-branca-vs-negra--série-histórica)
 - [É ocupação, ou é cor da pele?](#é-ocupação-ou-é-cor-da-pele)
+- [Aprofundamentos: região, segregação e quebras estruturais](#aprofundamentos-região-segregação-e-quebras-estruturais)
+- [Aprofundamentos: novas variáveis da PNAD](#aprofundamentos-novas-variáveis-da-pnad)
 - [Raça × Gênero](#raça--gênero)
 - [Preta × Parda × Gênero](#preta--parda--gênero)
 - [Raça × Faixa etária](#raça--faixa-etária)
@@ -74,6 +75,71 @@ escolaridade e mesma categoria ocupacional, sobra um hiato de ~24%** que essas t
 não explicam. Não é prova direta de discriminação (outros fatores não medidos aqui — horas
 trabalhadas, formalidade, região, senioridade dentro da ocupação — também podem contribuir),
 mas mostra que "estar na mesma ocupação" está longe de eliminar o hiato racial de renda.
+
+**Mesma pergunta, com teste de significância formal** — regressão (Oaxaca-Blinder):
+
+![Decomposição de Oaxaca-Blinder](img/oaxaca_blinder_decomposicao.png)
+
+Com os mesmos controles, o resíduo (parte "não-explicada" — mesma idade, escolaridade e
+ocupação, retorno diferente) converge pra **+22%**, muito perto dos 24% da padronização
+direta acima — dois métodos diferentes concordando é uma checagem de robustez importante —
+e agora **com teste de significância** (p < 0,001, não é ruído amostral).
+
+![Hiato residual por quantil](img/oaxaca_blinder_quantis.png)
+
+O resíduo não é uniforme ao longo da distribuição de renda: menor na mediana (~15%), mas
+maior tanto na base (P10, ~31% — "piso pegajoso") quanto no topo (P90, ~36% — "teto de
+vidro", coerente com o hiato que se abre no Superior completo).
+
+## Aprofundamentos: região, segregação e quebras estruturais
+
+![Hiato por região](img/hiato_racial_por_regiao.png)
+
+O hiato racial varia MUITO entre regiões — Sudeste tem o maior (65-85% ao longo da série),
+Sul o menor (45-55%). A desigualdade regional do Brasil também aparece especificamente no
+hiato racial, não é uniforme pelo país.
+
+![Segregação ocupacional](img/segregacao_ocupacional.png)
+
+Índice de dissimilaridade de Duncan: ~17% de um dos grupos (Branca ou Negra) precisaria
+trocar de categoria ocupacional pra igualar a distribuição do outro — mede segregação
+ocupacional em si, à parte do efeito dela na renda (já coberto pela decomposição acima).
+
+![Quebra estrutural](img/hiato_quebra_estrutural.png)
+
+Teste tipo Chow (simplificado) nos 3 eventos já mapeados como possíveis pontos de inflexão:
+os 3 mostram mudança estatisticamente significativa de patamar e/ou inclinação — não é
+prova de causalidade (a série tem só 58 pontos e outros eventos concorrentes, como a
+pandemia perto da reforma da previdência, não são controlados), mas é evidência de
+correlação temporal que vale documentar.
+
+## Aprofundamentos: novas variáveis da PNAD
+
+Quatro variáveis da PNAD ainda não exploradas nas rodadas anteriores — ver decodificação
+completa em [LIMITACOES_E_METODOLOGIA.md](LIMITACOES_E_METODOLOGIA.md).
+
+![Informalidade](img/informalidade_carteira_assinada.png)
+
+% com carteira assinada (entre empregados): Branca 72%, Negra 63%, Indígena 52% (2026 T2) —
+o hiato de proteção social/formalização acompanha o hiato de renda.
+
+![Renda por hora](img/renda_por_hora.png)
+
+Testando se o hiato de renda vem de jornada menor: **não vem** — a jornada semanal é
+parecida entre os três grupos (38,8h Branca vs. 37,7h Negra vs. 36,7h Indígena, 2026 T2), e
+o hiato na renda POR HORA (~65%) é quase idêntico ao hiato na renda mensal (67%). O hiato é
+de remuneração por hora mesmo, não de quantas horas se trabalha.
+
+![Alfabetização 60+](img/alfabetizacao_60mais.png)
+
+Analfabetismo residual ainda é uma realidade nas cohorts mais velhas: 93% Branca vs. 80%
+Negra vs. 72% Indígena alfabetizados entre 60+ anos (2026 T2).
+
+![Desalento](img/desalento.png)
+
+Entre quem está fora da força de trabalho, Negra (7,4%) e Indígena (5,9%) desistem de
+procurar emprego a taxas bem maiores que Branca (3,4%, 2026 T2) — desalento vai além da taxa
+de desocupação simples e também tem recorte racial.
 
 ## Raça × Gênero
 
@@ -217,11 +283,23 @@ as outras duas em quase toda célula" segura mesmo nesse nível de detalhe.
   IBGE ("sem instrução e menos de 1 ano de estudo") — **não** é código de não-resposta; quem
   não respondeu/não se aplica já é excluído antes de qualquer gráfico (ver
   [LIMITACOES_E_METODOLOGIA.md](LIMITACOES_E_METODOLOGIA.md)).
-- Estes são gráficos **exploratórios** — só o hiato Branca-Negra (seção "Hiato" acima) passou
-  por teste de significância formal; as demais comparações (por faixa etária, escolaridade,
-  a decomposição por ocupação, etc.) ainda não — são comparações de médias ponderadas, não
-  testes estatísticos completos.
-- **Bug estatístico real encontrado e corrigido nesta rodada**: a função
+- Estes são gráficos **exploratórios** — o hiato Branca-Negra nacional e por região, e a
+  decomposição de Oaxaca-Blinder (incl. por quantil), passaram por teste de significância
+  formal (Welch e/ou o coeficiente de regressão, respectivamente); as demais comparações
+  (por faixa etária, escolaridade, informalidade, alfabetização, desalento etc.) ainda não —
+  são comparações de médias ponderadas, não testes estatísticos completos.
+- **Bug estatístico real encontrado e corrigido (rodada 2)**: a função
   `erro_padrao_media_ponderada` em `pnadc_core.py` (herdada do projeto anterior) calculava um
   erro padrão inflado por um fator de ~√n em relação ao valor correto — bug puramente de
   código, não de dados; documentado em detalhe no `docs/PLANO.md`.
+- **Bug de decodificação real encontrado e corrigido (rodada 3)**: `VD4009` (posição na
+  ocupação/carteira assinada) tem 10 categorias e vem zero-padded (`'01'`..`'10'`) no layout
+  do IBGE — o código inicial usava `'1'`,`'2'` sem padding, o que fazia `pct_com_carteira`
+  sair inteiramente NULO sem erro nenhum. Encontrado só ao conferir a distribuição bruta dos
+  valores antes de confiar no número.
+- **Frequência escolar (V3014) descartada desta rodada**: a cobertura de V3014 na população
+  14-17 anos é de só ~6-8% em vários trimestres testados (2018 a 2026) — bem menor que o
+  ~95% de V3001 (alfabetização) ou os ~20% que uma rotação padrão de painel explicaria.
+  Não conseguimos confirmar dentro do orçamento desta rodada se essa subamostra é aleatória
+  (estimativa válida, só com IC mais largo) ou enviesada — preferimos não publicar um número
+  sobre evasão escolar sem entender a regra de coleta exata do IBGE pra essa variável.
