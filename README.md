@@ -29,9 +29,27 @@ móvel de 4 trimestres para reduzir ruído (ver
 
 O achado mais forte da Fase 1: o hiato de renda entre Branca e Negra/Indígena não desaparece
 entre pessoas com o mesmo nível de instrução — ele se abre dramaticamente justo no topo
-(Superior completo). Galeria completa (Preta vs. Parda separadas, cortes por gênero, por
-faixa etária, e mais) e a leitura de cada gráfico em
-[docs/ANALISE_FASE1.md](docs/ANALISE_FASE1.md).
+(Superior completo).
+
+### Hiato Branca vs. Negra, com significância estatística
+
+![Hiato percentual Branca vs. Negra](docs/img/hiato_racial_percentual.png)
+
+Testado (Welch, IC 95%) trimestre a trimestre a partir dos microdados: os 58 trimestres da
+série são estatisticamente significativos — o hiato caiu de ~76% para ~66% entre 2012 e 2026.
+
+### É ocupação, ou é cor da pele?
+
+![Decomposição do hiato por ocupação](docs/img/decomposicao_hiato_ocupacional.png)
+
+Controlando por idade, escolaridade e ocupação (mesma categoria ocupacional), o hiato bruto
+de 67% cai para 24% — mas não desaparece. Boa parte do hiato racial de renda não se explica
+por "estar em ocupações diferentes".
+
+**44 gráficos ao todo** — raça × gênero × faixa etária × escolaridade em todas as
+combinações, Preta e Parda sempre também separadas. Galeria completa, com a leitura de cada
+gráfico, em [docs/ANALISE_FASE1.md](docs/ANALISE_FASE1.md), ou como apresentação em
+[docs/Datahub_Racial_Brasil_Fase1.pptx](docs/Datahub_Racial_Brasil_Fase1.pptx).
 
 ## Escopo do MVP
 

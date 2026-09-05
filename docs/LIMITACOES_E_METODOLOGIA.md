@@ -89,13 +89,15 @@ especificamente.
 - **Recessão de 2015-2016**: candidata a período de piora aguda em renda/ocupação,
   possivelmente com efeito desigual entre raças — checar na Etapa 6.
 
-## Variável ausente: VD4011A
+## Variável corrigida: VD4011A → VD4011 (grupamento ocupacional)
 
-`VD4011A` (grupamento ocupacional do trabalho principal) nunca existiu com esse nome exato
-em nenhum trimestre da série — o nome correto no layout atual do IBGE é `VD4011` (sem "A").
-Não afeta nenhum cruzamento obrigatório do MVP (renda, escolaridade, condição de ocupação
-usam outras variáveis). Corrigido no extrator para trimestres futuros; os 58 trimestres já
-extraídos ficam sem essa coluna específica.
+`VD4011A` nunca existiu com esse nome exato em nenhum trimestre da série — o nome correto no
+layout do IBGE é `VD4011` (sem "A"), 11 categorias (diretores/gerentes, profissionais de
+nível superior, técnicos, apoio administrativo, serviços/comércio, agropecuária,
+construção/ofícios, operadores de máquinas, ocupações elementares, forças armadas/policiais,
+maldefinidas). Corrigido no extrator e a série histórica completa foi **reextraída** (58
+trimestres) para trazer essa coluna — usada na decomposição do hiato racial por ocupação
+(ver `docs/PLANO.md`, seção "Decomposição do hiato").
 
 ## Nota técnica: tipos de variável no layout do IBGE
 
