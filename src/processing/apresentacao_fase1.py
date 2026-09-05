@@ -225,6 +225,17 @@ SECOES = [
     ("Hiato Branca vs. Negra — série histórica", "Com teste de significância (Welch, IC 95%)", [
         ("hiato_racial_percentual.png", "Hiato relativo caiu de ~76% para ~66% — todos os 58 trimestres são estatisticamente significativos."),
         ("hiato_racial_absoluto.png", "Em R$, o hiato disparou na pandemia (pico ~R$2.035) antes de recuar."),
+        ("hiato_genero_historico_todas.png", "Abertura por gênero — o hiato é maior entre homens que entre mulheres em quase todo o período."),
+        ("hiato_faixa_etaria_historico_todas.png", "Abertura por faixa etária — cresce muito com a idade, de ~15-18% entre jovens a acima de 80% depois dos 40."),
+        ("hiato_escolaridade_historico_todas.png", "Abertura por nível de instrução — mais ruidoso (amostra menor por célula), mas o padrão de abertura no Superior completo aparece na maior parte da série."),
+        ("hiato_racial_por_geracao.png", "Abertura por geração — a MESMA coorte de nascimento envelhecendo, não a mesma faixa etária com pessoas diferentes a cada trimestre."),
+    ]),
+    ("Hiato Preta vs. Parda — série histórica", "Mesmo teste de Welch, dentro da população negra", [
+        ("hiato_preta_parda_percentual.png", "O sinal do hiato virou ao longo da série: Preta chegou a ganhar mais que Parda até ~2015, hoje ganha menos (-6%)."),
+        ("hiato_genero_historico_pretaparda.png", "Abertura por gênero."),
+        ("hiato_faixa_etaria_historico_pretaparda.png", "Abertura por faixa etária."),
+        ("hiato_escolaridade_historico_pretaparda.png", "Abertura por nível de instrução."),
+        ("hiato_geracao_historico_pretaparda.png", "Abertura por geração — a MESMA coorte de nascimento envelhecendo."),
     ]),
     ("É ocupação, ou é cor da pele?", "Decomposição: quanto idade, escolaridade e ocupação explicam do hiato", [
         ("decomposicao_hiato_ocupacional.png", "Hiato bruto 67% → 64% (só idade) → 30% (+escolaridade) → 24% (+ocupação, residual). Ocupação SOZINHA (isolada, sem outros controles) já leva o hiato a 33%."),
@@ -232,12 +243,15 @@ SECOES = [
         ("oaxaca_blinder_quantis.png", "O hiato residual não é uniforme: menor na mediana (~15%), maior na base (~31%, 'piso pegajoso') e no topo (~36%, 'teto de vidro')."),
         ("renda_por_raca_ocupacao.png", "Dentro de CADA categoria ocupacional, Branca ganha mais que Negra — o hiato não é só 'estar em ocupações diferentes'."),
     ]),
-    ("Raça cruzada com tudo: as combinações que faltavam", "Heatmaps raça × 2 dimensões, um painel por raça — fecha a matriz completa pedida pelo usuário", [
+    ("Raça cruzada com tudo: as combinações que faltavam", "Heatmaps raça × 2 dimensões, um painel por raça — fecha a matriz completa pedida pelo usuário. Ocupação fica só no snapshot (pooled 8 trimestres): 11 categorias já deixam a célula por trimestre isolado fina demais pra uma série histórica confiável.", [
         ("raca_genero_geracao.png", "Renda por raça, gênero e geração."),
+        *_SERIE_GENERO_TODAS, *_SERIE_GERACAO_TODAS,
         ("raca_genero_ocupacao.png", "Renda por raça, gênero e ocupação."),
         ("raca_faixa_etaria_escolaridade.png", "Renda por raça, faixa etária e escolaridade."),
+        *_SERIE_FAIXA_TODAS, *_SERIE_ESCOLARIDADE_TODAS,
         ("raca_faixa_etaria_ocupacao.png", "Renda por raça, faixa etária e ocupação."),
         ("raca_geracao_escolaridade.png", "Renda por raça, geração e escolaridade."),
+        *_SERIE_GERACAO_TODAS, *_SERIE_ESCOLARIDADE_TODAS,
         ("raca_geracao_ocupacao.png", "Renda por raça, geração e ocupação."),
         ("raca_escolaridade_ocupacao.png", "Renda por raça, escolaridade e ocupação — dentro do mesmo nível de instrução E mesma ocupação, o hiato racial ainda aparece na maioria das células."),
     ]),
@@ -254,7 +268,11 @@ SECOES = [
     ]),
     ("Geração: seguindo a mesma coorte, não a mesma faixa etária", "A PNAD é um corte transversal repetido — 'pessoas de 14-17 anos' em 2012 e 2026 são pessoas diferentes", [
         ("hiato_racial_por_geracao.png", "Cada linha é a MESMA coorte de nascimento envelhecendo — o hiato varia bastante entre gerações e ao longo do tempo dentro de cada uma."),
-        ("renda_por_geracao_raca.png", "Renda por geração e raça, cada uma na idade em que está hoje."),
+        ("renda_por_geracao_raca.png", "Renda por geração e raça, cada uma na idade em que está hoje (snapshot)."),
+        *_SERIE_GERACAO_TODAS,
+        ("renda_preta_parda_geracao.png", "Preta vs. Parda por geração (snapshot)."),
+        *_SERIE_GERACAO_PP,
+        ("hiato_geracao_historico_pretaparda.png", "Hiato Preta vs. Parda por geração, série histórica com Welch."),
     ]),
     ("Quem está no topo 10%? Negra vs. Branca", "Limiar (P90) calculado DENTRO de cada raça, não um corte único pro Brasil", [
         ("topo10_genero.png", "% de mulheres no topo 10% de cada raça — Branca sempre um pouco à frente, mas a distância vem encolhendo."),
@@ -329,11 +347,13 @@ SECOES = [
         ("renda_preta_parda_escolaridade_superior_compl.png", "Superior completo."),
     ]),
     ("Raça × Gênero × Escolaridade", None, [
-        ("renda_por_raca_escolaridade_homens.png", "Hiato no Superior completo é maior entre homens (~46%)."),
-        ("renda_por_raca_escolaridade_mulheres.png", "...do que entre mulheres (~36%)."),
+        ("renda_por_raca_escolaridade_homens.png", "Hiato no Superior completo é maior entre homens (~46%), snapshot."),
+        ("renda_por_raca_escolaridade_mulheres.png", "...do que entre mulheres (~36%), snapshot."),
+        *_SERIE_GENERO_TODAS, *_SERIE_ESCOLARIDADE_TODAS,
     ]),
     ("Raça × Gênero × Faixa etária", None, [
-        ("renda_por_faixa_etaria_raca_genero.png", "Mesmo efeito de abertura em 40-59 anos, visível nos dois gêneros."),
+        ("renda_por_faixa_etaria_raca_genero.png", "Mesmo efeito de abertura em 40-59 anos, visível nos dois gêneros (snapshot)."),
+        *_SERIE_GENERO_TODAS, *_SERIE_FAIXA_TODAS,
     ]),
     ("Escolaridade × Raça × Gênero", "Combinado (Superior completo, o destaque) + um por nível", [
         ("escolaridade_por_raca_genero.png", "Conclusão do superior: hiato racial >2x; mulheres à frente dos homens em todos os grupos."),
@@ -345,7 +365,8 @@ SECOES = [
         ("escolaridade_por_raca_genero_superior_incompl.png", "Superior incompleto."),
     ]),
     ("Todas as dimensões de uma vez", "Raça × Gênero × Faixa etária × Escolaridade", [
-        ("renda_completa_heatmap.png", "Seis painéis (raça×gênero), faixa etária × nível de instrução em cada um — o padrão racial se mantém."),
+        ("renda_completa_heatmap.png", "Seis painéis (raça×gênero), faixa etária × nível de instrução em cada um — o padrão racial se mantém (snapshot)."),
+        *_SERIE_GENERO_TODAS, *_SERIE_FAIXA_TODAS, *_SERIE_ESCOLARIDADE_TODAS,
     ]),
 ]
 
