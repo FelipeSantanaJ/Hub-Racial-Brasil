@@ -67,12 +67,22 @@ mesmas pessoas ao longo do tempo (é um corte transversal repetido) — por isso
 seguimos **gerações** (coortes de nascimento) pra ver o hiato dentro do mesmo grupo
 envelhecendo, não misturado entre gerações diferentes.
 
-**59 gráficos ao todo** — raça × gênero × faixa etária × escolaridade em todas as
+### O hiato educacional se abre conforme sobe o quartil de renda
+
+![Quartis por escolaridade](docs/img/quartis_escolaridade.png)
+
+Generalizando o topo 10% pra toda a distribuição — os 4 quartis (Q1 = 25% mais pobres, Q4 =
+25% mais ricos), cada um calculado DENTRO de cada raça: a diferença de escolaridade entre
+Negra e Branca é de só ~6 p.p. no quartil mais pobre, mas chega a ~32 p.p. no mais rico.
+Quanto mais alto na distribuição de renda, maior o hiato educacional entre as raças.
+
+**63 gráficos ao todo** — raça × gênero × faixa etária × escolaridade em todas as
 combinações (Preta e Parda sempre também separadas), mais aprofundamentos: hiato por região,
 segregação ocupacional (índice de Duncan), teste de quebra estrutural em 3 eventos
 históricos, novas variáveis (informalidade, renda por hora, alfabetização, desalento),
-hiato/renda por geração e perfil de quem está no topo 10% de cada raça. Galeria completa, com
-a leitura de cada gráfico, em [docs/ANALISE_FASE1.md](docs/ANALISE_FASE1.md), ou como
+hiato/renda por geração, e o perfil de quem está no topo 10% e em cada um dos 4 quartis de
+renda de cada raça. Galeria completa, com a leitura de cada gráfico, em
+[docs/ANALISE_FASE1.md](docs/ANALISE_FASE1.md), ou como
 apresentação em
 [docs/Datahub_Racial_Brasil_Fase1.pptx](docs/Datahub_Racial_Brasil_Fase1.pptx).
 

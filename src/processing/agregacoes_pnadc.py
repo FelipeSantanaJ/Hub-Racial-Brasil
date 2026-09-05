@@ -522,6 +522,78 @@ def gerar_perfil_topo10_racial(con: duckdb.DuckDBPyConnection) -> None:
     print(f"perfil_topo10_racial.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
+def gerar_perfil_quartis_racial(con: duckdb.DuckDBPyConnection) -> None:
+    """Perfil demográfico de cada QUARTIL de renda (Q1 = 25% que menos ganham, ..., Q4 =
+    25% que mais ganham) DENTRO de cada raça (Branca e Negra — Indígena fica de fora,
+    mesma razão do topo 10%: amostra insuficiente pra 3 quantis confiáveis por
+    trimestre), trimestre a trimestre.
+
+    Generaliza `gerar_perfil_topo10_racial` (que só olha o topo 10%, um recorte mais
+    estreito — P90, não P75) pros 4 quartis de uma vez — permite comparar a composição
+    demográfica de CADA fatia da distribuição de renda entre Negra e Branca, não só quem
+    está no topo. Limiares (P25/P50/P75) calculados DENTRO de cada raça separadamente —
+    "Q1 de Branca" e "Q1 de Negra" não têm o mesmo intervalo de R$, cada um é "os 25% que
+    menos ganham dentro do próprio grupo".
+
+    Universo/dimensões/formato: iguais a `gerar_perfil_topo10_racial`. Mesma ressalva de
+    heaping documentada lá — `pct_populacao_capturada` aqui é o peso de cada quartil
+    sobre o total do grupo (deveria ficar perto de 25%, pode desviar um pouco pela mesma
+    razão: renda autodeclarada concentrada em valores redondos).
+    """
+    dimensoes = ["sexo", "faixa_etaria", "geracao", "nivel_instrucao"]
+    trimestres = con.execute("SELECT DISTINCT ano, trimestre FROM base ORDER BY ano, trimestre").df()
+
+    resultados = []
+    for _, row in trimestres.iterrows():
+        ano, trimestre = int(row["ano"]), int(row["trimestre"])
+        micro = con.execute(f"""
+            SELECT raca_cor, sexo, faixa_etaria, geracao, nivel_instrucao,
+                   renda_habitual_real, peso
+            FROM base
+            WHERE ano = {ano} AND trimestre = {trimestre}
+              AND raca_cor IN ('Branca', 'Preta', 'Parda')
+              AND renda_habitual_real IS NOT NULL AND renda_habitual_real > 0
+        """).df()
+        if micro.empty:
+            continue
+        micro["raca_cor"] = micro["raca_cor"].replace({"Preta": "Negra", "Parda": "Negra"})
+
+        for raca in ("Branca", "Negra"):
+            grupo = micro[micro["raca_cor"] == raca].copy()
+            if len(grupo) < 200:  # amostra mínima maior — 3 limiares em vez de 1
+                continue
+            peso_grupo = grupo["peso"].sum()
+            p25 = pnadc_core.quantil_ponderado(grupo["renda_habitual_real"], grupo["peso"], 0.25)
+            p50 = pnadc_core.quantil_ponderado(grupo["renda_habitual_real"], grupo["peso"], 0.50)
+            p75 = pnadc_core.quantil_ponderado(grupo["renda_habitual_real"], grupo["peso"], 0.75)
+            grupo["quartil"] = np.select(
+                [grupo["renda_habitual_real"] < p25,
+                 grupo["renda_habitual_real"] < p50,
+                 grupo["renda_habitual_real"] < p75],
+                ["Q1 (25% que menos ganham)", "Q2", "Q3"],
+                default="Q4 (25% que mais ganham)",
+            )
+            for quartil, fatia in grupo.groupby("quartil", observed=True):
+                peso_fatia = fatia["peso"].sum()
+                if peso_fatia == 0:
+                    continue
+                pct_capturado = 100 * peso_fatia / peso_grupo
+                for dimensao in dimensoes:
+                    for categoria, sub in fatia.groupby(dimensao, observed=True):
+                        resultados.append({
+                            "ano": ano, "trimestre": trimestre, "raca_cor": raca,
+                            "quartil": quartil, "n_quartil": len(fatia),
+                            "pct_populacao_capturada": pct_capturado,
+                            "dimensao": dimensao, "categoria": categoria,
+                            "pct_do_quartil": 100 * sub["peso"].sum() / peso_fatia,
+                        })
+
+    df = pd.DataFrame(resultados)
+    destino = OUTPUT_DIR / "perfil_quartis_racial.parquet"
+    df.to_parquet(destino, index=False)
+    print(f"perfil_quartis_racial.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
+
+
 def gerar_hiato_regional(con: duckdb.DuckDBPyConnection) -> None:
     """Hiato Branca vs. Negra por Região, trimestre a trimestre, com teste de
     significância (Welch) — mesmo método de `gerar_hiato_racial`, quebrado por região
@@ -876,6 +948,7 @@ def main() -> None:
     gerar_decomposicao_hiato_ocupacional(con)
     gerar_decomposicao_oaxaca_blinder(con)
     gerar_perfil_topo10_racial(con)
+    gerar_perfil_quartis_racial(con)
     gerar_indice_segregacao_ocupacional(con)
     gerar_ocupacao(con)
     gerar_informalidade(con)

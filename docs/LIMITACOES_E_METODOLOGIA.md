@@ -154,7 +154,7 @@ arquivo trimestral regular não traz essas colunas). Mobilidade/deslocamento par
 não é coletado na PNAD Contínua regular. Ambos ficam para o Censo Demográfico (Fase 2), que
 tem os dois blocos.
 
-## Geração (coorte de nascimento sintética) e "topo 10%" (2026-09-05)
+## Geração (coorte de nascimento sintética), "topo 10%" e os 4 quartis (2026-09-05)
 
 - **Geração**: `ano_nascimento_aprox = ano da pesquisa - V2009` (idade) — aproximado, não
   considera mês de nascimento x mês de entrevista, pode errar por 1 ano perto de cada
@@ -176,6 +176,15 @@ tem os dois blocos.
   `perfil_topo10_racial.parquet` registra o valor real capturado a cada trimestre — não
   tentamos uma correção de desempate mais sofisticada (fracionar a inclusão de quem está
   exatamente no limiar) por estar fora do escopo desta rodada.
+- **4 quartis por raça** (`perfil_quartis_racial.parquet`): generaliza o "topo 10%" acima —
+  em vez de só o P90, calcula P25/P50/P75 dentro de cada raça e classifica cada pessoa em
+  Q1-Q4. Pedido originalmente como "decomposição histórica dos 4 quartis", o topo 10% tinha
+  sido entregue como resposta parcial (só um exemplo dado pelo usuário, não o pedido
+  completo) — corrigido depois que o usuário perguntou se a quebra por quartil dentro de
+  cada raça tinha sido entendida. Mesma ressalva de heaping do P90 vale aqui: cada quartil
+  deveria capturar ~25% da população do grupo, mas pode desviar um pouco (checado no
+  trimestre mais recente: entre 22% e 31% conforme quartil/raça) — mesma coluna de
+  diagnóstico (`pct_populacao_capturada`), sem correção de desempate.
 
 ## Nota técnica: tipos de variável no layout do IBGE
 

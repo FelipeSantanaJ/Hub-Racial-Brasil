@@ -6,7 +6,7 @@ gênero, faixa etária e escolaridade, para renda habitual real (deflator oficia
 `src/processing/graficos_fase1.py` a partir dos datasets em `data/processed/*.parquet`.
 Também disponível como apresentação: [Datahub_Racial_Brasil_Fase1.pptx](Datahub_Racial_Brasil_Fase1.pptx).
 
-59 gráficos ao todo. Índice:
+63 gráficos ao todo. Índice:
 
 - [Raça](#raça)
 - [Hiato Branca vs. Negra — série histórica](#hiato-branca-vs-negra--série-histórica)
@@ -15,6 +15,7 @@ Também disponível como apresentação: [Datahub_Racial_Brasil_Fase1.pptx](Data
 - [Aprofundamentos: novas variáveis da PNAD](#aprofundamentos-novas-variáveis-da-pnad)
 - [Geração: seguindo a mesma coorte, não a mesma faixa etária](#geração-seguindo-a-mesma-coorte-não-a-mesma-faixa-etária)
 - [Quem está no topo 10%? Negra vs. Branca](#quem-está-no-topo-10-negra-vs-branca)
+- [Decomposição dos 4 quartis de renda — Negra vs. Branca](#decomposição-dos-4-quartis-de-renda--negra-vs-branca)
 - [Raça × Gênero](#raça--gênero)
 - [Preta × Parda × Gênero](#preta--parda--gênero)
 - [Raça × Faixa etária](#raça--faixa-etária)
@@ -196,6 +197,37 @@ Millennial/Geração Z; o topo dos brancos, para Baby Boomer/Geração X. Coeren
 de escolaridade acima: gerações mais novas de negros parecem estar chegando ao topo com
 credenciais mais parecidas às dos brancos do que gerações mais velhas.
 
+## Decomposição dos 4 quartis de renda — Negra vs. Branca
+
+O topo 10% acima é um recorte estreito (P90). Aqui vai a versão completa: **os 4 quartis**
+da distribuição de renda (Q1 = 25% que menos ganham, ..., Q4 = 25% que mais ganham),
+calculados DENTRO de cada raça — permite comparar a composição demográfica de QUALQUER fatia
+da distribuição entre Negra e Branca, não só o topo.
+
+![Quartis — gênero](img/quartis_genero.png)
+
+% de mulheres em cada quartil: maioria entre as mais pobres (Q1) nas duas raças, minoria
+entre as mais ricas (Q4) — e a distância ENTRE as raças também cresce no Q4 (39% Branca vs.
+33% Negra), não só a diferença entre quartis dentro de cada raça.
+
+![Quartis — escolaridade](img/quartis_escolaridade.png)
+
+O achado mais forte desta seção: % com Superior completo cresce em todos os quartis nas duas
+raças, mas o hiato racial se ABRE dramaticamente no topo — no Q4, ~72% de Branca tem Superior
+completo contra ~40% de Negra (uma diferença de 32 p.p.); no Q1, a diferença é de só ~6 p.p.
+Confirma, com o painel completo, o padrão já visto no gráfico de topo 10%: quanto mais alto
+na distribuição de renda, maior o hiato educacional entre as raças.
+
+![Quartis — faixa etária](img/quartis_faixa_etaria.png)
+
+Composição por faixa etária, um painel por quartil — perfil etário bem parecido entre Negra e
+Branca dentro de cada quartil (diferente da escolaridade, que diverge fortemente no topo).
+
+![Quartis — geração](img/quartis_geracao.png)
+
+Composição por geração, um painel por quartil — mesmo padrão qualitativo do topo 10%, agora
+visível em todas as fatias da distribuição.
+
 ## Raça × Gênero
 
 ![Renda por raça e gênero](img/renda_por_raca_genero.png)
@@ -369,4 +401,7 @@ as outras duas em quase toda célula" segura mesmo nesse nível de detalhe.
   cai bem em cima de um desses valores muito populosos, o corte inclui todo mundo empatado
   ali, capturando um pouco mais que 10% (no trimestre mais recente, ~11,5% de Branca e ~12,8%
   de Negra, checado manualmente). A coluna `pct_populacao_capturada` em
-  `perfil_topo10_racial.parquet` registra o valor real capturado a cada trimestre.
+  `perfil_topo10_racial.parquet` registra o valor real capturado a cada trimestre. A mesma
+  ressalva vale pros 4 quartis (`perfil_quartis_racial.parquet`) — cada quartil deveria ter
+  ~25% da população do grupo, mas heaping nos limiares P25/P50/P75 pode desviar um pouco
+  (checado: entre 22% e 31% conforme o quartil e a raça no trimestre mais recente).

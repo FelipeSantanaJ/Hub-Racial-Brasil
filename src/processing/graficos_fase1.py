@@ -1553,6 +1553,143 @@ def grafico_topo10_geracao(perfil: pd.DataFrame) -> Path:
     return _salvar(fig, "topo10_geracao.png")
 
 
+QUARTIS_ORDEM = ["Q1 (25% que menos ganham)", "Q2", "Q3", "Q4 (25% que mais ganham)"]
+QUARTIS_ROTULO_CURTO = {
+    "Q1 (25% que menos ganham)": "Q1 (mais pobres)", "Q2": "Q2", "Q3": "Q3",
+    "Q4 (25% que mais ganham)": "Q4 (mais ricos)",
+}
+
+
+def _grafico_quartis_serie_pequenos_multiplos(
+    perfil_q: pd.DataFrame, dimensao: str, categoria: str, titulo: str, subtitulo: str, nome_arquivo: str,
+) -> Path:
+    """4 painéis pequenos (um por quartil de renda, calculado DENTRO de cada raça), cada
+    um com 2 linhas (Branca vs. Negra) da % de `categoria` dentro de `dimensao`, ao
+    longo do tempo — generaliza os gráficos de topo 10% pros 4 quartis de uma vez, pra
+    poder comparar a composição em QUALQUER fatia da distribuição, não só o topo."""
+    p = perfil_q[(perfil_q["dimensao"] == dimensao) & (perfil_q["categoria"] == categoria)].copy()
+    p["data"] = pd.to_datetime(p["ano"].astype(str) + "-" + ((p["trimestre"] - 1) * 3 + 1).astype(str) + "-01")
+
+    fig, axes = plt.subplots(1, 4, figsize=(15.5, 4.8), dpi=150, sharey=True)
+    fig.patch.set_facecolor(SUPERFICIE)
+    for i, (ax, quartil) in enumerate(zip(axes, QUARTIS_ORDEM)):
+        ax.set_facecolor(SUPERFICIE)
+        sub = p[p["quartil"] == quartil].sort_values("data")
+        for raca, cor in [("Branca", COR_BRANCA), ("Negra", COR_NEGRA)]:
+            serie = sub[sub["raca_cor"] == raca]
+            ax.plot(serie["data"], serie["pct_do_quartil"], color=cor, linewidth=1.8, solid_capstyle="round", zorder=3)
+        ax.set_title(QUARTIS_ROTULO_CURTO[quartil], fontsize=11, color=TINTA_SECUNDARIA, loc="left")
+        ax.spines[["top", "right", "left"]].set_visible(False)
+        ax.spines["bottom"].set_color(EIXO)
+        ax.tick_params(axis="both", colors=TINTA_MUTED, labelsize=8, length=0, labelleft=(i == 0))
+        ax.xaxis.set_major_locator(mdates.YearLocator(4))
+        ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
+        ax.grid(axis="y", color=GRADE, linewidth=0.7, zorder=0)
+        ax.yaxis.set_major_formatter(lambda v, _: f"{v:.0f}%")
+
+    legenda = [Patch(facecolor=COR_BRANCA, label="Branca"), Patch(facecolor=COR_NEGRA, label="Negra")]
+    fig.legend(handles=legenda, loc="upper right", ncol=2, frameon=False, fontsize=10, bbox_to_anchor=(0.99, 0.99))
+    fig.suptitle(titulo, fontsize=14, fontweight="bold", color=TINTA_PRIMARIA, x=0.01, ha="left", y=0.99)
+    fig.text(0.01, 0.93, subtitulo, fontsize=9.5, color=TINTA_SECUNDARIA, ha="left")
+    _rodape(fig)
+    fig.tight_layout(rect=(0, 0.05, 1, 0.85))
+    return _salvar(fig, nome_arquivo)
+
+
+def grafico_quartis_genero(perfil_q: pd.DataFrame) -> Path:
+    """% de mulheres em cada quartil de renda, Branca vs. Negra, ao longo do tempo —
+    generaliza `grafico_topo10_genero` pros 4 quartis."""
+    return _grafico_quartis_serie_pequenos_multiplos(
+        perfil_q, "sexo", "Mulher",
+        "% de mulheres, por quartil de renda — Branca vs. Negra",
+        "Quartis calculados DENTRO de cada raça · Q1 = 25% que menos ganham, Q4 = 25% que mais ganham · "
+        "PNAD Contínua Trimestral",
+        "quartis_genero.png",
+    )
+
+
+def grafico_quartis_escolaridade(perfil_q: pd.DataFrame) -> Path:
+    """% com Superior completo em cada quartil de renda, Branca vs. Negra, ao longo do
+    tempo — generaliza `grafico_topo10_escolaridade` pros 4 quartis."""
+    return _grafico_quartis_serie_pequenos_multiplos(
+        perfil_q, "nivel_instrucao", "Superior completo",
+        "% com Superior completo, por quartil de renda — Branca vs. Negra",
+        "Quartis calculados DENTRO de cada raça · Q1 = 25% que menos ganham, Q4 = 25% que mais ganham · "
+        "PNAD Contínua Trimestral",
+        "quartis_escolaridade.png",
+    )
+
+
+def _snapshot_quartis(perfil_q: pd.DataFrame, dimensao: str, n_trimestres: int = 8) -> pd.DataFrame:
+    """Média (simples) dos últimos `n_trimestres` — mesma lógica de `_snapshot_topo10`."""
+    p = perfil_q[perfil_q["dimensao"] == dimensao].copy()
+    ultimos = p[["ano", "trimestre"]].drop_duplicates().sort_values(["ano", "trimestre"]).tail(n_trimestres)
+    p = p.merge(ultimos, on=["ano", "trimestre"])
+    return p.groupby(["raca_cor", "quartil", "categoria"], observed=True)["pct_do_quartil"].mean().reset_index()
+
+
+def _grafico_quartis_snapshot_categorico(
+    perfil_q: pd.DataFrame, dimensao: str, categorias_ordem: list[str], rotulos_categoria: dict[str, str],
+    titulo: str, subtitulo: str, nome_arquivo: str,
+) -> Path:
+    """4 painéis pequenos (um por quartil), cada um com barras agrupadas (Branca vs.
+    Negra) pelas categorias de `dimensao` — composição (snapshot), não série temporal."""
+    d = _snapshot_quartis(perfil_q, dimensao)
+    x = np.arange(len(categorias_ordem))
+    largura = 0.35
+
+    fig, axes = plt.subplots(1, 4, figsize=(16, 4.8), dpi=150, sharey=True)
+    fig.patch.set_facecolor(SUPERFICIE)
+    for i, (ax, quartil) in enumerate(zip(axes, QUARTIS_ORDEM)):
+        ax.set_facecolor(SUPERFICIE)
+        for j, raca in enumerate(["Branca", "Negra"]):
+            valores = [
+                d[(d["raca_cor"] == raca) & (d["quartil"] == quartil) & (d["categoria"] == c)]["pct_do_quartil"].sum()
+                for c in categorias_ordem
+            ]
+            deslocamento = (j - 0.5) * largura
+            ax.bar(x + deslocamento, valores, largura, color=CORES_RACA[raca], zorder=3)
+        ax.set_title(QUARTIS_ROTULO_CURTO[quartil], fontsize=11, color=TINTA_SECUNDARIA, loc="left")
+        ax.set_xticks(x)
+        ax.set_xticklabels([rotulos_categoria[c] for c in categorias_ordem], fontsize=7.5, rotation=35, ha="right")
+        ax.spines[["top", "right", "left"]].set_visible(False)
+        ax.spines["bottom"].set_color(EIXO)
+        ax.tick_params(axis="y", colors=TINTA_MUTED, labelsize=8, length=0, labelleft=(i == 0))
+        ax.tick_params(axis="x", colors=TINTA_MUTED, length=0)
+        ax.grid(axis="y", color=GRADE, linewidth=0.7, zorder=0)
+        ax.yaxis.set_major_formatter(lambda v, _: f"{v:.0f}%")
+
+    legenda = [Patch(facecolor=COR_BRANCA, label="Branca"), Patch(facecolor=COR_NEGRA, label="Negra")]
+    fig.legend(handles=legenda, loc="upper right", ncol=2, frameon=False, fontsize=10, bbox_to_anchor=(0.99, 0.99))
+    fig.suptitle(titulo, fontsize=14, fontweight="bold", color=TINTA_PRIMARIA, x=0.01, ha="left", y=0.99)
+    fig.text(0.01, 0.93, subtitulo, fontsize=9.5, color=TINTA_SECUNDARIA, ha="left")
+    _rodape(fig)
+    fig.tight_layout(rect=(0, 0.16, 1, 0.85))
+    return _salvar(fig, nome_arquivo)
+
+
+def grafico_quartis_faixa_etaria(perfil_q: pd.DataFrame) -> Path:
+    """Composição por faixa etária de cada quartil de renda, Branca vs. Negra —
+    generaliza `grafico_topo10_faixa_etaria` pros 4 quartis."""
+    return _grafico_quartis_snapshot_categorico(
+        perfil_q, "faixa_etaria", FAIXAS_ETARIAS_ORDEM, {f: f for f in FAIXAS_ETARIAS_ORDEM},
+        "Composição por faixa etária, por quartil de renda — Branca vs. Negra",
+        "Quartis calculados DENTRO de cada raça · média dos últimos 8 trimestres · PNAD Contínua Trimestral",
+        "quartis_faixa_etaria.png",
+    )
+
+
+def grafico_quartis_geracao(perfil_q: pd.DataFrame) -> Path:
+    """Composição por geração de cada quartil de renda, Branca vs. Negra — generaliza
+    `grafico_topo10_geracao` pros 4 quartis."""
+    return _grafico_quartis_snapshot_categorico(
+        perfil_q, "geracao", GERACOES_ORDEM_GRAFICO, ROTULOS_GERACAO_CURTO,
+        "Composição por geração, por quartil de renda — Branca vs. Negra",
+        "Quartis calculados DENTRO de cada raça · média dos últimos 8 trimestres · PNAD Contínua Trimestral",
+        "quartis_geracao.png",
+    )
+
+
 def main() -> None:
     renda = pd.read_parquet(REPO_ROOT / "data" / "processed" / "renda.parquet")
     esc = pd.read_parquet(REPO_ROOT / "data" / "processed" / "escolaridade.parquet")
@@ -1571,6 +1708,7 @@ def main() -> None:
     renda_geracao = pd.read_parquet(REPO_ROOT / "data" / "processed" / "renda_por_geracao.parquet")
     hiato_geracao = pd.read_parquet(REPO_ROOT / "data" / "processed" / "hiato_por_geracao.parquet")
     perfil_topo10 = pd.read_parquet(REPO_ROOT / "data" / "processed" / "perfil_topo10_racial.parquet")
+    perfil_quartis = pd.read_parquet(REPO_ROOT / "data" / "processed" / "perfil_quartis_racial.parquet")
 
     destinos = [
         # raça
@@ -1600,6 +1738,11 @@ def main() -> None:
         grafico_topo10_escolaridade(perfil_topo10),
         grafico_topo10_faixa_etaria(perfil_topo10),
         grafico_topo10_geracao(perfil_topo10),
+        # decomposição dos 4 quartis (generaliza o topo 10% pra toda a distribuição)
+        grafico_quartis_genero(perfil_quartis),
+        grafico_quartis_escolaridade(perfil_quartis),
+        grafico_quartis_faixa_etaria(perfil_quartis),
+        grafico_quartis_geracao(perfil_quartis),
         # raça x gênero: combinado + um por gênero
         grafico_renda_por_raca_genero(renda),
         grafico_renda_por_raca_sexo(renda, "Homem"),
