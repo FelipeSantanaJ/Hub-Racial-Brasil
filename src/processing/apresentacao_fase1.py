@@ -18,10 +18,12 @@ DESTINO = REPO_ROOT / "docs" / "Datahub_Racial_Brasil_Fase1.pptx"
 LARGURA_SLIDE = Inches(13.333)
 ALTURA_SLIDE = Inches(7.5)
 
-SUPERFICIE = RGBColor(0xFC, 0xFC, 0xFB)
-TINTA_PRIMARIA = RGBColor(0x0B, 0x0B, 0x0B)
-TINTA_SECUNDARIA = RGBColor(0x52, 0x51, 0x4E)
-COR_BRANCA = RGBColor(0x2A, 0x78, 0xD6)
+
+# Identidade visual em tons terrosos — mesma paleta de src/processing/graficos_fase1.py.
+SUPERFICIE = RGBColor(0xF7, 0xF2, 0xEA)
+TINTA_PRIMARIA = RGBColor(0x2B, 0x20, 0x18)
+TINTA_SECUNDARIA = RGBColor(0x5C, 0x4F, 0x3F)
+COR_BRANCA = RGBColor(0x0D, 0x90, 0x86)
 
 # (título da seção, nota de rodapé opcional, [(arquivo, legenda), ...])
 SECOES = [

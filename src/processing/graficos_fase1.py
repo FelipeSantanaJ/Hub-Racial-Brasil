@@ -20,23 +20,29 @@ from matplotlib.patches import Patch
 REPO_ROOT = Path(__file__).resolve().parents[2]
 OUTPUT_DIR = REPO_ROOT / "docs" / "img"
 
-# Paleta categórica validada (ver skill de dataviz) — ordem fixa, não trocar por raça.
-COR_BRANCA = "#2a78d6"    # slot 1 (azul)
-COR_NEGRA = "#eb6834"     # slot 2 (laranja) — usada também para "Preta" nos gráficos detalhados
-COR_INDIGENA = "#1baf7a"  # slot 3 (aqua)
+# Identidade visual em tons terrosos (2026-09-04) — paleta re-validada do zero com
+# `validate_palette.js` (ALL CHECKS PASS, all-pairs, modo claro): banda de luminosidade,
+# piso de croma, separação CVD (deutan/protan/tritan) e piso de visão normal. Escolhida
+# de propósito espalhada pelo círculo cromático (verde-azulado, vermelho-terracota,
+# ocre-amarelo, ameixa-roxo) para NÃO formar um gradiente claro→escuro que lembre tom de
+# pele — é uma paleta categórica arbitrária, igual à anterior (azul/laranja/aqua/violeta),
+# só que reformulada em tons terrosos.
+COR_BRANCA = "#0d9086"    # verde-azulado profundo (pinho/petróleo)
+COR_NEGRA = "#c8541f"     # terracota — usada também para "Preta" nos gráficos detalhados
+COR_INDIGENA = "#853359"  # ameixa/vinho
 CORES_RACA = {"Branca": COR_BRANCA, "Negra": COR_NEGRA, "Indígena": COR_INDIGENA}
 
-# Cores do gráfico Preta vs. Parda (validadas à parte, all-pairs PASS junto com
-# Branca/Indígena — ver skill de dataviz, ainda que este gráfico não mostre as duas).
+# Cor do gráfico Preta vs. Parda (validada junto com Branca/Negra/Indígena acima,
+# all-pairs PASS, ainda que este gráfico não mostre as quatro ao mesmo tempo).
 COR_PRETA = COR_NEGRA
-COR_PARDA = "#4a3aa7"     # slot 7 (violeta)
+COR_PARDA = "#d19a12"     # ocre/mostarda
 
-SUPERFICIE = "#fcfcfb"
-TINTA_PRIMARIA = "#0b0b0b"
-TINTA_SECUNDARIA = "#52514e"
-TINTA_MUTED = "#898781"
-GRADE = "#e1e0d9"
-EIXO = "#c3c2b7"
+SUPERFICIE = "#f7f2ea"
+TINTA_PRIMARIA = "#2b2018"
+TINTA_SECUNDARIA = "#5c4f3f"
+TINTA_MUTED = "#8f8271"
+GRADE = "#e6ddd0"
+EIXO = "#c9bda8"
 
 
 def _slug(texto: str) -> str:
@@ -905,7 +911,9 @@ def graficos_renda_por_raca_nivel_individual(rpe: pd.DataFrame) -> list[Path]:
     return destinos
 
 
-CMAP_SEQUENCIAL = LinearSegmentedColormap.from_list("azul_sequencial", ["#cde2fb", "#2a78d6", "#0d366b"])
+CMAP_SEQUENCIAL = LinearSegmentedColormap.from_list(
+    "terroso_sequencial", ["#f6e8cf", "#d19a12", "#8a3d17", "#2b1509"]
+)
 
 
 def _preparar_hiato(hiato: pd.DataFrame) -> pd.DataFrame:
@@ -1190,11 +1198,13 @@ def grafico_oaxaca_blinder_quantis(ob: pd.DataFrame) -> Path:
 
 
 REGIOES_ORDEM = ["Norte", "Nordeste", "Centro-Oeste", "Sudeste", "Sul"]
-# Paleta de 5 cores validada à parte (all-pairs PASS) — dimensão diferente de raça
-# (região), de propósito não reaproveita CORES_RACA pra não confundir as duas.
+# Paleta terrosa de 5 cores, validada all-pairs PASS (reaproveita os 3 tons de raça +
+# ocre da Parda, já validados juntos, mais um 5º — índigo terroso — validado contra os
+# outros 4). Dimensão diferente de raça (região) nunca aparece no mesmo gráfico, mas os
+# tons se sobrepõem por serem a mesma identidade visual, não por acidente.
 CORES_REGIAO = {
-    "Norte": "#2a78d6", "Nordeste": "#eb6834", "Sudeste": "#1baf7a",
-    "Sul": "#4a3aa7", "Centro-Oeste": "#c9376b",
+    "Norte": "#3a5a9a", "Nordeste": "#c8541f", "Sudeste": "#0d9086",
+    "Sul": "#853359", "Centro-Oeste": "#d19a12",
 }
 
 
