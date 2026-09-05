@@ -528,19 +528,52 @@ datasets (era 20).
 
 ---
 
+## Correção: a decomposição por quartil precisava de valores em R$, não só composição (2026-09-05)
+
+Usuário esclareceu que a análise de quartis (seção anterior) devia incluir os valores REAIS em
+R$ em cada ponto da distribuição — não só quem está em cada fatia. Dois exemplos concretos
+dados pelo usuário: (1) "os 10% mais pobres negros ganham X enquanto os 10% mais pobres
+brancos ganham Y, e assim por diante" — a função quantil completa em R$; (2) "quem ganha R$3
+mil entre os brancos está no segundo quartil, enquanto entre os negros já seria top 10% mais
+ricos" — a pergunta INVERSA, que percentil corresponde a um valor fixo de renda. Pediu
+explicitamente pra manter as distribuições (composição por quartil) já montadas — mantidas
+sem alteração, isso é aditivo.
+
+- `pnadc_core.percentil_ponderado_de_valor` (nova, função inversa de `quantil_ponderado`):
+  validada com round-trip antes de usar (`quantil_ponderado` de um percentil P, jogado de
+  volta em `percentil_ponderado_de_valor`, precisa devolver P — bateu exato pros 5 percentis
+  testados).
+- `gerar_funcao_quantil_racial`: gera dois parquets — `funcao_quantil_racial.parquet`
+  (percentil → R$, deciles P10 a P90, dentro de cada raça) e
+  `percentil_de_valor_racial.parquet` (R$ → percentil, pra uma lista de valores de referência
+  redondos: R$1.000 a R$20.000). Mesmo universo/amostra mínima de sempre (ocupados, renda
+  real > 0, Branca/Negra apenas — Indígena de fora pela mesma razão de amostra).
+- Resultado (2026 T2, exatamente o exemplo que o usuário deu): R$3.000 está no **P57** da
+  distribuição de Branca (renda "do meio") mas no **P76** da distribuição de Negra (perto do
+  topo dos 25% que mais ganham) — confirma a intuição do usuário quase exatamente.
+- Achado extra: o hiato bruto por percentil (sem nenhum controle) não é uniforme — 108% no
+  P10, cai pra 23-50% no meio da distribuição, sobe de novo pra 100% no P90. Formato em U,
+  parecido com o já visto na decomposição residual por RIF (que já tinha achado esse mesmo
+  padrão controlando por idade/escolaridade/ocupação) — aqui é a versão sem controles.
+
+3 gráficos novos (71 no total, era 68), 2 datasets novos (27 no total, era 25).
+
+---
+
 ## 🏁 Fase 1 concluída (2026-09-04, expandida em 2026-09-05)
 
-Todas as 7 etapas (0-6) fechadas no mesmo dia, incl. quatro rodadas de expansão a pedido (a
+Todas as 7 etapas (0-6) fechadas no mesmo dia, incl. cinco rodadas de expansão a pedido (a
 segunda com teste de significância formal via Oaxaca-Blinder, hiato regional, segregação
 ocupacional, quebra estrutural e 4 variáveis novas; a terceira com geração, perfil do topo
 10% e a decomposição completa dos 4 quartis; a quarta com Gini/Theil por raça, setor
-econômico, setor público/privado e sobre-qualificação — ver seções acima). Entregáveis:
+econômico, setor público/privado e sobre-qualificação; a quinta com a função quantil da
+renda em R$ e sua inversa — ver seções acima). Entregáveis:
 `src/ingestion/{extrator_pnadc,baixar_deflator}.py`,
 `src/processing/{agregacoes_pnadc,graficos_fase1,apresentacao_fase1}.py`,
-`src/utils/pnadc_core.py`, 25 datasets em `data/processed/*.parquet`,
-`docs/{LIMITACOES_E_METODOLOGIA,ANALISE_FASE1}.md`, 68 gráficos em `docs/img/` (galeria
+`src/utils/pnadc_core.py`, 27 datasets em `data/processed/*.parquet`,
+`docs/{LIMITACOES_E_METODOLOGIA,ANALISE_FASE1}.md`, 71 gráficos em `docs/img/` (galeria
 completa em `docs/ANALISE_FASE1.md`, destaques no README), apresentação
-`docs/Datahub_Racial_Brasil_Fase1.pptx` (88 slides). Próximo passo: Fase 2 (Censo
+`docs/Datahub_Racial_Brasil_Fase1.pptx` (92 slides). Próximo passo: Fase 2 (Censo
 Demográfico) — ainda não detalhada.
 
 ---

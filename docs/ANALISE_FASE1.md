@@ -6,7 +6,7 @@ gênero, faixa etária e escolaridade, para renda habitual real (deflator oficia
 `src/processing/graficos_fase1.py` a partir dos datasets em `data/processed/*.parquet`.
 Também disponível como apresentação: [Datahub_Racial_Brasil_Fase1.pptx](Datahub_Racial_Brasil_Fase1.pptx).
 
-68 gráficos ao todo. Índice:
+71 gráficos ao todo. Índice:
 
 - [Raça](#raça)
 - [Hiato Branca vs. Negra — série histórica](#hiato-branca-vs-negra--série-histórica)
@@ -17,6 +17,7 @@ Também disponível como apresentação: [Datahub_Racial_Brasil_Fase1.pptx](Data
 - [Quem está no topo 10%? Negra vs. Branca](#quem-está-no-topo-10-negra-vs-branca)
 - [Decomposição dos 4 quartis de renda — Negra vs. Branca](#decomposição-dos-4-quartis-de-renda--negra-vs-branca)
 - [Desigualdade interna, setor público/privado e sobre-qualificação](#desigualdade-interna-setor-públicoprivado-e-sobre-qualificação)
+- [A função quantil da renda, em R$, e sua inversa](#a-função-quantil-da-renda-em-r-e-sua-inversa)
 - [Raça × Gênero](#raça--gênero)
 - [Preta × Parda × Gênero](#preta--parda--gênero)
 - [Raça × Faixa etária](#raça--faixa-etária)
@@ -268,6 +269,33 @@ elementar, o proxy padrão de mismatch credencial-ocupação na literatura) é q
 Negra em relação a Branca ao longo de quase toda a série — mesmo diploma, resultado
 profissional diferente. Indígena tem amostra pequena aqui (poucas pessoas com Superior
 completo) e a série fica bem ruidosa mesmo suavizada — ler com cautela.
+
+## A função quantil da renda, em R$, e sua inversa
+
+Os gráficos de quartil (seção acima) mostram QUEM está em cada fatia da distribuição —
+composição por gênero/idade/geração/escolaridade. Aqui vai o complemento pedido: os valores
+em R$ de fato, nas duas direções.
+
+![Função quantil por raça](img/funcao_quantil_racial.png)
+
+Responde diretamente: "os 10% mais pobres entre os negros ganham quanto, comparado aos 10%
+mais pobres entre os brancos? E os 20%? E assim por diante?" No P10, Branca ganha R$1.500 e
+Negra R$720 — mais que o dobro. Na mediana (P50), R$3.000 vs. R$2.000. No P90, R$10.000 vs.
+R$5.000 — o hiato em R$ cresce conforme sobe a distribuição.
+
+![Hiato bruto por percentil](img/hiato_por_percentil.png)
+
+O hiato bruto (sem nenhum controle, diferente da versão residual da seção "É ocupação, ou é
+cor da pele?") não é uniforme ao longo da distribuição: maior na base (108% no P10) e no topo
+(100% no P90), menor no meio (23-50% entre P20 e P70).
+
+![Percentil de um valor de renda, por raça](img/percentil_de_valor_racial.png)
+
+A pergunta INVERSA: quem ganha uma quantia fixa está em que posição da distribuição de CADA
+raça? R$3.000 é uma renda "do meio" pra Branca (P57, pouco acima da mediana) — mas a mesma
+quantia já coloca uma pessoa negra no P76, perto do topo dos 25% que mais ganham dentro do
+próprio grupo. A mesma quantia em R$ representa posições relativas bem diferentes conforme a
+raça.
 
 ## Raça × Gênero
 

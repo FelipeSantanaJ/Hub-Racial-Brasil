@@ -292,6 +292,18 @@ def quantil_ponderado(valores, pesos, quantil):
     return float(valores[ordem][min(pos, len(valores) - 1)])
 
 
+def percentil_ponderado_de_valor(valores, pesos, valor_referencia):
+    """Função INVERSA de `quantil_ponderado`: dado um valor de referência (ex.: R$3.000
+    de renda), retorna o percentil (0-100) que ele ocupa na distribuição ponderada de
+    `valores` — "que % da população (ponderada) ganha até esse valor?". Pré-condição:
+    sem NaN (filtrar antes de chamar)."""
+    valores = np.asarray(valores, dtype=float)
+    pesos = np.asarray(pesos, dtype=float)
+    peso_total = pesos.sum()
+    peso_abaixo_ou_igual = pesos[valores <= valor_referencia].sum()
+    return float(100 * peso_abaixo_ou_igual / peso_total)
+
+
 def rif_quantil(valores, pesos, quantil):
     """Recentered Influence Function (Firpo-Fortin-Lemieux, 2009) do quantil `quantil`
     (ex.: 0.1, 0.5, 0.9) de `valores`, ponderada por `pesos`.
