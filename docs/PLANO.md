@@ -699,9 +699,52 @@ seção nova quanto na antiga).
 
 ---
 
+## Nona rodada de expansão (2026-09-05): série histórica em toda abertura da seção "Renda média"
+
+Feedback do usuário sobre a rodada anterior: os gráficos que só mostravam o trimestre mais
+recente (ex.: Raça × Faixa Etária) precisavam TAMBÉM da série histórica completa — um slide
+por categoria (14-17, 18-24, 25-39... por raça, ao longo de 2012-2026), não só o snapshot.
+Pedido explícito: manter os snapshots, acrescentar as séries históricas, "isso para todas as
+aberturas" (gênero, faixa etária, geração, escolaridade, em toda combinação onde aparecem).
+
+Boa parte já existia: as séries históricas "um gráfico por categoria" pra gênero, faixa
+etária e escolaridade (Todas e Preta/Parda) já tinham sido construídas em rodadas bem
+anteriores (`graficos_renda_por_raca_faixa_etaria_individual` e afins) — só não estavam
+incluídas nas subseções novas da seção "Renda média". Faltava mesmo: a série histórica de
+Raça × Geração (não existia — geração até então só tinha o snapshot e o hiato por coorte;
+8 gráficos novos, 4 Todas + 4 Preta/Parda, mesma função `_serie_por_raca` reaproveitada) e o
+HIATO histórico por gênero/faixa etária/escolaridade com teste de Welch trimestre a
+trimestre (só existia pra geração, via `gerar_hiato_por_geracao`) — generalizado numa função
+nova, `gerar_hiato_historico_por_categoria`, chamada 7 vezes (gênero/faixa/escolaridade ×
+2 escopos + geração só Preta/Parda, já que Branca-vs-Negra por geração já existia).
+
+Um cuidado ao construir o gráfico do hiato histórico: `_grafico_serie_temporal` (a função já
+usada em quase todo gráfico de série do projeto) assume série não-negativa (`base = 0`
+quando o mínimo é negativo) — usaria ela cortaria a parte negativa das séries Preta-vs-Parda
+(que cruzam zero, como visto no achado da rodada anterior). Escrita uma função nova e
+pequena, `_grafico_hiato_historico_categoria`, com cálculo de eixo Y correto pra séries que
+passam por zero, em vez de arriscar alterar a função compartilhada usada em todo o resto do
+projeto.
+
+Pra cada combinação da seção "Renda média" que envolve gênero/faixa etária/geração/
+escolaridade, a subseção agora traz: snapshot (mantido) + a série histórica de cada
+dimensão presente (reaproveitando o MESMO conjunto de imagens em várias subseções — ex.:
+os 2 gráficos de série por gênero aparecem em toda combinação que inclui gênero — prática já
+usada no projeto antes, não é novidade). Combinações de 3-4 dimensões trazem a série
+histórica de CADA dimensão isoladamente (ex.: Raça × Gênero × Faixa Etária traz as séries de
+gênero E as de faixa etária), não o cruzamento das duas — o mesmo padrão que já existia pra
+gênero/faixa/escolaridade sozinhos, sem introduzir uma célula (categoria x categoria) nova
+que a amostra por trimestre não sustentaria bem.
+
+15 gráficos novos (134 no total, era 119). 7 datasets novos (60 no total, era 53). PPT:
+428 slides (era 208) — o salto grande vem do reaproveitamento das séries históricas em
+várias subseções (mesmas imagens, vários slides).
+
+---
+
 ## 🏁 Fase 1 concluída (2026-09-04, expandida em 2026-09-05)
 
-Todas as 7 etapas (0-6) fechadas no mesmo dia, incl. oito rodadas de expansão a pedido (a
+Todas as 7 etapas (0-6) fechadas no mesmo dia, incl. nove rodadas de expansão a pedido (a
 segunda com teste de significância formal via Oaxaca-Blinder, hiato regional, segregação
 ocupacional, quebra estrutural e 4 variáveis novas; a terceira com geração, perfil do topo
 10% e a decomposição completa dos 4 quartis; a quarta com Gini/Theil por raça, setor
@@ -709,13 +752,15 @@ econômico, setor público/privado e sobre-qualificação; a quinta com a funç�
 renda em R$ e sua inversa; a sexta fechando a matriz completa de combinações raça × A × B e
 quantificando quanto ocupação sozinha explica do hiato; a sétima corrigindo um gap real na
 seção Escolaridade × Raça × Gênero; a oitava reorganizando o PPT com a seção "Renda média"
-(48 subseções, índice no início, hiato com Welch nas 24 combinações) na frente — ver seções
-acima). Entregáveis: `src/ingestion/{extrator_pnadc,baixar_deflator}.py`,
+(48 subseções, índice no início, hiato com Welch nas 24 combinações) na frente; a nona
+acrescentando a série histórica completa (2012-2026) em toda abertura da seção "Renda média"
+que antes só tinha o snapshot do trimestre mais recente — ver seções acima). Entregáveis:
+`src/ingestion/{extrator_pnadc,baixar_deflator}.py`,
 `src/processing/{agregacoes_pnadc,graficos_fase1,apresentacao_fase1}.py`,
-`src/utils/pnadc_core.py`, 53 datasets em `data/processed/*.parquet`,
-`docs/{LIMITACOES_E_METODOLOGIA,ANALISE_FASE1}.md`, 119 gráficos em `docs/img/` (galeria
+`src/utils/pnadc_core.py`, 60 datasets em `data/processed/*.parquet`,
+`docs/{LIMITACOES_E_METODOLOGIA,ANALISE_FASE1}.md`, 134 gráficos em `docs/img/` (galeria
 completa em `docs/ANALISE_FASE1.md`, destaques no README), apresentação
-`docs/Datahub_Racial_Brasil_Fase1.pptx` (208 slides). Próximo passo: Fase 2 (Censo
+`docs/Datahub_Racial_Brasil_Fase1.pptx` (428 slides). Próximo passo: Fase 2 (Censo
 Demográfico) — ainda não detalhada.
 
 ---

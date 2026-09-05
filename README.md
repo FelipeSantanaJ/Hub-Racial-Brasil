@@ -100,7 +100,7 @@ P57 da distribuição de Branca (pouco acima da mediana), mas no P76 da distribu
 ganha quem está em cada percentil —, os 10% mais pobres entre os brancos ganham R$1.500,
 contra R$720 entre os 10% mais pobres dos negros.
 
-**119 gráficos ao todo** — a matriz completa de combinações entre raça, gênero, faixa
+**134 gráficos ao todo** — a matriz completa de combinações entre raça, gênero, faixa
 etária, geração, escolaridade e ocupação (Preta e Parda sempre também separadas), mais
 aprofundamentos: hiato por região, segregação ocupacional e setorial (índice de Duncan),
 teste de quebra estrutural em 3 eventos históricos, novas variáveis (informalidade, renda
@@ -110,7 +110,9 @@ raça, hiato no setor público vs. privado, e a função quantil da renda em R$ 
 por raça. A apresentação em PPTX abre com uma seção "Renda média" de 48 subseções (12
 combinações de dimensões × Todas as raças/Apenas negros × Valores/Hiato, com teste de Welch
 nas 24 combinações de hiato e um índice de conferência logo no início) antes do restante do
-conteúdo. Galeria completa, com a leitura de cada gráfico, em
+conteúdo — cada abertura (gênero, faixa etária, geração, escolaridade) traz o snapshot do
+trimestre mais recente E a série histórica completa (2012-2026) por categoria. Galeria
+completa, com a leitura de cada gráfico, em
 [docs/ANALISE_FASE1.md](docs/ANALISE_FASE1.md), ou como
 apresentação em
 [docs/Datahub_Racial_Brasil_Fase1.pptx](docs/Datahub_Racial_Brasil_Fase1.pptx).

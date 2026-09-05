@@ -1240,6 +1240,114 @@ def gerar_hiatos_multidimensionais(con: duckdb.DuckDBPyConnection) -> None:
     )
 
 
+FAIXAS_ETARIAS_ORDEM = ["14-17", "18-24", "25-39", "40-59", "60+"]
+NIVEIS_INSTRUCAO_ORDEM = [
+    "Sem instrução e menos de 1 ano de estudo",
+    "Fundamental incompleto ou equivalente",
+    "Fundamental completo ou equivalente",
+    "Médio incompleto ou equivalente",
+    "Médio completo ou equivalente",
+    "Superior incompleto ou equivalente",
+    "Superior completo",
+]
+GERACOES_COM_AMOSTRA = [
+    "Baby Boomer (1946-1964)", "Geração X (1965-1980)",
+    "Millennial (1981-1996)", "Geração Z (1997-2012)",
+]
+
+
+def gerar_hiato_historico_por_categoria(
+    con: duckdb.DuckDBPyConnection, col_dim: str, categorias: list[str], racas_incluidas: list[str],
+    combinar_negra: bool, grupo_referencia: str, grupo_nao_referencia: str, nome_saida: str,
+) -> None:
+    """Generaliza `gerar_hiato_por_geracao`: hiato trimestre a trimestre (todos os 58),
+    COM teste de Welch, DENTRO de cada categoria de `col_dim` — dá série histórica pras
+    aberturas (gênero, faixa etária, escolaridade) que antes só tinham o snapshot do
+    trimestre mais recente em `gerar_hiatos_multidimensionais`. `combinar_negra=True`
+    compara Branca vs. Negra (Preta+Parda combinadas); `False` compara Preta vs. Parda
+    sem combinar."""
+    racas_sql = "', '".join(racas_incluidas)
+    categorias_sql = "', '".join(categorias)
+    combinacoes = con.execute(f"""
+        SELECT DISTINCT ano, trimestre, {col_dim} FROM base
+        WHERE {col_dim} IN ('{categorias_sql}')
+        ORDER BY ano, trimestre, {col_dim}
+    """).df()
+
+    resultados = []
+    for _, row in combinacoes.iterrows():
+        ano, trimestre, categoria = int(row["ano"]), int(row["trimestre"]), row[col_dim]
+        micro = con.execute(f"""
+            SELECT raca_cor, renda_habitual_real, peso
+            FROM base
+            WHERE ano = {ano} AND trimestre = {trimestre} AND {col_dim} = '{categoria}'
+              AND raca_cor IN ('{racas_sql}')
+              AND renda_habitual_real IS NOT NULL
+        """).df()
+        if micro.empty:
+            continue
+        if combinar_negra:
+            micro["raca_cor"] = micro["raca_cor"].replace({"Preta": "Negra", "Parda": "Negra"})
+        racas_presentes = set(micro["raca_cor"].unique())
+        if grupo_referencia not in racas_presentes or grupo_nao_referencia not in racas_presentes:
+            continue
+        tabela = pnadc_core.tabela_hiatos_significancia(
+            micro, "renda_habitual_real", "raca_cor", grupo_referencia=grupo_referencia, peso="peso"
+        )
+        if grupo_nao_referencia not in tabela.index:
+            continue
+        linha = tabela.loc[grupo_nao_referencia]
+        media_ref = tabela.loc[grupo_referencia, "media"]
+        resultados.append({
+            "ano": ano, "trimestre": trimestre, col_dim: categoria,
+            f"renda_media_{grupo_nao_referencia.lower()}": linha["media"],
+            f"renda_media_{grupo_referencia.lower()}": media_ref,
+            "hiato_absoluto": linha["hiato_media"],
+            "hiato_percentual": 100 * linha["hiato_media"] / media_ref if media_ref else None,
+            "p_valor": linha["p_valor"], "significativo": linha["significativo"],
+        })
+
+    df = pd.DataFrame(resultados)
+    destino = OUTPUT_DIR / nome_saida
+    df.to_parquet(destino, index=False)
+    print(f"{nome_saida}: {len(df):,} linhas".replace(",", "."), flush=True)
+
+
+def gerar_hiatos_historicos_por_categoria(con: duckdb.DuckDBPyConnection) -> None:
+    """Roda `gerar_hiato_historico_por_categoria` pras 3 dimensões (gênero, faixa
+    etária, escolaridade) x 2 escopos, mais geração (só Preta/Parda — a versão Branca
+    vs. Negra já existe em `hiato_por_geracao.parquet`, gerada por
+    `gerar_hiato_por_geracao`)."""
+    gerar_hiato_historico_por_categoria(
+        con, "sexo", ["Homem", "Mulher"], ["Branca", "Preta", "Parda"], True,
+        "Negra", "Branca", "hiato_genero_historico_todas.parquet",
+    )
+    gerar_hiato_historico_por_categoria(
+        con, "sexo", ["Homem", "Mulher"], ["Preta", "Parda"], False,
+        "Parda", "Preta", "hiato_genero_historico_pretaparda.parquet",
+    )
+    gerar_hiato_historico_por_categoria(
+        con, "faixa_etaria", FAIXAS_ETARIAS_ORDEM, ["Branca", "Preta", "Parda"], True,
+        "Negra", "Branca", "hiato_faixa_etaria_historico_todas.parquet",
+    )
+    gerar_hiato_historico_por_categoria(
+        con, "faixa_etaria", FAIXAS_ETARIAS_ORDEM, ["Preta", "Parda"], False,
+        "Parda", "Preta", "hiato_faixa_etaria_historico_pretaparda.parquet",
+    )
+    gerar_hiato_historico_por_categoria(
+        con, "nivel_instrucao", NIVEIS_INSTRUCAO_ORDEM, ["Branca", "Preta", "Parda"], True,
+        "Negra", "Branca", "hiato_escolaridade_historico_todas.parquet",
+    )
+    gerar_hiato_historico_por_categoria(
+        con, "nivel_instrucao", NIVEIS_INSTRUCAO_ORDEM, ["Preta", "Parda"], False,
+        "Parda", "Preta", "hiato_escolaridade_historico_pretaparda.parquet",
+    )
+    gerar_hiato_historico_por_categoria(
+        con, "geracao", GERACOES_COM_AMOSTRA, ["Preta", "Parda"], False,
+        "Parda", "Preta", "hiato_geracao_historico_pretaparda.parquet",
+    )
+
+
 def gerar_gini_por_raca(con: duckdb.DuckDBPyConnection) -> None:
     """Coeficiente de Gini ponderado da renda habitual real, calculado DENTRO de cada
     raça — usa `pnadc_core.gini_ponderado_por_grupo`, função já portada do notebook
@@ -1467,6 +1575,7 @@ def main() -> None:
     gerar_hiato_racial(con)
     gerar_hiato_preta_parda(con)
     gerar_hiatos_multidimensionais(con)
+    gerar_hiatos_historicos_por_categoria(con)
     gerar_hiato_por_geracao(con)
     gerar_gini_por_raca(con)
     gerar_theil_racial(con)
