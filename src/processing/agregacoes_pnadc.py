@@ -404,8 +404,14 @@ def gerar_decomposicao_hiato_ocupacional(con: duckdb.DuckDBPyConnection, n_trime
         }
 
     resultados = []
+    # a lista progressiva (nenhum -> +idade -> +escolaridade -> +ocupação) conta uma
+    # história de acumulação; "só ocupação" no final é uma comparação ISOLADA à parte
+    # (sem idade/escolaridade já controladas) — responde direto "quanto ocupação
+    # SOZINHA explica do hiato?", sem misturar com o que idade/escolaridade já
+    # explicavam antes dela entrar na conta.
     for controles in [[], ["faixa_etaria"], ["faixa_etaria", "nivel_instrucao"],
-                       ["faixa_etaria", "nivel_instrucao", "grupamento_ocupacional"]]:
+                       ["faixa_etaria", "nivel_instrucao", "grupamento_ocupacional"],
+                       ["grupamento_ocupacional"]]:
         r = gap_padronizado(controles)
         if r["media_branca_ajustada"] is not None and r["media_negra"] is not None:
             r["hiato_absoluto"] = r["media_branca_ajustada"] - r["media_negra"]
@@ -449,8 +455,12 @@ def gerar_decomposicao_oaxaca_blinder(con: duckdb.DuckDBPyConnection, n_trimestr
     micro["log_renda"] = np.log(micro["renda_habitual_real"])
 
     resultados = []
+    # "grupamento_ocupacional" sozinho, no final, é uma comparação ISOLADA (sem idade/
+    # escolaridade já controladas) — responde "quanto ocupação SOZINHA explica do
+    # hiato, com teste de significância?", à parte da cadeia progressiva acima.
     for controles in [["faixa_etaria"], ["faixa_etaria", "nivel_instrucao"],
-                       ["faixa_etaria", "nivel_instrucao", "grupamento_ocupacional"]]:
+                       ["faixa_etaria", "nivel_instrucao", "grupamento_ocupacional"],
+                       ["grupamento_ocupacional"]]:
         r = pnadc_core.decomposicao_oaxaca_blinder(
             micro, "log_renda", controles, "peso", "raca_cor", "Branca", "Negra"
         )
@@ -1148,6 +1158,66 @@ def gerar_theil_racial(con: duckdb.DuckDBPyConnection, n_trimestres: int | None 
           "dentro de cada raça", flush=True)
 
 
+def gerar_renda_multidimensional_faixa(con: duckdb.DuckDBPyConnection, n_trimestres: int = 8) -> None:
+    """Cruza renda com raça x sexo x faixa_etaria x nivel_instrucao x
+    grupamento_ocupacional — estende `gerar_renda_completa` adicionando ocupação, pra
+    fechar as combinações raça×faixa_etaria×ocupação e raça×faixa_etaria×escolaridade
+    que ainda não tinham gráfico próprio (só apareciam embutidas no heatmap de 4
+    dimensões, sem ocupação). Só ocupados com ocupação identificada (universo em que
+    "ocupação" faz sentido), últimos `n_trimestres` agrupados — abrir mais uma dimensão
+    de 11 categorias deixaria as células por trimestre pequenas demais (mesmo padrão de
+    `gerar_decomposicao_hiato_ocupacional`/`gerar_decomposicao_oaxaca_blinder`). Brasil
+    apenas — já são 5 dimensões, abrir também por geografia deixaria a maioria das
+    células com amostra residual."""
+    select_agregado = f"""
+           raca_cor, sexo, faixa_etaria, nivel_instrucao, grupamento_ocupacional,
+           COUNT(*) AS n_amostra,
+           SUM(peso) AS populacao_estimada,
+           SUM(renda_habitual_real * peso)
+               / NULLIF(SUM(peso) FILTER (WHERE renda_habitual_real IS NOT NULL), 0)
+               AS renda_habitual_real_media"""
+    query = f"""
+        SELECT {select_agregado}
+        FROM base
+        WHERE grupamento_ocupacional IS NOT NULL
+          AND (ano, trimestre) IN (
+              SELECT ano, trimestre FROM (SELECT DISTINCT ano, trimestre FROM base ORDER BY ano DESC, trimestre DESC LIMIT {n_trimestres})
+          )
+        GROUP BY raca_cor, sexo, faixa_etaria, nivel_instrucao, grupamento_ocupacional"""
+    df = con.execute(query).df()
+    df = df[df["nivel_instrucao"].notna()]
+    destino = OUTPUT_DIR / "renda_multidimensional_faixa.parquet"
+    df.to_parquet(destino, index=False)
+    print(f"renda_multidimensional_faixa.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
+
+
+def gerar_renda_multidimensional_geracao(con: duckdb.DuckDBPyConnection, n_trimestres: int = 8) -> None:
+    """Igual a `gerar_renda_multidimensional_faixa`, mas com geração no lugar de faixa
+    etária — fecha raça×geração×ocupação e raça×geração×escolaridade, além de
+    raça×gênero×geração e raça×gênero×ocupação (todas derivadas colapsando as
+    dimensões que sobram desta mesma tabela, ver `graficos_fase1.py`)."""
+    select_agregado = f"""
+           raca_cor, sexo, geracao, nivel_instrucao, grupamento_ocupacional,
+           COUNT(*) AS n_amostra,
+           SUM(peso) AS populacao_estimada,
+           SUM(renda_habitual_real * peso)
+               / NULLIF(SUM(peso) FILTER (WHERE renda_habitual_real IS NOT NULL), 0)
+               AS renda_habitual_real_media"""
+    query = f"""
+        SELECT {select_agregado}
+        FROM base
+        WHERE grupamento_ocupacional IS NOT NULL
+          AND (ano, trimestre) IN (
+              SELECT ano, trimestre FROM (SELECT DISTINCT ano, trimestre FROM base ORDER BY ano DESC, trimestre DESC LIMIT {n_trimestres})
+          )
+        GROUP BY raca_cor, sexo, geracao, nivel_instrucao, grupamento_ocupacional"""
+    df = con.execute(query).df()
+    df = df[df["nivel_instrucao"].notna()]
+    destino = OUTPUT_DIR / "renda_multidimensional_geracao.parquet"
+    df.to_parquet(destino, index=False)
+    print(f"renda_multidimensional_geracao.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
+
+
 def gerar_renda_completa(con: duckdb.DuckDBPyConnection) -> None:
     """Cruza renda com raça x sexo x faixa_etaria x nivel_instrucao TODAS AO MESMO TEMPO
     — o cruzamento mais fino pedido. Só Brasil (as outras 4 dimensões já multiplicam
@@ -1212,6 +1282,8 @@ def main() -> None:
     gerar_renda_por_escolaridade(con)
     gerar_renda_por_geracao(con)
     gerar_renda_completa(con)
+    gerar_renda_multidimensional_faixa(con)
+    gerar_renda_multidimensional_geracao(con)
     gerar_hiato_racial(con)
     gerar_hiato_por_geracao(con)
     gerar_gini_por_raca(con)

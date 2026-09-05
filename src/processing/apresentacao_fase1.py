@@ -36,9 +36,19 @@ SECOES = [
         ("hiato_racial_absoluto.png", "Em R$, o hiato disparou na pandemia (pico ~R$2.035) antes de recuar."),
     ]),
     ("É ocupação, ou é cor da pele?", "Decomposição: quanto idade, escolaridade e ocupação explicam do hiato", [
-        ("decomposicao_hiato_ocupacional.png", "Hiato bruto 67% → 64% (só idade) → 30% (+escolaridade) → 24% (+ocupação, residual)."),
-        ("oaxaca_blinder_decomposicao.png", "Mesma pergunta via regressão (Oaxaca-Blinder), com teste de significância: resíduo de +22% (p<0,001) — bate com a padronização direta."),
+        ("decomposicao_hiato_ocupacional.png", "Hiato bruto 67% → 64% (só idade) → 30% (+escolaridade) → 24% (+ocupação, residual). Ocupação SOZINHA (isolada, sem outros controles) já leva o hiato a 33%."),
+        ("oaxaca_blinder_decomposicao.png", "Mesma pergunta via regressão (Oaxaca-Blinder), com teste de significância: resíduo de +22% (p<0,001) — bate com a padronização direta. Ocupação sozinha explica 40% do hiato (p<0,001)."),
         ("oaxaca_blinder_quantis.png", "O hiato residual não é uniforme: menor na mediana (~15%), maior na base (~31%, 'piso pegajoso') e no topo (~36%, 'teto de vidro')."),
+        ("renda_por_raca_ocupacao.png", "Dentro de CADA categoria ocupacional, Branca ganha mais que Negra — o hiato não é só 'estar em ocupações diferentes'."),
+    ]),
+    ("Raça cruzada com tudo: as combinações que faltavam", "Heatmaps raça × 2 dimensões, um painel por raça — fecha a matriz completa pedida pelo usuário", [
+        ("raca_genero_geracao.png", "Renda por raça, gênero e geração."),
+        ("raca_genero_ocupacao.png", "Renda por raça, gênero e ocupação."),
+        ("raca_faixa_etaria_escolaridade.png", "Renda por raça, faixa etária e escolaridade."),
+        ("raca_faixa_etaria_ocupacao.png", "Renda por raça, faixa etária e ocupação."),
+        ("raca_geracao_escolaridade.png", "Renda por raça, geração e escolaridade."),
+        ("raca_geracao_ocupacao.png", "Renda por raça, geração e ocupação."),
+        ("raca_escolaridade_ocupacao.png", "Renda por raça, escolaridade e ocupação — dentro do mesmo nível de instrução E mesma ocupação, o hiato racial ainda aparece na maioria das células."),
     ]),
     ("Aprofundamentos: região, segregação e quebras estruturais", "Rodada 3 — a pedido do usuário", [
         ("hiato_racial_por_regiao.png", "O hiato racial varia MUITO por região: ~65-85% no Sudeste vs. ~45-55% no Sul."),
