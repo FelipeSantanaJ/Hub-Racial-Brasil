@@ -68,12 +68,14 @@ SECOES = [
     ("Quem está no topo 10%? Negra vs. Branca", "Limiar (P90) calculado DENTRO de cada raça, não um corte único pro Brasil", [
         ("topo10_genero.png", "% de mulheres no topo 10% de cada raça — Branca sempre um pouco à frente, mas a distância vem encolhendo."),
         ("topo10_escolaridade.png", "% com Superior completo no topo 10% — o topo dos negros ficou muito mais qualificado (38%→58%), mas ainda atrás do topo dos brancos (~83%)."),
+        ("topo10_escolaridade_composicao.png", "Distribuição completa pelos 7 níveis: o topo dos negros tem mais Médio completo (23%) que o dos brancos (10%) — o hiato de Superior completo não é a única diferença."),
         ("topo10_faixa_etaria.png", "Composição por faixa etária do topo 10%, média dos últimos 8 trimestres."),
         ("topo10_geracao.png", "Composição por geração do topo 10% — o topo dos negros pende um pouco mais para Millennial/Geração Z; o dos brancos, para Baby Boomer/Geração X."),
     ]),
     ("Decomposição dos 4 quartis de renda — Negra vs. Branca", "Generaliza o topo 10% pra toda a distribuição: Q1 (25% mais pobres) a Q4 (25% mais ricos), limiar DENTRO de cada raça", [
         ("quartis_genero.png", "% de mulheres por quartil — maioria entre as mais pobres, minoria entre as mais ricas, nas duas raças; a distância entre raças é maior no Q4."),
         ("quartis_escolaridade.png", "% com Superior completo cresce em todos os quartis nas duas raças, mas o hiato racial se abre dramaticamente no Q4 (~72% Branca vs. ~40% Negra)."),
+        ("quartis_escolaridade_composicao.png", "Distribuição completa pelos 7 níveis, um painel por quartil — mesmo padrão do topo 10% visível em cada fatia da distribuição."),
         ("quartis_faixa_etaria.png", "Composição por faixa etária, um painel por quartil — perfil etário parecido entre as raças em cada quartil."),
         ("quartis_geracao.png", "Composição por geração, um painel por quartil."),
     ]),
@@ -142,8 +144,14 @@ SECOES = [
     ("Raça × Gênero × Faixa etária", None, [
         ("renda_por_faixa_etaria_raca_genero.png", "Mesmo efeito de abertura em 40-59 anos, visível nos dois gêneros."),
     ]),
-    ("Escolaridade × Raça × Gênero", None, [
+    ("Escolaridade × Raça × Gênero", "Combinado (Superior completo, o destaque) + um por nível", [
         ("escolaridade_por_raca_genero.png", "Conclusão do superior: hiato racial >2x; mulheres à frente dos homens em todos os grupos."),
+        ("escolaridade_por_raca_genero_sem_instrucao.png", "Sem instrução."),
+        ("escolaridade_por_raca_genero_fundamental_incompl.png", "Fundamental incompleto."),
+        ("escolaridade_por_raca_genero_fundamental_compl.png", "Fundamental completo."),
+        ("escolaridade_por_raca_genero_medio_incompl.png", "Médio incompleto."),
+        ("escolaridade_por_raca_genero_medio_compl.png", "Médio completo."),
+        ("escolaridade_por_raca_genero_superior_incompl.png", "Superior incompleto."),
     ]),
     ("Todas as dimensões de uma vez", "Raça × Gênero × Faixa etária × Escolaridade", [
         ("renda_completa_heatmap.png", "Seis painéis (raça×gênero), faixa etária × nível de instrução em cada um — o padrão racial se mantém."),

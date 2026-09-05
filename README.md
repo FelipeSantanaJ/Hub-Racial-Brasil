@@ -100,7 +100,7 @@ P57 da distribuição de Branca (pouco acima da mediana), mas no P76 da distribu
 ganha quem está em cada percentil —, os 10% mais pobres entre os brancos ganham R$1.500,
 contra R$720 entre os 10% mais pobres dos negros.
 
-**79 gráficos ao todo** — a matriz completa de combinações entre raça, gênero, faixa
+**87 gráficos ao todo** — a matriz completa de combinações entre raça, gênero, faixa
 etária, geração, escolaridade e ocupação (Preta e Parda sempre também separadas), mais
 aprofundamentos: hiato por região, segregação ocupacional e setorial (índice de Duncan),
 teste de quebra estrutural em 3 eventos históricos, novas variáveis (informalidade, renda

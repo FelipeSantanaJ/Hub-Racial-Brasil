@@ -624,21 +624,50 @@ suficiente reservado) em rodadas anteriores.
 
 ---
 
+## Correção: gap real na seção Escolaridade × Raça × Gênero (2026-09-05)
+
+Usuário apontou (depois de pedir a auditoria completa da seção anterior) que a seção
+"Escolaridade × Raça × Gênero" só tinha 1 gráfico — Superior completo — enquanto
+`nivel_instrucao` tem 7 categorias. Checado: **era um bug real, isolado**, diferente do
+padrão "combinado + um por nível" já usado corretamente em `renda_por_raca_escolaridade`
+(que já cobria os 7 níveis certinho, inclusive nas versões por gênero). A função
+`grafico_escolaridade_por_raca_genero` tinha `"Superior completo"` fixo no código em vez de
+parametrizado — corrigido: agora aceita `nivel` e é chamada nos 7 níveis.
+
+Auditoria também achou o mesmo padrão de bug em dois lugares relacionados: os snapshots de
+composição do topo 10% e dos quartis (`grafico_topo10_escolaridade` e
+`grafico_quartis_escolaridade`) só rastreavam "% Superior completo" ao longo do tempo — os
+dados dos outros 6 níveis já estavam nos parquets (a agregação sempre salvou todas as
+categorias), só não tinham virado gráfico. Adicionados
+`grafico_topo10_escolaridade_composicao` e `grafico_quartis_escolaridade_composicao`
+(reaproveitando os helpers genéricos `_snapshot_topo10`/`_grafico_quartis_snapshot_categorico`
+já existentes, sem precisar de lógica nova) mostrando a distribuição completa pelos 7 níveis.
+
+Achado novo: o topo 10% dos negros tem mais que o dobro de Médio completo (23%) do que o dos
+brancos (10%) — quem não chega ao Superior completo dentro do topo dos negros, na maioria das
+vezes, já concluiu o Médio, não fica pra trás no Fundamental. Mesmo padrão visível em todos os
+4 quartis.
+
+8 gráficos novos (87 no total, era 79).
+
+---
+
 ## 🏁 Fase 1 concluída (2026-09-04, expandida em 2026-09-05)
 
-Todas as 7 etapas (0-6) fechadas no mesmo dia, incl. seis rodadas de expansão a pedido (a
+Todas as 7 etapas (0-6) fechadas no mesmo dia, incl. sete rodadas de expansão a pedido (a
 segunda com teste de significância formal via Oaxaca-Blinder, hiato regional, segregação
 ocupacional, quebra estrutural e 4 variáveis novas; a terceira com geração, perfil do topo
 10% e a decomposição completa dos 4 quartis; a quarta com Gini/Theil por raça, setor
 econômico, setor público/privado e sobre-qualificação; a quinta com a função quantil da
 renda em R$ e sua inversa; a sexta fechando a matriz completa de combinações raça × A × B e
-quantificando quanto ocupação sozinha explica do hiato — ver seções acima). Entregáveis:
+quantificando quanto ocupação sozinha explica do hiato; a sétima corrigindo um gap real na
+seção Escolaridade × Raça × Gênero — ver seções acima). Entregáveis:
 `src/ingestion/{extrator_pnadc,baixar_deflator}.py`,
 `src/processing/{agregacoes_pnadc,graficos_fase1,apresentacao_fase1}.py`,
 `src/utils/pnadc_core.py`, 29 datasets em `data/processed/*.parquet`,
-`docs/{LIMITACOES_E_METODOLOGIA,ANALISE_FASE1}.md`, 79 gráficos em `docs/img/` (galeria
+`docs/{LIMITACOES_E_METODOLOGIA,ANALISE_FASE1}.md`, 87 gráficos em `docs/img/` (galeria
 completa em `docs/ANALISE_FASE1.md`, destaques no README), apresentação
-`docs/Datahub_Racial_Brasil_Fase1.pptx` (101 slides). Próximo passo: Fase 2 (Censo
+`docs/Datahub_Racial_Brasil_Fase1.pptx` (109 slides). Próximo passo: Fase 2 (Censo
 Demográfico) — ainda não detalhada.
 
 ---

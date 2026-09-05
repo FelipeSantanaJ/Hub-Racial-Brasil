@@ -609,8 +609,11 @@ def grafico_renda_por_raca_genero(renda: pd.DataFrame) -> Path:
     return _salvar(fig, "renda_por_raca_genero.png")
 
 
-def grafico_escolaridade_por_raca_genero(esc: pd.DataFrame) -> Path:
-    """% com superior completo, por raça x gênero, Brasil, trimestre mais recente."""
+def grafico_escolaridade_por_raca_genero(esc: pd.DataFrame, nivel: str = "Superior completo") -> Path:
+    """% que atingiu um nível de instrução (`nivel`, default Superior completo), por
+    raça x gênero, Brasil, trimestre mais recente. `nivel=None` cobria só Superior
+    completo antes — chamado agora pros 7 níveis (ver `main()`), mesmo padrão
+    "combinado + um por categoria" já usado em raça×escolaridade (renda)."""
     ultimo_ano, ultimo_trimestre = _trimestre_mais_recente(esc)
     e = esc[
         (esc["nivel_geografico"] == "brasil")
@@ -620,11 +623,11 @@ def grafico_escolaridade_por_raca_genero(esc: pd.DataFrame) -> Path:
 
     combinado = _combinar_negra_multi(e, "populacao_estimada", by=["sexo", "nivel_instrucao"])
     total = combinado.groupby(["raca_cor", "sexo"])["populacao_estimada"].sum().rename("total")
-    superior = (
-        combinado[combinado["nivel_instrucao"] == "Superior completo"]
-        .groupby(["raca_cor", "sexo"])["populacao_estimada"].sum().rename("superior")
+    no_nivel = (
+        combinado[combinado["nivel_instrucao"] == nivel]
+        .groupby(["raca_cor", "sexo"])["populacao_estimada"].sum().rename("no_nivel")
     )
-    pct = (superior / total * 100).rename("pct_superior").reset_index()
+    pct = (no_nivel / total * 100).rename("pct_nivel").reset_index()
 
     ordem_raca = ["Branca", "Negra", "Indígena"]
     pct["raca_cor"] = pd.Categorical(pct["raca_cor"], categories=ordem_raca, ordered=True)
@@ -637,7 +640,7 @@ def grafico_escolaridade_por_raca_genero(esc: pd.DataFrame) -> Path:
     # mulheres = cor cheia (1.0) — mesma convenção em todo o gráfico.
     alpha_por_sexo = {"Homem": 0.55, "Mulher": 1.0}
     for i, sexo in enumerate(["Homem", "Mulher"]):
-        valores = [pct[(pct["raca_cor"] == r) & (pct["sexo"] == sexo)]["pct_superior"].sum() for r in ordem_raca]
+        valores = [pct[(pct["raca_cor"] == r) & (pct["sexo"] == sexo)]["pct_nivel"].sum() for r in ordem_raca]
         cores = [CORES_RACA[r] for r in ordem_raca]
         deslocamento = (i - 0.5) * largura
         barras = ax.bar(
@@ -646,7 +649,7 @@ def grafico_escolaridade_por_raca_genero(esc: pd.DataFrame) -> Path:
         )
         for barra, v in zip(barras, valores):
             ax.text(
-                barra.get_x() + barra.get_width() / 2, v + 0.6, f"{v:.0f}%",
+                barra.get_x() + barra.get_width() / 2, v + max(valores) * 0.02, f"{v:.0f}%",
                 ha="center", fontsize=9, color=TINTA_SECUNDARIA,
             )
 
@@ -658,19 +661,21 @@ def grafico_escolaridade_por_raca_genero(esc: pd.DataFrame) -> Path:
 
     ax.set_xticks(x)
     ax.set_xticklabels([r.split(" ")[0] for r in ordem_raca], fontsize=10.5, color=TINTA_PRIMARIA)
-    ax.set_ylim(0, pct["pct_superior"].max() * 1.35)
+    ax.set_ylim(0, pct["pct_nivel"].max() * 1.35)
     ax.yaxis.set_major_formatter(lambda v, _: f"{v:.0f}%")
 
+    rotulo_nivel = NIVEIS_INSTRUCAO_ROTULO_CURTO[nivel]
     _titulo(
         ax,
-        "Superior completo, por raça e gênero — Brasil",
+        f"{rotulo_nivel}, por raça e gênero — Brasil",
         f"% da população 14+ anos · {ultimo_trimestre}º trimestre de {ultimo_ano} · PNAD Contínua Trimestral",
     )
     ax.grid(axis="y", color=GRADE, linewidth=0.8, zorder=0)
 
     _rodape(fig)
     fig.tight_layout(rect=(0, 0.03, 1, 1))
-    return _salvar(fig, "escolaridade_por_raca_genero.png")
+    sufixo = "" if nivel == "Superior completo" else f"_{_slug(rotulo_nivel)}"
+    return _salvar(fig, f"escolaridade_por_raca_genero{sufixo}.png")
 
 
 def _combinar_negra_multi(df: pd.DataFrame, col_valor: str, by: list[str]) -> pd.DataFrame:
@@ -1982,6 +1987,37 @@ def grafico_topo10_escolaridade(perfil: pd.DataFrame) -> Path:
     )
 
 
+def grafico_topo10_escolaridade_composicao(perfil: pd.DataFrame) -> Path:
+    """Composição por nível de instrução (todos os 7, não só Superior completo) do
+    topo 10% de renda, Negra vs. Branca — complementa `grafico_topo10_escolaridade`
+    (que só rastreia UM nível ao longo do tempo) com a distribuição completa, snapshot
+    (média dos últimos 8 trimestres)."""
+    d = _snapshot_topo10(perfil, "nivel_instrucao")
+    x = np.arange(len(NIVEIS_INSTRUCAO_ORDEM))
+    largura = 0.35
+    fig, ax = _novo_eixo(figsize=(11, 5.8))
+    for i, raca in enumerate(["Branca", "Negra"]):
+        valores = [
+            d[(d["raca_cor"] == raca) & (d["categoria"] == n)]["pct_do_topo10"].sum()
+            for n in NIVEIS_INSTRUCAO_ORDEM
+        ]
+        deslocamento = (i - 0.5) * largura
+        ax.bar(x + deslocamento, valores, largura, color=CORES_RACA[raca], zorder=3, label=raca)
+    ax.set_xticks(x)
+    ax.set_xticklabels([NIVEIS_INSTRUCAO_ROTULO_CURTO[n] for n in NIVEIS_INSTRUCAO_ORDEM], fontsize=9,
+                       rotation=25, ha="right")
+    ax.legend(loc="upper left", frameon=False, fontsize=9.5)
+    _titulo(
+        ax, "Composição por nível de instrução do topo 10% de renda — Negra vs. Branca",
+        "Topo 10% dentro de cada raça · média dos últimos 8 trimestres · PNAD Contínua Trimestral",
+    )
+    ax.yaxis.set_major_formatter(lambda v, _: f"{v:.0f}%")
+    ax.grid(axis="y", color=GRADE, linewidth=0.8, zorder=0)
+    _rodape(fig)
+    fig.tight_layout(rect=(0, 0.08, 1, 1))
+    return _salvar(fig, "topo10_escolaridade_composicao.png")
+
+
 def _snapshot_topo10(perfil: pd.DataFrame, dimensao: str, n_trimestres: int = 8) -> pd.DataFrame:
     """Média (simples, não ponderada por amostra) dos últimos `n_trimestres` — célula
     mais robusta que um único trimestre isolado pra uma composição já bem repartida."""
@@ -2184,6 +2220,18 @@ def grafico_quartis_geracao(perfil_q: pd.DataFrame) -> Path:
     )
 
 
+def grafico_quartis_escolaridade_composicao(perfil_q: pd.DataFrame) -> Path:
+    """Composição por nível de instrução (todos os 7, não só Superior completo) de
+    cada quartil de renda, Branca vs. Negra — complementa `grafico_quartis_escolaridade`
+    (que só rastreia UM nível ao longo do tempo) com a distribuição completa."""
+    return _grafico_quartis_snapshot_categorico(
+        perfil_q, "nivel_instrucao", NIVEIS_INSTRUCAO_ORDEM, NIVEIS_INSTRUCAO_ROTULO_CURTO,
+        "Composição por nível de instrução, por quartil de renda — Branca vs. Negra",
+        "Quartis calculados DENTRO de cada raça · média dos últimos 8 trimestres · PNAD Contínua Trimestral",
+        "quartis_escolaridade_composicao.png",
+    )
+
+
 def main() -> None:
     renda = pd.read_parquet(REPO_ROOT / "data" / "processed" / "renda.parquet")
     esc = pd.read_parquet(REPO_ROOT / "data" / "processed" / "escolaridade.parquet")
@@ -2239,11 +2287,13 @@ def main() -> None:
         grafico_renda_por_geracao_raca(renda_geracao),
         grafico_topo10_genero(perfil_topo10),
         grafico_topo10_escolaridade(perfil_topo10),
+        grafico_topo10_escolaridade_composicao(perfil_topo10),
         grafico_topo10_faixa_etaria(perfil_topo10),
         grafico_topo10_geracao(perfil_topo10),
         # decomposição dos 4 quartis (generaliza o topo 10% pra toda a distribuição)
         grafico_quartis_genero(perfil_quartis),
         grafico_quartis_escolaridade(perfil_quartis),
+        grafico_quartis_escolaridade_composicao(perfil_quartis),
         grafico_quartis_faixa_etaria(perfil_quartis),
         grafico_quartis_geracao(perfil_quartis),
         # desigualdade dentro de cada raça, setor público x privado, segregação
@@ -2292,8 +2342,9 @@ def main() -> None:
         grafico_renda_por_raca_escolaridade(rpe, sexo="Mulher"),
         # raça x gênero x faixa etária
         grafico_renda_por_faixa_etaria(renda),
-        # escolaridade x raça x gênero (nível de instrução, não renda)
-        grafico_escolaridade_por_raca_genero(esc),
+        # escolaridade x raça x gênero (nível de instrução, não renda) — combinado
+        # (Superior completo, já era o destaque) + um por nível (os outros 6 faltavam)
+        *[grafico_escolaridade_por_raca_genero(esc, nivel=n) for n in NIVEIS_INSTRUCAO_ORDEM],
         # raça x gênero x faixa etária x escolaridade
         grafico_renda_completa_heatmap(rc),
     ]
