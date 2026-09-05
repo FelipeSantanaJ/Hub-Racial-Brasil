@@ -221,6 +221,27 @@ tem os dois blocos.
   com Superior completo nesse grupo) — a série fica ruidosa mesmo com média móvel de 4
   trimestres, ler com cautela.
 
+## Matriz de combinações raça × A × B e "só ocupação" isolada (2026-09-05)
+
+- **`renda_multidimensional_faixa.parquet`** e **`renda_multidimensional_geracao.parquet`**:
+  raça × sexo × [faixa_etaria ou geracao] × nivel_instrucao × grupamento_ocupacional, Brasil
+  apenas, últimos 8 trimestres agrupados (mesma razão de sempre: ocupação tem 11 categorias,
+  célula por trimestre isolado ficaria pequena demais). Toda combinação raça×A×B usada nos
+  heatmaps novos é derivada dessas duas tabelas, colapsando (média ponderada, via
+  `_combinar_negra`/`_media_ponderada_por_grupo`) as dimensões que sobram.
+- **Combinação deliberadamente NÃO feita: raça × faixa etária × geração.** As duas variáveis
+  descrevem a MESMA coisa (idade) de formas diferentes — faixa etária é a idade atual da
+  pessoa, geração é o ano de nascimento aproximado. Cruzá-las geraria células
+  minúsculas/instáveis sem adicionar informação além do que "raça × faixa etária" e "raça ×
+  geração" (cada uma já existente separadamente) já mostram.
+- **"Só ocupação" como controle isolado** (`decomposicao_hiato_ocupacional.parquet` e
+  `decomposicao_oaxaca_blinder.parquet`, controles=`grupamento_ocupacional` sem mais nada):
+  diferente da cadeia progressiva (que mostra o efeito MARGINAL de ocupação depois de
+  idade+escolaridade já estarem no modelo), esta linha isola o efeito de ocupação sozinha.
+  Resultado: hiato bruto 67,0% → 33,4% controlando só por ocupação (padronização direta);
+  40,4% de "% explicada" via Oaxaca-Blinder (p<0,001) — em ambos os métodos, ocupação sozinha
+  explica quase tanto quanto idade+escolaridade JUNTAS.
+
 ## Nota técnica: tipos de variável no layout do IBGE
 
 Várias variáveis que parecem numéricas na verdade são **texto** no layout de largura fixa do

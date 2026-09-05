@@ -560,20 +560,85 @@ sem alteração, isso é aditivo.
 
 ---
 
+## Matriz completa de combinações raça × A × B (2026-09-05)
+
+Usuário pediu uma checagem explícita: raça sozinha, e cruzada com gênero/faixa
+etária/geração/escolaridade/ocupação — pares e alguns triplos — "até ter todas as
+combinações". Auditoria honesta do que já existia:
+
+| Combinação | Já existia? |
+|---|---|
+| Raça | ✅ |
+| Raça × gênero, × faixa etária, × geração, × escolaridade | ✅ |
+| Raça × gênero × faixa etária, × gênero × escolaridade | ✅ |
+| **Raça × ocupação** | ❌ nunca virou gráfico próprio (só aparecia dentro de decomposições) |
+| **Raça × gênero × geração** | ❌ |
+| **Raça × gênero × ocupação** | ❌ |
+| **Raça × faixa etária × escolaridade** | ❌ (só embutido no heatmap de 4 dimensões, sem ocupação) |
+| **Raça × faixa etária × ocupação** | ❌ |
+| **Raça × geração × escolaridade** | ❌ |
+| **Raça × geração × ocupação** | ❌ |
+| Raça × faixa etária × geração | Pulado de propósito (ver abaixo) |
+
+Implementado: `gerar_renda_multidimensional_faixa` e `gerar_renda_multidimensional_geracao`
+(raça × sexo × [faixa_etaria ou geracao] × nivel_instrucao × grupamento_ocupacional, últimos
+8 trimestres agrupados — mesma razão de sempre pra pooling: ocupação tem 11 categorias,
+célula por trimestre isolado ficaria pequena demais). A partir dessas duas tabelas-base,
+qualquer combinação pedida é só uma questão de colapsar (média ponderada) as dimensões que
+sobram — reaproveitando `_combinar_negra`/`_media_ponderada_por_grupo` já existentes.
+
+Novo helper genérico de gráfico, `_grafico_heatmap_raca` (generaliza
+`grafico_renda_completa_heatmap`): um painel por raça, sempre os 3 (Branca/Negra/Indígena),
+com qualquer par de dimensões nas linhas/colunas do heatmap — usado nas 7 combinações
+faltantes, mais um gráfico de barras horizontal pra raça × ocupação (11 categorias, melhor
+como barras que como heatmap de 2 dimensões).
+
+**Pulado de propósito: raça × faixa etária × geração.** As duas são visões diferentes da
+MESMA coisa (idade) — faixa etária é a idade atual, geração é o ano de nascimento. Cruzá-las
+criaria células minúsculas e instáveis sem agregar informação nova além do que "raça × faixa
+etária" e "raça × geração" (já existentes, separados) já mostram.
+
+**Pedido complementar no meio da mesma rodada**: além de quebrar por ocupação, quantificar
+quanto ocupação SOZINHA (sem idade/escolaridade já controladas) explica do hiato — diferente
+da decomposição progressiva já existente, que só mostra o efeito MARGINAL de ocupação depois
+de idade+escolaridade já estarem no modelo. Adicionado como uma 5ª barra, visualmente
+separada (espaço + linha pontilhada, sem seta de acumulação), tanto na padronização direta
+quanto na regressão de Oaxaca-Blinder:
+
+| Método | Hiato bruto | Ocupação sozinha | Idade+escolaridade+ocupação juntas |
+|---|---|---|---|
+| Padronização direta | 67,0% | **33,4%** | 24,3% |
+| Oaxaca-Blinder (% explicada) | — | **40,4%** (p<0,001) | 52,6% (p<0,001) |
+
+Achado: ocupação sozinha já explica quase tanto quanto idade+escolaridade JUNTAS (que levam
+o hiato a 30,3% na padronização direta) — é, isoladamente, uma das variáveis mais explicativas
+que temos nesta base.
+
+**Bug de layout encontrado e corrigido**: a legenda e o texto de rodapé do gráfico de
+Oaxaca-Blinder ficaram sobrepostos no primeiro render (a 5ª barra isolada + texto extra
+precisavam de mais espaço vertical do que a margem original previa) — corrigido aumentando a
+altura da figura e a margem reservada, mesmo padrão de bug já visto (texto sem espaço
+suficiente reservado) em rodadas anteriores.
+
+8 gráficos novos (79 no total, era 71), 2 datasets novos (29 no total, era 27).
+
+---
+
 ## 🏁 Fase 1 concluída (2026-09-04, expandida em 2026-09-05)
 
-Todas as 7 etapas (0-6) fechadas no mesmo dia, incl. cinco rodadas de expansão a pedido (a
+Todas as 7 etapas (0-6) fechadas no mesmo dia, incl. seis rodadas de expansão a pedido (a
 segunda com teste de significância formal via Oaxaca-Blinder, hiato regional, segregação
 ocupacional, quebra estrutural e 4 variáveis novas; a terceira com geração, perfil do topo
 10% e a decomposição completa dos 4 quartis; a quarta com Gini/Theil por raça, setor
 econômico, setor público/privado e sobre-qualificação; a quinta com a função quantil da
-renda em R$ e sua inversa — ver seções acima). Entregáveis:
+renda em R$ e sua inversa; a sexta fechando a matriz completa de combinações raça × A × B e
+quantificando quanto ocupação sozinha explica do hiato — ver seções acima). Entregáveis:
 `src/ingestion/{extrator_pnadc,baixar_deflator}.py`,
 `src/processing/{agregacoes_pnadc,graficos_fase1,apresentacao_fase1}.py`,
-`src/utils/pnadc_core.py`, 27 datasets em `data/processed/*.parquet`,
-`docs/{LIMITACOES_E_METODOLOGIA,ANALISE_FASE1}.md`, 71 gráficos em `docs/img/` (galeria
+`src/utils/pnadc_core.py`, 29 datasets em `data/processed/*.parquet`,
+`docs/{LIMITACOES_E_METODOLOGIA,ANALISE_FASE1}.md`, 79 gráficos em `docs/img/` (galeria
 completa em `docs/ANALISE_FASE1.md`, destaques no README), apresentação
-`docs/Datahub_Racial_Brasil_Fase1.pptx` (92 slides). Próximo passo: Fase 2 (Censo
+`docs/Datahub_Racial_Brasil_Fase1.pptx` (101 slides). Próximo passo: Fase 2 (Censo
 Demográfico) — ainda não detalhada.
 
 ---

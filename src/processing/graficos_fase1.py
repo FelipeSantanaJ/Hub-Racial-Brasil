@@ -762,6 +762,33 @@ NIVEIS_INSTRUCAO_ROTULO_CURTO = {
     "Superior completo": "Superior compl.",
 }
 
+GRUPAMENTOS_OCUPACIONAIS_ORDEM = [
+    "Diretores e gerentes",
+    "Profissionais das ciências e intelectuais",
+    "Técnicos e profissionais de nível médio",
+    "Trabalhadores de apoio administrativo",
+    "Trabalhadores dos serviços, vendedores do comércio",
+    "Trabalhadores agropecuários, florestais, da caça e pesca",
+    "Trabalhadores da construção, artes mecânicas e ofícios",
+    "Operadores de instalações e máquinas e montadores",
+    "Ocupações elementares",
+    "Forças armadas, policiais e bombeiros militares",
+    "Ocupações maldefinidas",
+]
+ROTULOS_OCUPACAO_CURTO = {
+    "Diretores e gerentes": "Diretores/gerentes",
+    "Profissionais das ciências e intelectuais": "Profissionais",
+    "Técnicos e profissionais de nível médio": "Técnicos",
+    "Trabalhadores de apoio administrativo": "Apoio administrativo",
+    "Trabalhadores dos serviços, vendedores do comércio": "Serviços/comércio",
+    "Trabalhadores agropecuários, florestais, da caça e pesca": "Agropecuária",
+    "Trabalhadores da construção, artes mecânicas e ofícios": "Construção/ofícios",
+    "Operadores de instalações e máquinas e montadores": "Operadores de máquinas",
+    "Ocupações elementares": "Ocupações elementares",
+    "Forças armadas, policiais e bombeiros militares": "Forças armadas/policiais",
+    "Ocupações maldefinidas": "Maldefinidas",
+}
+
 
 def grafico_renda_por_raca_escolaridade(rpe: pd.DataFrame, sexo: str | None = None) -> Path:
     """Renda habitual real por nível de instrução x raça, trimestre mais recente.
@@ -1006,49 +1033,67 @@ ROTULOS_DECOMPOSICAO = {
     "faixa_etaria": "+ faixa\netária",
     "faixa_etaria + nivel_instrucao": "+ escolaridade",
     "faixa_etaria + nivel_instrucao + grupamento_ocupacional": "+ ocupação\n(residual)",
+    "grupamento_ocupacional": "Só ocupação\n(isolado)",
 }
 
 
 def grafico_decomposicao_hiato(decomp: pd.DataFrame) -> Path:
     """Quanto do hiato Branca vs. Negra sobra depois de controlar por idade, depois +
     escolaridade, depois + ocupação — padronização direta (ver
-    agregacoes_pnadc.gerar_decomposicao_hiato_ocupacional)."""
-    d = decomp.copy()
-    d["rotulo"] = d["controles"].map(ROTULOS_DECOMPOSICAO)
+    agregacoes_pnadc.gerar_decomposicao_hiato_ocupacional). A 5ª barra ("só ocupação")
+    é uma comparação ISOLADA — ocupação sozinha, sem idade/escolaridade já controladas
+    — por isso vem separada visualmente (espaço + cor diferente + linha pontilhada),
+    não é mais um passo acumulado da cadeia."""
+    ordem_cadeia = [
+        "nenhum (hiato bruto)", "faixa_etaria", "faixa_etaria + nivel_instrucao",
+        "faixa_etaria + nivel_instrucao + grupamento_ocupacional",
+    ]
+    cadeia = decomp[decomp["controles"].isin(ordem_cadeia)].set_index("controles").loc[ordem_cadeia].reset_index()
+    isolado = decomp[decomp["controles"] == "grupamento_ocupacional"].iloc[0]
 
-    fig, ax = _novo_eixo(figsize=(10, 5.5))
-    x = np.arange(len(d))
-    cores = [COR_BRANCA] * (len(d) - 1) + [COR_NEGRA]
-    barras = ax.bar(x, d["hiato_percentual"], color=cores, width=0.55, zorder=3)
-    for barra, v in zip(barras, d["hiato_percentual"]):
+    cadeia["rotulo"] = cadeia["controles"].map(ROTULOS_DECOMPOSICAO)
+    x_cadeia = np.arange(len(cadeia))
+    x_isolado = len(cadeia) + 0.6
+
+    fig, ax = _novo_eixo(figsize=(11.5, 5.5))
+    cores_cadeia = [COR_BRANCA] * (len(cadeia) - 1) + [COR_NEGRA]
+    barras = ax.bar(x_cadeia, cadeia["hiato_percentual"], color=cores_cadeia, width=0.55, zorder=3)
+    for barra, v in zip(barras, cadeia["hiato_percentual"]):
         ax.text(barra.get_x() + barra.get_width() / 2, v + 1.5, f"{v:.0f}%",
                 ha="center", fontsize=12, fontweight="bold", color=TINTA_PRIMARIA)
 
-    for i in range(len(d) - 1):
+    for i in range(len(cadeia) - 1):
         ax.annotate(
-            "", xy=(x[i + 1] - 0.3, d["hiato_percentual"].iloc[i + 1] + 3),
-            xytext=(x[i] + 0.3, d["hiato_percentual"].iloc[i] + 3),
+            "", xy=(x_cadeia[i + 1] - 0.3, cadeia["hiato_percentual"].iloc[i + 1] + 3),
+            xytext=(x_cadeia[i] + 0.3, cadeia["hiato_percentual"].iloc[i] + 3),
             arrowprops=dict(arrowstyle="->", color=TINTA_MUTED, lw=1.2),
         )
 
-    ax.set_xticks(x)
-    ax.set_xticklabels(d["rotulo"], fontsize=10.5)
-    ax.set_ylim(0, d["hiato_percentual"].max() * 1.25)
+    ax.axvline(x_isolado - 0.6, color=EIXO, linewidth=1, linestyle=":", zorder=1)
+    ax.bar([x_isolado], [isolado["hiato_percentual"]], color=COR_PARDA, width=0.55, zorder=3)
+    ax.text(x_isolado, isolado["hiato_percentual"] + 1.5, f"{isolado['hiato_percentual']:.0f}%",
+            ha="center", fontsize=12, fontweight="bold", color=TINTA_PRIMARIA)
+
+    ax.set_xticks(list(x_cadeia) + [x_isolado])
+    ax.set_xticklabels(list(cadeia["rotulo"]) + [ROTULOS_DECOMPOSICAO["grupamento_ocupacional"]], fontsize=10)
+    ax.set_ylim(0, max(cadeia["hiato_percentual"].max(), isolado["hiato_percentual"]) * 1.25)
     ax.yaxis.set_major_formatter(lambda v, _: f"{v:.0f}%")
 
     _titulo(
         ax, "Quanto do hiato Branca vs. Negra idade/escolaridade/ocupação explicam?",
         "Últimos 8 trimestres agrupados, pessoas ocupadas · padronização direta · PNAD Contínua Trimestral",
     )
+    hiato_bruto = cadeia.loc[cadeia["controles"] == "nenhum (hiato bruto)", "hiato_percentual"].iloc[0]
+    hiato_residual = cadeia["hiato_percentual"].iloc[-1]
     ax.text(
         0.5, -0.20,
-        "Mesma idade, escolaridade e ocupação — ainda assim resta um hiato de "
-        f"{d['hiato_percentual'].iloc[-1]:.0f}% não explicado por essas três variáveis.",
-        transform=ax.transAxes, ha="center", fontsize=10.5, color=TINTA_SECUNDARIA, style="italic",
+        f"Ocupação sozinha: hiato cai de {hiato_bruto:.0f}% pra {isolado['hiato_percentual']:.0f}%. "
+        f"Idade+escolaridade+ocupação juntas: cai pra {hiato_residual:.0f}%.",
+        transform=ax.transAxes, ha="center", fontsize=10, color=TINTA_SECUNDARIA, style="italic",
     )
     ax.grid(axis="y", color=GRADE, linewidth=0.8, zorder=0)
     _rodape(fig)
-    fig.tight_layout(rect=(0, 0.08, 1, 1))
+    fig.tight_layout(rect=(0, 0.1, 1, 1))
     return _salvar(fig, "decomposicao_hiato_ocupacional.png")
 
 
@@ -1127,6 +1172,7 @@ ROTULOS_OB_CONTROLES = {
     "faixa_etaria": "+ faixa\netária",
     "faixa_etaria + nivel_instrucao": "+ escolaridade",
     "faixa_etaria + nivel_instrucao + grupamento_ocupacional": "+ ocupação",
+    "grupamento_ocupacional": "Só ocupação\n(isolado)",
 }
 
 
@@ -1137,37 +1183,54 @@ def grafico_oaxaca_blinder_decomposicao(ob: pd.DataFrame) -> Path:
     Complementa `decomposicao_hiato_ocupacional.png` (padronização direta, mais fácil
     de ler em R$) com o teste de significância formal da parte residual."""
     d = ob[ob["ponto"] == "média"].copy()
-    d["rotulo"] = d["controles"].map(ROTULOS_OB_CONTROLES)
+    ordem_cadeia = [
+        "faixa_etaria", "faixa_etaria + nivel_instrucao",
+        "faixa_etaria + nivel_instrucao + grupamento_ocupacional",
+    ]
+    cadeia = d[d["controles"].isin(ordem_cadeia)].set_index("controles").loc[ordem_cadeia].reset_index()
+    isolado = d[d["controles"] == "grupamento_ocupacional"].iloc[0]
+    cadeia["rotulo"] = cadeia["controles"].map(ROTULOS_OB_CONTROLES)
 
-    fig, ax = _novo_eixo(figsize=(9.5, 5.8))
-    x = np.arange(len(d))
-    ax.bar(x, d["pct_explicada"], width=0.5, color=COR_BRANCA, alpha=0.55, zorder=3,
-           label="Explicada (composição)")
-    ax.bar(x, d["pct_nao_explicada"], width=0.5, bottom=d["pct_explicada"], color=COR_NEGRA, zorder=3,
-           label="Não-explicada (retorno)")
+    x_cadeia = np.arange(len(cadeia))
+    x_isolado = len(cadeia) + 0.6
 
-    for i, (exp_, nexp) in enumerate(zip(d["pct_explicada"], d["pct_nao_explicada"])):
+    fig, ax = _novo_eixo(figsize=(11, 6.8))
+
+    def _desenhar_barra(x, exp_, nexp, label_exp=None, label_nexp=None):
+        ax.bar([x], [exp_], width=0.5, color=COR_BRANCA, alpha=0.55, zorder=3, label=label_exp)
+        ax.bar([x], [nexp], width=0.5, bottom=[exp_], color=COR_NEGRA, zorder=3, label=label_nexp)
         # fatia fina (< 8pp, caso da barra "+ faixa etária") recebe rótulo ACIMA da
         # própria fatia, não centralizado dentro dela — texto não cabe numa fatia de
         # poucos pixels de altura (bug visto no primeiro render: rótulo vazava pro
         # eixo x e colidia com o tick label).
         if exp_ < 8:
-            ax.text(i, exp_ + 2, f"{exp_:.0f}%", ha="center", va="bottom", fontsize=9,
+            ax.text(x, exp_ + 2, f"{exp_:.0f}%", ha="center", va="bottom", fontsize=9,
                     color=TINTA_PRIMARIA, fontweight="bold")
         else:
-            ax.text(i, exp_ / 2, f"{exp_:.0f}%", ha="center", va="center", fontsize=10,
+            ax.text(x, exp_ / 2, f"{exp_:.0f}%", ha="center", va="center", fontsize=10,
                     color=SUPERFICIE, fontweight="bold")
-        ax.text(i, exp_ + nexp / 2, f"{nexp:.0f}%", ha="center", va="center", fontsize=10,
+        ax.text(x, exp_ + nexp / 2, f"{nexp:.0f}%", ha="center", va="center", fontsize=10,
                 color=SUPERFICIE, fontweight="bold")
 
-    ax.set_xticks(x)
-    ax.set_xticklabels(d["rotulo"], fontsize=10.5)
+    for i, row in cadeia.iterrows():
+        _desenhar_barra(
+            x_cadeia[i], row["pct_explicada"], row["pct_nao_explicada"],
+            label_exp="Explicada (composição)" if i == 0 else None,
+            label_nexp="Não-explicada (retorno)" if i == 0 else None,
+        )
+    # barra isolada ("só ocupação", sem idade/escolaridade já controladas) — separada
+    # visualmente (espaço + linha pontilhada), não é mais um passo acumulado da cadeia.
+    ax.axvline(x_isolado - 0.6, color=EIXO, linewidth=1, linestyle=":", zorder=1)
+    _desenhar_barra(x_isolado, isolado["pct_explicada"], isolado["pct_nao_explicada"])
+
+    ax.set_xticks(list(x_cadeia) + [x_isolado])
+    ax.set_xticklabels(list(cadeia["rotulo"]) + [ROTULOS_OB_CONTROLES["grupamento_ocupacional"]], fontsize=10)
     ax.set_ylim(0, 100)
     ax.yaxis.set_major_formatter(lambda v, _: f"{v:.0f}%")
-    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.13), ncol=2, frameon=False, fontsize=9.5)
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.18), ncol=2, frameon=False, fontsize=9.5)
 
-    p_valor_final = d["residuo_restrito_p_valor"].iloc[-1]
-    coef_final = d["residuo_restrito_coef"].iloc[-1]
+    p_valor_final = cadeia["residuo_restrito_p_valor"].iloc[-1]
+    coef_final = cadeia["residuo_restrito_coef"].iloc[-1]
     hiato_residual_pct = (np.exp(coef_final) - 1) * 100
     p_txt = "p < 0,001" if p_valor_final < 0.001 else f"p = {p_valor_final:.3f}"
     _titulo(
@@ -1175,8 +1238,15 @@ def grafico_oaxaca_blinder_decomposicao(ob: pd.DataFrame) -> Path:
         "% do hiato de log-renda por composição vs. por retorno às mesmas características · "
         f"resíduo final de +{hiato_residual_pct:.0f}% ({p_txt})",
     )
+    p_isolado_txt = "p < 0,001" if isolado["residuo_restrito_p_valor"] < 0.001 else f"p = {isolado['residuo_restrito_p_valor']:.3f}"
+    ax.text(
+        0.5, -0.34,
+        f"Ocupação sozinha explica {isolado['pct_explicada']:.0f}% do hiato ({p_isolado_txt}) — "
+        "menos que idade+escolaridade+ocupação juntas.",
+        transform=ax.transAxes, ha="center", fontsize=9.5, color=TINTA_SECUNDARIA, style="italic",
+    )
     _rodape(fig)
-    fig.tight_layout(rect=(0, 0.15, 1, 1))
+    fig.tight_layout(rect=(0, 0.28, 1, 1))
     return _salvar(fig, "oaxaca_blinder_decomposicao.png")
 
 
@@ -1635,6 +1705,185 @@ def grafico_percentil_de_valor_racial(pv: pd.DataFrame) -> Path:
     return _salvar(fig, "percentil_de_valor_racial.png")
 
 
+def grafico_renda_por_raca_ocupacao(rm: pd.DataFrame) -> Path:
+    """Renda por raça e grupamento ocupacional (VD4011) — combinação que faltava:
+    dentro de CADA categoria ocupacional, Branca ganha mais que Negra, confirmando que
+    o hiato não é só "estar em ocupações diferentes" (isso já foi quantificado à parte
+    na decomposição do hiato por ocupação)."""
+    combinado = _combinar_negra(rm, "renda_habitual_real_media", by=["grupamento_ocupacional"])
+    ordem_raca = ["Branca", "Negra", "Indígena"]
+    y = np.arange(len(GRUPAMENTOS_OCUPACIONAIS_ORDEM))
+    altura = 0.25
+    fig, ax = _novo_eixo(figsize=(10.5, 7.5))
+    for i, raca in enumerate(ordem_raca):
+        valores = [
+            combinado[(combinado["raca_cor"] == raca) & (combinado["grupamento_ocupacional"] == o)]["renda_habitual_real_media"].sum()
+            for o in GRUPAMENTOS_OCUPACIONAIS_ORDEM
+        ]
+        deslocamento = (1 - i) * altura
+        ax.barh(y + deslocamento, valores, altura, color=CORES_RACA[raca], zorder=3, label=raca)
+    ax.set_yticks(y)
+    ax.set_yticklabels([ROTULOS_OCUPACAO_CURTO[o] for o in GRUPAMENTOS_OCUPACIONAIS_ORDEM], fontsize=9.5)
+    ax.invert_yaxis()
+    ax.legend(loc="lower right", frameon=False, fontsize=9.5)
+    _titulo(
+        ax, "Renda habitual real por raça e categoria ocupacional — Brasil",
+        "Últimos 8 trimestres, pessoas ocupadas · PNAD Contínua Trimestral",
+    )
+    ax.xaxis.set_major_formatter(lambda v, _: f"R$ {v:,.0f}".replace(",", "."))
+    ax.grid(axis="x", color=GRADE, linewidth=0.8, zorder=0)
+    _rodape(fig)
+    fig.tight_layout(rect=(0, 0.03, 1, 1))
+    return _salvar(fig, "renda_por_raca_ocupacao.png")
+
+
+def _grafico_heatmap_raca(
+    dados: pd.DataFrame, dim_linha: str, dim_coluna: str, ordem_linha: list[str], ordem_coluna: list[str],
+    rotulos_linha: dict[str, str], rotulos_coluna: dict[str, str], col_valor: str,
+    titulo: str, subtitulo: str, nome_arquivo: str, figsize_painel: tuple[float, float] = (4.2, 4.6),
+) -> Path:
+    """Heatmap com um painel por raça (Branca/Negra/Indígena, sempre os 3, lado a lado)
+    — `dim_linha` nas linhas e `dim_coluna` nas colunas de cada painel, cor = valor.
+    Generaliza `grafico_renda_completa_heatmap` (um caso particular disto) pra qualquer
+    par de dimensões — reaproveitado nas combinações raça×A×B que ainda faltavam."""
+    ordem_raca = ["Branca", "Negra", "Indígena"]
+    vmin, vmax = dados[col_valor].min(), dados[col_valor].max()
+
+    fig, axes = plt.subplots(1, 3, figsize=(figsize_painel[0] * 3, figsize_painel[1] + 1.3), dpi=150)
+    fig.patch.set_facecolor(SUPERFICIE)
+
+    for j, raca in enumerate(ordem_raca):
+        ax = axes[j]
+        ax.set_facecolor(SUPERFICIE)
+        sub = dados[dados["raca_cor"] == raca]
+        matriz = sub.pivot_table(index=dim_linha, columns=dim_coluna, values=col_valor)
+        matriz = matriz.reindex(index=ordem_linha, columns=ordem_coluna)
+        ax.imshow(matriz.values, cmap=CMAP_SEQUENCIAL, vmin=vmin, vmax=vmax, aspect="auto")
+
+        ax.set_xticks(range(len(ordem_coluna)))
+        ax.set_xticklabels([rotulos_coluna.get(c, c) for c in ordem_coluna], fontsize=7.5,
+                            color=TINTA_MUTED, rotation=35, ha="right")
+        if j == 0:
+            ax.set_yticks(range(len(ordem_linha)))
+            ax.set_yticklabels([rotulos_linha.get(r, r) for r in ordem_linha], fontsize=7.5, color=TINTA_MUTED)
+        else:
+            ax.set_yticks([])
+        for spine in ax.spines.values():
+            spine.set_visible(False)
+        ax.tick_params(length=0)
+        ax.set_title(raca, fontsize=11, color=TINTA_SECUNDARIA)
+
+        for yi in range(matriz.shape[0]):
+            for xi in range(matriz.shape[1]):
+                v = matriz.values[yi, xi]
+                if pd.notna(v):
+                    cor_txt = SUPERFICIE if v > (vmin + vmax) / 2 else TINTA_PRIMARIA
+                    ax.text(xi, yi, f"{v / 1000:.1f}k", ha="center", va="center", fontsize=6.5, color=cor_txt)
+
+    fig.suptitle(titulo, fontsize=13.5, fontweight="bold", color=TINTA_PRIMARIA, x=0.02, ha="left", y=0.99)
+    fig.text(0.02, 0.93, subtitulo, fontsize=9, color=TINTA_SECUNDARIA)
+    _rodape(fig)
+    fig.tight_layout(rect=(0, 0.03, 1, 0.88))
+    return _salvar(fig, nome_arquivo)
+
+
+def grafico_raca_genero_geracao(rmg: pd.DataFrame) -> Path:
+    combinado = _combinar_negra(rmg, "renda_habitual_real_media", by=["sexo", "geracao"])
+    return _grafico_heatmap_raca(
+        combinado, dim_linha="geracao", dim_coluna="sexo",
+        ordem_linha=GERACOES_ORDEM_GRAFICO, ordem_coluna=["Homem", "Mulher"],
+        rotulos_linha=ROTULOS_GERACAO_CURTO, rotulos_coluna={"Homem": "Homens", "Mulher": "Mulheres"},
+        col_valor="renda_habitual_real_media",
+        titulo="Renda habitual real por raça, gênero e geração — Brasil",
+        subtitulo="R$ reais (milhares), a preços do trimestre mais recente · PNAD Contínua Trimestral",
+        nome_arquivo="raca_genero_geracao.png",
+    )
+
+
+def grafico_raca_genero_ocupacao(rm: pd.DataFrame) -> Path:
+    combinado = _combinar_negra(rm, "renda_habitual_real_media", by=["sexo", "grupamento_ocupacional"])
+    return _grafico_heatmap_raca(
+        combinado, dim_linha="grupamento_ocupacional", dim_coluna="sexo",
+        ordem_linha=GRUPAMENTOS_OCUPACIONAIS_ORDEM, ordem_coluna=["Homem", "Mulher"],
+        rotulos_linha=ROTULOS_OCUPACAO_CURTO, rotulos_coluna={"Homem": "Homens", "Mulher": "Mulheres"},
+        col_valor="renda_habitual_real_media",
+        titulo="Renda habitual real por raça, gênero e ocupação — Brasil",
+        subtitulo="R$ reais (milhares), últimos 8 trimestres, ocupados · PNAD Contínua Trimestral",
+        nome_arquivo="raca_genero_ocupacao.png",
+        figsize_painel=(4.2, 6.5),
+    )
+
+
+def grafico_raca_faixa_etaria_escolaridade(rm: pd.DataFrame) -> Path:
+    combinado = _combinar_negra(rm, "renda_habitual_real_media", by=["faixa_etaria", "nivel_instrucao"])
+    return _grafico_heatmap_raca(
+        combinado, dim_linha="nivel_instrucao", dim_coluna="faixa_etaria",
+        ordem_linha=NIVEIS_INSTRUCAO_ORDEM, ordem_coluna=FAIXAS_ETARIAS_ORDEM,
+        rotulos_linha=NIVEIS_INSTRUCAO_ROTULO_CURTO, rotulos_coluna={f: f for f in FAIXAS_ETARIAS_ORDEM},
+        col_valor="renda_habitual_real_media",
+        titulo="Renda habitual real por raça, faixa etária e escolaridade — Brasil",
+        subtitulo="R$ reais (milhares), últimos 8 trimestres, ocupados · PNAD Contínua Trimestral",
+        nome_arquivo="raca_faixa_etaria_escolaridade.png",
+        figsize_painel=(4.2, 5.4),
+    )
+
+
+def grafico_raca_faixa_etaria_ocupacao(rm: pd.DataFrame) -> Path:
+    combinado = _combinar_negra(rm, "renda_habitual_real_media", by=["faixa_etaria", "grupamento_ocupacional"])
+    return _grafico_heatmap_raca(
+        combinado, dim_linha="grupamento_ocupacional", dim_coluna="faixa_etaria",
+        ordem_linha=GRUPAMENTOS_OCUPACIONAIS_ORDEM, ordem_coluna=FAIXAS_ETARIAS_ORDEM,
+        rotulos_linha=ROTULOS_OCUPACAO_CURTO, rotulos_coluna={f: f for f in FAIXAS_ETARIAS_ORDEM},
+        col_valor="renda_habitual_real_media",
+        titulo="Renda habitual real por raça, faixa etária e ocupação — Brasil",
+        subtitulo="R$ reais (milhares), últimos 8 trimestres, ocupados · PNAD Contínua Trimestral",
+        nome_arquivo="raca_faixa_etaria_ocupacao.png",
+        figsize_painel=(4.2, 6.5),
+    )
+
+
+def grafico_raca_geracao_escolaridade(rmg: pd.DataFrame) -> Path:
+    combinado = _combinar_negra(rmg, "renda_habitual_real_media", by=["geracao", "nivel_instrucao"])
+    return _grafico_heatmap_raca(
+        combinado, dim_linha="nivel_instrucao", dim_coluna="geracao",
+        ordem_linha=NIVEIS_INSTRUCAO_ORDEM, ordem_coluna=GERACOES_ORDEM_GRAFICO,
+        rotulos_linha=NIVEIS_INSTRUCAO_ROTULO_CURTO, rotulos_coluna=ROTULOS_GERACAO_CURTO,
+        col_valor="renda_habitual_real_media",
+        titulo="Renda habitual real por raça, geração e escolaridade — Brasil",
+        subtitulo="R$ reais (milhares), últimos 8 trimestres, ocupados · PNAD Contínua Trimestral",
+        nome_arquivo="raca_geracao_escolaridade.png",
+        figsize_painel=(4.2, 5.4),
+    )
+
+
+def grafico_raca_geracao_ocupacao(rmg: pd.DataFrame) -> Path:
+    combinado = _combinar_negra(rmg, "renda_habitual_real_media", by=["geracao", "grupamento_ocupacional"])
+    return _grafico_heatmap_raca(
+        combinado, dim_linha="grupamento_ocupacional", dim_coluna="geracao",
+        ordem_linha=GRUPAMENTOS_OCUPACIONAIS_ORDEM, ordem_coluna=GERACOES_ORDEM_GRAFICO,
+        rotulos_linha=ROTULOS_OCUPACAO_CURTO, rotulos_coluna=ROTULOS_GERACAO_CURTO,
+        col_valor="renda_habitual_real_media",
+        titulo="Renda habitual real por raça, geração e ocupação — Brasil",
+        subtitulo="R$ reais (milhares), últimos 8 trimestres, ocupados · PNAD Contínua Trimestral",
+        nome_arquivo="raca_geracao_ocupacao.png",
+        figsize_painel=(4.2, 6.5),
+    )
+
+
+def grafico_raca_escolaridade_ocupacao(rm: pd.DataFrame) -> Path:
+    combinado = _combinar_negra(rm, "renda_habitual_real_media", by=["nivel_instrucao", "grupamento_ocupacional"])
+    return _grafico_heatmap_raca(
+        combinado, dim_linha="grupamento_ocupacional", dim_coluna="nivel_instrucao",
+        ordem_linha=GRUPAMENTOS_OCUPACIONAIS_ORDEM, ordem_coluna=NIVEIS_INSTRUCAO_ORDEM,
+        rotulos_linha=ROTULOS_OCUPACAO_CURTO, rotulos_coluna=NIVEIS_INSTRUCAO_ROTULO_CURTO,
+        col_valor="renda_habitual_real_media",
+        titulo="Renda habitual real por raça, escolaridade e ocupação — Brasil",
+        subtitulo="R$ reais (milhares), últimos 8 trimestres, ocupados · PNAD Contínua Trimestral",
+        nome_arquivo="raca_escolaridade_ocupacao.png",
+        figsize_painel=(4.6, 6.5),
+    )
+
+
 def grafico_hiato_por_geracao(hg: pd.DataFrame) -> Path:
     """Hiato Branca vs. Negra DENTRO de cada geração (coorte de nascimento sintética),
     ao longo do tempo. Diferença crucial em relação a um gráfico "por faixa etária":
@@ -1961,6 +2210,8 @@ def main() -> None:
     sobrequalificacao = pd.read_parquet(REPO_ROOT / "data" / "processed" / "sobrequalificacao.parquet")
     funcao_quantil = pd.read_parquet(REPO_ROOT / "data" / "processed" / "funcao_quantil_racial.parquet")
     percentil_de_valor = pd.read_parquet(REPO_ROOT / "data" / "processed" / "percentil_de_valor_racial.parquet")
+    renda_multi_faixa = pd.read_parquet(REPO_ROOT / "data" / "processed" / "renda_multidimensional_faixa.parquet")
+    renda_multi_geracao = pd.read_parquet(REPO_ROOT / "data" / "processed" / "renda_multidimensional_geracao.parquet")
 
     destinos = [
         # raça
@@ -2006,6 +2257,16 @@ def main() -> None:
         grafico_funcao_quantil_racial(funcao_quantil),
         grafico_hiato_por_percentil(funcao_quantil),
         grafico_percentil_de_valor_racial(percentil_de_valor),
+        # combinações raça×A×B que faltavam pra fechar a matriz completa (ocupação,
+        # geração e faixa etária cruzadas entre si e com gênero/escolaridade)
+        grafico_renda_por_raca_ocupacao(renda_multi_faixa),
+        grafico_raca_genero_geracao(renda_multi_geracao),
+        grafico_raca_genero_ocupacao(renda_multi_faixa),
+        grafico_raca_faixa_etaria_escolaridade(renda_multi_faixa),
+        grafico_raca_faixa_etaria_ocupacao(renda_multi_faixa),
+        grafico_raca_geracao_escolaridade(renda_multi_geracao),
+        grafico_raca_geracao_ocupacao(renda_multi_geracao),
+        grafico_raca_escolaridade_ocupacao(renda_multi_faixa),
         # raça x gênero: combinado + um por gênero
         grafico_renda_por_raca_genero(renda),
         grafico_renda_por_raca_sexo(renda, "Homem"),

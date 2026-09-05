@@ -46,7 +46,10 @@ Controlando por idade, escolaridade e ocupação (mesma categoria ocupacional), 
 de 67% cai para 24% — mas não desaparece. Boa parte do hiato racial de renda não se explica
 por "estar em ocupações diferentes". Confirmado por um segundo método (regressão de
 Oaxaca-Blinder, com teste de significância formal — p < 0,001): resíduo de +22%, muito perto
-do resultado da padronização direta acima.
+do resultado da padronização direta acima. E ocupação SOZINHA (sem nem controlar
+idade/escolaridade) já explica quase tanto quanto as duas juntas — hiato cai de 67% pra 33%
+só com essa variável. Dentro de **cada** categoria ocupacional, aliás, Branca ganha mais que
+Negra — o hiato não é só "estar em ocupações diferentes".
 
 ### O hiato residual é maior no topo E na base da distribuição de renda
 
@@ -97,14 +100,14 @@ P57 da distribuição de Branca (pouco acima da mediana), mas no P76 da distribu
 ganha quem está em cada percentil —, os 10% mais pobres entre os brancos ganham R$1.500,
 contra R$720 entre os 10% mais pobres dos negros.
 
-**71 gráficos ao todo** — raça × gênero × faixa etária × escolaridade em todas as
-combinações (Preta e Parda sempre também separadas), mais aprofundamentos: hiato por região,
-segregação ocupacional e setorial (índice de Duncan), teste de quebra estrutural em 3 eventos
-históricos, novas variáveis (informalidade, renda por hora, alfabetização, desalento,
-sobre-qualificação), hiato/renda por geração, perfil de quem está no topo 10% e em cada um
-dos 4 quartis de renda de cada raça, Gini e Theil por raça, hiato no setor público vs.
-privado, e a função quantil da renda em R$ (e sua inversa) por raça. Galeria completa, com a
-leitura de cada gráfico, em
+**79 gráficos ao todo** — a matriz completa de combinações entre raça, gênero, faixa
+etária, geração, escolaridade e ocupação (Preta e Parda sempre também separadas), mais
+aprofundamentos: hiato por região, segregação ocupacional e setorial (índice de Duncan),
+teste de quebra estrutural em 3 eventos históricos, novas variáveis (informalidade, renda
+por hora, alfabetização, desalento, sobre-qualificação), hiato/renda por geração, perfil de
+quem está no topo 10% e em cada um dos 4 quartis de renda de cada raça, Gini e Theil por
+raça, hiato no setor público vs. privado, e a função quantil da renda em R$ (e sua inversa)
+por raça. Galeria completa, com a leitura de cada gráfico, em
 [docs/ANALISE_FASE1.md](docs/ANALISE_FASE1.md), ou como
 apresentação em
 [docs/Datahub_Racial_Brasil_Fase1.pptx](docs/Datahub_Racial_Brasil_Fase1.pptx).
