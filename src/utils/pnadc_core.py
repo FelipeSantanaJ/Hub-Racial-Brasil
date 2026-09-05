@@ -52,11 +52,20 @@ def erro_padrao_media_ponderada(valores, pesos):
     pesos = pesos[valid]
 
     # Cochran (1977), Sampling Techniques, p. 30
-    # Variância = (n / (n-1)) * (sum(w_i * (x_i - mean)^2) / (sum(w_i)^2))
-    # O termo (n / (n-1)) é para amostras finitas
+    # Variância (da MÉDIA) = (n / (n-1)) * (sum(w_i * (x_i - mean)^2) / (sum(w_i)^2))
+    # O termo (n / (n-1)) é para amostras finitas.
+    # BUG histórico corrigido em 2026-09-04: a versão anterior usava um denominador
+    # diferente do documentado aqui (sum(w)^2 - sum(w^2)) e ainda multiplicava o
+    # resultado por len(valores) no final — isso inflava o erro padrão em ~sqrt(n)x
+    # (para n ~ centenas de milhares, um fator de centenas de vezes), gerando
+    # intervalos de confiança absurdamente largos mesmo com amostras enormes. Ver
+    # docs/PLANO.md para como isso foi encontrado (banda de IC do gráfico de hiato
+    # racial cobrindo de 40% a mais de 100%, incompatível com p-valores já
+    # extremamente pequenos calculados com a mesma fórmula).
+    n = len(valores)
     media = np.average(valores, weights=pesos)
-    variancia = np.sum(pesos * (valores - media)**2) / (np.sum(pesos)**2 - np.sum(pesos**2))
-    erro_padrao = np.sqrt(variancia * len(valores))
+    variancia_media = (n / (n - 1)) * np.sum(pesos * (valores - media)**2) / (np.sum(pesos)**2)
+    erro_padrao = np.sqrt(variancia_media)
     return erro_padrao
 
 

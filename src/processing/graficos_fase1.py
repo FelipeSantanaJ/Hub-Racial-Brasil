@@ -1,18 +1,20 @@
 """Gera as visualizações exploratórias da Fase 1 (Etapa 6).
 
 Lê data/processed/{renda,escolaridade}.parquet e produz os gráficos comparativos
-Branca vs. Negra (Preta+Parda) vs. Indígena — geral, por gênero, e cruzando com
+Branca vs. Negra vs. Indígena — geral, por gênero, e cruzando com
 faixa etária — salvos em docs/img/ para uso no README.
 
 Uso:
     python -m src.processing.graficos_fase1
 """
+import unicodedata
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import numpy as np
 import pandas as pd
+from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.patches import Patch
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -22,14 +24,12 @@ OUTPUT_DIR = REPO_ROOT / "docs" / "img"
 COR_BRANCA = "#2a78d6"    # slot 1 (azul)
 COR_NEGRA = "#eb6834"     # slot 2 (laranja) — usada também para "Preta" nos gráficos detalhados
 COR_INDIGENA = "#1baf7a"  # slot 3 (aqua)
-CORES_RACA = {"Branca": COR_BRANCA, "Negra (Preta+Parda)": COR_NEGRA, "Indígena": COR_INDIGENA}
+CORES_RACA = {"Branca": COR_BRANCA, "Negra": COR_NEGRA, "Indígena": COR_INDIGENA}
 
-# Paleta dos gráficos "detalhados" que separam Preta de Parda (validada à parte,
-# all-pairs PASS — ver skill de dataviz): Branca=azul, Preta=laranja, Parda=violeta,
-# Indígena=aqua (mesmas cores de Branca/Indígena que o resto do projeto).
+# Cores do gráfico Preta vs. Parda (validadas à parte, all-pairs PASS junto com
+# Branca/Indígena — ver skill de dataviz, ainda que este gráfico não mostre as duas).
 COR_PRETA = COR_NEGRA
 COR_PARDA = "#4a3aa7"     # slot 7 (violeta)
-CORES_RACA_DETALHADA = {"Branca": COR_BRANCA, "Preta": COR_PRETA, "Parda": COR_PARDA, "Indígena": COR_INDIGENA}
 
 SUPERFICIE = "#fcfcfb"
 TINTA_PRIMARIA = "#0b0b0b"
@@ -37,6 +37,13 @@ TINTA_SECUNDARIA = "#52514e"
 TINTA_MUTED = "#898781"
 GRADE = "#e1e0d9"
 EIXO = "#c3c2b7"
+
+
+def _slug(texto: str) -> str:
+    """ASCII puro pra nome de arquivo (sem acento) — evita problemas de link/URL
+    quando o gráfico é embutido no README/GitHub."""
+    sem_acento = unicodedata.normalize("NFKD", texto).encode("ascii", "ignore").decode("ascii")
+    return sem_acento.lower().replace(" ", "_").replace(".", "").replace("-", "_")
 
 
 def _novo_eixo(figsize=(10, 5.5)):
@@ -91,13 +98,13 @@ def _media_ponderada_por_grupo(df: pd.DataFrame, col_valor: str, by: list[str]) 
 
 
 def _combinar_negra(df: pd.DataFrame, col_valor: str, by: list[str]) -> pd.DataFrame:
-    """Combina Preta+Parda em 'Negra (Preta+Parda)'; Branca/Indígena passam pela mesma
+    """Combina Preta+Parda em 'Negra'; Branca/Indígena passam pela mesma
     média ponderada (colapsando qualquer dimensão fora de `by`, ex.: faixa_etaria) —
     todas as raças precisam do mesmo tratamento, senão o pivot_table do gráfico faria
     média NÃO ponderada por engano para quem não passasse por aqui.
     """
     negra = _media_ponderada_por_grupo(df[df["raca_cor"].isin(["Preta", "Parda"])], col_valor, by)
-    negra["raca_cor"] = "Negra (Preta+Parda)"
+    negra["raca_cor"] = "Negra"
 
     partes = [negra]
     for raca in ("Branca", "Indígena"):
@@ -116,7 +123,7 @@ def _media_ponderada_por_data(df: pd.DataFrame) -> pd.Series:
 
 
 def _preparar_serie_brasil(renda: pd.DataFrame) -> pd.DataFrame:
-    """Monta a série Branca / Negra (Preta+Parda) / Indígena, renda habitual real, Brasil.
+    """Monta a série Branca / Negra / Indígena, renda habitual real, Brasil.
 
     O nível 'brasil' de renda.parquet ainda tem uma linha por sexo x faixa_etaria —
     aqui colapsamos isso numa única média ponderada por trimestre e raça.
@@ -130,7 +137,7 @@ def _preparar_serie_brasil(renda: pd.DataFrame) -> pd.DataFrame:
     indigena = _media_ponderada_por_data(r[r["raca_cor"] == "Indígena"])
     negra = _media_ponderada_por_data(r[r["raca_cor"].isin(["Preta", "Parda"])])
 
-    serie = pd.DataFrame({"Branca": branca, "Negra (Preta+Parda)": negra, "Indígena": indigena}).sort_index()
+    serie = pd.DataFrame({"Branca": branca, "Negra": negra, "Indígena": indigena}).sort_index()
 
     # Indígena tem amostra pequena por trimestre (~0,6% da amostra nacional) e a série
     # trimestral bruta é muito ruidosa para mostrar tendência — suaviza com média móvel
@@ -156,10 +163,10 @@ def grafico_renda_por_raca(renda: pd.DataFrame) -> Path:
 
     linhas = [
         ("Branca", COR_BRANCA),
-        ("Negra (Preta+Parda)", COR_NEGRA),
+        ("Negra", COR_NEGRA),
         ("Indígena (média móvel 4 trim.)", COR_INDIGENA),
     ]
-    colunas_serie = ["Branca", "Negra (Preta+Parda)", "Indígena"]
+    colunas_serie = ["Branca", "Negra", "Indígena"]
     for coluna, (_, cor) in zip(colunas_serie, linhas):
         ax.plot(serie.index, serie[coluna], color=cor, linewidth=2, solid_capstyle="round", zorder=3)
 
@@ -225,34 +232,74 @@ def grafico_renda_por_raca(renda: pd.DataFrame) -> Path:
     return destino
 
 
-def grafico_renda_por_raca_detalhada(renda: pd.DataFrame) -> Path:
-    """Igual ao gráfico de renda por raça, mas SEM combinar Preta+Parda em 'Negra' —
-    pra ver se as duas populações se movem juntas ou têm trajetórias diferentes."""
-    r = renda[renda["nivel_geografico"] == "brasil"].copy()
+def _media_ponderada_por_data_generico(df: pd.DataFrame, coluna_valor: str) -> pd.Series:
+    """Como _media_ponderada_por_data, mas com a coluna de valor parametrizada."""
+    if df.empty:
+        return pd.Series(dtype=float)
+    return df.groupby("data").apply(
+        lambda g: (g[coluna_valor] * g["populacao_estimada"]).sum() / g["populacao_estimada"].sum()
+    )
+
+
+def _serie_por_raca(
+    df: pd.DataFrame, racas: list[str], coluna_valor: str = "renda_habitual_real_media",
+    filtro_extra: dict | None = None, sexo: str | None = None, suavizar: set[str] | None = None,
+) -> pd.DataFrame:
+    """Série temporal (index=data) com uma coluna por raça em `racas`.
+
+    'Negra' em `racas` soma Preta+Parda (ponderado). Filtra
+    nivel_geografico='brasil' (se a coluna existir), qualquer `filtro_extra`
+    ({coluna: valor}, ex.: {'faixa_etaria': '25-39'}) e `sexo` se informados.
+    `suavizar` é o conjunto de nomes de raça que recebem média móvel de 4
+    trimestres (tipicamente Indígena, por causa da amostra pequena).
+    """
+    r = df.copy()
+    if "nivel_geografico" in r.columns:
+        r = r[r["nivel_geografico"] == "brasil"]
+    if filtro_extra:
+        for col, val in filtro_extra.items():
+            r = r[r[col] == val]
+    if sexo is not None:
+        r = r[r["sexo"] == sexo]
     r["data"] = pd.to_datetime(
         r["ano"].astype(str) + "-" + ((r["trimestre"] - 1) * 3 + 1).astype(str) + "-01"
     )
-    racas = ["Branca", "Preta", "Parda", "Indígena"]
-    serie = pd.DataFrame({raca: _media_ponderada_por_data(r[r["raca_cor"] == raca]) for raca in racas}).sort_index()
-    # Indígena tem amostra pequena — mesma suavização dos outros gráficos
-    serie["Indígena"] = serie["Indígena"].rolling(4, center=True, min_periods=2).mean()
 
-    fig, ax = _novo_eixo()
+    colunas = {}
+    for raca in racas:
+        sub = r[r["raca_cor"].isin(["Preta", "Parda"])] if raca == "Negra" else r[r["raca_cor"] == raca]
+        colunas[raca] = _media_ponderada_por_data_generico(sub, coluna_valor)
+    serie = pd.DataFrame(colunas).sort_index()
+
+    for raca in suavizar or set():
+        if raca in serie.columns:
+            serie[raca] = serie[raca].rolling(4, center=True, min_periods=2).mean()
+    return serie
+
+
+def _grafico_serie_temporal(
+    serie: pd.DataFrame, cores: dict[str, str], titulo: str, subtitulo: str, nome_arquivo: str,
+    rotulos: dict[str, str] | None = None,
+) -> Path:
+    """Plota uma série temporal (colunas = raças) no estilo padrão do projeto —
+    linhas, rótulos diretos sem colisão, faixa da pandemia, grade horizontal."""
+    rotulos = rotulos or {c: c for c in serie.columns}
+    fig, ax = _novo_eixo(figsize=(11, 5.5))
     ax.axvspan(pd.Timestamp("2020-01-01"), pd.Timestamp("2021-12-31"), color=GRADE, alpha=0.6, zorder=0)
 
     topo = serie.max().max() * 1.22
-    base = serie.min().min() * 0.92
+    base = serie.min().min() * 0.9 if serie.min().min() > 0 else 0
     ax.set_ylim(base, topo)
 
-    for raca in racas:
-        ax.plot(
-            serie.index, serie[raca], color=CORES_RACA_DETALHADA[raca], linewidth=2,
-            solid_capstyle="round", zorder=3,
-        )
+    for coluna in serie.columns:
+        ax.plot(serie.index, serie[coluna], color=cores[coluna], linewidth=2, solid_capstyle="round", zorder=3)
 
     ultimo_x = serie.index[-1]
-    valores_finais = sorted((serie[raca].iloc[-1], raca, CORES_RACA_DETALHADA[raca]) for raca in racas)
-    espaco_minimo = (topo - base) * 0.045
+    valores_finais = sorted(
+        (serie[coluna].iloc[-1], rotulos[coluna], cores[coluna])
+        for coluna in serie.columns if pd.notna(serie[coluna].iloc[-1])
+    )
+    espaco_minimo = (topo - base) * 0.05
     for i in range(1, len(valores_finais)):
         anterior_y = valores_finais[i - 1][0]
         if valores_finais[i][0] - anterior_y < espaco_minimo:
@@ -260,28 +307,218 @@ def grafico_renda_por_raca_detalhada(renda: pd.DataFrame) -> Path:
     for y_rotulo, rotulo, cor in valores_finais:
         ax.annotate(
             rotulo, xy=(ultimo_x, y_rotulo), xytext=(8, 0), textcoords="offset points",
-            color=cor, fontsize=10, fontweight="bold", va="center",
+            color=cor, fontsize=9.5, fontweight="bold", va="center",
         )
 
     ax.text(
-        pd.Timestamp("2020-06-15"), topo * 0.93, "pandemia\n(coleta por telefone)",
+        pd.Timestamp("2020-06-15"), topo * 0.95, "pandemia\n(coleta por telefone)",
         fontsize=8, color=TINTA_MUTED, ha="center", va="top",
     )
 
-    _titulo(
-        ax,
-        "Renda habitual do trabalho, Preta e Parda separadas — Brasil (2012–2026)",
+    _titulo(ax, titulo, subtitulo)
+    ax.yaxis.set_major_formatter(lambda v, _: f"R$ {v:,.0f}".replace(",", "."))
+    ax.xaxis.set_major_locator(mdates.YearLocator(2))
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
+    ax.grid(axis="y", color=GRADE, linewidth=0.8, zorder=0)
+    ax.set_xlim(serie.index.min(), serie.index.max() + pd.Timedelta(days=280))
+
+    _rodape(fig)
+    fig.tight_layout(rect=(0, 0.03, 1, 1))
+    return _salvar(fig, nome_arquivo)
+
+
+def grafico_renda_preta_parda(renda: pd.DataFrame) -> Path:
+    """Só a população negra: Preta vs. Parda, sem Branca/Indígena — pra ver se as
+    duas populações que compõem 'Negra' se movem juntas ou têm trajetórias diferentes."""
+    serie = _serie_por_raca(renda, ["Preta", "Parda"])
+    cores = {"Preta": COR_PRETA, "Parda": COR_PARDA}
+    return _grafico_serie_temporal(
+        serie, cores,
+        "Renda habitual do trabalho — Preta vs. Parda — Brasil (2012–2026)",
         "R$ reais, a preços do trimestre mais recente (deflator oficial IBGE) · PNAD Contínua Trimestral",
+        "renda_preta_parda.png",
+    )
+
+
+def grafico_preta_parda_sexo(renda: pd.DataFrame, sexo: str) -> Path:
+    """Preta vs. Parda, um único gênero."""
+    serie = _serie_por_raca(renda, ["Preta", "Parda"], sexo=sexo)
+    cores = {"Preta": COR_PRETA, "Parda": COR_PARDA}
+    rotulo_sexo = {"Homem": "Homens", "Mulher": "Mulheres"}[sexo]
+    sufixo = {"Homem": "homens", "Mulher": "mulheres"}[sexo]
+    return _grafico_serie_temporal(
+        serie, cores,
+        f"Renda habitual do trabalho — Preta vs. Parda — {rotulo_sexo} — Brasil (2012–2026)",
+        "R$ reais, a preços do trimestre mais recente (deflator oficial IBGE) · PNAD Contínua Trimestral",
+        f"renda_preta_parda_{sufixo}.png",
+    )
+
+
+def grafico_preta_parda_genero_combinado(renda: pd.DataFrame) -> Path:
+    """Preta vs. Parda, homens e mulheres juntos (4 linhas: cor = Preta/Parda,
+    traço = gênero — mesma convenção do gráfico raça x gênero: sólido = mulheres,
+    tracejado = homens)."""
+    r = renda[renda["nivel_geografico"] == "brasil"].copy()
+    r["data"] = pd.to_datetime(
+        r["ano"].astype(str) + "-" + ((r["trimestre"] - 1) * 3 + 1).astype(str) + "-01"
+    )
+    base_cols = {}
+    for raca in ("Preta", "Parda"):
+        for sexo in ("Homem", "Mulher"):
+            sub = r[(r["raca_cor"] == raca) & (r["sexo"] == sexo)]
+            base_cols[(raca, sexo)] = _media_ponderada_por_data_generico(sub, "renda_habitual_real_media")
+    pivot = pd.DataFrame(base_cols).sort_index()
+
+    cores = {"Preta": COR_PRETA, "Parda": COR_PARDA}
+    estilos = {"Homem": "--", "Mulher": "-"}
+    rotulo_sexo = {"Homem": "Homens", "Mulher": "Mulheres"}
+
+    fig, ax = _novo_eixo(figsize=(11, 5.5))
+    ax.axvspan(pd.Timestamp("2020-01-01"), pd.Timestamp("2021-12-31"), color=GRADE, alpha=0.6, zorder=0)
+    topo, base = pivot.max().max() * 1.28, pivot.min().min() * 0.9
+    ax.set_ylim(base, topo)
+
+    for raca in ("Preta", "Parda"):
+        for sexo, tracejado in estilos.items():
+            ax.plot(
+                pivot.index, pivot[(raca, sexo)], color=cores[raca], linewidth=2,
+                linestyle=tracejado, solid_capstyle="round", dash_capstyle="round", zorder=3,
+            )
+
+    ultimo_x = pivot.index[-1]
+    finais = sorted(
+        (pivot[(raca, sexo)].iloc[-1], f"{raca} · {rotulo_sexo[sexo]}", cores[raca])
+        for raca in ("Preta", "Parda") for sexo in ("Homem", "Mulher")
+    )
+    espaco_minimo = (topo - base) * 0.05
+    for i in range(1, len(finais)):
+        anterior_y = finais[i - 1][0]
+        if finais[i][0] - anterior_y < espaco_minimo:
+            finais[i] = (anterior_y + espaco_minimo, *finais[i][1:])
+    for y_rotulo, rotulo, cor in finais:
+        ax.annotate(
+            rotulo, xy=(ultimo_x, y_rotulo), xytext=(8, 0), textcoords="offset points",
+            color=cor, fontsize=9.5, fontweight="bold", va="center",
+        )
+
+    _titulo(
+        ax, "Renda habitual do trabalho — Preta vs. Parda, por gênero — Brasil (2012–2026)",
+        "R$ reais, a preços do trimestre mais recente (deflator oficial IBGE) · linha cheia "
+        "= mulheres, tracejada = homens · PNAD Contínua Trimestral",
     )
     ax.yaxis.set_major_formatter(lambda v, _: f"R$ {v:,.0f}".replace(",", "."))
     ax.xaxis.set_major_locator(mdates.YearLocator(2))
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
     ax.grid(axis="y", color=GRADE, linewidth=0.8, zorder=0)
-    ax.set_xlim(serie.index.min(), serie.index.max() + pd.Timedelta(days=270))
-
+    ax.set_xlim(pivot.index.min(), pivot.index.max() + pd.Timedelta(days=320))
     _rodape(fig)
     fig.tight_layout(rect=(0, 0.03, 1, 1))
-    return _salvar(fig, "renda_por_raca_detalhada.png")
+    return _salvar(fig, "renda_preta_parda_genero.png")
+
+
+def grafico_preta_parda_faixa_etaria_combinada(renda: pd.DataFrame) -> Path:
+    """Preta vs. Parda por faixa etária, snapshot do trimestre mais recente."""
+    ultimo_ano, ultimo_trimestre = _trimestre_mais_recente(renda)
+    r = renda[
+        (renda["nivel_geografico"] == "brasil") & (renda["ano"] == ultimo_ano) & (renda["trimestre"] == ultimo_trimestre)
+        & (renda["raca_cor"].isin(["Preta", "Parda"]))
+    ].copy()
+    combinado = _media_ponderada_por_grupo(r, "renda_habitual_real_media", by=["raca_cor", "faixa_etaria"])
+
+    x = np.arange(len(FAIXAS_ETARIAS_ORDEM))
+    largura = 0.35
+    fig, ax = _novo_eixo(figsize=(10, 5.5))
+    for i, raca in enumerate(["Preta", "Parda"]):
+        valores = [
+            combinado[(combinado["raca_cor"] == raca) & (combinado["faixa_etaria"] == f)]["renda_habitual_real_media"].sum()
+            for f in FAIXAS_ETARIAS_ORDEM
+        ]
+        deslocamento = (i - 0.5) * largura
+        cor = {"Preta": COR_PRETA, "Parda": COR_PARDA}[raca]
+        ax.bar(x + deslocamento, valores, largura, color=cor, zorder=3, label=raca)
+
+    ax.set_xticks(x)
+    ax.set_xticklabels(FAIXAS_ETARIAS_ORDEM, fontsize=10.5)
+    ax.legend(loc="upper left", frameon=False, fontsize=9.5)
+    _titulo(
+        ax, "Renda habitual real, Preta vs. Parda, por faixa etária — Brasil",
+        f"R$ reais, a preços do trimestre mais recente · {ultimo_trimestre}º trimestre de {ultimo_ano} "
+        "· PNAD Contínua Trimestral",
+    )
+    ax.yaxis.set_major_formatter(lambda v, _: f"R$ {v:,.0f}".replace(",", "."))
+    ax.grid(axis="y", color=GRADE, linewidth=0.8, zorder=0)
+    _rodape(fig)
+    fig.tight_layout(rect=(0, 0.03, 1, 1))
+    return _salvar(fig, "renda_preta_parda_faixa_etaria.png")
+
+
+def graficos_preta_parda_faixa_etaria_individual(renda: pd.DataFrame) -> list[Path]:
+    destinos = []
+    for faixa in FAIXAS_ETARIAS_ORDEM:
+        serie = _serie_por_raca(renda, ["Preta", "Parda"], filtro_extra={"faixa_etaria": faixa})
+        slug = faixa.replace("+", "mais").replace("-", "_")
+        destinos.append(_grafico_serie_temporal(
+            serie, {"Preta": COR_PRETA, "Parda": COR_PARDA},
+            f"Renda habitual, Preta vs. Parda, {faixa} anos — Brasil (2012–2026)",
+            "R$ reais, a preços do trimestre mais recente (deflator oficial IBGE) · PNAD Contínua Trimestral",
+            f"renda_preta_parda_faixa_{slug}.png",
+        ))
+    return destinos
+
+
+def grafico_preta_parda_escolaridade_combinada(rpe: pd.DataFrame) -> Path:
+    """Preta vs. Parda por nível de instrução, snapshot do trimestre mais recente."""
+    ultimo_ano, ultimo_trimestre = _trimestre_mais_recente(rpe)
+    r = rpe[
+        (rpe["nivel_geografico"] == "brasil") & (rpe["ano"] == ultimo_ano) & (rpe["trimestre"] == ultimo_trimestre)
+        & (rpe["raca_cor"].isin(["Preta", "Parda"]))
+    ].copy()
+
+    y = np.arange(len(NIVEIS_INSTRUCAO_ORDEM))
+    altura = 0.35
+    fig, ax = _novo_eixo(figsize=(10, 6.5))
+    for i, raca in enumerate(["Preta", "Parda"]):
+        valores = [
+            r[(r["raca_cor"] == raca) & (r["nivel_instrucao"] == n)]["renda_habitual_real_media"].sum()
+            for n in NIVEIS_INSTRUCAO_ORDEM
+        ]
+        deslocamento = (0.5 - i) * altura
+        cor = {"Preta": COR_PRETA, "Parda": COR_PARDA}[raca]
+        ax.barh(y + deslocamento, valores, altura, color=cor, zorder=3, label=raca)
+        for yi, v in zip(y + deslocamento, valores):
+            if v > 0:
+                ax.text(v + max(valores) * 0.015, yi, f"R$ {v:,.0f}".replace(",", "."),
+                        va="center", fontsize=8, color=TINTA_SECUNDARIA)
+
+    ax.set_yticks(y)
+    ax.set_yticklabels([NIVEIS_INSTRUCAO_ROTULO_CURTO[n] for n in NIVEIS_INSTRUCAO_ORDEM], fontsize=10)
+    ax.invert_yaxis()
+    ax.legend(loc="upper right", frameon=False, fontsize=9.5)
+    _titulo(
+        ax, "Renda habitual real, Preta vs. Parda, por nível de instrução — Brasil",
+        f"R$ reais, a preços do trimestre mais recente · {ultimo_trimestre}º trimestre de {ultimo_ano} "
+        "· PNAD Contínua Trimestral",
+    )
+    ax.xaxis.set_major_formatter(lambda v, _: f"R$ {v:,.0f}".replace(",", "."))
+    ax.grid(axis="x", color=GRADE, linewidth=0.8, zorder=0)
+    _rodape(fig)
+    fig.tight_layout(rect=(0, 0.03, 1, 1))
+    return _salvar(fig, "renda_preta_parda_escolaridade.png")
+
+
+def graficos_preta_parda_escolaridade_individual(rpe: pd.DataFrame) -> list[Path]:
+    destinos = []
+    for nivel in NIVEIS_INSTRUCAO_ORDEM:
+        serie = _serie_por_raca(rpe, ["Preta", "Parda"], filtro_extra={"nivel_instrucao": nivel})
+        rotulo_curto = NIVEIS_INSTRUCAO_ROTULO_CURTO[nivel]
+        slug = _slug(rotulo_curto)
+        destinos.append(_grafico_serie_temporal(
+            serie, {"Preta": COR_PRETA, "Parda": COR_PARDA},
+            f"Renda habitual, Preta vs. Parda — {rotulo_curto} — Brasil (2012–2026)",
+            "R$ reais, a preços do trimestre mais recente (deflator oficial IBGE) · PNAD Contínua Trimestral",
+            f"renda_preta_parda_escolaridade_{slug}.png",
+        ))
+    return destinos
 
 
 def grafico_renda_por_raca_genero(renda: pd.DataFrame) -> Path:
@@ -306,7 +543,7 @@ def grafico_renda_por_raca_genero(renda: pd.DataFrame) -> Path:
     base = pivot.min().min() * 0.9
     ax.set_ylim(base, topo)
 
-    ordem_raca = ["Branca", "Negra (Preta+Parda)", "Indígena"]
+    ordem_raca = ["Branca", "Negra", "Indígena"]
     estilos = {"Homem": "--", "Mulher": "-"}
     rotulo_sexo = {"Homem": "Homens", "Mulher": "Mulheres"}
     rotulos_finais = []
@@ -375,7 +612,7 @@ def grafico_escolaridade_por_raca_genero(esc: pd.DataFrame) -> Path:
     )
     pct = (superior / total * 100).rename("pct_superior").reset_index()
 
-    ordem_raca = ["Branca", "Negra (Preta+Parda)", "Indígena"]
+    ordem_raca = ["Branca", "Negra", "Indígena"]
     pct["raca_cor"] = pd.Categorical(pct["raca_cor"], categories=ordem_raca, ordered=True)
     pct = pct.sort_values(["raca_cor", "sexo"])
 
@@ -428,7 +665,7 @@ def _combinar_negra_multi(df: pd.DataFrame, col_valor: str, by: list[str]) -> pd
         df[df["raca_cor"].isin(["Preta", "Parda"])]
         .groupby(by)[col_valor].sum().reset_index()
     )
-    negra["raca_cor"] = "Negra (Preta+Parda)"
+    negra["raca_cor"] = "Negra"
     outras = df[df["raca_cor"].isin(["Branca", "Indígena"])][by + ["raca_cor", col_valor]].copy()
     return pd.concat([outras, negra[by + ["raca_cor", col_valor]]], ignore_index=True)
 
@@ -457,7 +694,7 @@ def grafico_renda_por_faixa_etaria(renda: pd.DataFrame) -> Path:
         sub = combinado[combinado["sexo"] == sexo]
         x = np.arange(len(faixas))
         largura = 0.38
-        for i, raca in enumerate(["Branca", "Negra (Preta+Parda)"]):
+        for i, raca in enumerate(["Branca", "Negra"]):
             valores = [
                 sub[(sub["raca_cor"] == raca) & (sub["faixa_etaria"] == f)]["renda_habitual_real_media"].sum()
                 for f in faixas
@@ -473,7 +710,7 @@ def grafico_renda_por_faixa_etaria(renda: pd.DataFrame) -> Path:
 
     axes[0].legend(
         loc="upper left", frameon=False, fontsize=9.5,
-        labelcolor=[CORES_RACA["Branca"], CORES_RACA["Negra (Preta+Parda)"]],
+        labelcolor=[CORES_RACA["Branca"], CORES_RACA["Negra"]],
     )
 
     fig.suptitle(
@@ -528,7 +765,7 @@ def grafico_renda_por_raca_escolaridade(rpe: pd.DataFrame, sexo: str | None = No
 
     combinado = _combinar_negra(r, "renda_habitual_real_media", by=["nivel_instrucao"])
 
-    ordem_raca = ["Branca", "Negra (Preta+Parda)", "Indígena"]
+    ordem_raca = ["Branca", "Negra", "Indígena"]
     y = np.arange(len(NIVEIS_INSTRUCAO_ORDEM))
     altura = 0.26
 
@@ -567,22 +804,341 @@ def grafico_renda_por_raca_escolaridade(rpe: pd.DataFrame, sexo: str | None = No
     return _salvar(fig, f"renda_por_raca_escolaridade{sufixo_arquivo}.png")
 
 
+FAIXAS_ETARIAS_ORDEM = ["14-17", "18-24", "25-39", "40-59", "60+"]
+
+
+def grafico_renda_por_raca_sexo(renda: pd.DataFrame, sexo: str) -> Path:
+    """Renda por raça ao longo do tempo, um único gênero (recorte raça x gênero,
+    'um pra cada gênero')."""
+    serie = _serie_por_raca(
+        renda, ["Branca", "Negra", "Indígena"], sexo=sexo, suavizar={"Indígena"},
+    )
+    rotulo_sexo = {"Homem": "Homens", "Mulher": "Mulheres"}[sexo]
+    sufixo = {"Homem": "homens", "Mulher": "mulheres"}[sexo]
+    return _grafico_serie_temporal(
+        serie, CORES_RACA,
+        f"Renda habitual do trabalho por raça — {rotulo_sexo} — Brasil (2012–2026)",
+        "R$ reais, a preços do trimestre mais recente (deflator oficial IBGE) · PNAD Contínua Trimestral",
+        f"renda_por_raca_{sufixo}.png",
+    )
+
+
+def grafico_renda_por_raca_faixa_etaria_combinada(renda: pd.DataFrame) -> Path:
+    """Renda por faixa etária x raça, SEM separar por gênero — um único painel
+    ('raça x faixa etária, um que mostre tudo')."""
+    ultimo_ano, ultimo_trimestre = _trimestre_mais_recente(renda)
+    r = renda[
+        (renda["nivel_geografico"] == "brasil") & (renda["ano"] == ultimo_ano) & (renda["trimestre"] == ultimo_trimestre)
+    ].copy()
+    combinado = _combinar_negra(r, "renda_habitual_real_media", by=["faixa_etaria"])
+
+    ordem_raca = ["Branca", "Negra", "Indígena"]
+    x = np.arange(len(FAIXAS_ETARIAS_ORDEM))
+    largura = 0.26
+
+    fig, ax = _novo_eixo(figsize=(10, 5.5))
+    for i, raca in enumerate(ordem_raca):
+        valores = [
+            combinado[(combinado["raca_cor"] == raca) & (combinado["faixa_etaria"] == f)]["renda_habitual_real_media"].sum()
+            for f in FAIXAS_ETARIAS_ORDEM
+        ]
+        deslocamento = (i - 1) * largura
+        ax.bar(x + deslocamento, valores, largura, color=CORES_RACA[raca], zorder=3, label=raca)
+
+    ax.set_xticks(x)
+    ax.set_xticklabels(FAIXAS_ETARIAS_ORDEM, fontsize=10.5)
+    ax.legend(loc="upper left", frameon=False, fontsize=9.5)
+    _titulo(
+        ax, "Renda habitual real por faixa etária e raça — Brasil",
+        f"R$ reais, a preços do trimestre mais recente · {ultimo_trimestre}º trimestre de {ultimo_ano} "
+        "· PNAD Contínua Trimestral",
+    )
+    ax.yaxis.set_major_formatter(lambda v, _: f"R$ {v:,.0f}".replace(",", "."))
+    ax.grid(axis="y", color=GRADE, linewidth=0.8, zorder=0)
+    _rodape(fig)
+    fig.tight_layout(rect=(0, 0.03, 1, 1))
+    return _salvar(fig, "renda_por_raca_faixa_etaria.png")
+
+
+def graficos_renda_por_raca_faixa_etaria_individual(renda: pd.DataFrame) -> list[Path]:
+    """Um gráfico de série temporal por faixa etária ('um pra cada faixa etária')."""
+    destinos = []
+    for faixa in FAIXAS_ETARIAS_ORDEM:
+        serie = _serie_por_raca(
+            renda, ["Branca", "Negra", "Indígena"],
+            filtro_extra={"faixa_etaria": faixa}, suavizar={"Indígena"},
+        )
+        slug = faixa.replace("+", "mais").replace("-", "_")
+        destinos.append(_grafico_serie_temporal(
+            serie, CORES_RACA,
+            f"Renda habitual do trabalho por raça, {faixa} anos — Brasil (2012–2026)",
+            "R$ reais, a preços do trimestre mais recente (deflator oficial IBGE) · PNAD Contínua Trimestral",
+            f"renda_por_raca_faixa_{slug}.png",
+        ))
+    return destinos
+
+
+def graficos_renda_por_raca_nivel_individual(rpe: pd.DataFrame) -> list[Path]:
+    """Um gráfico de série temporal por nível de instrução ('um por nível de escolaridade')."""
+    destinos = []
+    for nivel in NIVEIS_INSTRUCAO_ORDEM:
+        serie = _serie_por_raca(
+            rpe, ["Branca", "Negra", "Indígena"],
+            filtro_extra={"nivel_instrucao": nivel}, suavizar={"Indígena"},
+        )
+        rotulo_curto = NIVEIS_INSTRUCAO_ROTULO_CURTO[nivel]
+        slug = _slug(rotulo_curto)
+        destinos.append(_grafico_serie_temporal(
+            serie, CORES_RACA,
+            f"Renda habitual do trabalho por raça — {rotulo_curto} — Brasil (2012–2026)",
+            "R$ reais, a preços do trimestre mais recente (deflator oficial IBGE) · PNAD Contínua Trimestral",
+            f"renda_por_raca_escolaridade_{slug}.png",
+        ))
+    return destinos
+
+
+CMAP_SEQUENCIAL = LinearSegmentedColormap.from_list("azul_sequencial", ["#cde2fb", "#2a78d6", "#0d366b"])
+
+
+def _preparar_hiato(hiato: pd.DataFrame) -> pd.DataFrame:
+    h = hiato.copy()
+    h["data"] = pd.to_datetime(h["ano"].astype(str) + "-" + ((h["trimestre"] - 1) * 3 + 1).astype(str) + "-01")
+    return h.sort_values("data")
+
+
+def grafico_hiato_percentual(hiato: pd.DataFrame) -> Path:
+    """Hiato de renda Branca vs. Negra em %, série histórica, com banda de intervalo
+    de confiança de 95% (teste de Welch — ver `pnadc_core.tabela_hiatos_significancia`,
+    calculado a partir dos microdados de cada trimestre, não das médias já agregadas)."""
+    h = _preparar_hiato(hiato)
+    h["ic_inferior_pct"] = 100 * h["ic_inferior"] / h["renda_media_negra"]
+    h["ic_superior_pct"] = 100 * h["ic_superior"] / h["renda_media_negra"]
+
+    fig, ax = _novo_eixo(figsize=(11, 5.5))
+    ax.axvspan(pd.Timestamp("2020-01-01"), pd.Timestamp("2021-12-31"), color=GRADE, alpha=0.6, zorder=0)
+    ax.fill_between(h["data"], h["ic_inferior_pct"], h["ic_superior_pct"], color=COR_BRANCA, alpha=0.15, zorder=2)
+    ax.plot(h["data"], h["hiato_percentual"], color=COR_BRANCA, linewidth=2.2, solid_capstyle="round", zorder=3)
+    ax.axhline(0, color=EIXO, linewidth=1)
+
+    ax.annotate(
+        f"{h['hiato_percentual'].iloc[-1]:.0f}%", xy=(h["data"].iloc[-1], h["hiato_percentual"].iloc[-1]),
+        xytext=(8, 0), textcoords="offset points", color=COR_BRANCA, fontsize=11, fontweight="bold", va="center",
+    )
+
+    _titulo(
+        ax, "Hiato de renda Branca vs. Negra, em % — Brasil (2012–2026)",
+        "Quanto a mais Branca ganha que Negra · faixa = IC 95% (teste de Welch) · PNAD Contínua Trimestral",
+    )
+    ax.yaxis.set_major_formatter(lambda v, _: f"{v:.0f}%")
+    ax.xaxis.set_major_locator(mdates.YearLocator(2))
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
+    ax.grid(axis="y", color=GRADE, linewidth=0.8, zorder=0)
+    ax.set_xlim(h["data"].min(), h["data"].max() + pd.Timedelta(days=280))
+    _rodape(fig)
+    fig.tight_layout(rect=(0, 0.03, 1, 1))
+    return _salvar(fig, "hiato_racial_percentual.png")
+
+
+def grafico_hiato_absoluto(hiato: pd.DataFrame) -> Path:
+    """Hiato de renda Branca vs. Negra em R$, série histórica, com banda de IC 95%."""
+    h = _preparar_hiato(hiato)
+
+    fig, ax = _novo_eixo(figsize=(11, 5.5))
+    ax.axvspan(pd.Timestamp("2020-01-01"), pd.Timestamp("2021-12-31"), color=GRADE, alpha=0.6, zorder=0)
+    ax.fill_between(h["data"], h["ic_inferior"], h["ic_superior"], color=COR_BRANCA, alpha=0.15, zorder=2)
+    ax.plot(h["data"], h["hiato_absoluto"], color=COR_BRANCA, linewidth=2.2, solid_capstyle="round", zorder=3)
+
+    ax.annotate(
+        f"R$ {h['hiato_absoluto'].iloc[-1]:,.0f}".replace(",", "."),
+        xy=(h["data"].iloc[-1], h["hiato_absoluto"].iloc[-1]),
+        xytext=(8, 0), textcoords="offset points", color=COR_BRANCA, fontsize=11, fontweight="bold", va="center",
+    )
+
+    _titulo(
+        ax, "Hiato de renda Branca vs. Negra, em R$ — Brasil (2012–2026)",
+        "R$ reais, preço do trimestre mais recente · faixa = IC 95% (Welch) · PNAD Contínua Trimestral",
+    )
+    ax.yaxis.set_major_formatter(lambda v, _: f"R$ {v:,.0f}".replace(",", "."))
+    ax.xaxis.set_major_locator(mdates.YearLocator(2))
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
+    ax.grid(axis="y", color=GRADE, linewidth=0.8, zorder=0)
+    ax.set_xlim(h["data"].min(), h["data"].max() + pd.Timedelta(days=280))
+    _rodape(fig)
+    fig.tight_layout(rect=(0, 0.03, 1, 1))
+    return _salvar(fig, "hiato_racial_absoluto.png")
+
+
+ROTULOS_DECOMPOSICAO = {
+    "nenhum (hiato bruto)": "Hiato bruto\n(sem controle)",
+    "faixa_etaria": "+ faixa\netária",
+    "faixa_etaria + nivel_instrucao": "+ escolaridade",
+    "faixa_etaria + nivel_instrucao + grupamento_ocupacional": "+ ocupação\n(residual)",
+}
+
+
+def grafico_decomposicao_hiato(decomp: pd.DataFrame) -> Path:
+    """Quanto do hiato Branca vs. Negra sobra depois de controlar por idade, depois +
+    escolaridade, depois + ocupação — padronização direta (ver
+    agregacoes_pnadc.gerar_decomposicao_hiato_ocupacional)."""
+    d = decomp.copy()
+    d["rotulo"] = d["controles"].map(ROTULOS_DECOMPOSICAO)
+
+    fig, ax = _novo_eixo(figsize=(10, 5.5))
+    x = np.arange(len(d))
+    cores = [COR_BRANCA] * (len(d) - 1) + [COR_NEGRA]
+    barras = ax.bar(x, d["hiato_percentual"], color=cores, width=0.55, zorder=3)
+    for barra, v in zip(barras, d["hiato_percentual"]):
+        ax.text(barra.get_x() + barra.get_width() / 2, v + 1.5, f"{v:.0f}%",
+                ha="center", fontsize=12, fontweight="bold", color=TINTA_PRIMARIA)
+
+    for i in range(len(d) - 1):
+        ax.annotate(
+            "", xy=(x[i + 1] - 0.3, d["hiato_percentual"].iloc[i + 1] + 3),
+            xytext=(x[i] + 0.3, d["hiato_percentual"].iloc[i] + 3),
+            arrowprops=dict(arrowstyle="->", color=TINTA_MUTED, lw=1.2),
+        )
+
+    ax.set_xticks(x)
+    ax.set_xticklabels(d["rotulo"], fontsize=10.5)
+    ax.set_ylim(0, d["hiato_percentual"].max() * 1.25)
+    ax.yaxis.set_major_formatter(lambda v, _: f"{v:.0f}%")
+
+    _titulo(
+        ax, "Quanto do hiato Branca vs. Negra idade/escolaridade/ocupação explicam?",
+        "Últimos 8 trimestres agrupados, pessoas ocupadas · padronização direta · PNAD Contínua Trimestral",
+    )
+    ax.text(
+        0.5, -0.20,
+        "Mesma idade, escolaridade e ocupação — ainda assim resta um hiato de "
+        f"{d['hiato_percentual'].iloc[-1]:.0f}% não explicado por essas três variáveis.",
+        transform=ax.transAxes, ha="center", fontsize=10.5, color=TINTA_SECUNDARIA, style="italic",
+    )
+    ax.grid(axis="y", color=GRADE, linewidth=0.8, zorder=0)
+    _rodape(fig)
+    fig.tight_layout(rect=(0, 0.08, 1, 1))
+    return _salvar(fig, "decomposicao_hiato_ocupacional.png")
+
+
+def grafico_renda_completa_heatmap(rc: pd.DataFrame) -> Path:
+    """Raça x gênero x faixa etária x nível de instrução — tudo de uma vez, como
+    grade de heatmaps (um painel por raça x gênero; dentro de cada painel, células
+    de faixa etária x nível de instrução, cor = renda real)."""
+    ultimo_ano, ultimo_trimestre = _trimestre_mais_recente(rc)
+    r = rc[(rc["ano"] == ultimo_ano) & (rc["trimestre"] == ultimo_trimestre)].copy()
+
+    negra = (
+        r[r["raca_cor"].isin(["Preta", "Parda"])]
+        .groupby(["sexo", "faixa_etaria", "nivel_instrucao"])
+        .apply(lambda g: (g["renda_habitual_real_media"] * g["populacao_estimada"]).sum() / g["populacao_estimada"].sum())
+        .rename("renda_habitual_real_media")
+        .reset_index()
+    )
+    negra["raca_cor"] = "Negra"
+    outras = r[r["raca_cor"].isin(["Branca", "Indígena"])]
+    completo = pd.concat([outras, negra], ignore_index=True)
+
+    ordem_raca = ["Branca", "Negra", "Indígena"]
+    generos = ["Homem", "Mulher"]
+    vmin, vmax = completo["renda_habitual_real_media"].min(), completo["renda_habitual_real_media"].max()
+
+    fig, axes = plt.subplots(len(ordem_raca), len(generos), figsize=(11, 13), dpi=150)
+    fig.patch.set_facecolor(SUPERFICIE)
+
+    for i, raca in enumerate(ordem_raca):
+        for j, sexo in enumerate(generos):
+            ax = axes[i, j]
+            ax.set_facecolor(SUPERFICIE)
+            sub = completo[(completo["raca_cor"] == raca) & (completo["sexo"] == sexo)]
+            matriz = sub.pivot_table(index="nivel_instrucao", columns="faixa_etaria", values="renda_habitual_real_media")
+            matriz = matriz.reindex(index=NIVEIS_INSTRUCAO_ORDEM, columns=FAIXAS_ETARIAS_ORDEM)
+            ax.imshow(matriz.values, cmap=CMAP_SEQUENCIAL, vmin=vmin, vmax=vmax, aspect="auto")
+
+            ax.set_xticks(range(len(FAIXAS_ETARIAS_ORDEM)))
+            ax.set_xticklabels(FAIXAS_ETARIAS_ORDEM, fontsize=7.5, color=TINTA_MUTED)
+            if j == 0:
+                ax.set_yticks(range(len(NIVEIS_INSTRUCAO_ORDEM)))
+                ax.set_yticklabels(
+                    [NIVEIS_INSTRUCAO_ROTULO_CURTO[n] for n in NIVEIS_INSTRUCAO_ORDEM], fontsize=7.5, color=TINTA_MUTED
+                )
+            else:
+                ax.set_yticks([])
+            for spine in ax.spines.values():
+                spine.set_visible(False)
+            ax.tick_params(length=0)
+            rotulo_sexo = "Homens" if sexo == "Homem" else "Mulheres"
+            ax.set_title(f"{raca.split(' ')[0]} · {rotulo_sexo}", fontsize=10, color=TINTA_SECUNDARIA)
+
+            for yi in range(matriz.shape[0]):
+                for xi in range(matriz.shape[1]):
+                    v = matriz.values[yi, xi]
+                    if pd.notna(v):
+                        cor_txt = SUPERFICIE if v > (vmin + vmax) / 2 else TINTA_PRIMARIA
+                        ax.text(xi, yi, f"{v / 1000:.1f}k", ha="center", va="center", fontsize=6.5, color=cor_txt)
+
+    fig.suptitle(
+        "Renda habitual real por raça, gênero, faixa etária e nível de instrução — Brasil",
+        fontsize=13.5, fontweight="bold", color=TINTA_PRIMARIA, x=0.02, ha="left", y=0.99,
+    )
+    fig.text(
+        0.02, 0.965,
+        f"R$ reais (milhares), a preços do trimestre mais recente · {ultimo_trimestre}º trimestre de {ultimo_ano} "
+        "· células em branco = sem amostra suficiente · PNAD Contínua Trimestral",
+        fontsize=9, color=TINTA_SECUNDARIA,
+    )
+    _rodape(fig)
+    fig.tight_layout(rect=(0, 0.02, 1, 0.955))
+    return _salvar(fig, "renda_completa_heatmap.png")
+
+
 def main() -> None:
     renda = pd.read_parquet(REPO_ROOT / "data" / "processed" / "renda.parquet")
     esc = pd.read_parquet(REPO_ROOT / "data" / "processed" / "escolaridade.parquet")
     rpe = pd.read_parquet(REPO_ROOT / "data" / "processed" / "renda_por_escolaridade.parquet")
+    rc = pd.read_parquet(REPO_ROOT / "data" / "processed" / "renda_completa.parquet")
+    hiato = pd.read_parquet(REPO_ROOT / "data" / "processed" / "hiato_racial.parquet")
+    decomp = pd.read_parquet(REPO_ROOT / "data" / "processed" / "decomposicao_hiato_ocupacional.parquet")
 
-    for destino in [
+    destinos = [
+        # raça
         grafico_renda_por_raca(renda),
-        grafico_renda_por_raca_detalhada(renda),
+        grafico_renda_preta_parda(renda),
+        # hiato Branca vs. Negra, série histórica, com significância
+        grafico_hiato_percentual(hiato),
+        grafico_hiato_absoluto(hiato),
+        grafico_decomposicao_hiato(decomp),
+        # raça x gênero: combinado + um por gênero
         grafico_renda_por_raca_genero(renda),
-        grafico_escolaridade_por_raca_genero(esc),
-        grafico_renda_por_faixa_etaria(renda),
+        grafico_renda_por_raca_sexo(renda, "Homem"),
+        grafico_renda_por_raca_sexo(renda, "Mulher"),
+        # preta x parda x gênero: combinado + um por gênero
+        grafico_preta_parda_genero_combinado(renda),
+        grafico_preta_parda_sexo(renda, "Homem"),
+        grafico_preta_parda_sexo(renda, "Mulher"),
+        # raça x faixa etária: combinado + um por faixa
+        grafico_renda_por_raca_faixa_etaria_combinada(renda),
+        *graficos_renda_por_raca_faixa_etaria_individual(renda),
+        # preta x parda x faixa etária: combinado + uma por faixa
+        grafico_preta_parda_faixa_etaria_combinada(renda),
+        *graficos_preta_parda_faixa_etaria_individual(renda),
+        # raça x escolaridade: combinado + um por nível
         grafico_renda_por_raca_escolaridade(rpe, sexo=None),
+        *graficos_renda_por_raca_nivel_individual(rpe),
+        # preta x parda x escolaridade: combinado + um por nível
+        grafico_preta_parda_escolaridade_combinada(rpe),
+        *graficos_preta_parda_escolaridade_individual(rpe),
+        # raça x gênero x escolaridade
         grafico_renda_por_raca_escolaridade(rpe, sexo="Homem"),
         grafico_renda_por_raca_escolaridade(rpe, sexo="Mulher"),
-    ]:
+        # raça x gênero x faixa etária
+        grafico_renda_por_faixa_etaria(renda),
+        # escolaridade x raça x gênero (nível de instrução, não renda)
+        grafico_escolaridade_por_raca_genero(esc),
+        # raça x gênero x faixa etária x escolaridade
+        grafico_renda_completa_heatmap(rc),
+    ]
+    for destino in destinos:
         print(f"Gráfico salvo em: {destino.relative_to(REPO_ROOT)}")
+    print(f"\nTotal: {len(destinos)} gráficos.")
 
 
 if __name__ == "__main__":

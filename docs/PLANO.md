@@ -162,14 +162,121 @@ desta sessão.
   "duplicadas" ocultas na nova agregação — virou parâmetro opcional
   (`incluir_faixa_etaria`).
 
+### Etapa 6 — segunda rodada de expansão, "todas as interseções" (2026-09-04)
+
+Pedido explícito: cobrir sistematicamente raça × gênero × faixa etária × escolaridade, não
+só uma curadoria — "um gráfico combinado + um por categoria" para cada dimensão cruzada com
+raça, e o mesmo tratamento repetido só para Preta vs. Parda (sem Branca/Indígena). Foram pra
+43 gráficos no total (ver `docs/ANALISE_FASE1.md`). Principais adições:
+
+- **Rótulos simplificados**: "Negra (Preta+Parda)" → só "Negra" em todos os gráficos (a
+  definição já está documentada uma vez em vez de repetida em cada legenda).
+- **Preta × Parda em todos os níveis**: gênero (combinado + um por gênero), faixa etária
+  (combinado + 5 individuais), escolaridade (combinado + 7 individuais) — 18 gráficos só
+  dessa família, reaproveitando os mesmos helpers genéricos (`_serie_por_raca`,
+  `_grafico_serie_temporal`) usados pro recorte de 3 raças.
+- **Um gráfico por categoria**: 5 por faixa etária + 7 por nível de instrução (série
+  temporal 2012-2026 filtrada a uma faixa/nível fixo), tanto pra Branca/Negra/Indígena
+  quanto pra Preta/Parda.
+- **Heatmap de 4 dimensões** (`renda_completa_heatmap.png`): raça × gênero × faixa etária ×
+  nível de instrução tudo de uma vez — exigiu nova agregação Brasil-only
+  (`gerar_renda_completa` → `data/processed/renda_completa.parquet`, 20.377 linhas; só
+  Brasil porque abrir mais 4 dimensões por 5 níveis geográficos deixaria a maioria das
+  células com amostra residual).
+- **Gráficos de hiato Branca vs. Negra com significância estatística de verdade**
+  (`hiato_racial_percentual.png`, `hiato_racial_absoluto.png`) — nova agregação
+  `gerar_hiato_racial` que roda `pnadc_core.tabela_hiatos_significancia` (teste de Welch)
+  trimestre a trimestre sobre os MICRODADOS (não sobre médias já agregadas, que não dão pra
+  calcular erro padrão corretamente) → `data/processed/hiato_racial.parquet` (58 linhas).
+  Resultado: os 58 trimestres são estatisticamente significativos a 95%.
+- **Bug estatístico real encontrado e corrigido**: implementando o teste de significância
+  com rigor, a banda de intervalo de confiança saiu absurda (40% a mais de 100%, para uma
+  amostra de centenas de milhares de pessoas). Causa: `erro_padrao_media_ponderada` em
+  `pnadc_core.py` tinha uma fórmula que não batia com o próprio comentário que a documentava
+  (citando Cochran 1977) — usava um denominador diferente do descrito E multiplicava o
+  resultado por `len(valores)` no final, inflando o erro padrão por um fator de ~√n (pra
+  n ~ centenas de milhares, um fator de centenas de vezes). Corrigido pra bater exatamente
+  com a fórmula documentada; validado com um teste unitário contra a fórmula clássica
+  s/√n do caso não-ponderado. O bug tornava os IC muito mais largos que o real (nunca
+  overclaiming significância — se algo, o oposto), mas ainda assim precisava de correção
+  antes de virar gráfico público.
+- **Bug de layout descoberto durante a depuração acima**: dois gráficos (`hiato_racial_*`)
+  vieram com o eixo X inexplicavelmente espremido num canto — depurado a fundo (isolando
+  cada parte do código) até achar que o subtítulo longo demais fazia o `fig.tight_layout()`
+  encolher o retângulo do eixo pra ~22% da largura da figura pra tentar acomodar o texto.
+  Corrigido encurtando os subtítulos; lição: `tight_layout()` pode silenciosamente destruir
+  o layout de um gráfico com texto longo, sem lançar nenhum erro — vale conferir visualmente
+  todo gráfico novo, não só rodar sem exceção.
+- **Apresentação em PowerPoint**: `src/processing/apresentacao_fase1.py` →
+  `docs/Datahub_Racial_Brasil_Fase1.pptx` (56 slides: 1 título + 12 divisores de seção + 43
+  gráficos), gerada automaticamente a partir da mesma lista de imagens.
+- **Reextração completa da série histórica em andamento** (58 trimestres, ~30min) pra trazer
+  `VD4011` (grupamento ocupacional/tipo de ocupação) — variável que faltava desde a Etapa 1
+  (era pedida como `VD4011A`, nome que nunca existiu; corrigido pra `VD4011` mas só passou a
+  valer pra trimestres extraídos depois da correção). Motivação: pergunta de pesquisa sobre
+  se o hiato racial de renda, controlando por idade e escolaridade, se explica por
+  segregação ocupacional (negros em ocupações que pagam menos) ou persiste mesmo dentro da
+  mesma ocupação — ver seção "Decomposição do hiato" abaixo.
+
+## Decomposição do hiato: ocupação explica, ou é só cor da pele? ✅ (2026-09-04)
+
+Pergunta feita pelo usuário: controlando por idade e escolaridade, o hiato de renda entre
+negros e brancos existe porque estão em ocupações diferentes (que pagam menos), ou persiste
+mesmo dentro da mesma ocupação?
+
+- **`VD4010`** (setor/ramo de atividade econômica) já estava disponível.
+- **`VD4011`** (grupamento ocupacional, 11 categorias — diretores/gerentes, profissionais
+  de nível superior, técnicos, apoio administrativo, serviços/comércio, agropecuária,
+  construção/ofícios, operadores de máquinas, ocupações elementares, forças
+  armadas/policiais, maldefinidas) exigiu a reextração completa da série (58 trimestres)
+  concluída nesta sessão — mesmas contagens de linhas de antes, agora com a coluna nova.
+- **Método**: padronização direta (`gerar_decomposicao_hiato_ocupacional` em
+  `agregacoes_pnadc.py`) — não é uma regressão Oaxaca-Blinder completa, mas responde a
+  mesma pergunta de forma direta e auditável: dentro de cada célula (faixa etária ×
+  escolaridade × ocupação, só entram células com ≥30 pessoas de cada raça), calcula a média
+  de Branca e "padroniza" usando a distribuição de Negra nessas células como peso — ou seja,
+  "se Branca tivesse a mesma distribuição de idade/escolaridade/ocupação que Negra tem hoje,
+  qual seria a média de Branca?". Usa os últimos 8 trimestres agrupados (2 anos) porque abrir
+  por ocupação (11 categorias) deixa as células menores — só pessoas ocupadas com ocupação
+  identificada entram (universo onde a pergunta faz sentido).
+- **Resultado** (`data/processed/decomposicao_hiato_ocupacional.parquet`,
+  `docs/img/decomposicao_hiato_ocupacional.png`):
+
+  | Controle | Hiato | Amostra de Negra incluída |
+  |---|---|---|
+  | Nenhum (hiato bruto) | 67,0% (R\$1.884) | 100% |
+  | + faixa etária | 63,9% (R\$1.797) | 100% |
+  | + faixa etária + escolaridade | 30,3% (R\$851) | 99,99% |
+  | + faixa etária + escolaridade + ocupação | **24,3% (R\$684)** | 99,91% |
+
+  **Leitura**: idade sozinha explica quase nada do hiato (as distribuições etárias de
+  Branca e Negra não são tão diferentes). Escolaridade explica MUITO — mais da metade do
+  hiato desaparece só com esse controle. Ocupação explica uma fatia adicional menor. Mas
+  **mesmo comparando pessoas de mesma idade, mesma escolaridade E mesma categoria
+  ocupacional, sobra um hiato de ~24%** — não explicado por nenhuma dessas três variáveis.
+  Isso não é prova direta de discriminação (podem existir outros fatores não medidos aqui —
+  horas trabalhadas, formalidade, região, porte da empresa, senioridade dentro da mesma
+  ocupação), mas é evidência de que "estar na mesma ocupação" está longe de eliminar o
+  hiato racial de renda.
+- **Limitação a documentar**: esse resultado NÃO passou pelo teste de significância formal
+  (Welch) célula a célula — é uma comparação de médias padronizadas, não um teste
+  estatístico completo. Ainda assim, a queda de 67%→24% e a alta retenção de amostra (>99%
+  em todos os cortes) tornam o padrão qualitativo (idade pouco explica, escolaridade explica
+  muito, resta hiato mesmo controlando ocupação) bastante robusto. Aplicar
+  `tabela_hiatos_significancia` ao recorte final (mesma idade/escolaridade/ocupação) é um
+  refinamento natural para uma futura rodada.
+
 ## 🏁 Fase 1 concluída (2026-09-04)
 
-Todas as 7 etapas (0-6) fechadas no mesmo dia. Entregáveis: `src/ingestion/{extrator_pnadc,baixar_deflator}.py`,
-`src/processing/{agregacoes_pnadc,graficos_fase1}.py`, `src/utils/pnadc_core.py`,
-`data/processed/{renda,escolaridade,ocupacao,deflator_ibge,renda_por_escolaridade}.parquet`,
-`docs/{LIMITACOES_E_METODOLOGIA,ANALISE_FASE1}.md`, 8 gráficos em `docs/img/` (galeria
-completa em `docs/ANALISE_FASE1.md`, destaques no README). Próximo passo: Fase 2 (Censo
-Demográfico) — ainda não detalhada, ver seção abaixo.
+Todas as 7 etapas (0-6) fechadas no mesmo dia, incl. uma segunda rodada de expansão a
+pedido. Entregáveis: `src/ingestion/{extrator_pnadc,baixar_deflator}.py`,
+`src/processing/{agregacoes_pnadc,graficos_fase1,apresentacao_fase1}.py`,
+`src/utils/pnadc_core.py`,
+`data/processed/{renda,escolaridade,ocupacao,deflator_ibge,renda_por_escolaridade,renda_completa,hiato_racial,decomposicao_hiato_ocupacional}.parquet`,
+`docs/{LIMITACOES_E_METODOLOGIA,ANALISE_FASE1}.md`, 44 gráficos em `docs/img/` (galeria
+completa em `docs/ANALISE_FASE1.md`, destaques no README), apresentação
+`docs/Datahub_Racial_Brasil_Fase1.pptx` (58 slides). Próximo passo: Fase 2 (Censo
+Demográfico) — ainda não detalhada.
 
 ---
 
@@ -191,6 +298,31 @@ sem ordem fixa:
 
 Nenhum desses substitui as Fases 2 (Censo) e 3 (DataSUS) já previstas no escopo original —
 são adições ao roadmap, a priorizar conforme o interesse depois que a Fase 1 fechar.
+
+### Ferramentas/fontes de referência para cruzar dados (anotado a pedido, 2026-09-04)
+
+Não avaliadas em profundidade ainda — só registradas aqui como ponto de partida pra quando
+formos expandir a análise (Fase 2+ ou aprofundamento da Fase 1):
+
+- **IPUMS** (ipums.org, incl. IPUMS International) — microdados de censos e pesquisas
+  domiciliares harmonizados entre países/anos. Útil se algum dia quisermos comparar o Brasil
+  com outros países ou harmonizar variáveis entre Censo e PNAD de anos diferentes sem
+  reinventar o mapeamento de categorias.
+- **`lodown`** (pacote R, projeto asdfree.com de Anthony Damico) — toolkit padronizado pra
+  baixar e analisar dados de pesquisas complexas (survey data) de vários países, incluindo
+  pesquisas domiciliares brasileiras. Referência de metodologia (desenho amostral, pesos)
+  mesmo se a gente continuar em Python/DuckDB.
+- **`microdadosBrasil`** (pacote R) — leitura de microdados de pesquisas brasileiras (PNAD,
+  Censo, POF etc.). Pode servir de checagem cruzada da nossa própria extração (comparar
+  contagens/médias com o que esse pacote produz pros mesmos trimestres).
+- **Data Zoom (PUC-Rio, Departamento de Economia)** — rotinas Stata/R pra processar
+  microdados de pesquisas domiciliares brasileiras (PNAD, PNAD Contínua, POF, Censo). Muito
+  citado em trabalhos aplicados de economia brasileira — bom lugar pra checar convenções
+  metodológicas (ex.: deflação de renda, tratamento de painel rotativo) contra o que fizemos
+  aqui.
+
+Uso pretendido: validação cruzada de metodologia, não substituição do pipeline atual
+(FTP do IBGE direto + DuckDB já funciona e está validado).
 
 ---
 

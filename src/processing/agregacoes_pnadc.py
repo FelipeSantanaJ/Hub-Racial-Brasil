@@ -31,6 +31,8 @@ from pathlib import Path
 import duckdb
 import pandas as pd
 
+from src.utils import pnadc_core
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
 PARQUET_GLOB = str(REPO_ROOT / "data" / "raw" / "pnadc_extraido" / "parquet" / "ano=*" / "trimestre=*" / "*.parquet")
 DEFLATOR_PATH = str(REPO_ROOT / "data" / "processed" / "deflator_ibge.parquet")
@@ -91,6 +93,19 @@ CREATE TEMP TABLE base AS
         END AS nivel_instrucao,
         m.VD4001 AS forca_trabalho,      -- '1' = na força de trabalho, '2' = fora
         m.VD4002 AS condicao_ocupacao,   -- '1' = ocupada, '2' = desocupada
+        CASE m.VD4011
+            WHEN '01' THEN 'Diretores e gerentes'
+            WHEN '02' THEN 'Profissionais das ciências e intelectuais'
+            WHEN '03' THEN 'Técnicos e profissionais de nível médio'
+            WHEN '04' THEN 'Trabalhadores de apoio administrativo'
+            WHEN '05' THEN 'Trabalhadores dos serviços, vendedores do comércio'
+            WHEN '06' THEN 'Trabalhadores agropecuários, florestais, da caça e pesca'
+            WHEN '07' THEN 'Trabalhadores da construção, artes mecânicas e ofícios'
+            WHEN '08' THEN 'Operadores de instalações e máquinas e montadores'
+            WHEN '09' THEN 'Ocupações elementares'
+            WHEN '10' THEN 'Forças armadas, policiais e bombeiros militares'
+            WHEN '11' THEN 'Ocupações maldefinidas'
+        END AS grupamento_ocupacional,
         m.VD4019 AS renda_habitual_nominal,
         m.VD4020 AS renda_efetiva_nominal,
         -- deflator do IBGE: MULTIPLICA o nominal para trazer a preços do trimestre
@@ -185,6 +200,169 @@ def gerar_renda_por_escolaridade(con: duckdb.DuckDBPyConnection) -> None:
     print(f"renda_por_escolaridade.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
+def gerar_decomposicao_hiato_ocupacional(con: duckdb.DuckDBPyConnection, n_trimestres: int = 8) -> None:
+    """Decompõe o hiato de renda Branca vs. Negra: quanto sobra depois de controlar por
+    faixa etária, depois + escolaridade, depois + ocupação (VD4011/grupamento_ocupacional)?
+
+    Método: padronização direta. Pra cada conjunto de variáveis de controle, calcula a
+    média ponderada de Branca e de Negra DENTRO de cada célula (ex.: faixa etária x
+    escolaridade x ocupação), descarta células com amostra insuficiente de qualquer um dos
+    dois grupos, e agrega de volta usando a distribuição de Negra nas células como peso —
+    ou seja, "se Branca tivesse a mesma distribuição de idade/escolaridade/ocupação que
+    Negra tem hoje, qual seria a média de Branca?". A diferença entre essa média ajustada e
+    a média real de Negra é o hiato que control ainda não explica.
+
+    Só entram pessoas OCUPADAS com ocupação identificada (grupamento_ocupacional não nulo)
+    — é o universo em que a pergunta "mesma ocupação, ainda assim ganha menos?" faz sentido.
+    Pool de `n_trimestres` mais recentes (não só o último) porque abrir por ocupação deixa
+    as células menores.
+    """
+    micro = con.execute(f"""
+        SELECT raca_cor, faixa_etaria, nivel_instrucao, grupamento_ocupacional,
+               renda_habitual_real, peso
+        FROM base
+        WHERE raca_cor IN ('Branca', 'Preta', 'Parda')
+          AND grupamento_ocupacional IS NOT NULL
+          AND renda_habitual_real IS NOT NULL
+          AND (ano, trimestre) IN (
+              SELECT ano, trimestre FROM (SELECT DISTINCT ano, trimestre FROM base ORDER BY ano DESC, trimestre DESC LIMIT {n_trimestres})
+          )
+    """).df()
+    micro["raca_cor"] = micro["raca_cor"].replace({"Preta": "Negra", "Parda": "Negra"})
+
+    def media_pond(df, col="renda_habitual_real"):
+        return (df[col] * df["peso"]).sum() / df["peso"].sum()
+
+    def gap_padronizado(controles: list[str], n_minimo: int = 30) -> dict:
+        if not controles:
+            b = micro[micro["raca_cor"] == "Branca"]
+            n = micro[micro["raca_cor"] == "Negra"]
+            return {
+                "controles": "nenhum (hiato bruto)",
+                "media_branca_ajustada": media_pond(b),
+                "media_negra": media_pond(n),
+                "n_branca": len(b), "n_negra": len(n),
+                "pct_amostra_negra_incluida": 100.0,
+            }
+
+        # Acumula Branca e Negra célula a célula, na mesma passada — só entram células
+        # (combinações de `controles`) com amostra mínima dos DOIS grupos.
+        soma_pond_branca = soma_peso_negra = soma_pond_negra = 0.0
+        n_branca_total = n_negra_total = n_negra_incluida = 0
+        for _, grupo in micro.groupby(controles, observed=True):
+            gb = grupo[grupo["raca_cor"] == "Branca"]
+            gn = grupo[grupo["raca_cor"] == "Negra"]
+            n_branca_total += len(gb)
+            n_negra_total += len(gn)
+            if len(gb) < n_minimo or len(gn) < n_minimo:
+                continue
+            peso_negra_cel = gn["peso"].sum()
+            soma_pond_branca += media_pond(gb) * peso_negra_cel
+            soma_pond_negra += (gn["renda_habitual_real"] * gn["peso"]).sum()
+            soma_peso_negra += peso_negra_cel
+            n_negra_incluida += len(gn)
+
+        return {
+            "controles": " + ".join(controles),
+            "media_branca_ajustada": soma_pond_branca / soma_peso_negra if soma_peso_negra else None,
+            "media_negra": soma_pond_negra / soma_peso_negra if soma_peso_negra else None,
+            "n_branca": n_branca_total, "n_negra": n_negra_total,
+            "pct_amostra_negra_incluida": 100 * n_negra_incluida / n_negra_total if n_negra_total else 0,
+        }
+
+    resultados = []
+    for controles in [[], ["faixa_etaria"], ["faixa_etaria", "nivel_instrucao"],
+                       ["faixa_etaria", "nivel_instrucao", "grupamento_ocupacional"]]:
+        r = gap_padronizado(controles)
+        if r["media_branca_ajustada"] is not None and r["media_negra"] is not None:
+            r["hiato_absoluto"] = r["media_branca_ajustada"] - r["media_negra"]
+            r["hiato_percentual"] = 100 * r["hiato_absoluto"] / r["media_negra"]
+        resultados.append(r)
+
+    df = pd.DataFrame(resultados)
+    destino = OUTPUT_DIR / "decomposicao_hiato_ocupacional.parquet"
+    df.to_parquet(destino, index=False)
+    print(f"decomposicao_hiato_ocupacional.parquet: {len(df)} linhas (controles progressivos)", flush=True)
+    print(df[["controles", "hiato_absoluto", "hiato_percentual", "pct_amostra_negra_incluida"]].to_string(index=False), flush=True)
+
+
+def gerar_hiato_racial(con: duckdb.DuckDBPyConnection) -> None:
+    """Hiato de renda Branca vs. Negra (Preta+Parda), trimestre a trimestre, COM teste
+    de significância (Welch) — usa `pnadc_core.tabela_hiatos_significancia`, que precisa
+    dos microdados (não das médias já agregadas) pra calcular erro padrão corretamente.
+    Roda uma query por trimestre em vez de uma vez só pra manter a tabela intermediária
+    pequena na memória do pandas (58 trimestres x algumas centenas de milhares de linhas
+    cada seria pesado de concatenar tudo de uma vez)."""
+    trimestres = con.execute("SELECT DISTINCT ano, trimestre FROM base ORDER BY ano, trimestre").df()
+
+    resultados = []
+    for _, row in trimestres.iterrows():
+        ano, trimestre = int(row["ano"]), int(row["trimestre"])
+        micro = con.execute(f"""
+            SELECT raca_cor, renda_habitual_real, peso
+            FROM base
+            WHERE ano = {ano} AND trimestre = {trimestre}
+              AND raca_cor IN ('Branca', 'Preta', 'Parda')
+              AND renda_habitual_real IS NOT NULL
+        """).df()
+        if micro.empty:
+            continue
+        micro["raca_cor"] = micro["raca_cor"].replace({"Preta": "Negra", "Parda": "Negra"})
+
+        tabela = pnadc_core.tabela_hiatos_significancia(
+            micro, "renda_habitual_real", "raca_cor", grupo_referencia="Negra", peso="peso"
+        )
+        if "Branca" not in tabela.index:
+            continue
+        linha_branca = tabela.loc["Branca"]
+        media_negra = tabela.loc["Negra", "media"]
+        resultados.append({
+            "ano": ano, "trimestre": trimestre,
+            "renda_media_branca": linha_branca["media"],
+            "renda_media_negra": media_negra,
+            "hiato_absoluto": linha_branca["hiato_media"],
+            "hiato_percentual": 100 * linha_branca["hiato_media"] / media_negra if media_negra else None,
+            "ic_inferior": linha_branca["ic_inferior"],
+            "ic_superior": linha_branca["ic_superior"],
+            "p_valor": linha_branca["p_valor"],
+            "significativo": linha_branca["significativo"],
+        })
+
+    df = pd.DataFrame(resultados)
+    destino = OUTPUT_DIR / "hiato_racial.parquet"
+    df.to_parquet(destino, index=False)
+    n_nao_significativo = (~df["significativo"]).sum()
+    print(f"hiato_racial.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
+    if n_nao_significativo:
+        print(
+            f"  aviso: {n_nao_significativo} trimestre(s) com hiato Branca-Negra "
+            "NÃO significativo a 95% (checar antes de destacar no gráfico)", flush=True,
+        )
+
+
+def gerar_renda_completa(con: duckdb.DuckDBPyConnection) -> None:
+    """Cruza renda com raça x sexo x faixa_etaria x nivel_instrucao TODAS AO MESMO TEMPO
+    — o cruzamento mais fino pedido. Só Brasil (as outras 4 dimensões já multiplicam
+    bastante as combinações; abrir também por geografia deixaria a maioria das células
+    com amostra residual)."""
+    select_agregado = """
+           ano, trimestre, raca_cor, sexo, faixa_etaria, nivel_instrucao,
+           COUNT(*) AS n_amostra,
+           SUM(peso) AS populacao_estimada,
+           SUM(renda_habitual_real * peso)
+               / NULLIF(SUM(peso) FILTER (WHERE renda_habitual_real IS NOT NULL), 0)
+               AS renda_habitual_real_media"""
+    query = f"""
+        SELECT 'brasil' AS nivel_geografico, 'Brasil' AS geografia, {select_agregado}
+        FROM base
+        GROUP BY ano, trimestre, raca_cor, sexo, faixa_etaria, nivel_instrucao"""
+    df = con.execute(query).df()
+    df = df[df["nivel_instrucao"].notna()]
+    destino = OUTPUT_DIR / "renda_completa.parquet"
+    df.to_parquet(destino, index=False)
+    print(f"renda_completa.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
+
+
 def gerar_escolaridade(con: duckdb.DuckDBPyConnection) -> None:
     select_agregado = """
            ano, trimestre, raca_cor, sexo, faixa_etaria, nivel_instrucao,
@@ -224,6 +402,9 @@ def main() -> None:
     gerar_renda(con)
     gerar_escolaridade(con)
     gerar_renda_por_escolaridade(con)
+    gerar_renda_completa(con)
+    gerar_hiato_racial(con)
+    gerar_decomposicao_hiato_ocupacional(con)
     gerar_ocupacao(con)
 
 
