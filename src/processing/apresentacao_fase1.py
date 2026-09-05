@@ -51,6 +51,16 @@ SECOES = [
         ("alfabetizacao_60mais.png", "Analfabetismo residual (60+ anos): Branca 93%, Negra 80%, Indígena 72% alfabetizados."),
         ("desalento.png", "Entre quem está fora da força de trabalho, Negra e Indígena desistem de procurar emprego a taxas 2-4x maiores que Branca."),
     ]),
+    ("Geração: seguindo a mesma coorte, não a mesma faixa etária", "A PNAD é um corte transversal repetido — 'pessoas de 14-17 anos' em 2012 e 2026 são pessoas diferentes", [
+        ("hiato_racial_por_geracao.png", "Cada linha é a MESMA coorte de nascimento envelhecendo — o hiato varia bastante entre gerações e ao longo do tempo dentro de cada uma."),
+        ("renda_por_geracao_raca.png", "Renda por geração e raça, cada uma na idade em que está hoje."),
+    ]),
+    ("Quem está no topo 10%? Negra vs. Branca", "Limiar (P90) calculado DENTRO de cada raça, não um corte único pro Brasil", [
+        ("topo10_genero.png", "% de mulheres no topo 10% de cada raça — Branca sempre um pouco à frente, mas a distância vem encolhendo."),
+        ("topo10_escolaridade.png", "% com Superior completo no topo 10% — o topo dos negros ficou muito mais qualificado (38%→58%), mas ainda atrás do topo dos brancos (~83%)."),
+        ("topo10_faixa_etaria.png", "Composição por faixa etária do topo 10%, média dos últimos 8 trimestres."),
+        ("topo10_geracao.png", "Composição por geração do topo 10% — o topo dos negros pende um pouco mais para Millennial/Geração Z; o dos brancos, para Baby Boomer/Geração X."),
+    ]),
     ("Raça × Gênero", "Combinado + um por gênero", [
         ("renda_por_raca_genero.png", "O hiato de gênero soma ao de raça, não substitui."),
         ("renda_por_raca_homens.png", "Recorte só Homens."),
