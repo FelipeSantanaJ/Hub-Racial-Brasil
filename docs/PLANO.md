@@ -742,9 +742,40 @@ várias subseções (mesmas imagens, vários slides).
 
 ---
 
+## Décima rodada de expansão (2026-09-05): mesma abertura em série histórica nas 21 seções antigas
+
+Pedido do usuário: "faça as mesmas aberturas para as outras análises" — estender o padrão da
+seção "Renda média" (manter snapshot, acrescentar série histórica por categoria) pras 21
+seções antigas do PPT (as que ficaram no final do deck desde a oitava rodada). Perguntado o
+escopo antes de mexer: usuário confirmou todas as 21 seções, e pediu explicitamente pra NÃO
+fazer abertura por região (só nível nacional) — decisão que, por extensão, também resolveu a
+questão de ocupação/setor econômico (11 e várias categorias, já agrupadas em janelas de 8
+trimestres numa rodada bem anterior justamente por amostra fina por trimestre isolado):
+ficaram de fora da abertura em série histórica, mantidas como já estavam (snapshot/pooled).
+
+Sem gráfico novo nem dataset novo — só reorganização do PPT, reaproveitando os 15 gráficos
+de série histórica (valor e hiato, por gênero/faixa etária/geração/escolaridade) já
+construídos na rodada anterior, inseridos nas seções antigas onde a dimensão aparece:
+- "Hiato Branca vs. Negra — série histórica": ganhou a abertura por gênero/faixa
+  etária/escolaridade/geração do próprio hiato histórico com Welch.
+- Nova seção "Hiato Preta vs. Parda — série histórica" (não existia como seção própria antes
+  da oitava rodada — só aparecia dentro da seção "Renda média"): junta o hiato Preta vs.
+  Parda flagship + as 4 aberturas.
+- "Raça cruzada com tudo": as 3 combinações sem ocupação (gênero×geração, faixa×escolaridade,
+  geração×escolaridade) ganharam a abertura por cada dimensão; as 4 com ocupação ficaram como
+  estavam.
+- "Geração": ganhou as séries individuais por geração (valor, Todas e Preta/Parda) e o hiato
+  histórico Preta vs. Parda por geração.
+- "Raça × Gênero × Escolaridade", "Raça × Gênero × Faixa etária" e "Todas as dimensões de uma
+  vez" (antigas, só com o snapshot): ganharam as aberturas correspondentes.
+
+PPT: 507 slides (era 428) — 70 divisores (69 + a nova seção "Hiato Preta vs. Parda").
+
+---
+
 ## 🏁 Fase 1 concluída (2026-09-04, expandida em 2026-09-05)
 
-Todas as 7 etapas (0-6) fechadas no mesmo dia, incl. nove rodadas de expansão a pedido (a
+Todas as 7 etapas (0-6) fechadas no mesmo dia, incl. dez rodadas de expansão a pedido (a
 segunda com teste de significância formal via Oaxaca-Blinder, hiato regional, segregação
 ocupacional, quebra estrutural e 4 variáveis novas; a terceira com geração, perfil do topo
 10% e a decomposição completa dos 4 quartis; a quarta com Gini/Theil por raça, setor
@@ -754,13 +785,14 @@ quantificando quanto ocupação sozinha explica do hiato; a sétima corrigindo u
 seção Escolaridade × Raça × Gênero; a oitava reorganizando o PPT com a seção "Renda média"
 (48 subseções, índice no início, hiato com Welch nas 24 combinações) na frente; a nona
 acrescentando a série histórica completa (2012-2026) em toda abertura da seção "Renda média"
-que antes só tinha o snapshot do trimestre mais recente — ver seções acima). Entregáveis:
+que antes só tinha o snapshot do trimestre mais recente; a décima estendendo essa mesma
+abertura em série histórica pras 21 seções antigas do deck — ver seções acima). Entregáveis:
 `src/ingestion/{extrator_pnadc,baixar_deflator}.py`,
 `src/processing/{agregacoes_pnadc,graficos_fase1,apresentacao_fase1}.py`,
 `src/utils/pnadc_core.py`, 60 datasets em `data/processed/*.parquet`,
 `docs/{LIMITACOES_E_METODOLOGIA,ANALISE_FASE1}.md`, 134 gráficos em `docs/img/` (galeria
 completa em `docs/ANALISE_FASE1.md`, destaques no README), apresentação
-`docs/Datahub_Racial_Brasil_Fase1.pptx` (428 slides). Próximo passo: Fase 2 (Censo
+`docs/Datahub_Racial_Brasil_Fase1.pptx` (507 slides). Próximo passo: Fase 2 (Censo
 Demográfico) — ainda não detalhada.
 
 ---
