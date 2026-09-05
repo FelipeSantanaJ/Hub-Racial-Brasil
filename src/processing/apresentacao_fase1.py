@@ -25,6 +25,74 @@ TINTA_PRIMARIA = RGBColor(0x2B, 0x20, 0x18)
 TINTA_SECUNDARIA = RGBColor(0x5C, 0x4F, 0x3F)
 COR_BRANCA = RGBColor(0x0D, 0x90, 0x86)
 
+# --- Séries históricas por categoria (reaproveitadas em toda combinação que envolve
+# aquela dimensão — "isso para todas as aberturas", pedido do usuário: os snapshots do
+# trimestre mais recente continuam, mas cada abertura ganha também sua série histórica
+# completa, 2012-2026, um slide por categoria pros valores e um só gráfico
+# multi-linha pro hiato, mesmo padrão que "Raça × Geração" já usava).
+_SERIE_GENERO_TODAS = [
+    ("renda_por_raca_homens.png", "Série histórica — só Homens."),
+    ("renda_por_raca_mulheres.png", "Série histórica — só Mulheres."),
+]
+_SERIE_GENERO_PP = [
+    ("renda_preta_parda_homens.png", "Série histórica — só Homens."),
+    ("renda_preta_parda_mulheres.png", "Série histórica — só Mulheres."),
+]
+_SERIE_FAIXA_TODAS = [
+    ("renda_por_raca_faixa_14_17.png", "Série histórica — 14-17 anos."),
+    ("renda_por_raca_faixa_18_24.png", "Série histórica — 18-24 anos."),
+    ("renda_por_raca_faixa_25_39.png", "Série histórica — 25-39 anos."),
+    ("renda_por_raca_faixa_40_59.png", "Série histórica — 40-59 anos."),
+    ("renda_por_raca_faixa_60mais.png", "Série histórica — 60+ anos."),
+]
+_SERIE_FAIXA_PP = [
+    ("renda_preta_parda_faixa_14_17.png", "Série histórica — 14-17 anos."),
+    ("renda_preta_parda_faixa_18_24.png", "Série histórica — 18-24 anos."),
+    ("renda_preta_parda_faixa_25_39.png", "Série histórica — 25-39 anos."),
+    ("renda_preta_parda_faixa_40_59.png", "Série histórica — 40-59 anos."),
+    ("renda_preta_parda_faixa_60mais.png", "Série histórica — 60+ anos."),
+]
+_SERIE_GERACAO_TODAS = [
+    ("renda_por_raca_geracao_baby_boomer.png", "Série histórica — Baby Boomer."),
+    ("renda_por_raca_geracao_geracao_x.png", "Série histórica — Geração X."),
+    ("renda_por_raca_geracao_millennial.png", "Série histórica — Millennial."),
+    ("renda_por_raca_geracao_geracao_z.png", "Série histórica — Geração Z."),
+]
+_SERIE_GERACAO_PP = [
+    ("renda_preta_parda_geracao_baby_boomer.png", "Série histórica — Baby Boomer."),
+    ("renda_preta_parda_geracao_geracao_x.png", "Série histórica — Geração X."),
+    ("renda_preta_parda_geracao_millennial.png", "Série histórica — Millennial."),
+    ("renda_preta_parda_geracao_geracao_z.png", "Série histórica — Geração Z."),
+]
+_SERIE_ESCOLARIDADE_TODAS = [
+    ("renda_por_raca_escolaridade_sem_instrucao.png", "Série histórica — Sem instrução."),
+    ("renda_por_raca_escolaridade_fundamental_incompl.png", "Série histórica — Fundamental incompleto."),
+    ("renda_por_raca_escolaridade_fundamental_compl.png", "Série histórica — Fundamental completo."),
+    ("renda_por_raca_escolaridade_medio_incompl.png", "Série histórica — Médio incompleto."),
+    ("renda_por_raca_escolaridade_medio_compl.png", "Série histórica — Médio completo."),
+    ("renda_por_raca_escolaridade_superior_incompl.png", "Série histórica — Superior incompleto."),
+    ("renda_por_raca_escolaridade_superior_compl.png", "Série histórica — Superior completo."),
+]
+_SERIE_ESCOLARIDADE_PP = [
+    ("renda_preta_parda_escolaridade_sem_instrucao.png", "Série histórica — Sem instrução."),
+    ("renda_preta_parda_escolaridade_fundamental_incompl.png", "Série histórica — Fundamental incompleto."),
+    ("renda_preta_parda_escolaridade_fundamental_compl.png", "Série histórica — Fundamental completo."),
+    ("renda_preta_parda_escolaridade_medio_incompl.png", "Série histórica — Médio incompleto."),
+    ("renda_preta_parda_escolaridade_medio_compl.png", "Série histórica — Médio completo."),
+    ("renda_preta_parda_escolaridade_superior_incompl.png", "Série histórica — Superior incompleto."),
+    ("renda_preta_parda_escolaridade_superior_compl.png", "Série histórica — Superior completo."),
+]
+
+_HIATO_HIST_GENERO_TODAS = [("hiato_genero_historico_todas.png", "Série histórica do hiato, por gênero (Welch).")]
+_HIATO_HIST_GENERO_PP = [("hiato_genero_historico_pretaparda.png", "Série histórica do hiato, por gênero (Welch).")]
+_HIATO_HIST_FAIXA_TODAS = [("hiato_faixa_etaria_historico_todas.png", "Série histórica do hiato, por faixa etária (Welch).")]
+_HIATO_HIST_FAIXA_PP = [("hiato_faixa_etaria_historico_pretaparda.png", "Série histórica do hiato, por faixa etária (Welch).")]
+_HIATO_HIST_GERACAO_TODAS = [("hiato_racial_por_geracao.png", "Série histórica do hiato, por geração (Welch) — mesma coorte envelhecendo.")]
+_HIATO_HIST_GERACAO_PP = [("hiato_geracao_historico_pretaparda.png", "Série histórica do hiato, por geração (Welch) — mesma coorte envelhecendo.")]
+_HIATO_HIST_ESCOLARIDADE_TODAS = [("hiato_escolaridade_historico_todas.png", "Série histórica do hiato, por escolaridade (Welch).")]
+_HIATO_HIST_ESCOLARIDADE_PP = [("hiato_escolaridade_historico_pretaparda.png", "Série histórica do hiato, por escolaridade (Welch).")]
+
+
 # --- Seção "Renda média": as 12 combinações pedidas, x 2 escopos (Todas as raças /
 # Apenas negros, Preta vs. Parda) x 2 métricas (Valores / Hiato) = 48 subseções, cada
 # uma virando um slide-divisor + 1-2 slides de gráfico. Onde gênero ou escolaridade
@@ -46,83 +114,83 @@ COMBOS_RENDA_MEDIA = [
     },
     {
         "nome": "Raça × Gênero",
-        "valor_todas": [("renda_por_raca_genero.png", "Homens e mulheres, Branca/Negra/Indígena — o hiato de gênero soma ao de raça.")],
-        "valor_pretaparda": [("renda_preta_parda_genero.png", "Preta vs. Parda, por gênero.")],
-        "hiato_todas": [("hiato_genero_todas.png", "Hiato Branca vs. Negra dentro de cada gênero — maior entre homens (71%) que entre mulheres (62%).")],
-        "hiato_pretaparda": [("hiato_genero_pretaparda.png", "Hiato Preta vs. Parda dentro de cada gênero.")],
+        "valor_todas": [("renda_por_raca_genero.png", "Homens e mulheres, Branca/Negra/Indígena, série histórica — o hiato de gênero soma ao de raça.")] + _SERIE_GENERO_TODAS,
+        "valor_pretaparda": [("renda_preta_parda_genero.png", "Preta vs. Parda, por gênero, série histórica.")] + _SERIE_GENERO_PP,
+        "hiato_todas": [("hiato_genero_todas.png", "Hiato Branca vs. Negra dentro de cada gênero, snapshot — maior entre homens (71%) que entre mulheres (62%).")] + _HIATO_HIST_GENERO_TODAS,
+        "hiato_pretaparda": [("hiato_genero_pretaparda.png", "Hiato Preta vs. Parda dentro de cada gênero, snapshot.")] + _HIATO_HIST_GENERO_PP,
     },
     {
         "nome": "Raça × Faixa Etária",
-        "valor_todas": [("renda_por_raca_faixa_etaria.png", "Hiato racial se abre nas faixas de maior potencial de renda.")],
-        "valor_pretaparda": [("renda_preta_parda_faixa_etaria.png", "Preta vs. Parda, por faixa etária.")],
-        "hiato_todas": [("hiato_faixa_etaria_todas.png", "Hiato Branca vs. Negra por faixa etária — de 15-18% entre jovens a 81-94% depois dos 40.")],
-        "hiato_pretaparda": [("hiato_faixa_etaria_pretaparda.png", "Hiato Preta vs. Parda por faixa etária.")],
+        "valor_todas": [("renda_por_raca_faixa_etaria.png", "Hiato racial se abre nas faixas de maior potencial de renda (snapshot).")] + _SERIE_FAIXA_TODAS,
+        "valor_pretaparda": [("renda_preta_parda_faixa_etaria.png", "Preta vs. Parda, por faixa etária, snapshot.")] + _SERIE_FAIXA_PP,
+        "hiato_todas": [("hiato_faixa_etaria_todas.png", "Hiato Branca vs. Negra por faixa etária, snapshot — de 15-18% entre jovens a 81-94% depois dos 40.")] + _HIATO_HIST_FAIXA_TODAS,
+        "hiato_pretaparda": [("hiato_faixa_etaria_pretaparda.png", "Hiato Preta vs. Parda por faixa etária, snapshot.")] + _HIATO_HIST_FAIXA_PP,
     },
     {
         "nome": "Raça × Geração",
-        "valor_todas": [("renda_por_geracao_raca.png", "Cada geração na idade em que está hoje (não controla por idade).")],
-        "valor_pretaparda": [("renda_preta_parda_geracao.png", "Preta vs. Parda, por geração.")],
-        "hiato_todas": [("hiato_geracao_todas.png", "Hiato Branca vs. Negra por geração, snapshot mais recente (ver também a série histórica por coorte, adiante no deck).")],
-        "hiato_pretaparda": [("hiato_geracao_pretaparda.png", "Hiato Preta vs. Parda por geração — negativo em todas: Parda ganha mais que Preta em toda geração viva.")],
+        "valor_todas": [("renda_por_geracao_raca.png", "Cada geração na idade em que está hoje, snapshot (não controla por idade).")] + _SERIE_GERACAO_TODAS,
+        "valor_pretaparda": [("renda_preta_parda_geracao.png", "Preta vs. Parda, por geração, snapshot.")] + _SERIE_GERACAO_PP,
+        "hiato_todas": [("hiato_geracao_todas.png", "Hiato Branca vs. Negra por geração, snapshot mais recente.")] + _HIATO_HIST_GERACAO_TODAS,
+        "hiato_pretaparda": [("hiato_geracao_pretaparda.png", "Hiato Preta vs. Parda por geração, snapshot — negativo em todas: Parda ganha mais que Preta em toda geração viva.")] + _HIATO_HIST_GERACAO_PP,
     },
     {
         "nome": "Raça × Escolaridade",
-        "valor_todas": [("renda_por_raca_escolaridade.png", "O achado central da Fase 1: o hiato SOBREVIVE ao controle por escolaridade, abrindo no Superior completo.")],
-        "valor_pretaparda": [("renda_preta_parda_escolaridade.png", "Preta vs. Parda, por nível de instrução.")],
-        "hiato_todas": [("hiato_escolaridade_todas.png", "Hiato Branca vs. Negra por nível de instrução.")],
-        "hiato_pretaparda": [("hiato_escolaridade_pretaparda.png", "Hiato Preta vs. Parda por nível de instrução.")],
+        "valor_todas": [("renda_por_raca_escolaridade.png", "O achado central da Fase 1, snapshot: o hiato SOBREVIVE ao controle por escolaridade, abrindo no Superior completo.")] + _SERIE_ESCOLARIDADE_TODAS,
+        "valor_pretaparda": [("renda_preta_parda_escolaridade.png", "Preta vs. Parda, por nível de instrução, snapshot.")] + _SERIE_ESCOLARIDADE_PP,
+        "hiato_todas": [("hiato_escolaridade_todas.png", "Hiato Branca vs. Negra por nível de instrução, snapshot.")] + _HIATO_HIST_ESCOLARIDADE_TODAS,
+        "hiato_pretaparda": [("hiato_escolaridade_pretaparda.png", "Hiato Preta vs. Parda por nível de instrução, snapshot.")] + _HIATO_HIST_ESCOLARIDADE_PP,
     },
     {
         "nome": "Raça × Gênero × Faixa Etária",
-        "valor_todas": [("renda_por_faixa_etaria_raca_genero.png", "Mesmo efeito de abertura em 40-59 anos, visível nos dois gêneros.")],
-        "valor_pretaparda": [("preta_parda_genero_faixa_etaria.png", "Preta vs. Parda, por gênero e faixa etária.")],
-        "hiato_todas": [("hiato_genero_faixa_etaria_todas.png", "Hiato Branca vs. Negra por gênero e faixa etária.")],
-        "hiato_pretaparda": [("hiato_genero_faixa_etaria_pretaparda.png", "Hiato Preta vs. Parda por gênero e faixa etária.")],
+        "valor_todas": [("renda_por_faixa_etaria_raca_genero.png", "Mesmo efeito de abertura em 40-59 anos, visível nos dois gêneros (snapshot).")] + _SERIE_GENERO_TODAS + _SERIE_FAIXA_TODAS,
+        "valor_pretaparda": [("preta_parda_genero_faixa_etaria.png", "Preta vs. Parda, por gênero e faixa etária, snapshot.")] + _SERIE_GENERO_PP + _SERIE_FAIXA_PP,
+        "hiato_todas": [("hiato_genero_faixa_etaria_todas.png", "Hiato Branca vs. Negra por gênero e faixa etária, snapshot.")] + _HIATO_HIST_GENERO_TODAS + _HIATO_HIST_FAIXA_TODAS,
+        "hiato_pretaparda": [("hiato_genero_faixa_etaria_pretaparda.png", "Hiato Preta vs. Parda por gênero e faixa etária, snapshot.")] + _HIATO_HIST_GENERO_PP + _HIATO_HIST_FAIXA_PP,
     },
     {
         "nome": "Raça × Gênero × Geração",
-        "valor_todas": [("raca_genero_geracao.png", "Renda por raça, gênero e geração.")],
-        "valor_pretaparda": [("preta_parda_genero_geracao.png", "Preta vs. Parda, por gênero e geração.")],
-        "hiato_todas": [("hiato_genero_geracao_todas.png", "Hiato Branca vs. Negra por gênero e geração.")],
-        "hiato_pretaparda": [("hiato_genero_geracao_pretaparda.png", "Hiato Preta vs. Parda por gênero e geração.")],
+        "valor_todas": [("raca_genero_geracao.png", "Renda por raça, gênero e geração, snapshot.")] + _SERIE_GENERO_TODAS + _SERIE_GERACAO_TODAS,
+        "valor_pretaparda": [("preta_parda_genero_geracao.png", "Preta vs. Parda, por gênero e geração, snapshot.")] + _SERIE_GENERO_PP + _SERIE_GERACAO_PP,
+        "hiato_todas": [("hiato_genero_geracao_todas.png", "Hiato Branca vs. Negra por gênero e geração, snapshot.")] + _HIATO_HIST_GENERO_TODAS + _HIATO_HIST_GERACAO_TODAS,
+        "hiato_pretaparda": [("hiato_genero_geracao_pretaparda.png", "Hiato Preta vs. Parda por gênero e geração, snapshot.")] + _HIATO_HIST_GENERO_PP + _HIATO_HIST_GERACAO_PP,
     },
     {
         "nome": "Raça × Gênero × Escolaridade",
         "valor_todas": [
-            ("renda_por_raca_escolaridade_homens.png", "Homens — hiato no Superior completo é maior (~46%)."),
-            ("renda_por_raca_escolaridade_mulheres.png", "Mulheres — hiato menor (~36%) que entre homens."),
-        ],
-        "valor_pretaparda": [("preta_parda_genero_escolaridade.png", "Preta vs. Parda, por gênero e nível de instrução.")],
-        "hiato_todas": [("hiato_genero_escolaridade_todas.png", "Hiato Branca vs. Negra por gênero e nível de instrução.")],
-        "hiato_pretaparda": [("hiato_genero_escolaridade_pretaparda.png", "Hiato Preta vs. Parda por gênero e nível de instrução.")],
+            ("renda_por_raca_escolaridade_homens.png", "Homens — hiato no Superior completo é maior (~46%), snapshot."),
+            ("renda_por_raca_escolaridade_mulheres.png", "Mulheres — hiato menor (~36%) que entre homens, snapshot."),
+        ] + _SERIE_GENERO_TODAS + _SERIE_ESCOLARIDADE_TODAS,
+        "valor_pretaparda": [("preta_parda_genero_escolaridade.png", "Preta vs. Parda, por gênero e nível de instrução, snapshot.")] + _SERIE_GENERO_PP + _SERIE_ESCOLARIDADE_PP,
+        "hiato_todas": [("hiato_genero_escolaridade_todas.png", "Hiato Branca vs. Negra por gênero e nível de instrução, snapshot.")] + _HIATO_HIST_GENERO_TODAS + _HIATO_HIST_ESCOLARIDADE_TODAS,
+        "hiato_pretaparda": [("hiato_genero_escolaridade_pretaparda.png", "Hiato Preta vs. Parda por gênero e nível de instrução, snapshot.")] + _HIATO_HIST_GENERO_PP + _HIATO_HIST_ESCOLARIDADE_PP,
     },
     {
         "nome": "Raça × Faixa Etária × Escolaridade",
-        "valor_todas": [("raca_faixa_etaria_escolaridade.png", "Renda por raça, faixa etária e escolaridade.")],
-        "valor_pretaparda": [("preta_parda_faixa_etaria_escolaridade.png", "Preta vs. Parda, por faixa etária e escolaridade.")],
-        "hiato_todas": [("hiato_faixa_etaria_escolaridade_todas.png", "Hiato Branca vs. Negra por faixa etária e nível de instrução.")],
-        "hiato_pretaparda": [("hiato_faixa_etaria_escolaridade_pretaparda.png", "Hiato Preta vs. Parda por faixa etária e nível de instrução.")],
+        "valor_todas": [("raca_faixa_etaria_escolaridade.png", "Renda por raça, faixa etária e escolaridade, snapshot.")] + _SERIE_FAIXA_TODAS + _SERIE_ESCOLARIDADE_TODAS,
+        "valor_pretaparda": [("preta_parda_faixa_etaria_escolaridade.png", "Preta vs. Parda, por faixa etária e escolaridade, snapshot.")] + _SERIE_FAIXA_PP + _SERIE_ESCOLARIDADE_PP,
+        "hiato_todas": [("hiato_faixa_etaria_escolaridade_todas.png", "Hiato Branca vs. Negra por faixa etária e nível de instrução, snapshot.")] + _HIATO_HIST_FAIXA_TODAS + _HIATO_HIST_ESCOLARIDADE_TODAS,
+        "hiato_pretaparda": [("hiato_faixa_etaria_escolaridade_pretaparda.png", "Hiato Preta vs. Parda por faixa etária e nível de instrução, snapshot.")] + _HIATO_HIST_FAIXA_PP + _HIATO_HIST_ESCOLARIDADE_PP,
     },
     {
         "nome": "Raça × Geração × Escolaridade",
-        "valor_todas": [("raca_geracao_escolaridade.png", "Renda por raça, geração e escolaridade.")],
-        "valor_pretaparda": [("preta_parda_geracao_escolaridade.png", "Preta vs. Parda, por geração e escolaridade.")],
-        "hiato_todas": [("hiato_geracao_escolaridade_todas.png", "Hiato Branca vs. Negra por geração e nível de instrução.")],
-        "hiato_pretaparda": [("hiato_geracao_escolaridade_pretaparda.png", "Hiato Preta vs. Parda por geração e nível de instrução.")],
+        "valor_todas": [("raca_geracao_escolaridade.png", "Renda por raça, geração e escolaridade, snapshot.")] + _SERIE_GERACAO_TODAS + _SERIE_ESCOLARIDADE_TODAS,
+        "valor_pretaparda": [("preta_parda_geracao_escolaridade.png", "Preta vs. Parda, por geração e escolaridade, snapshot.")] + _SERIE_GERACAO_PP + _SERIE_ESCOLARIDADE_PP,
+        "hiato_todas": [("hiato_geracao_escolaridade_todas.png", "Hiato Branca vs. Negra por geração e nível de instrução, snapshot.")] + _HIATO_HIST_GERACAO_TODAS + _HIATO_HIST_ESCOLARIDADE_TODAS,
+        "hiato_pretaparda": [("hiato_geracao_escolaridade_pretaparda.png", "Hiato Preta vs. Parda por geração e nível de instrução, snapshot.")] + _HIATO_HIST_GERACAO_PP + _HIATO_HIST_ESCOLARIDADE_PP,
     },
     {
         "nome": "Raça × Gênero × Faixa Etária × Escolaridade",
-        "valor_todas": [("renda_completa_heatmap.png", "Seis painéis (raça×gênero), faixa etária × nível de instrução em cada um.")],
-        "valor_pretaparda": [("preta_parda_genero_faixa_etaria_escolaridade.png", "Quatro painéis (Preta/Parda×gênero), faixa etária × escolaridade em cada um.")],
-        "hiato_todas": [("hiato_genero_faixa_etaria_escolaridade_todas.png", "Hiato Branca vs. Negra por gênero, faixa etária e nível de instrução (painéis = gênero).")],
-        "hiato_pretaparda": [("hiato_genero_faixa_etaria_escolaridade_pretaparda.png", "Hiato Preta vs. Parda por gênero, faixa etária e nível de instrução.")],
+        "valor_todas": [("renda_completa_heatmap.png", "Seis painéis (raça×gênero), faixa etária × nível de instrução em cada um, snapshot.")] + _SERIE_GENERO_TODAS + _SERIE_FAIXA_TODAS + _SERIE_ESCOLARIDADE_TODAS,
+        "valor_pretaparda": [("preta_parda_genero_faixa_etaria_escolaridade.png", "Quatro painéis (Preta/Parda×gênero), faixa etária × escolaridade em cada um, snapshot.")] + _SERIE_GENERO_PP + _SERIE_FAIXA_PP + _SERIE_ESCOLARIDADE_PP,
+        "hiato_todas": [("hiato_genero_faixa_etaria_escolaridade_todas.png", "Hiato Branca vs. Negra por gênero, faixa etária e nível de instrução, snapshot (painéis = gênero).")] + _HIATO_HIST_GENERO_TODAS + _HIATO_HIST_FAIXA_TODAS + _HIATO_HIST_ESCOLARIDADE_TODAS,
+        "hiato_pretaparda": [("hiato_genero_faixa_etaria_escolaridade_pretaparda.png", "Hiato Preta vs. Parda por gênero, faixa etária e nível de instrução, snapshot.")] + _HIATO_HIST_GENERO_PP + _HIATO_HIST_FAIXA_PP + _HIATO_HIST_ESCOLARIDADE_PP,
     },
     {
         "nome": "Raça × Gênero × Geração × Escolaridade",
-        "valor_todas": [("raca_genero_geracao_escolaridade.png", "Seis painéis (raça×gênero), geração × nível de instrução em cada um.")],
-        "valor_pretaparda": [("preta_parda_genero_geracao_escolaridade.png", "Quatro painéis (Preta/Parda×gênero), geração × escolaridade em cada um.")],
-        "hiato_todas": [("hiato_genero_geracao_escolaridade_todas.png", "Hiato Branca vs. Negra por gênero, geração e nível de instrução (painéis = gênero).")],
-        "hiato_pretaparda": [("hiato_genero_geracao_escolaridade_pretaparda.png", "Hiato Preta vs. Parda por gênero, geração e nível de instrução.")],
+        "valor_todas": [("raca_genero_geracao_escolaridade.png", "Seis painéis (raça×gênero), geração × nível de instrução em cada um, snapshot.")] + _SERIE_GENERO_TODAS + _SERIE_GERACAO_TODAS + _SERIE_ESCOLARIDADE_TODAS,
+        "valor_pretaparda": [("preta_parda_genero_geracao_escolaridade.png", "Quatro painéis (Preta/Parda×gênero), geração × escolaridade em cada um, snapshot.")] + _SERIE_GENERO_PP + _SERIE_GERACAO_PP + _SERIE_ESCOLARIDADE_PP,
+        "hiato_todas": [("hiato_genero_geracao_escolaridade_todas.png", "Hiato Branca vs. Negra por gênero, geração e nível de instrução, snapshot (painéis = gênero).")] + _HIATO_HIST_GENERO_TODAS + _HIATO_HIST_GERACAO_TODAS + _HIATO_HIST_ESCOLARIDADE_TODAS,
+        "hiato_pretaparda": [("hiato_genero_geracao_escolaridade_pretaparda.png", "Hiato Preta vs. Parda por gênero, geração e nível de instrução, snapshot.")] + _HIATO_HIST_GENERO_PP + _HIATO_HIST_GERACAO_PP + _HIATO_HIST_ESCOLARIDADE_PP,
     },
 ]
 

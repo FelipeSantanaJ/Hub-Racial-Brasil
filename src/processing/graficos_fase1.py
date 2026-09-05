@@ -960,6 +960,44 @@ def graficos_renda_por_raca_nivel_individual(rpe: pd.DataFrame) -> list[Path]:
     return destinos
 
 
+def graficos_renda_por_raca_geracao_individual(rg: pd.DataFrame) -> list[Path]:
+    """Um gráfico de série temporal por geração ('um pra cada geração') — espelha
+    `graficos_renda_por_raca_faixa_etaria_individual`/`_nivel_individual`, fechando a
+    lacuna: a seção "Renda média" tinha só o snapshot do trimestre mais recente pra
+    Raça × Geração, sem a série histórica que as outras aberturas (gênero, faixa
+    etária, escolaridade) já tinham."""
+    destinos = []
+    for geracao in GERACOES_ORDEM_GRAFICO:
+        serie = _serie_por_raca(
+            rg, ["Branca", "Negra", "Indígena"], filtro_extra={"geracao": geracao}, suavizar={"Indígena"},
+        )
+        rotulo = ROTULOS_GERACAO_CURTO[geracao]
+        slug = _slug(rotulo)
+        destinos.append(_grafico_serie_temporal(
+            serie, CORES_RACA,
+            f"Renda habitual do trabalho por raça — {rotulo} — Brasil (2012–2026)",
+            "R$ reais, a preços do trimestre mais recente (deflator oficial IBGE) · PNAD Contínua Trimestral",
+            f"renda_por_raca_geracao_{slug}.png",
+        ))
+    return destinos
+
+
+def graficos_preta_parda_geracao_individual(rg: pd.DataFrame) -> list[Path]:
+    """Mesma ideia, Preta vs. Parda."""
+    destinos = []
+    for geracao in GERACOES_ORDEM_GRAFICO:
+        serie = _serie_por_raca(rg, ["Preta", "Parda"], filtro_extra={"geracao": geracao})
+        rotulo = ROTULOS_GERACAO_CURTO[geracao]
+        slug = _slug(rotulo)
+        destinos.append(_grafico_serie_temporal(
+            serie, {"Preta": COR_PRETA, "Parda": COR_PARDA},
+            f"Renda habitual, Preta vs. Parda — {rotulo} — Brasil (2012–2026)",
+            "R$ reais, a preços do trimestre mais recente (deflator oficial IBGE) · PNAD Contínua Trimestral",
+            f"renda_preta_parda_geracao_{slug}.png",
+        ))
+    return destinos
+
+
 CMAP_SEQUENCIAL = LinearSegmentedColormap.from_list(
     "terroso_sequencial", ["#f6e8cf", "#d19a12", "#8a3d17", "#2b1509"]
 )
@@ -1071,6 +1109,119 @@ def grafico_hiato_preta_parda_percentual(hpp: pd.DataFrame) -> Path:
     _rodape(fig)
     fig.tight_layout(rect=(0, 0.03, 1, 1))
     return _salvar(fig, "hiato_preta_parda_percentual.png")
+
+
+# --- Hiato histórico por categoria (gênero, faixa etária, escolaridade, geração) ---
+#
+# Antes, as aberturas de hiato por gênero/faixa etária/escolaridade só tinham o
+# snapshot do trimestre mais recente (`agregacoes_pnadc.gerar_hiatos_multidimensionais`).
+# Aqui é o mesmo tipo de gráfico que `grafico_hiato_por_geracao` já fazia pra geração —
+# uma linha por categoria, os 58 trimestres inteiros, com Welch em cada ponto.
+
+CORES_GENERO = {"Homem": "#3a5a9a", "Mulher": "#d19a12"}
+CORES_FAIXA_ETARIA = dict(zip(FAIXAS_ETARIAS_ORDEM, ["#0d9086", "#c8541f", "#d19a12", "#853359", "#3a5a9a"]))
+CORES_NIVEL_INSTRUCAO = {
+    nivel: CMAP_SEQUENCIAL(t)
+    for nivel, t in zip(NIVEIS_INSTRUCAO_ORDEM, np.linspace(0.15, 0.95, len(NIVEIS_INSTRUCAO_ORDEM)))
+}
+
+
+def _grafico_hiato_historico_categoria(
+    dados: pd.DataFrame, col_dim: str, categorias_ordem: list[str], rotulos: dict[str, str],
+    cores: dict, titulo: str, subtitulo: str, nome_arquivo: str,
+) -> Path:
+    """Uma linha por categoria de `col_dim`, hiato % ao longo dos 58 trimestres — não
+    reaproveita `_grafico_serie_temporal` porque aquela função assume série
+    não-negativa (`base = 0` quando o mínimo é negativo, o que cortaria a parte
+    negativa das séries Preta-vs-Parda, que cruzam zero)."""
+    h = dados.copy()
+    h["data"] = pd.to_datetime(h["ano"].astype(str) + "-" + ((h["trimestre"] - 1) * 3 + 1).astype(str) + "-01")
+    pivot = h.pivot_table(index="data", columns=col_dim, values="hiato_percentual").sort_index()
+    pivot = pivot[[c for c in categorias_ordem if c in pivot.columns]]
+
+    fig, ax = _novo_eixo(figsize=(11, 5.5))
+    ax.axvspan(pd.Timestamp("2020-01-01"), pd.Timestamp("2021-12-31"), color=GRADE, alpha=0.6, zorder=0)
+    ax.axhline(0, color=EIXO, linewidth=1)
+
+    minv, maxv = pivot.min().min(), pivot.max().max()
+    margem = (maxv - minv) * 0.18 or 1
+    ax.set_ylim(minv - margem, maxv + margem)
+
+    for cat in pivot.columns:
+        ax.plot(pivot.index, pivot[cat], color=cores[cat], linewidth=2, solid_capstyle="round", zorder=3)
+
+    valores_finais = sorted(
+        (pivot[cat].iloc[-1], rotulos.get(cat, cat), cores[cat])
+        for cat in pivot.columns if pd.notna(pivot[cat].iloc[-1])
+    )
+    espaco_minimo = margem * 0.35
+    for i in range(1, len(valores_finais)):
+        anterior_y = valores_finais[i - 1][0]
+        if valores_finais[i][0] - anterior_y < espaco_minimo:
+            valores_finais[i] = (anterior_y + espaco_minimo, *valores_finais[i][1:])
+    for y_rotulo, rotulo, cor in valores_finais:
+        ax.annotate(rotulo, xy=(pivot.index[-1], y_rotulo), xytext=(8, 0), textcoords="offset points",
+                    color=cor, fontsize=9.5, fontweight="bold", va="center")
+
+    ax.set_xlim(pivot.index.min(), pivot.index.max() + pd.Timedelta(days=340))
+    ax.xaxis.set_major_locator(mdates.YearLocator(2))
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
+    ax.yaxis.set_major_formatter(lambda v, _: f"{v:.0f}%")
+    ax.grid(axis="y", color=GRADE, linewidth=0.8, zorder=0)
+    _titulo(ax, titulo, subtitulo)
+    _rodape(fig)
+    fig.tight_layout(rect=(0, 0.03, 1, 1))
+    return _salvar(fig, nome_arquivo)
+
+
+def graficos_hiatos_historicos_por_categoria(hiatos_hist: dict[str, pd.DataFrame]) -> list[Path]:
+    subtitulo_padrao = "Welch, trimestre a trimestre · PNAD Contínua Trimestral (2012–2026)"
+    destinos = [
+        _grafico_hiato_historico_categoria(
+            hiatos_hist["hiato_genero_historico_todas"], "sexo", ["Homem", "Mulher"],
+            {"Homem": "Homens", "Mulher": "Mulheres"}, CORES_GENERO,
+            "Hiato de renda Branca vs. Negra, por gênero — Brasil (2012–2026)", subtitulo_padrao,
+            "hiato_genero_historico_todas.png",
+        ),
+        _grafico_hiato_historico_categoria(
+            hiatos_hist["hiato_genero_historico_pretaparda"], "sexo", ["Homem", "Mulher"],
+            {"Homem": "Homens", "Mulher": "Mulheres"}, CORES_GENERO,
+            "Hiato de renda Preta vs. Parda, por gênero — Brasil (2012–2026)", subtitulo_padrao,
+            "hiato_genero_historico_pretaparda.png",
+        ),
+        _grafico_hiato_historico_categoria(
+            hiatos_hist["hiato_faixa_etaria_historico_todas"], "faixa_etaria", FAIXAS_ETARIAS_ORDEM,
+            {f: f for f in FAIXAS_ETARIAS_ORDEM}, CORES_FAIXA_ETARIA,
+            "Hiato de renda Branca vs. Negra, por faixa etária — Brasil (2012–2026)", subtitulo_padrao,
+            "hiato_faixa_etaria_historico_todas.png",
+        ),
+        _grafico_hiato_historico_categoria(
+            hiatos_hist["hiato_faixa_etaria_historico_pretaparda"], "faixa_etaria", FAIXAS_ETARIAS_ORDEM,
+            {f: f for f in FAIXAS_ETARIAS_ORDEM}, CORES_FAIXA_ETARIA,
+            "Hiato de renda Preta vs. Parda, por faixa etária — Brasil (2012–2026)", subtitulo_padrao,
+            "hiato_faixa_etaria_historico_pretaparda.png",
+        ),
+        _grafico_hiato_historico_categoria(
+            hiatos_hist["hiato_escolaridade_historico_todas"], "nivel_instrucao", NIVEIS_INSTRUCAO_ORDEM,
+            NIVEIS_INSTRUCAO_ROTULO_CURTO, CORES_NIVEL_INSTRUCAO,
+            "Hiato de renda Branca vs. Negra, por escolaridade — Brasil (2012–2026)", subtitulo_padrao,
+            "hiato_escolaridade_historico_todas.png",
+        ),
+        _grafico_hiato_historico_categoria(
+            hiatos_hist["hiato_escolaridade_historico_pretaparda"], "nivel_instrucao", NIVEIS_INSTRUCAO_ORDEM,
+            NIVEIS_INSTRUCAO_ROTULO_CURTO, CORES_NIVEL_INSTRUCAO,
+            "Hiato de renda Preta vs. Parda, por escolaridade — Brasil (2012–2026)", subtitulo_padrao,
+            "hiato_escolaridade_historico_pretaparda.png",
+        ),
+        _grafico_hiato_historico_categoria(
+            hiatos_hist["hiato_geracao_historico_pretaparda"], "geracao", GERACOES_ORDEM_GRAFICO,
+            ROTULOS_GERACAO_CURTO, CORES_GERACAO,
+            "Hiato de renda Preta vs. Parda, por geração — Brasil (2012–2026)",
+            "A MESMA coorte de nascimento envelhecendo · " + subtitulo_padrao,
+            "hiato_geracao_historico_pretaparda.png",
+        ),
+    ]
+    return destinos
 
 
 # --- Hiato de renda por combinações de dimensões (seção "Renda média" do PPT) ---
@@ -2791,6 +2942,15 @@ def main() -> None:
             "hiato_" + "_".join(METADADOS_DIM_HIATO[d]["apelido"] for d in dims) + f"_{sufixo}.parquet"
         )]
     }
+    hiatos_hist = {
+        nome: pd.read_parquet(REPO_ROOT / "data" / "processed" / f"{nome}.parquet")
+        for nome in [
+            "hiato_genero_historico_todas", "hiato_genero_historico_pretaparda",
+            "hiato_faixa_etaria_historico_todas", "hiato_faixa_etaria_historico_pretaparda",
+            "hiato_escolaridade_historico_todas", "hiato_escolaridade_historico_pretaparda",
+            "hiato_geracao_historico_pretaparda",
+        ]
+    }
 
     destinos = [
         # raça
@@ -2896,6 +3056,13 @@ def main() -> None:
         # hiato de renda por combinação de dimensões (22 = 11 combinações x 2 escopos),
         # todos com teste de Welch
         *graficos_hiatos_multidimensionais(hiatos_multi),
+        # séries históricas por categoria que faltavam nas aberturas (antes só tinham
+        # o snapshot do trimestre mais recente): valores por geração (espelha as já
+        # existentes por gênero/faixa etária/escolaridade) e hiato histórico com Welch
+        # por gênero/faixa etária/escolaridade (espelha o que já existia por geração)
+        *graficos_renda_por_raca_geracao_individual(renda_geracao),
+        *graficos_preta_parda_geracao_individual(renda_geracao),
+        *graficos_hiatos_historicos_por_categoria(hiatos_hist),
     ]
     for destino in destinos:
         print(f"Gráfico salvo em: {destino.relative_to(REPO_ROOT)}")
