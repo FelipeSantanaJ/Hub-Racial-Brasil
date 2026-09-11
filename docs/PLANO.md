@@ -6,7 +6,11 @@ Documento vivo. Atualizar conforme o projeto avança (datas, marcos concluídos,
 - **Ritmo assumido**: 3-5h/semana (projeto pessoal, horas vagas).
 - **Status atual**: 🏁 **Fase 1 (MVP) concluída em 2026-09-04**, mesmo dia do início do repo
   — graças à base herdada de um projeto anterior no Colab (ver "Base herdada" abaixo).
-  Próximo passo: Fase 2 (Censo Demográfico), ainda não detalhada.
+  **Fase 2 (Censo Demográfico 2022) detalhada em 2026-09-11** (ver seção própria abaixo)
+  — mas **bloqueada na Etapa 0**: precisa do usuário pessoalmente criar login GovBR e
+  assinar o termo de compromisso de acesso controlado do IBGE antes de qualquer extração
+  poder começar (mudança de modelo de acesso do IBGE desde a época da PNAD; não é mais
+  FTP público como a Fase 1).
 
 ---
 
@@ -89,7 +93,7 @@ número oficial). Diante disso, a estrutura de trabalho recomendada:
 | Fase | Escopo | Status | Estimativa |
 |---|---|---|---|
 | 1 | MVP — PNAD Contínua (renda, escolaridade, ocupação) | ✅ concluída | 2026-09-04 (1 dia; estimativa original: ~6 semanas) |
-| 2 | Censo Demográfico (moradia, recorte municipal — resolve limitação do ABC Paulista) | ⏳ não iniciada | a partir de 2026-10-16 |
+| 2 | Censo Demográfico 2022 (moradia, recorte por Área de Ponderação — resolve limitação do ABC Paulista) | 📋 detalhada 2026-09-11, execução bloqueada na Etapa 0 (GovBR do usuário) | ~25h ativas, 5-7 semanas após a Etapa 0 liberar |
 | 3 | Saúde (DataSUS/SIM/SINASC/PNS) | ⏳ não iniciada | a definir após Fase 2 |
 | 3.x | Módulos adicionais (ver tabela "Outras fontes" abaixo) — ordem flexível | ⏳ pool de candidatos | intercalar conforme interesse |
 | 4 | Dashboard público (Observable Framework) | ⏳ não iniciada | após consolidar Fases 1-3 |
@@ -797,6 +801,281 @@ Demográfico) — ainda não detalhada.
 
 ---
 
+## Reconstrução do deck sem duplicação — ÁRVORE cruzada (2026-09-06, em andamento)
+
+**Problema**: o deck `Datahub_Racial_Brasil_Fase1.pptx` (507 slides) tinha a seção "Renda
+média" quebrando cada dimensão ISOLADAMENTE e reaproveitando as séries por-categoria em
+toda subseção que tocava aquela dimensão — 434 slides de gráfico pra só 134 imagens
+distintas (algumas em 11 slides diferentes).
+
+**Estrutura nova**: uma ÁRVORE de verdade, quebra CRUZADA (Mulheres × 14-17 é um gráfico
+próprio, diferente de Mulheres sozinho ou de 14-17 sozinho), 10 combinações principais.
+Regra de ouro: cada PNG aparece em EXATAMENTE 1 slide.
+
+**Decisões do usuário (2026-09-06)** antes de gerar:
+- Itens 9-10 (Raça×Gênero×Faixa×Escolaridade e ×Geração×Escolaridade): gerar TODAS as 126
+  folhas-célula (70 + 56), não colapsar em heatmap.
+- Cada folha "Valores" = 2 imagens irmãs: série histórica (linha) + snapshot (barra). As
+  "Combinado" dos itens 3-5 são só snapshot.
+- Família Preta vs. Parda: DESCARTADA do deck novo (a árvore é só Branca/Negra/Indígena).
+  Os ~40 PNGs `renda_preta_parda_*`/`*_pretaparda` ficam no disco e em `ANALISE_FASE1.md`
+  como registro histórico — só o deck novo não os inclui.
+- Tabela de crescimento (renda Branca/Negra 2012 T1 vs. trim. recente, % de crescimento,
+  hiato R$ início/fim): 1 linha por folha "Valores", em XLSX + CSV à parte, sem slide de
+  tabela.
+- Execução em fases, cada uma numa sessão, atualizando este PLANO ao fim.
+
+**Tamanho estimado**: ~505 slides (vs. 507), ~377 PNGs novos — mas agora sem nenhuma
+duplicação. O tamanho vem da quebra real de 126 células nos itens 9-10 (×2 imagens) + a
+duplicação linha/snapshot em toda folha. Nenhuma agregação nova é necessária para a árvore
+(os 5 parquets-base já cobrem tudo; os hiatos multidimensionais já têm a coluna `sexo`, é
+só fatiar). Agregação nova só para o bloco topo10%/base10%/quartis (limiares Brasil /
+dentro de gênero / dentro de raça×gênero).
+
+### Decisão adicional (2026-09-06): texto fora da imagem
+
+Pedido do usuário: os slides devem ter a IMAGEM do gráfico, mas os TEXTOS em caixa de
+texto do PowerPoint, não rasterizados. Escolha confirmada (menu AskUserQuestion): **título,
+subtítulo, linha de fonte e legenda do slide viram caixa de texto**; o PNG fica só com
+dados, eixos, grade, rótulos de eixo, rótulos de valor e legenda de séries. (A opção de
+extrair TAMBÉM cada rótulo de valor / asterisco de Welch pra caixa de texto foi
+descartada — alinhamento frágil em ~370 gráficos.)
+
+Consequência: **regerar tudo** como figura "crua" (as 27 séries reaproveitadas da Fase A
+tinham título rasterizado). `graficos_arvore.py` foi reescrito como fonte única da árvore
+inteira (itens 1-10), com renderizadores próprios sem `_titulo`/`_rodape`
+(`_fig_serie`, `_fig_snapshot`, `_fig_snapshot_agrupado_sexo`, `_fig_snapshot_dim`,
+`_fig_hiato_bar`, `_fig_hiato_heatmap`, `_placeholder`). O manifesto agora grava
+`titulo`/`subtitulo`/`legenda`/`ramo` por folha; `_meta.fonte` guarda a linha de fonte.
+
+### Fases A + B + C concluídas (2026-09-06): árvore completa, itens 1-10
+
+- `src/processing/graficos_arvore.py` → **374 PNGs** `arv_*` (prefixo), todos crus:
+  - Itens 1-5: 48 folhas. Itens 6-8: 70. Itens 9-10: 256 (70×2 + 2 hiato / 56×2 + 2 hiato).
+  - Folha "Valores" = série (`arv_*_serie.png`) + snapshot (`arv_*_snapshot.png`); "Combinado"
+    dos itens 3-5 = só snapshot agrupado (3 raças × categorias). Hiato: barra (itens 1-8) ou
+    heatmap faixa/geração × escolaridade fatiado por gênero (itens 9-10), sempre Welch.
+  - Célula sem amostra nenhuma → `_placeholder` ("Amostra insuficiente"); só 4 casos
+    (14-17 anos × Superior completo, M e H, nos itens 9-10 — não dá pra concluir superior
+    aos 14-17). Célula com amostra parcial (ex.: Indígena ausente) → barra vazada hachurada.
+  - `python -m src.processing.graficos_arvore [n ...]` gera itens específicos ou todos.
+- `docs/arvore_manifest.json` (chave `arvore`, 10 itens) — consumido pelo deck.
+- `src/processing/apresentacao_arvore.py` reescrito: monta `Datahub_Racial_Brasil_ARVORE.pptx`
+  (**412 slides**, ~24 MB) com título/subtítulo/legenda/fonte como CAIXAS DE TEXTO e a
+  imagem crua centralizada. Divisor por item + subdivisor por ramo (Mulheres/Homens) nos
+  itens 6-10. Não é o deck final (falta Fase D + "Outras análises").
+- Auditoria visual OK: série crua (sem título, rótulos de fim de linha), snapshot agrupado
+  Raça×Gênero (hachura = Homens, sólido = Mulheres, legenda cinza — resolveu a pendência da
+  Fase A), snapshot combinado por escolaridade (7 níveis ordenados), hiato-barra por faixa
+  (15%→87%, bate com ANALISE), hiato-heatmap gênero×faixa×escolaridade, placeholder de
+  célula vazia.
+- **`Datahub_Racial_Brasil_ARVORE_parcial.pptx`** (deck só-imagem da Fase A) fica obsoleto —
+  substituído por `Datahub_Racial_Brasil_ARVORE.pptx`.
+
+### Fases D + E + F concluídas (2026-09-06): deck final montado
+
+**Fase D — topo 10% / base 10% / quartis com limiares NOVOS** (`agregacoes_pnadc.py`):
+- `gerar_extremos_racial` → 3 parquets. Limiar do topo10/base10 (P90/P10) em 3 escopos:
+  `brasil` (um único pra todo mundo), `genero` (dentro de cada gênero), `raca_genero`
+  (dentro de cada raça×gênero). Universo: ocupados, renda real > 0.
+  - `extremos_distribuicao_racial.parquet` (1.044 linhas): de quem são os 10% mais ricos/
+    pobres — % Branca/Negra/Indígena, escopos brasil e genero. Achado (2026 T2): Negra é
+    ~56% dos ocupados mas só 33% do topo 10% e 73% da base 10% do Brasil.
+  - `extremos_renda_racial.parquet` (696): renda média R$ do decil, por raça e por
+    raça×gênero. Topo 10%: Branca·Homem R$22.219 vs. Negra·Mulher R$8.710. Base 10%:
+    Branca·Homem R$943 vs. Negra·Mulher R$378.
+  - `extremos_composicao_racial.parquet` (10.959): distribuição de escolaridade/faixa/
+    geração dentro do decil, recorte por raça E por raça×gênero.
+- `gerar_quartis_multi_racial` → `quartis_multi_racial.parquet` (23.171): decomposição
+  Q1-Q4 (limiares P25/P50/P75 dentro do grupo do recorte) — recorte `raca` (dimensões
+  sexo/escolaridade/faixa/geração) e `raca_sexo` (escolaridade/faixa/geração). Cobre os 7
+  cruzamentos de quartil pedidos.
+- `src/processing/graficos_extremos.py` → **24 PNGs crus** `ext_*` (seção `extremos` do
+  manifesto). Barras agrupadas + 100% empilhado (mix ordinal por quartil, paleta
+  sequencial). Auditoria OK (dist. Brasil, renda raça×gênero, quartil×escolaridade
+  empilhado — o alargamento do hiato educacional Q1→Q4 aparece claríssimo).
+
+**Fase E — tabela de crescimento** (`src/processing/tabela_crescimento.py`):
+- `docs/tabela_crescimento_renda.{xlsx,csv}` — **181 linhas** (1 por folha "Valores" da
+  árvore): renda Branca/Negra 2012 T1 vs. 2026 T2, % de crescimento de cada, hiato em R$
+  no início vs. no fim. Leitura: Negra cresceu mais (em %) em 101 das 181 folhas, mas a
+  diferença em R$ AUMENTOU em 92 — hiato relativo cai enquanto a distância absoluta sobe.
+  XLSX tem uma aba por item + aba "Tudo". Não é slide (decisão do usuário) — o deck tem só
+  um slide-ponteiro.
+
+**Fase F — deck final** (`src/processing/apresentacao_final.py` →
+`docs/Datahub_Racial_Brasil_Fase1.pptx`, **~490 slides**, ~29 MB):
+- Árvore (itens 1-10) + seção Fase D (`extremos`) + slide-ponteiro da tabela de crescimento
+  + "Outras análises" (curadoria de 9 subseções / 42 imagens antigas — hiato histórico
+  Branca-Negra, decomposição Oaxaca-Blinder/RIF/ocupacional, raça×A×B com ocupação, região/
+  segregação/quebra estrutural, novas variáveis, topo10%/quartis com limiar DENTRO da raça
+  [série histórica, complementa a Fase D], Gini/Theil/setor público-privado/sobre-qualif.,
+  função quantil em R$).
+- **Fora do deck novo**: toda a família Preta vs. Parda (~40 PNGs) + a seção antiga "Renda
+  média" de 48 subseções (substituída pela árvore). Os PNGs continuam no disco e em
+  `ANALISE_FASE1.md`.
+- **Inconsistência conhecida a resolver depois**: as 42 imagens de "Outras análises" ainda
+  têm o título rasterizado (só a árvore + Fase D têm o tratamento título-como-caixa-de-
+  texto). Regerá-las cruas é uma passada futura.
+- `README.md` e `docs/ANALISE_FASE1.md` atualizados (contador → ~530 gráficos; nota sobre a
+  reconstrução).
+
+**Pendência menor**: auditoria visual foi por amostragem (não os ~400 gráficos um a um).
+Metodologia dos limiares novos JÁ escrita em `LIMITACOES_E_METODOLOGIA.md`.
+
+### v2 (2026-09-06): correção pelo exemplo de "Raça × Gênero"
+
+Usuário corrigiu a estrutura da árvore com um exemplo (5 slides pra Raça × Gênero) e pediu
+pra estender aos 10 itens. Decisões (AskUserQuestion):
+
+- **Sem snapshot de renda** — cada folha de renda vira SÓ a série histórica. A foto do
+  trimestre recente fica só no hiato.
+- **Hiato ganha 2 comparações**: Branca vs. Negra **e** Branca vs. Indígena, em todo
+  gráfico de hiato (série = 2 linhas; snapshot = barras pareadas; itens 9-10 = 4 heatmaps
+  vs. Negra/Indígena × gênero). Welch em tudo.
+- **Hiato ganha série histórica dentro da árvore**: "combinada" (painel múltiplo) + uma
+  por recorte. A série do hiato vs. Indígena é suavizada (média móvel 4 trim., amostra
+  pequena).
+- Indígena entra também na **tabela de crescimento** (colunas novas: renda Indígena
+  início/fim, % cresc., hiato B-I em R$/%) e a seção "Hiato Branca vs. Negra — série
+  histórica" saiu de "Outras análises" (a árvore agora cobre isso, com Indígena).
+- **Versionamento**: cada mudança pedida gera um arquivo novo `..._vN.pptx`; o
+  `Datahub_Racial_Brasil_Fase1.pptx` original **não é mais tocado**.
+
+Dados: `agregacoes_pnadc.gerar_hiatos_arvore` → `hiato_arvore.parquet` (12.593 linhas) —
+hiato histórico com Welch pras 10 combinações da árvore × {Negra, Indígena}, 58 trimestres.
+`COMBOS_HIATO_ARVORE` lista as combinações. Célula com < 30 de qualquer grupo é pulada
+(linha do gráfico fica com buraco — comum pra Indígena em cortes finos).
+
+`graficos_arvore.py` reescrito (v1 salvo em `graficos_arvore_v1_backup.py`): renderizadores
+crus `_fig_serie`, `_fig_serie_multipanel` (painel por raça / por comparação),
+`_fig_hiato_bar_pareado` (barras vs. Negra / vs. Indígena com Welch), `_fig_hiato_heatmap`.
+**393 folhas** (itens 1-10): 1→3, 2→7, 3→13, 4→11, 5→17, 6→26, 7→22, 8→34, 9→144, 10→116.
+10 placeholders (célula sem amostra, ex.: 14-17 × Superior completo).
+
+Deck: `src/processing/apresentacao_final.py` (VERSAO="v2") →
+**`docs/Datahub_Racial_Brasil_Fase1_v2.pptx`** (494 slides, ~41 MB). Auditoria por
+amostragem OK (série de hiato por categoria com as 2 linhas + Welch no subtítulo-texto;
+snapshot pareado homem/mulher × negra/indígena; multipainel combinado).
+
+### v3 (2026-09-06): um slide por gráfico de hiato (Negra / Indígena separados)
+
+Feedback do usuário: a série de Indígena tem muitos picos (amostra pequena) e, sobreposta
+à de Negra no mesmo gráfico, atrapalha a leitura. "Faça um slide pra cada gráfico" — nos de
+hiato e "pras demais análises também".
+
+Mudança: **todo gráfico de hiato virou 2 slides**, um por comparação:
+- `hiato_serie` por recorte: era 1 gráfico (2 linhas) → 2 gráficos (`_ne.png` / `_in.png`),
+  uma linha cada. A de Indígena é suavizada (média móvel 4 trim.).
+- `hiato_serie` combinada (painel múltiplo vs. Negra | vs. Indígena) → 2 gráficos de painel
+  único, um por comparação (`_fig_serie_categorias`, N linhas de categoria).
+- `hiato_snapshot` (barras pareadas) → 2 gráficos, um por comparação (`_fig_hiato_bar`,
+  1 barra por categoria + Welch).
+- Itens 9-10: a série de hiato por célula fica **só em Branca vs. Negra** (Indígena por
+  célula gênero×faixa/geração×escolaridade quase nunca tem amostra ≥ 30 — viraria 100+
+  placeholders); a visão de Indígena desses itens está nos 2 heatmaps por gênero, que já
+  eram separados por comparação.
+
+Helpers novos em `graficos_arvore.py`: `_emit_hs_recorte`, `_emit_hs_comb`, `_emit_hsnap`
+(cada um gera 2 arquivos + 2 folhas). `_fig_hiato_bar_pareado` saiu; entrou `_fig_hiato_bar`
+(uma comparação). Árvore: **465 folhas** (1→5, 2→11, 3→20, 4→17, 5→26, 6→40, 7→34, 8→52,
+9→144, 10→116).
+
+Deck: `apresentacao_final.py` VERSAO="v3" → `docs/Datahub_Racial_Brasil_Fase1_v3.pptx`.
+Resolução dos gráficos da árvore baixou pra dpi 88 (mais gráficos, mesmo teto de 30 MB no
+envio). "Outras análises" sem mudança (não tinha sobreposição de Indígena).
+
+### v4 (2026-09-06): ajustes finos por slide
+
+Feedback do usuário (referenciando slides do v3):
+1. **Snapshot de hiato da análise de Raça (item 1)**: era 2 slides de 1 barra cada →
+   1 gráfico com 2 barras (vs. Negra / vs. Indígena). `_fig_hiato_bar_2cmp`. Nos demais
+   itens o snapshot continua separado por comparação.
+2. **Homens/Mulheres no mesmo gráfico** → Homens tracejado, Mulheres linha sólida
+   (`_fig_serie` detecta "Homem"/"Homens" no nome da série). Afeta a série combinada de
+   renda Raça×Gênero e a série combinada de hiato por gênero.
+3. **Série combinada de renda dos itens 3-8** (era 3 painéis Branca|Negra|Indígena num
+   slide) → 3 slides, um por raça (`_emit_valor_comb_split`). Dá espaço a cada painel.
+4. **Título das séries de hiato por recorte**: a quebra agora entra EXPLÍCITA no título
+   (ex.: "Hiato de renda — 40-59 anos — Branca vs. Indígena — Brasil"). `_emit_hs_recorte`
+   monta o título com `_tit()`.
+5. **Fase D — renda em R$ do decil** (`ext_renda_raca` / `ext_renda_raca_sexo`): eram 1
+   gráfico com topo 10% e base 10% juntos (base sumia de escala) → 2 gráficos, um por
+   decil.
+
+Árvore: ~510 folhas (1→4, 2→11, 3→22, 4→19, 5→28, 6→44, 7→38, 8→56, 9→144, 10→116).
+Deck: `apresentacao_final.py` VERSAO="v4" → `Datahub_Racial_Brasil_Fase1_v4.pptx`.
+
+**Pendências v4**: série combinada de hiato por categoria (N linhas) ainda fica cheia
+quando uma categoria dispara (60+ ~150%); as 42 imagens de "Outras análises" seguem com
+título rasterizado.
+
+### v5 (2026-09-06): item 11 — fecha o dashboard geração×escolaridade×gênero
+
+Pergunta do usuário: um dashboard com filtros de gênero × escolaridade × geração nos
+gráficos de histórico de renda e de hiato já estaria 100% coberto pelo deck? Resposta:
+92 dos 120 estados de filtro, sim — faltava só **gênero = "ambos" + escolaridade
+específica + geração específica** (28 estados). Motivo: os cruzamentos de 3-4 dimensões
+(itens 9-10) sempre foram quebrados por gênero, nunca "os dois juntos".
+
+Fechado com o **item 11 — Raça × Geração × Escolaridade (ambos os gêneros)**: 28 células
+(4 gerações × 7 níveis), cada uma com série histórica de renda + série histórica de hiato
+(Branca vs. Negra, gênero colapsado por média ponderada) + 2 heatmaps (vs. Negra / vs.
+Indígena, trimestre recente). 58 folhas.
+
+Dados: `COMBOS_HIATO_ARVORE` ganhou `("geracao", "nivel_instrucao")`;
+`gerar_hiatos_arvore` re-rodado → `hiato_arvore.parquet` agora com 14.598 linhas (o combo
+novo: 1.544 Negra / 461 Indígena). Renda vem de `renda_completa_geracao.parquet` com
+`_serie_por_raca(sexo=None)` (pool ponderado dos dois sexos).
+
+Deck: `apresentacao_final.py` VERSAO="v5" → `Datahub_Racial_Brasil_Fase1_v5.pptx`
+(644 slides, ~29,5 MB). Árvore: 540 folhas (itens 1-11).
+
+**Não coberto ainda** (fora do escopo da pergunta): a versão faixa-etária do item 11
+(faixa × escolaridade, ambos os gêneros) — o dashboard perguntado só tinha geração.
+
+### v6 (2026-09-06): seção "Aprofundamentos — sugestões novas"
+
+O usuário pediu sugestões de novas análises e escolheu TODAS as apresentadas. 6 agregações
+novas em `agregacoes_pnadc.py` + `src/processing/graficos_aprofundamentos.py` (11 gráficos
+crus) + seção nova no deck (`apresentacao_final.py::secao_aprofundamentos`, VERSAO="v6",
+`Datahub_Racial_Brasil_Fase1_v6.pptx`, 656 slides, ~30 MB).
+
+| # | Análise | Dataset novo | Achado |
+|---|---|---|---|
+| 1 | Renda efetiva ÷ habitual (instabilidade) | — (de `renda.parquet`) | ver gráfico |
+| 2 | Retorno da escolaridade por raça | — (de `renda_por_escolaridade.parquet`) | Superior completo "vale" ~2,65× o Médio p/ Branca, ~2,37× p/ Negra |
+| 3 | Hiato Capital × Interior | `hiato_capital_interior.parquet` (116 lin) | — |
+| 4 | Desocupação por raça × escolaridade | `desocupacao_por_escolaridade.parquet` (1.218) | — |
+| 5 | Hiato formal × informal (contribui previdência) | `hiato_formal_informal.parquet` (116) | — |
+| 6 | % ≤1 SM / >3 SM por raça | `faixas_salario_minimo.parquet` (174) + `SALARIO_MINIMO_NOMINAL` | — |
+| 7 | Oaxaca-Blinder + RIF ANO A ANO | `oaxaca_blinder_temporal.parquet` (60) | **parcela não-explicada travada em ~46% há 14 anos**, apesar da escolaridade de negros subir |
+| 8 | Dupla desvantagem HB ↔ MN | `dupla_desvantagem.parquet` (58) | raça ~65% do gap, interação (~20%) > efeito gênero puro (~15%) |
+| 11 | "Quanto tempo até fechar o hiato" | — (fit em `hiato_racial.parquet`) | tendência 2012–26 → ~2104; pós-recessão 2016–26 → ~2073 (ilustrativo, com ressalvas) |
+
+### v7 (2026-09-06): validação cruzada IBGE (#12) + deck mais leve
+
+- **#12** adicionado a `graficos_aprofundamentos.py` (`apr_validacao_ibge.png`): barras
+  pareadas nosso pipeline (média 2021) vs. IBGE "Desigualdades Sociais por Cor ou Raça no
+  Brasil" (2ª ed., nov/2022, dados de 2021). Resultado — reproduzimos os oficiais dentro
+  de ~1-3 p.p.:
+  | Indicador (2021) | IBGE | Nosso |
+  |---|---|---|
+  | Desocupação Branca / Preta / Parda | 11,3 / 16,5 / 16,2 % | 10,8 / 16,1 / 15,0 % |
+  | Informalidade (sem contrib. prev.) Branca / Preta / Parda | 32,7 / 43,4 / 47,0 % | 35,1 / 44,2 / 47,7 % |
+  | Hiato de renda Branca vs. Preta/Negra | ~76 % (vs. Preta) | ~70 % (vs. Negra combinada) |
+  Diferenças cabem em universo/definição (a "informalidade" do IBGE é composto mais amplo;
+  o hiato deles é só vs. Preta, o nosso é vs. Preta+Parda).
+- Deck `apresentacao_final.py` VERSAO="v7" → `Datahub_Racial_Brasil_Fase1_v7.pptx`.
+  Resolução da árvore baixada pra **dpi 82** (v6 tinha estourado 29,99 MiB, colado no
+  limite de 30 MiB do envio).
+- Seção "Aprofundamentos" agora com **12 gráficos** (11 + validação IBGE).
+
+Fontes #12: [IBGE — Desigualdades Sociais por Cor ou Raça](https://www.ibge.gov.br/estatisticas/sociais/populacao/25844-desigualdades-sociais-por-cor-ou-raca.html),
+[Agência Brasil](https://agenciabrasil.ebc.com.br/economia/noticia/2022-11/ibge-renda-media-de-trabalhador-branco-e-757-maior-que-de-pretos).
+
+---
+
 ## Outras fontes de dados (além de PNAD/Censo/DataSUS já previstos)
 
 Você pediu pra eu incluir outras ideias de fonte, não só as já citadas. Lista de módulos
@@ -843,13 +1122,77 @@ Uso pretendido: validação cruzada de metodologia, não substituição do pipel
 
 ---
 
-## Fase 2 — Censo Demográfico (não detalhada ainda)
+## Fase 2 — Censo Demográfico 2022 (2026-09-11 → detalhada; execução ainda não iniciada)
 
-Moradia, condições domiciliares e, principalmente, **recorte municipal** — o Censo tem
-identificação de município (a PNAD Contínua pública não tem, ver risco abaixo), o que
-resolve a limitação do ABC Paulista da Fase 1. Também tem quesito dedicado para população
-indígena (incl. terras indígenas), mais robusto que a PNAD Contínua para esse recorte.
-Detalhar etapas quando a Fase 1 fechar.
+**Objetivo**: dataset(s) agregado(s) de renda, escolaridade, condições domiciliares e
+mercado de trabalho, cruzados por **Raça/Cor × Gênero**, com **recorte geográfico abaixo
+do município** (Área de Ponderação — ver descoberta abaixo), para resolver a limitação do
+ABC Paulista deixada em aberto na Fase 1. Quesito dedicado para população indígena
+(etnia, terra indígena) mais robusto que a PNAD Contínua.
+
+**Recorte racial**: mesmos três grupos centrais da Fase 1 — Branca, Negra (Preta+Parda),
+Indígena, com Amarela sempre explicitada. A pesquisar na Etapa 0: confirmar que o código
+da variável de cor/raça no Censo 2022 (esperado `V0606` ou equivalente — **não
+confirmado**, verificar no dicionário oficial) usa as mesmas 5 categorias do IBGE
+(Branca/Preta/Parda/Amarela/Indígena) que a PNAD, para manter o recorte comparável.
+
+### Descoberta que muda o desenho desta fase (pesquisado em 2026-09-11)
+
+Ao contrário da PNAD Contínua — FTP público, download direto, sem login, que é como a
+Fase 1 funcionou — o IBGE mudou o modelo de acesso aos **microdados da amostra do Censo
+2022** para um esquema de 3 níveis:
+
+| Nível | Requisito | Granularidade geográfica |
+|---|---|---|
+| Público | Nenhum (download direto) | Só até **UF** — não resolve o problema que motiva a Fase 2 |
+| **Controlado** | Login **GovBR** + formulário + **termo de compromisso assinado digitalmente** | **Área de Ponderação** — agrupamento de setores censitários contíguos, construído para respeitar limites municipais (na prática mais fino que município, mostra diferença *dentro* do município — melhor que o recorte por município puro) |
+| Sala de Acesso Restrito | Presencial, sede do IBGE no Rio | Base completa, sem subamostragem — fora de escopo |
+
+O nível que a Fase 2 precisa é o **Controlado**. Isso muda o "passo imediato" desta fase
+em relação ao que foi a Fase 1:
+
+- Não é um download manual simples (como foi o zip do Drive) — é **você pessoalmente**
+  (com seu login GovBR) que precisa preencher o formulário e assinar o termo de
+  compromisso em [microdados.ibge.gov.br](https://microdados.ibge.gov.br/). O termo
+  proíbe redistribuir/publicar os microdados brutos (arquivo vem rastreável ao seu
+  usuário) — só o agregado, que é exatamente o que este projeto publica (`data/raw/` já
+  é git-ignored, então isso já está coberto).
+  Isso é **fora do Claude**, como já era a etapa de recuperação da base na Fase 1, só que
+  com uma camada extra de autenticação/aceite legal que só você pode fazer.
+- Não encontrei um prazo documentado de aprovação do pedido de acesso — pesquisa web não
+  achou essa informação; a notícia de lançamento fala em concessão "rastreável" por
+  usuário mas não é claro se é imediata ou passa por análise manual do IBGE. **Risco a
+  monitorar**: se houver fila de aprovação, isso pode atrasar o início real da Fase 2 além
+  do que uma sessão de trabalho controla.
+
+### Critério de "pronto"
+
+Parquet(s) versionado(s) em `data/processed/` com os cruzamentos obrigatórios por
+Área de Ponderação (ou o nível que o dicionário confirmar), mais pelo menos um gráfico
+que mostre o ganho sobre a Fase 1 — idealmente o recorte do ABC Paulista que a PNAD não
+permitia.
+
+### Etapas
+
+| # | Etapa | Estimativa | Marco |
+|---|---|---|---|
+| 0 | **[fora do Claude]** Criar login GovBR (se ainda não tiver), preencher formulário e assinar termo de compromisso em microdados.ibge.gov.br; baixar o pacote de microdados da amostra + dicionário/layout de variáveis | 1-2h + tempo de espera de aprovação (desconhecido) | ⏳ não iniciado |
+| 1 | Validar o dicionário: confirmar nome exato da variável de cor/raça, código de Área de Ponderação, e quais variáveis de renda/escolaridade/domicílio existem na amostra (comparar com o que a Fase 1 já cobre) | 2h | ⏳ |
+| 2 | Portar/adaptar o padrão de `extrator_pnadc.py` para um `extrator_censo.py` — mas como a fonte não é mais FTP anônimo em lote, provavelmente processar o(s) arquivo(s) já baixados na Etapa 0 em vez de baixar programaticamente; layout de largura fixa como na PNAD (a confirmar) | 3h | ⏳ |
+| 3 | Aplicar o recorte racial de 3 grupos (mesma lógica de `pnadc_core.py`, reaproveitada) sobre o Censo; documentar se a variável de cor/raça precisa de algum mapeamento diferente da PNAD | 2h | ⏳ |
+| 4 | Agregações por Área de Ponderação × raça × gênero: renda, escolaridade, condições domiciliares (o Censo pergunta moradia com mais detalhe que a PNAD — saneamento, tipo de domicílio, densidade) | 6h | ⏳ |
+| 5 | Recorte específico ABC Paulista (o motivador original desta fase) — mapear quais Áreas de Ponderação cobrem Santo André/São Bernardo/São Caetano e comparar com o resultado agregado "RM SP não-capital" que a Fase 1 deixou grosseiro | 3h | ⏳ |
+| 6 | Recorte indígena expandido (etnia, terra indígena) — o Censo pergunta isso de forma mais robusta que a PNAD | 2h | ⏳ |
+| 7 | Documentar limitações (comparabilidade Censo x PNAD — anos diferentes, metodologia de coleta diferente; ver a nota de "Ferramentas de referência" na Fase 1 sobre IPUMS/Data Zoom para checagem cruzada) | 2h | ⏳ |
+| 8 | Visualizações + atualizar README/docs/ANALISE com o achado do recorte municipal | 4h | ⏳ |
+
+Total estimado: ~25h ativas (Etapa 0 à parte, por depender de aprovação externa). Ritmo
+assumido 3-5h/semana → **~5-7 semanas de trabalho ativo**, sem contar o tempo de espera
+da Etapa 0.
+
+**Antes de começar a Etapa 0**: confirmar com o usuário se ele já tem conta GovBR e se
+está disposto a passar pelo fluxo de termo de compromisso — essa é uma decisão pessoal
+(aceite de termos legais), não algo que se decide dentro de uma sessão de planejamento.
 
 ## Fase 3 — Saúde (DataSUS/SIM/SINASC/PNS) (não detalhada ainda)
 

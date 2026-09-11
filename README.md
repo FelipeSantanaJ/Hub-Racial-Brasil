@@ -10,9 +10,12 @@ Projeto pessoal, em construção. Plano de projeto e status atual em [docs/PLANO
 ## Status
 
 ✅ Fase 1 (MVP) concluída — pipeline completo (extração da PNAD Contínua, deflator oficial
-do IBGE, agregações por raça/gênero/faixa etária/geografia) rodando de ponta a ponta. Ver
-[docs/PLANO.md](docs/PLANO.md) para o plano completo, o histórico de como cada etapa foi
-validada, e o que vem a seguir (Fase 2 — Censo Demográfico).
+do IBGE, agregações por raça/gênero/faixa etária/geografia) rodando de ponta a ponta.
+📋 Fase 2 (Censo Demográfico 2022) já tem plano detalhado, mas está bloqueada num passo que
+só o dono do projeto pode fazer: o IBGE mudou o acesso aos microdados do Censo para exigir
+login GovBR + termo de compromisso assinado (a PNAD, usada na Fase 1, é FTP público sem essa
+exigência). Ver [docs/PLANO.md](docs/PLANO.md) para o plano completo, o histórico de como
+cada etapa foi validada, e o detalhamento da Fase 2.
 
 ### Renda habitual do trabalho, por raça (2012–2026)
 
@@ -100,22 +103,25 @@ P57 da distribuição de Branca (pouco acima da mediana), mas no P76 da distribu
 ganha quem está em cada percentil —, os 10% mais pobres entre os brancos ganham R$1.500,
 contra R$720 entre os 10% mais pobres dos negros.
 
-**134 gráficos ao todo** — a matriz completa de combinações entre raça, gênero, faixa
-etária, geração, escolaridade e ocupação (Preta e Parda sempre também separadas), mais
-aprofundamentos: hiato por região, segregação ocupacional e setorial (índice de Duncan),
-teste de quebra estrutural em 3 eventos históricos, novas variáveis (informalidade, renda
-por hora, alfabetização, desalento, sobre-qualificação), hiato/renda por geração, perfil de
-quem está no topo 10% e em cada um dos 4 quartis de renda de cada raça, Gini e Theil por
-raça, hiato no setor público vs. privado, e a função quantil da renda em R$ (e sua inversa)
-por raça. A apresentação em PPTX abre com uma seção "Renda média" de 48 subseções (12
-combinações de dimensões × Todas as raças/Apenas negros × Valores/Hiato, com teste de Welch
-nas 24 combinações de hiato e um índice de conferência logo no início) antes do restante do
-conteúdo — cada abertura (gênero, faixa etária, geração, escolaridade) traz o snapshot do
-trimestre mais recente E a série histórica completa (2012-2026) por categoria. Galeria
-completa, com a leitura de cada gráfico, em
-[docs/ANALISE_FASE1.md](docs/ANALISE_FASE1.md), ou como
-apresentação em
-[docs/Datahub_Racial_Brasil_Fase1.pptx](docs/Datahub_Racial_Brasil_Fase1.pptx).
+**~530 gráficos ao todo.** O deck em PPTX
+([docs/Datahub_Racial_Brasil_Fase1.pptx](docs/Datahub_Racial_Brasil_Fase1.pptx), ~490
+slides) foi reconstruído do zero (2026-09-06) como uma **árvore cruzada** de renda por raça
+(Branca / Negra=Preta+Parda / Indígena): 10 combinações — Raça; ×Gênero; ×Faixa Etária;
+×Geração; ×Escolaridade; e os cruzamentos até Raça×Gênero×[Faixa|Geração]×Escolaridade (126
+células-folha). Cada folha "Valores" traz série histórica (linha, 2012-2026) + snapshot
+(barra) em slides irmãos; cada folha "Hiato" é barra/heatmap Branca vs. Negra com teste de
+Welch. **Cada imagem aparece em exatamente um slide** — a estrutura antiga repetia o mesmo
+gráfico em até 11 slides. No deck, título, subtítulo, legenda e fonte são caixas de texto
+editáveis; só o gráfico é imagem. Depois da árvore: topo 10% / base 10% / quartis com
+limiares novos (Brasil inteiro / dentro de cada gênero / dentro de raça×gênero), um
+ponteiro para a tabela de crescimento da renda
+([docs/tabela_crescimento_renda.xlsx](docs/tabela_crescimento_renda.xlsx), 181 linhas), e
+"Outras análises" — hiato por região, segregação ocupacional/setorial (Duncan), quebra
+estrutural, novas variáveis (informalidade, renda/hora, alfabetização, desalento,
+sobre-qualificação), Gini/Theil, hiato setor público×privado, decomposição
+Oaxaca-Blinder/RIF e a função quantil da renda em R$. A galeria narrada em
+[docs/ANALISE_FASE1.md](docs/ANALISE_FASE1.md) é o recorte anterior (inclui Preta vs. Parda
+separadas — que ficaram fora do deck novo).
 
 ## Escopo do MVP
 

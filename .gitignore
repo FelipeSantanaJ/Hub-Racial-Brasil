@@ -15,6 +15,11 @@ env/
 # Ambiente / segredos
 .env
 
+# Office lock files
+~$*.pptx
+~$*.docx
+~$*.xlsx
+
 # OS
 .DS_Store
 Thumbs.db

@@ -6,11 +6,15 @@ gênero, faixa etária e escolaridade, para renda habitual real (deflator oficia
 `src/processing/graficos_fase1.py` a partir dos datasets em `data/processed/*.parquet`.
 Também disponível como apresentação: [Datahub_Racial_Brasil_Fase1.pptx](Datahub_Racial_Brasil_Fase1.pptx).
 
-134 gráficos ao todo (a apresentação em PPTX também abre com uma seção "Renda média" de 48
-subseções — 12 combinações de dimensões × Todas as raças/Apenas negros × Valores/Hiato, com
-teste de Welch nas 24 combinações de hiato, cada abertura trazendo snapshot mais série
-histórica completa por categoria — que reaproveita gráficos já listados nas seções temáticas
-abaixo, sem galeria separada aqui). Índice:
+134 gráficos nesta galeria. **Nota (2026-09-06):** o deck em PPTX
+(`Datahub_Racial_Brasil_Fase1.pptx`) foi reconstruído do zero como uma **árvore cruzada** de
+renda por raça (Branca / Negra / Indígena), sem repetição de imagem — ver
+[README](../README.md) e [PLANO.md](PLANO.md) (seção "Reconstrução do deck"). Os gráficos
+novos da árvore (`docs/img/arv_*.png`, ~374, gerados por `src/processing/graficos_arvore.py`)
+e do bloco topo 10% / base 10% / quartis com limiares novos (`docs/img/ext_*.png`, ~24, por
+`graficos_extremos.py`) **não** estão listados nesta galeria — ela é o recorte anterior, que
+segue válido como referência narrada, inclusive da família Preta vs. Parda separadas (que
+ficou fora do deck novo, mas continua no disco). Índice:
 
 - [Raça](#raça)
 - [Hiato Branca vs. Negra — série histórica](#hiato-branca-vs-negra--série-histórica)
