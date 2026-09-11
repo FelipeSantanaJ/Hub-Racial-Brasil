@@ -280,3 +280,34 @@ essas colunas com valores literais precisa usar strings (`'1'`, `'35'`), não in
   trimestre mais recente). Os valores dos dois escopos não são estritamente comparáveis
   célula a célula por causa dessa diferença de universo — cada um é internamente consistente,
   mas não foram construídos com a mesma base exata.
+
+## Limiares de topo 10% / base 10% / quartis — escopos (reconstrução do deck, 2026-09-06)
+
+O deck reconstruído tem, além do topo10%/quartis com limiar **dentro de cada raça** (já
+documentado acima, `gerar_perfil_topo10_racial`/`gerar_perfil_quartis_racial`), um bloco
+novo (`gerar_extremos_racial`/`gerar_quartis_multi_racial` → `extremos_*`/`quartis_multi_racial`)
+com o limiar calculado em **três escopos diferentes** — é cálculo novo, não recorte do que
+já existia:
+
+- **`brasil`**: um único P90/P10 (ou P25/P50/P75) sobre TODOS os ocupados com renda real
+  > 0, sem separar por grupo. Responde "quem chega ao topo / fica na base do Brasil
+  inteiro?" — e aí sim a composição racial é informativa (Negra é ~56% dos ocupados mas
+  ~33% do topo 10% e ~73% da base 10% no trimestre mais recente). É o oposto do limiar
+  dentro-da-raça, que por construção põe 10% de cada raça no seu próprio topo.
+- **`genero`**: P90/P10 calculado separadamente dentro de Homens e dentro de Mulheres —
+  tira o efeito do hiato de gênero do limiar antes de olhar a composição racial do decil.
+- **`raca_genero`**: P90/P10 dentro de cada uma das 4 células raça×gênero — usado só para
+  renda em R$ e composição demográfica do decil (a "distribuição racial" nesse escopo
+  seria trivial, 100% da própria raça).
+
+Universo: ocupados com `renda_habitual_real > 0` (mesmo escopo da decomposição do hiato e
+do topo10% dentro-da-raça). Amostra mínima antes de calcular um quantil: 200 (escopo com 3
+limiares), 100-150 nas células raça×gênero. Vale a **mesma ressalva de heaping** já
+documentada para o topo10% dentro-da-raça — renda autodeclarada concentra em valores
+redondos, então o filtro `>= limiar` captura um pouco mais que 10%/25% exatos; as tabelas
+gravam `pct_populacao_capturada` como diagnóstico.
+
+`gerar_quartis_multi_racial` generaliza `gerar_perfil_quartis_racial` para os recortes
+`raca` (limiar dentro da raça; dimensões sexo/escolaridade/faixa/geração) e `raca_sexo`
+(limiar dentro de raça×gênero; escolaridade/faixa/geração) — cobre os 7 cruzamentos de
+quartil pedidos na reconstrução do deck.
