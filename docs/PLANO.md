@@ -1583,3 +1583,97 @@ ritmo de convergência). Sem gráficos/PPTX novos — não entrou no escopo dest
 Priorizei o item 1 primeiro (era o que mais faltava pra tratar os três grupos raciais
 em pé de igualdade); itens 2-4 completos na mesma rodada, incluindo o painel rotativo
 (item 4) em vez de deixá-lo pra próxima.
+
+## Décima terceira rodada — primeira identificação causal, Leis de Cotas (2026-09-13)
+
+Todo o projeto até aqui é descritivo/correlacional, mesmo quando o método é rigoroso
+(Oaxaca-Blinder, Welch, Theil). Esta rodada tenta uma primeira identificação CAUSAL,
+usando as duas Leis de Cotas como fonte de variação exógena — tratada explicitamente como
+um desenho PRELIMINAR, não como "descobri o efeito causal definitivo". Texto completo e
+achados em [ANALISE_CAUSAL_COTAS.md](ANALISE_CAUSAL_COTAS.md); limitações específicas
+desta rodada em
+[LIMITACOES_E_METODOLOGIA.md](LIMITACOES_E_METODOLOGIA.md#primeira-identificação-causal-2026-09-13-leis-de-cotas-como-variação-exógena).
+
+A PNAD Contínua não tem nota de vestibular nem instituição de ensino — não dá pra fazer o
+RDD que a literatura padrão usa (Mello 2022; Francis-Tan & Tannuri-Pianto). O desenho
+possível é diff-in-diff por COORTE DE EXPOSIÇÃO (nível agregado, não indivíduo
+tratado/não-tratado) — mais fraco em identificação fina, mais forte em cobertura
+nacional/histórica. Registrei isso na abertura do doc de análise por honestidade
+metodológica, não como defeito a esconder.
+
+### Desenho A — Lei de Cotas Universitárias (12.711/2012)
+
+DiD por coorte de nascimento (`ano_exposicao = ano_nascimento + 18`, exposto se
+`>= 2012`), outcome = % Superior completo medido SEMPRE aos 25-29 anos (idade fixa, pra
+não confundir efeito da lei com "coorte mais nova ainda não teve tempo de terminar a
+faculdade"). Duas especificações (nível e rampa capada em 4 anos, já que a lei deu até
+2016 pras universidades atingirem 100% da cota), teste de tendências paralelas pré-2012, e
+placebo em 2008/2016 — pros pares Branca-Negra e Branca-Indígena.
+
+**Bug real encontrado na primeira rodada**: `exposto = ano_nascimento >= ano_exposicao`
+comparou `ano_nascimento` direto contra o ANO DA LEI (2012), sem converter pro limiar de
+NASCIMENTO equivalente (`ano_lei - 18` = 1994). Como as coortes do painel (1983-2001) são
+todas anteriores a 2012, a dummy "pós-lei" saía constante em zero — regressão com aviso
+de matriz de design deficiente em posto e coeficiente saindo exatamente 0,0, sem lançar
+erro nenhum. Só percebi olhando o número (0,0 exato não é um valor plausível), não pelo
+aviso do statsmodels sozinho.
+
+Corrigido, o resultado é um NULO honesto: tendências paralelas sustentadas nos dois pares
+(pré-2012 não diverge, p=0,42 e p=0,86), mas nenhum efeito de nível significativo (p=0,97
+Negra, p=0,80 Indígena), e os placebos em 2008/2016 também não deram "efeito" espúrio.
+Leitura: com só ~19 pontos de coorte e sem identificar quem de fato usou a cota, um efeito
+real pode existir sem poder estatístico suficiente pra aparecer aqui — "não detectei
+efeito" não é "não há efeito".
+
+Extensão de mecanismo (correlacional, rotulada como tal): Oaxaca-Blinder do hiato de
+renda, coortes pré vs. pós-exposição — resíduo um pouco menor na coorte pós (18,8% vs.
+22,0%), mas % explicada por escolaridade/ocupação cai (40,7% vs. 52,0%). Três motivos pra
+não superinterpretar, documentados no doc de análise.
+
+### Desenho B — Lei de Cotas no Serviço Público Federal (12.990/2014)
+
+Event-study DiD, pessoa × setor_trabalho (Público/Privado, privado como controle) ×
+trimestre relativo à lei (jun/2014, 1 trimestre de defasagem administrativa pro corte
+"pós"). Dois outcomes: participação de Negra/Preta/Parda/Indígena no setor público, e
+hiato de renda Branca-Negra dentro de cada setor.
+
+**Dois bugs reais encontrados na primeira rodada**: (1) a curva do event-study rodou como
+regressão totalmente saturada (dummy por trimestre × setor) em cima de dado JÁ agregado a
+uma linha por célula — com 2 observações por célula da interação completa, grau de
+liberdade residual sai ZERO e o erro padrão vem indefinido (aviso de "divide by zero").
+Corrigi separando em dois níveis: a curva ponto a ponto em forma fechada (diferença de
+médias ponderadas sobre o MICRODADO, que tem milhares de pessoas por célula) e o resumo
+(tendência pré-lei + DiD global) como regressão de verdade com erro-padrão clusterizado
+por UPA. (2) o outcome de participação saiu construído como fração 0-1 em vez de pontos
+percentuais — os números do gráfico saíam 100x menores do que o subtítulo prometia (eixo
+mostrando "-0,0012" em vez de "-0,12"). Pego numa inspeção visual do gráfico renderizado,
+não na tabela de números.
+
+Resultado, participação: nenhum efeito significativo em nenhuma das 4 raças, e a
+identificação FALHA pra Indígena especificamente (tendência pré-lei já divergia entre
+público e privado antes da lei existir, p=0,046) — reportado como está, "identificação
+não se sustenta aqui pra Indígena" é uma conclusão válida, não escondida. Negra também
+tem tendência pré-lei limítrofe (p=0,08) — tratada com a mesma cautela mesmo sem reprovar
+formalmente o critério de p≥0,05.
+
+Resultado, hiato de renda: o mais bem-identificado de toda a rodada — tendências
+paralelas sustentadas com folga (p=0,61), DiD significativo (interação tripla
+tempo×setor×raça em log-renda: +0,020, ~2%, p=0,041) — o hiato racial dentro do setor
+público encolheu mais que no privado depois da lei. Limitação documentada sem tentar
+contornar: `setor_trabalho` mistura federal (tratado pela lei) com estadual/municipal
+(nunca tratado) — o efeito estimado está diluído por isso, provavelmente menor que o
+efeito real isolado ao federal, que não dá pra quantificar com este dado.
+
+### Critério de "pronto" desta rodada
+
+`docs/ANALISE_CAUSAL_COTAS.md` novo, com seção "o que isso NÃO prova" tão explícita
+quanto os achados; `docs/LIMITACOES_E_METODOLOGIA.md` com a limitação de esfera de
+governo e as lições de bug desta rodada; dois módulos novos
+(`src/processing/analise_causal_cotas.py`, `src/processing/graficos_causal_cotas.py`);
+novos parquets (`did_cotas_universitarias`, `mecanismo_renda_cohortes_cotas`,
+`painel_cohortes_superior_completo`, `did_cotas_servico_publico` +
+`did_cotas_servico_publico_curvas`); 7 gráficos novos em `docs/img/causal_*.png`. Nenhum
+resultado foi suavizado pra parecer mais definitivo do que é — dois dos quatro
+sub-resultados (Desenho A completo, participação do Desenho B) são nulos, e um
+(Indígena no Desenho B) falha o teste de tendências paralelas — todos reportados com o
+mesmo destaque que o único resultado significativo (hiato de renda do Desenho B).

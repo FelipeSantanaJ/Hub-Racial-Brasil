@@ -425,3 +425,60 @@ hiato regional, topo10/quartis) pros pares Branca-Indígena e Preta-Parda:
   zero"). Mesma classe de bug (comparar/combinar duas quantidades com sinal sem checar
   consistência de sinal primeiro) vale a pena ter em mente em qualquer métrica futura que
   combine nível + tendência.
+
+## Primeira identificação causal (2026-09-13): Leis de Cotas como variação exógena
+
+Ver [ANALISE_CAUSAL_COTAS.md](ANALISE_CAUSAL_COTAS.md) pro desenho completo e os
+resultados. Diferente de todo o resto do projeto (descritivo/correlacional, mesmo quando
+estatisticamente rigoroso), esta é a primeira tentativa de identificação CAUSAL — as
+limitações abaixo são específicas dela.
+
+- **RDD não é possível com este dado.** A PNAD Contínua não tem nota de vestibular nem
+  identifica instituição de ensino — o desenho de regressão descontínua que a literatura
+  padrão usa pra medir o efeito causal das cotas raciais no Brasil (Mello 2022;
+  Francis-Tan & Tannuri-Pianto) não pode ser replicado aqui. O desenho usado
+  (diff-in-diff por coorte de exposição, nível agregado) troca identificação fina por
+  cobertura nacional/histórica — ver a seção 3 de ANALISE_CAUSAL_COTAS.md.
+- **Bug real encontrado na primeira rodada do Desenho A**: `ano_exposicao =
+  ano_nascimento + 18` e `exposto = ano_exposicao >= ano_lei` implica um limiar sobre
+  `ano_nascimento` de `ano_lei - 18` — a primeira versão do código comparou
+  `ano_nascimento` direto contra o ANO DA LEI (2012) sem essa conversão. Como as coortes
+  do painel (nascidos 1983-2001) são todas anteriores a 2012, a dummy "pós-lei" saía
+  constante em zero pra todo mundo — a regressão soltou aviso de matriz de design
+  deficiente em posto (rank-deficient) e o coeficiente saiu zerado, SEM lançar exceção
+  nenhuma. Só percebido inspecionando o número produzido (0,0 exato, não um valor
+  plausível), não pelo aviso do statsmodels sozinho — mesma lição repetida de outras
+  rodadas deste projeto: sempre olhar o NÚMERO, "rodou sem erro" não é suficiente.
+- **Event-study sobre dado agregado tem grau de liberdade residual ZERO.** A primeira
+  versão do Desenho B rodou uma regressão totalmente saturada (uma dummy por trimestre
+  relativo × setor) em cima de um painel já agregado a UMA linha por (trimestre, setor)
+  — com exatamente 2 observações por célula da interação completa, o modelo satura
+  (R²=1, todo grau de liberdade consumido) e o erro padrão sai indefinido (aviso de
+  "divide by zero" do statsmodels). Corrigido reestruturando em dois níveis: a CURVA
+  ponto a ponto calculada em forma fechada (diferença de médias ponderadas + soma de
+  variâncias em quadratura, sobre o MICRODADO, que tem milhares de pessoas por célula) e
+  o RESUMO (tendência pré-lei + DiD global, um coeficiente só) como regressão de verdade
+  sobre o microdado, com erro-padrão clusterizado por UPA. Lição geral: rodar uma
+  regressão com uma dummy por período só tem erro-padrão válido se cada célula
+  período×grupo tiver replicação de verdade (várias pessoas), nunca sobre uma série já
+  reduzida a uma média por célula.
+- **Bug de escala encontrado no outcome de participação do Desenho B**: a primeira
+  versão construiu o outcome de participação como uma dummy 0/1 (fração), mas os
+  gráficos/textos já assumiam "pontos percentuais" — os números saíam 100x menores do
+  que o rótulo dizia (ex.: eixo do gráfico mostrando "-0,0012" quando deveria mostrar
+  "-0,12"). Pego numa inspeção visual do gráfico gerado (a escala do eixo não batia com
+  o que o subtítulo prometia), não durante a checagem dos números da regressão — reforça
+  o hábito já estabelecido no projeto de olhar o PNG renderizado, não só a tabela.
+- **Limitação de esfera de governo no Desenho B, documentada sem tentar contornar**:
+  `setor_trabalho` (derivado de VD4009) não distingue federal de estadual/municipal — só
+  o federal foi atingido pela Lei 12.990/2014. O grupo "Público" do desenho mistura
+  observações tratadas (federal) com nunca-tratadas (estadual/municipal), diluindo
+  qualquer efeito estimado na direção de zero. `setor_atividade`/VD4010 tem uma categoria
+  de administração pública, mas também não separa esfera de governo — não existe uma
+  variável já extraída que resolva isso; registrado como limitação real, não contornado
+  com uma aproximação que os dados não sustentam.
+- **Sem correção de múltiplas comparações**, mesma limitação já documentada acima pro
+  resto do projeto — especialmente relevante aqui porque o Desenho B produziu só UM
+  resultado significativo (o hiato de renda dentro do setor público, p=0,041) entre
+  vários testes (2 outcomes × várias raças/especificações) — um p isolado perto de 0,05
+  entre vários testes pede mais cautela do que um p ordens de grandeza menor teria.
