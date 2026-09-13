@@ -145,6 +145,7 @@ src/
 └── utils/           # dicionários de variáveis, mapeamento de códigos
 notebooks/pnad/      # exploração e validação
 docs/                # plano de projeto, decisões, dicionário de dados
+tests/               # testes automatizados (pytest) das funções estatísticas
 ```
 
 ## Como rodar
@@ -153,6 +154,13 @@ docs/                # plano de projeto, decisões, dicionário de dados
 python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
+```
+
+Testes automatizados (round-trip de quantil, casos sintéticos de Theil e Gini, regressão
+do erro padrão ponderado):
+
+```bash
+pytest tests/
 ```
 
 ## Roadmap

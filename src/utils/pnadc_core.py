@@ -71,6 +71,43 @@ def erro_padrao_media_ponderada(valores, pesos):
     return erro_padrao
 
 
+def erro_padrao_cluster_bootstrap(df, coluna_valor, peso, cluster_col='UPA', n_boot=200, seed=0):
+    """Erro padrão da média ponderada de `coluna_valor`, via bootstrap por CLUSTER (UPA) —
+    reamostra UPAs inteiras com reposição e recalcula a média ponderada a cada réplica;
+    erro padrão = desvio-padrão das réplicas. Diferente de `erro_padrao_media_ponderada`
+    (que só usa o peso analítico, V1028), este método incorpora o efeito de conglomerado
+    da UPA no desenho amostral complexo da PNAD Contínua — mais conservador (erro padrão
+    maior ou igual), mais lento de calcular.
+
+    Adicionado em 2026-09-13 (ver `docs/PLANO.md`, seção de hardening) como CHECAGEM DE
+    ROBUSTEZ da série histórica de hiatos (`tabela_hiatos_significancia`), que segue
+    usando `erro_padrao_media_ponderada` em produção — este método não a substitui, só
+    confirma se as conclusões de significância se mantêm sob um erro padrão mais
+    conservador (ver `docs/LIMITACOES_E_METODOLOGIA.md`).
+
+    Implementação otimizada: em vez de reamostrar linha a linha a cada réplica (caro para
+    centenas de milhares de registros), agrega `sum(peso*valor)` e `sum(peso)` por UPA uma
+    única vez — cada réplica bootstrap então só soma esses agregados para as UPAs
+    sorteadas, o que é matematicamente idêntico a reamostrar as UPAs inteiras e recalcular
+    a média ponderada, só que muito mais rápido.
+    """
+    df = df.dropna(subset=[coluna_valor, peso, cluster_col])
+    df = df[df[peso] > 0]
+    wx = df[peso] * df[coluna_valor]
+    soma_wx = wx.groupby(df[cluster_col], observed=True).sum().to_numpy()
+    soma_w = df[peso].groupby(df[cluster_col], observed=True).sum().to_numpy()
+    n_clusters = len(soma_w)
+    if n_clusters < 2:
+        return np.nan
+
+    rng = np.random.default_rng(seed)
+    medias_boot = np.empty(n_boot)
+    for i in range(n_boot):
+        idx = rng.integers(0, n_clusters, size=n_clusters)
+        medias_boot[i] = soma_wx[idx].sum() / soma_w[idx].sum()
+    return float(np.std(medias_boot, ddof=1))
+
+
 def coeficiente_variacao_ponderado(valores, pesos):
     """Coeficiente de variação ponderado."""
     valores = np.asarray(valores, dtype=float)
@@ -328,7 +365,7 @@ def rif_quantil(valores, pesos, quantil):
     return rif, q, densidade
 
 
-def decomposicao_oaxaca_blinder(micro, outcome, controles, peso, col_grupo, grupo_favorecido, grupo_desfavorecido):
+def decomposicao_oaxaca_blinder(micro, outcome, controles, peso, col_grupo, grupo_favorecido, grupo_desfavorecido, cluster):
     """Decomposição de Oaxaca-Blinder (twofold) do hiato médio de `outcome` entre
     `grupo_favorecido` e `grupo_desfavorecido`, controlando por `controles` (lista de
     colunas categóricas). `outcome` já deve estar na escala desejada — passar
@@ -352,18 +389,25 @@ def decomposicao_oaxaca_blinder(micro, outcome, controles, peso, col_grupo, grup
     controles) do resíduo "não-explicado" acima — reportar os dois é intencional: um dá
     o tamanho da decomposição completa, o outro dá o teste formal de significância.
 
-    Limitação: os pesos amostrais (V1028) entram como pesos analíticos do WLS
-    (statsmodels), não como pesos de desenho amostral complexo (replicação/bootstrap de
-    desenho) — os erros-padrão tendem a ser um pouco otimistas (mais estreitos que o
-    "correto" sob desenho complexo), mas a direção/magnitude do coeficiente não muda.
+    `cluster`: nome da coluna de UPA (Unidade Primária de Amostragem) — os três modelos
+    WLS usam `cov_type='cluster'` sobre ela em vez do erro-padrão i.i.d. padrão do
+    statsmodels. Ajuste de robustez adicionado em 2026-09-13 (ver `docs/PLANO.md`, seção
+    de hardening): antes disso, o peso amostral (V1028) entrava só como peso analítico do
+    WLS, sem nada capturar o conglomerado por UPA do desenho amostral complexo da PNAD
+    Contínua — os erros-padrão do teste de significância vinham um pouco otimistas
+    (mais estreitos que o correto). Os coeficientes (`parcela_explicada`,
+    `parcela_nao_explicada`, `residuo_restrito_coef`) não mudam com `cov_type` — só
+    `residuo_restrito_erro_padrao`/`residuo_restrito_p_valor`.
     """
     formula_controles = " + ".join(f"C({c})" for c in controles)
-    micro = micro.dropna(subset=[outcome, peso, col_grupo] + controles)
+    micro = micro.dropna(subset=[outcome, peso, col_grupo, cluster] + controles)
     df_fav = micro[micro[col_grupo] == grupo_favorecido]
     df_desf = micro[micro[col_grupo] == grupo_desfavorecido]
 
-    modelo_fav = smf.wls(f"{outcome} ~ {formula_controles}", data=df_fav, weights=df_fav[peso]).fit()
-    modelo_desf = smf.wls(f"{outcome} ~ {formula_controles}", data=df_desf, weights=df_desf[peso]).fit()
+    modelo_fav = smf.wls(f"{outcome} ~ {formula_controles}", data=df_fav, weights=df_fav[peso]).fit(
+        cov_type='cluster', cov_kwds={'groups': df_fav[cluster]})
+    modelo_desf = smf.wls(f"{outcome} ~ {formula_controles}", data=df_desf, weights=df_desf[peso]).fit(
+        cov_type='cluster', cov_kwds={'groups': df_desf[cluster]})
 
     # Reindexa pro conjunto UNIÃO de colunas dummy (caso alguma categoria não apareça
     # num dos dois grupos) preenchendo com 0 — trata ausência de dados como "grupo não
@@ -386,7 +430,7 @@ def decomposicao_oaxaca_blinder(micro, outcome, controles, peso, col_grupo, grup
     modelo_restrito = smf.wls(
         f"{outcome} ~ C({col_grupo}, Treatment(reference='{grupo_desfavorecido}')) + {formula_controles}",
         data=micro_pooled, weights=micro_pooled[peso],
-    ).fit()
+    ).fit(cov_type='cluster', cov_kwds={'groups': micro_pooled[cluster]})
     nome_coef = next(c for c in modelo_restrito.params.index if col_grupo in c)
 
     return {

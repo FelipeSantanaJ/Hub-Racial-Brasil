@@ -173,7 +173,12 @@ CREATE TEMP TABLE base AS
         CASE m.VD4005 WHEN '1' THEN TRUE END AS desalentado,
         m.VD4031 AS horas_habituais_todos_trabalhos,
         m.VD4035 AS horas_efetivas_todos_trabalhos,
-        m.V1028 AS peso
+        m.V1028 AS peso,
+        -- UPA (Unidade Primária de Amostragem, conglomerado do desenho amostral da PNAD
+        -- Contínua) — usada só como cluster de erro-padrão robusto (ver
+        -- pnadc_core.decomposicao_oaxaca_blinder e erro_padrao_cluster_bootstrap), nunca
+        -- como dimensão de agregação.
+        m.UPA AS upa
     FROM read_parquet('{PARQUET_GLOB}', hive_partitioning = 1) AS m
     LEFT JOIN read_parquet('{DEFLATOR_PATH}') AS d
         ON m.ano = d.ano AND m.trimestre = d.trimestre AND m.UF = d.UF
@@ -442,7 +447,7 @@ def gerar_decomposicao_oaxaca_blinder(con: duckdb.DuckDBPyConnection, n_trimestr
     """
     micro = con.execute(f"""
         SELECT raca_cor, faixa_etaria, nivel_instrucao, grupamento_ocupacional,
-               renda_habitual_real, peso
+               renda_habitual_real, peso, upa
         FROM base
         WHERE raca_cor IN ('Branca', 'Preta', 'Parda')
           AND grupamento_ocupacional IS NOT NULL
@@ -462,7 +467,7 @@ def gerar_decomposicao_oaxaca_blinder(con: duckdb.DuckDBPyConnection, n_trimestr
                        ["faixa_etaria", "nivel_instrucao", "grupamento_ocupacional"],
                        ["grupamento_ocupacional"]]:
         r = pnadc_core.decomposicao_oaxaca_blinder(
-            micro, "log_renda", controles, "peso", "raca_cor", "Branca", "Negra"
+            micro, "log_renda", controles, "peso", "raca_cor", "Branca", "Negra", cluster="upa"
         )
         r["controles"] = " + ".join(controles)
         r["ponto"] = "média"
@@ -474,7 +479,7 @@ def gerar_decomposicao_oaxaca_blinder(con: duckdb.DuckDBPyConnection, n_trimestr
         micro_rif = micro.copy()
         micro_rif["rif"] = rif
         r = pnadc_core.decomposicao_oaxaca_blinder(
-            micro_rif, "rif", controles_completos, "peso", "raca_cor", "Branca", "Negra"
+            micro_rif, "rif", controles_completos, "peso", "raca_cor", "Branca", "Negra", cluster="upa"
         )
         r["controles"] = " + ".join(controles_completos)
         r["ponto"] = rotulo
@@ -1999,7 +2004,7 @@ def gerar_oaxaca_blinder_temporal(con: duckdb.DuckDBPyConnection) -> None:
     for ano in anos:
         micro = con.execute(f"""
             SELECT raca_cor, faixa_etaria, nivel_instrucao, grupamento_ocupacional,
-                   renda_habitual_real, peso
+                   renda_habitual_real, peso, upa
             FROM base
             WHERE ano={ano} AND raca_cor IN ('Branca','Preta','Parda')
               AND grupamento_ocupacional IS NOT NULL
@@ -2010,7 +2015,7 @@ def gerar_oaxaca_blinder_temporal(con: duckdb.DuckDBPyConnection) -> None:
         micro["raca_cor"] = micro["raca_cor"].replace({"Preta": "Negra", "Parda": "Negra"})
         micro["log_renda"] = np.log(micro["renda_habitual_real"])
         r = pnadc_core.decomposicao_oaxaca_blinder(
-            micro, "log_renda", controles, "peso", "raca_cor", "Branca", "Negra")
+            micro, "log_renda", controles, "peso", "raca_cor", "Branca", "Negra", cluster="upa")
         r.update({"ano": ano, "ponto": "média"})
         res.append(r)
         for q, rot in [(0.1, "p10"), (0.5, "p50"), (0.9, "p90")]:
@@ -2018,7 +2023,7 @@ def gerar_oaxaca_blinder_temporal(con: duckdb.DuckDBPyConnection) -> None:
             m2 = micro.copy()
             m2["rif"] = rif
             r2 = pnadc_core.decomposicao_oaxaca_blinder(
-                m2, "rif", controles, "peso", "raca_cor", "Branca", "Negra")
+                m2, "rif", controles, "peso", "raca_cor", "Branca", "Negra", cluster="upa")
             r2.update({"ano": ano, "ponto": rot})
             res.append(r2)
     df = pd.DataFrame(res)

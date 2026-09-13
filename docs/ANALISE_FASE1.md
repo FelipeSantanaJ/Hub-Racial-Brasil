@@ -299,9 +299,8 @@ visível em todas as fatias da distribuição.
 
 ## Desigualdade interna, setor público/privado e sobre-qualificação
 
-Cinco análises sugeridas e validadas com o usuário (via menu de opções) antes de implementar
-— ver [PLANO.md](PLANO.md) pra lista completa das ideias apresentadas e as que ficaram pra
-depois.
+Cinco análises listadas e priorizadas antes de implementar — ver [PLANO.md](PLANO.md) pra
+lista completa das ideias cogitadas e as que ficaram pra depois.
 
 ![Gini por raça](img/gini_por_raca.png)
 

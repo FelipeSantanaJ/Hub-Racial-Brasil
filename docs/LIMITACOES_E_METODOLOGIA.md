@@ -102,11 +102,34 @@ trimestres) para trazer essa coluna — usada na decomposição do hiato racial 
 ## Aprofundamento estatístico (2026-09-04): Oaxaca-Blinder, RIF, segregação, quebra estrutural
 
 - **Decomposição de Oaxaca-Blinder** (`pnadc_core.decomposicao_oaxaca_blinder`): os pesos
-  amostrais (V1028) entram como pesos analíticos da regressão WLS (statsmodels), não como
-  pesos de desenho amostral complexo (réplicas/bootstrap de desenho, que a PNAD Contínua
-  pública não distribui). Os erros-padrão tendem a ser um pouco otimistas (mais estreitos
-  que o "correto" sob desenho complexo) — a direção e a ordem de grandeza do coeficiente não
-  mudam, mas o p-valor exato deve ser lido como aproximado, não exato ao terceiro dígito.
+  amostrais (V1028) entram como pesos analíticos da regressão WLS (statsmodels). Até
+  2026-09-13, o erro-padrão do teste de significância (`residuo_restrito_erro_padrao`) vinha
+  de `cov_type` i.i.d. padrão, sem capturar o conglomerado por UPA do desenho amostral
+  complexo da PNAD Contínua — corrigido para `cov_type='cluster'` sobre a UPA nos três
+  modelos WLS (ver seção "Hardening" abaixo para o antes/depois). Ainda não é o desenho
+  completo (réplicas de estratificação por Estrato, que a PNAD Contínua pública não
+  distribui) — o que sobra de otimismo no erro-padrão é bem menor do que o corrigido aqui.
+- **Hiato histórico por Welch** (`pnadc_core.tabela_hiatos_significancia`, usada em
+  `gerar_hiato_racial` e toda a família de hiatos): mesma limitação do Oaxaca-Blinder acima
+  (só peso analítico, sem UPA), mas sem um `cov_type='cluster'` pronto pra usar — o teste de
+  Welch aqui é calculado à mão, não via regressão. Checagem de robustez feita em 2026-09-13
+  via `pnadc_core.erro_padrao_cluster_bootstrap` (bootstrap por cluster, 200 réplicas)
+  rodada sobre os 58 trimestres de `hiato_racial.parquet`
+  (`src/processing/checagem_robustez_hiato.py` →
+  `data/processed/checagem_robustez_hiato_racial.parquet`): o erro-padrão bootstrap ficou
+  **54×-90× maior** (média 67×) que o erro-padrão em produção — bem mais dramático que a
+  inflação de 2-3× vista no Oaxaca-Blinder. Causa identificada (não é bug): renda tem cauda
+  MUITO pesada (ex.: 2012 T1, Branca — mediana R\$2.089, máximo R\$328.247) e o bootstrap por
+  cluster reamostra a UPA inteira como bloco; quando uma UPA isolada concentra 1-2 pessoas com
+  renda extrema (achado real e conferido no microdado bruto — não um artefato do pipeline),
+  ela entra/sai do bootstrap de forma binária a cada réplica, inflando a variância muito mais
+  do que a fórmula fechada (que nunca trata UPA como bloco) ou do que um erro-padrão
+  clusterizado de regressão (que pesa a CONTRIBUIÇÃO de cada observação ao score do modelo,
+  não o valor bruto — bem menos sensível a um único outlier). **Apesar disso, os 58
+  trimestres continuam significativos** mesmo sob esse erro-padrão muito mais conservador —
+  o hiato (~R\$1.750-2.040) segue de longe maior que o erro-padrão bootstrap (~R\$55-90).
+  Não substitui `tabela_hiatos_significancia` em produção, só confirma que a conclusão de
+  significância resiste a um método de erro-padrão bem mais rigoroso.
 - **RIF por quantil** (`pnadc_core.rif_quantil`, Firpo-Fortin-Lemieux 2009): a densidade no
   ponto do quantil é estimada por kernel gaussiano ponderado sobre a distribuição CONJUNTA
   (Branca+Negra), não separadamente por grupo — é assim que a definição de RIF garante que a
@@ -178,10 +201,9 @@ tem os dois blocos.
   exatamente no limiar) por estar fora do escopo desta rodada.
 - **4 quartis por raça** (`perfil_quartis_racial.parquet`): generaliza o "topo 10%" acima —
   em vez de só o P90, calcula P25/P50/P75 dentro de cada raça e classifica cada pessoa em
-  Q1-Q4. Pedido originalmente como "decomposição histórica dos 4 quartis", o topo 10% tinha
-  sido entregue como resposta parcial (só um exemplo dado pelo usuário, não o pedido
-  completo) — corrigido depois que o usuário perguntou se a quebra por quartil dentro de
-  cada raça tinha sido entendida. Mesma ressalva de heaping do P90 vale aqui: cada quartil
+  Q1-Q4. O objetivo original era "decomposição histórica dos 4 quartis", e o topo 10% entregue
+  antes cobria só um exemplo disso, não o pedido completo — corrigido ao perceber a lacuna na
+  revisão. Mesma ressalva de heaping do P90 vale aqui: cada quartil
   deveria capturar ~25% da população do grupo, mas pode desviar um pouco (checado no
   trimestre mais recente: entre 22% e 31% conforme quartil/raça) — mesma coluna de
   diagnóstico (`pct_populacao_capturada`), sem correção de desempate.
@@ -311,3 +333,28 @@ gravam `pct_populacao_capturada` como diagnóstico.
 `raca` (limiar dentro da raça; dimensões sexo/escolaridade/faixa/geração) e `raca_sexo`
 (limiar dentro de raça×gênero; escolaridade/faixa/geração) — cobre os 7 cruzamentos de
 quartil pedidos na reconstrução do deck.
+
+## Múltiplas comparações: sem correção formal, por quê isso não muda as conclusões
+
+A série histórica tem 58 trimestres e dezenas de cruzamentos testados (hiato por região,
+por geração, por setor público/privado, por categoria de escolaridade/faixa etária/
+ocupação, entre outros) — nenhum desses testes usa correção pra múltiplas comparações
+(Bonferroni, FDR/Benjamini-Hochberg). Isso é uma limitação conhecida, não uma omissão:
+
+- **Tamanho de efeito, não só significância**: o achado central do projeto é um hiato de
+  renda Branca-Negra de ~60-70 p.p. (dependendo do trimestre/corte), com p-valores tipicamente
+  < 1e-5 mesmo nos cortes mais finos. Correção de Bonferroni sobre ~60 testes simultâneos
+  (a ordem de grandeza de cruzamentos publicados neste repositório) dividiria o limiar de
+  significância de 0,05 para ~0,0008 — não chega perto de anular um efeito dessa magnitude.
+  Ruído de múltiplas comparações produz falsos positivos marginais (p perto de 0,05), não
+  hiatos de dezenas de pontos percentuais com p ordens de grandeza menor que qualquer limiar
+  corrigido razoável.
+- **Onde a ressalva pesa mais**: cortes com amostra pequena (Indígena em geral, células
+  finas de geração×escolaridade×ocupação) têm p-valores mais próximos da fronteira — é
+  exatamente onde já existem ressalvas de amostra documentadas nas seções acima
+  ("Amostra pequena para população Indígena" etc.). A ausência de correção formal nesses
+  casos específicos é uma limitação real, e a leitura desses números já vem qualificada por
+  esse motivo.
+- **Não corrigido, mas não escondido**: registrado aqui como limitação conhecida em vez de
+  omitida — quem for reusar os dados pra um teste específico isolado (não os ~60 já
+  publicados) deve aplicar sua própria correção se for testar múltiplas hipóteses novas.

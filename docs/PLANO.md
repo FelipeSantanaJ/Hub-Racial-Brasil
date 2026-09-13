@@ -7,10 +7,10 @@ Documento vivo. Atualizar conforme o projeto avança (datas, marcos concluídos,
 - **Status atual**: 🏁 **Fase 1 (MVP) concluída em 2026-09-04**, mesmo dia do início do repo
   — graças à base herdada de um projeto anterior no Colab (ver "Base herdada" abaixo).
   **Fase 2 (Censo Demográfico 2022) detalhada em 2026-09-11** (ver seção própria abaixo)
-  — mas **bloqueada na Etapa 0**: precisa do usuário pessoalmente criar login GovBR e
-  assinar o termo de compromisso de acesso controlado do IBGE antes de qualquer extração
-  poder começar (mudança de modelo de acesso do IBGE desde a época da PNAD; não é mais
-  FTP público como a Fase 1).
+  — mas **bloqueada na Etapa 0**: preciso pessoalmente criar login GovBR e assinar o termo
+  de compromisso de acesso controlado do IBGE antes de qualquer extração poder começar
+  (mudança de modelo de acesso do IBGE desde a época da PNAD; não é mais FTP público como
+  a Fase 1).
 
 ---
 
@@ -40,7 +40,7 @@ Fase 1:
   superior para os cruzamentos que este projeto precisa (idade/RM/significância
   estatística, que a API agregada do SIDRA não permite).
 
-### Passo imediato — recuperar a base (fora do Claude, ver metodologia abaixo)
+### Passo imediato — recuperar a base
 
 1. Baixar manualmente a pasta `parquet` inteira do Drive (~500 MB, botão direito → Fazer
    download → .zip) e extrair em `data/raw/pnadc_extraido/parquet/` neste repo, mantendo a
@@ -49,42 +49,30 @@ Fase 1:
    buscar o 2026 T2 (e trimestres seguintes, conforme o IBGE for publicando) — o script pula
    automaticamente o que já tem marcador `_SUCCESS`, então é seguro rodar por cima da base
    herdada.
-3. (Opcional) sincronizar os trimestres novos de volta pro Drive, se você quiser manter o
-   Drive como backup — isso pode ser feito por mim (Claude) quando chegar a hora, já que são
-   poucos arquivos pequenos (~9 MB/trimestre); não faz sentido fazer isso para os 56
-   trimestres já existentes (ver metodologia de tokens abaixo).
+3. (Opcional) sincronizar os trimestres novos de volta pro Drive, pra manter como backup —
+   são poucos arquivos pequenos (~9 MB/trimestre); não faz sentido fazer isso para os 56
+   trimestres já existentes.
 
 ---
 
-## Como trabalhar este projeto com o Claude Code (sessões e tokens)
+## Como este projeto é organizado em sessões de trabalho
 
-Você pediu pra eu levar em conta que não vai usar a totalidade dos seus tokens só nisso, já
-que também usa o Claude para outros processos (o projeto **MIA\Scripts**, de trabalho, é hoje
-de longe o que mais concentra uso — não tenho acesso a um medidor exato de custo/cota da sua
-conta, então isso é uma leitura pelo tamanho do histórico de sessões salvo localmente, não um
-número oficial). Diante disso, a estrutura de trabalho recomendada:
+Ritmo assumido de 3-5h/semana em horas vagas — a estrutura abaixo existe pra cada bloco de
+trabalho ficar autocontido, sem depender de eu lembrar onde parei:
 
-1. **Este projeto já vive num diretório próprio** (`C:\Users\jfdsdsantana\Projects\datahub-racial-brasil`,
-   fora do MIA\Scripts) — o histórico de conversas fica isolado do seu trabalho principal por
-   padrão, sem competir por contexto com ele.
-2. **Uma etapa da tabela abaixo = uma sessão** (ou um bloquinho de etapas relacionadas). Abra
-   a sessão apontando pro `CLAUDE.md` + este `PLANO.md` — não precisa colar histórico de
-   sessões anteriores.
-3. **Feche cada sessão atualizando a tabela de status** deste arquivo (uma frase: o que
-   mudou, o que falta) antes de encerrar. Assim a próxima sessão não depende do transcript
-   anterior, só do arquivo — pode abrir uma sessão nova ou dar `/clear` sem perder contexto
-   relevante.
-4. **Processamento pesado roda como script Python via terminal**, não como algo que o Claude
-   lê linha a linha — peça resumos/contagens (`df.describe()`, `SELECT COUNT(*) ...`), nunca
-   dataframes inteiros no chat.
-5. **Transferência de dados binários grandes fica fora do Claude.** O zip de ~500 MB do Drive
-   (passo 1 acima) é baixo manual pelo navegador — passar arquivo binário grande por chamada
-   de ferramenta custaria uma fortuna em tokens (uma chamada de ~3 MB já estourou o limite de
-   uma resposta de ferramenta nesta própria sessão de planejamento). Atualizações incrementais
-   pequenas (1 trimestre novo, ~9 MB) são a exceção onde vale a pena eu mediar via Drive.
-6. **Pode abrir/fechar sessões livremente entre etapas** — não precisa manter uma sessão
-   maratona aberta o projeto inteiro. Isso é bom tanto para tokens quanto porque o ritmo real
-   (3-5h/semana) já é o fator limitante, não o contexto.
+1. **Projeto isolado no próprio diretório** (`C:\Users\jfdsdsantana\Projects\datahub-racial-brasil`,
+   fora do resto do trabalho) — sem misturar contexto com outros projetos.
+2. **Uma etapa da tabela abaixo = uma sessão** (ou um bloquinho de etapas relacionadas).
+3. **Fecho cada sessão atualizando a tabela de status** deste arquivo (uma frase: o que
+   mudou, o que falta) antes de encerrar — a próxima sessão parte só do que está escrito
+   aqui, sem depender de memória do que rolou antes.
+4. **Processamento pesado roda como script Python via terminal**, não acompanhado linha a
+   linha — só resumos/contagens (`df.describe()`, `SELECT COUNT(*) ...`).
+5. **Transferência de dados binários grandes é manual.** O zip de ~500 MB do Drive (passo 1
+   acima) é baixado direto pelo navegador. Atualizações incrementais pequenas (1 trimestre
+   novo, ~9 MB) são a exceção onde vale sincronizar de volta pro Drive.
+6. **Sessões abertas/fechadas livremente entre etapas** — não precisa virada única do
+   projeto inteiro; o ritmo real (3-5h/semana) já é o fator limitante, não o contexto.
 
 ---
 
@@ -93,7 +81,7 @@ número oficial). Diante disso, a estrutura de trabalho recomendada:
 | Fase | Escopo | Status | Estimativa |
 |---|---|---|---|
 | 1 | MVP — PNAD Contínua (renda, escolaridade, ocupação) | ✅ concluída | 2026-09-04 (1 dia; estimativa original: ~6 semanas) |
-| 2 | Censo Demográfico 2022 (moradia, recorte por Área de Ponderação — resolve limitação do ABC Paulista) | 📋 detalhada 2026-09-11, execução bloqueada na Etapa 0 (GovBR do usuário) | ~25h ativas, 5-7 semanas após a Etapa 0 liberar |
+| 2 | Censo Demográfico 2022 (moradia, recorte por Área de Ponderação — resolve limitação do ABC Paulista) | 📋 detalhada 2026-09-11, execução bloqueada na Etapa 0 (login GovBR) | ~25h ativas, 5-7 semanas após a Etapa 0 liberar |
 | 3 | Saúde (DataSUS/SIM/SINASC/PNS) | ⏳ não iniciada | a definir após Fase 2 |
 | 3.x | Módulos adicionais (ver tabela "Outras fontes" abaixo) — ordem flexível | ⏳ pool de candidatos | intercalar conforme interesse |
 | 4 | Dashboard público (Observable Framework) | ⏳ não iniciada | após consolidar Fases 1-3 |
@@ -224,9 +212,9 @@ raça, e o mesmo tratamento repetido só para Preta vs. Parda (sem Branca/Indíg
 
 ## Decomposição do hiato: ocupação explica, ou é só cor da pele? ✅ (2026-09-04)
 
-Pergunta feita pelo usuário: controlando por idade e escolaridade, o hiato de renda entre
-negros e brancos existe porque estão em ocupações diferentes (que pagam menos), ou persiste
-mesmo dentro da mesma ocupação?
+Pergunta que motivou esta etapa: controlando por idade e escolaridade, o hiato de renda
+entre negros e brancos existe porque estão em ocupações diferentes (que pagam menos), ou
+persiste mesmo dentro da mesma ocupação?
 
 - **`VD4010`** (setor/ramo de atividade econômica) já estava disponível.
 - **`VD4011`** (grupamento ocupacional, 11 categorias — diretores/gerentes, profissionais
@@ -272,13 +260,13 @@ mesmo dentro da mesma ocupação?
 
 ## Aprofundamento estatístico e novas variáveis ✅ (2026-09-04, terceira rodada)
 
-A pedido do usuário: (1) aplicar teste de significância formal ao resíduo da decomposição
+Objetivos desta rodada: (1) aplicar teste de significância formal ao resíduo da decomposição
 do hiato por ocupação (pendência deixada em aberto na seção anterior); (2) pensar em outras
 análises/cruzamentos/metodologias; (3) pensar em outras variáveis da PNAD ainda não usadas.
-Antes de implementar, apresentei um menu de opções (AskUserQuestion) e o usuário escolheu
-TUDO: regressão Oaxaca-Blinder (não a alternativa mais simples de só adaptar o teste de
-Welch), as 4 variáveis novas sugeridas (+ moradia/deslocamento, que não existem na PNAD
-Contínua trimestral — ver nota abaixo), e os 4 métodos extra sugeridos.
+Antes de implementar, listei as opções e decidi ir com TUDO: regressão Oaxaca-Blinder (não a
+alternativa mais simples de só adaptar o teste de Welch), as 4 variáveis novas cogitadas
+(+ moradia/deslocamento, que não existem na PNAD Contínua trimestral — ver nota abaixo), e
+os 4 métodos extra cogitados.
 
 **Moradia/deslocamento — não disponível nesta base**: características de domicílio só
 existem no bloco "Visita 1" da PNAD Contínua (sub-amostra menor, 1/5 dos domicílios,
@@ -417,8 +405,8 @@ recente, e `docs/LIMITACOES_E_METODOLOGIA.md` pra decodificação completa das v
 
 ## Geração e perfil do topo 10% ✅ (2026-09-05)
 
-Duas perguntas do usuário sobre limitações metodológicas dos gráficos por faixa etária e
-sobre decompor quem está no topo da distribuição de renda:
+Duas questões metodológicas em aberto: uma limitação dos gráficos por faixa etária, e como
+decompor quem está no topo da distribuição de renda:
 
 1. **"Faixa etária" não acompanha as mesmas pessoas** — a PNAD Contínua é um corte
    transversal repetido, não um painel de décadas: "pessoas de 14-17 anos" em 2012 e em 2026
@@ -466,11 +454,11 @@ antes de calcular um quantil). 6 gráficos novos, seção nova na apresentação
 
 ### Correção: faltava a decomposição dos 4 quartis (2026-09-05)
 
-O usuário pediu originalmente "decomposição histórica dos 4 quartis das populações",
-usando o topo 10% só como EXEMPLO de uma coisa que queria ver. A entrega acima cobriu só o
-exemplo (P90/topo 10%), não o pedido completo (P25/P50/P75, os 4 quartis) — usuário
-perguntou de volta se eu tinha entendido que ele queria a quebra dentro de cada raça pra
-toda a distribuição, não só o topo. Corrigido: `gerar_perfil_quartis_racial` generaliza
+O objetivo original era "decomposição histórica dos 4 quartis das populações" — o topo 10%
+entregue na seção anterior era só um EXEMPLO do que eu queria ver, não o pedido completo
+(P25/P50/P75, os 4 quartis). Percebi a lacuna ao revisar a entrega: faltava a quebra dentro
+de cada raça pra toda a distribuição, não só o topo. Corrigido: `gerar_perfil_quartis_racial`
+generaliza
 `gerar_perfil_topo10_racial` pros 4 quartis (Q1-Q4, limiares P25/P50/P75 calculados DENTRO
 de cada raça, mesmas 4 dimensões de composição, mesma ressalva de heaping documentada
 acima). O topo 10% continua publicado à parte — é um recorte mais estreito (P90) e
@@ -487,12 +475,11 @@ complementar, não foi substituído.
 
 ## Sugestões de análise validadas antes de executar (2026-09-05)
 
-Usuário pediu explicitamente "sugere mais algum tipo de análise... me traga antes de
-executar". Antes de implementar, mapeei o que já temos extraído mas nunca usado, e
-apresentei um menu (AskUserQuestion) separado em "fáceis" (dado já pronto, função já
-existente ou barata de fazer) e "custosas" (mais esforço/risco). Usuário escolheu as 4
-fáceis inteiras + 1 das custosas (Theil), não escolheu: hiato Capital/Interior nem o painel
-rotativo real de curto prazo (ficam registrados abaixo como candidatos futuros).
+Antes de mais uma rodada de análises, mapeei o que já tinha extraído mas nunca usado, e
+listei as opções em dois grupos: "fáceis" (dado já pronto, função já existente ou barata de
+fazer) e "custosas" (mais esforço/risco). Decidi ir com as 4 fáceis inteiras + 1 das
+custosas (Theil); ficaram de fora hiato Capital/Interior e o painel rotativo real de curto
+prazo (registrados abaixo como candidatos futuros).
 
 - **Gini por raça** (`gerar_gini_por_raca`): `pnadc_core.gini_ponderado_por_grupo` já
   existia, portada do notebook original, mas nunca tinha sido chamada em nenhuma rodada
@@ -534,14 +521,13 @@ datasets (era 20).
 
 ## Correção: a decomposição por quartil precisava de valores em R$, não só composição (2026-09-05)
 
-Usuário esclareceu que a análise de quartis (seção anterior) devia incluir os valores REAIS em
-R$ em cada ponto da distribuição — não só quem está em cada fatia. Dois exemplos concretos
-dados pelo usuário: (1) "os 10% mais pobres negros ganham X enquanto os 10% mais pobres
-brancos ganham Y, e assim por diante" — a função quantil completa em R$; (2) "quem ganha R$3
-mil entre os brancos está no segundo quartil, enquanto entre os negros já seria top 10% mais
-ricos" — a pergunta INVERSA, que percentil corresponde a um valor fixo de renda. Pediu
-explicitamente pra manter as distribuições (composição por quartil) já montadas — mantidas
-sem alteração, isso é aditivo.
+A análise de quartis (seção anterior) precisava incluir os valores REAIS em R$ em cada ponto
+da distribuição — não só quem está em cada fatia. Dois ângulos concretos: (1) "os 10% mais
+pobres negros ganham X enquanto os 10% mais pobres brancos ganham Y, e assim por diante" —
+a função quantil completa em R$; (2) "quem ganha R$3 mil entre os brancos está no segundo
+quartil, enquanto entre os negros já seria top 10% mais ricos" — a pergunta INVERSA, que
+percentil corresponde a um valor fixo de renda. As distribuições (composição por quartil) já
+montadas ficam sem alteração — isso é aditivo.
 
 - `pnadc_core.percentil_ponderado_de_valor` (nova, função inversa de `quantil_ponderado`):
   validada com round-trip antes de usar (`quantil_ponderado` de um percentil P, jogado de
@@ -552,9 +538,9 @@ sem alteração, isso é aditivo.
   `percentil_de_valor_racial.parquet` (R$ → percentil, pra uma lista de valores de referência
   redondos: R$1.000 a R$20.000). Mesmo universo/amostra mínima de sempre (ocupados, renda
   real > 0, Branca/Negra apenas — Indígena de fora pela mesma razão de amostra).
-- Resultado (2026 T2, exatamente o exemplo que o usuário deu): R$3.000 está no **P57** da
-  distribuição de Branca (renda "do meio") mas no **P76** da distribuição de Negra (perto do
-  topo dos 25% que mais ganham) — confirma a intuição do usuário quase exatamente.
+- Resultado (2026 T2, batendo quase exatamente com a intuição inicial): R$3.000 está no
+  **P57** da distribuição de Branca (renda "do meio") mas no **P76** da distribuição de
+  Negra (perto do topo dos 25% que mais ganham).
 - Achado extra: o hiato bruto por percentil (sem nenhum controle) não é uniforme — 108% no
   P10, cai pra 23-50% no meio da distribuição, sobe de novo pra 100% no P90. Formato em U,
   parecido com o já visto na decomposição residual por RIF (que já tinha achado esse mesmo
@@ -566,9 +552,9 @@ sem alteração, isso é aditivo.
 
 ## Matriz completa de combinações raça × A × B (2026-09-05)
 
-Usuário pediu uma checagem explícita: raça sozinha, e cruzada com gênero/faixa
-etária/geração/escolaridade/ocupação — pares e alguns triplos — "até ter todas as
-combinações". Auditoria honesta do que já existia:
+Fiz uma checagem explícita: raça sozinha, e cruzada com gênero/faixa
+etária/geração/escolaridade/ocupação — pares e alguns triplos — até ter todas as
+combinações. Auditoria honesta do que já existia:
 
 | Combinação | Já existia? |
 |---|---|
@@ -630,7 +616,7 @@ suficiente reservado) em rodadas anteriores.
 
 ## Correção: gap real na seção Escolaridade × Raça × Gênero (2026-09-05)
 
-Usuário apontou (depois de pedir a auditoria completa da seção anterior) que a seção
+Percebi, auditando por completo a seção anterior, que a seção
 "Escolaridade × Raça × Gênero" só tinha 1 gráfico — Superior completo — enquanto
 `nivel_instrucao` tem 7 categorias. Checado: **era um bug real, isolado**, diferente do
 padrão "combinado + um por nível" já usado corretamente em `renda_por_raca_escolaridade`
@@ -658,7 +644,7 @@ vezes, já concluiu o Médio, não fica pra trás no Fundamental. Mesmo padrão 
 
 ## Oitava rodada de expansão (2026-09-05): seção "Renda média" no PPT, reordenada pra frente
 
-Pedido do usuário: reorganizar o PPT com uma seção "Renda média" logo no início, cobrindo as
+Reorganizei o PPT com uma seção "Renda média" logo no início, cobrindo as
 12 combinações de dimensões (Raça; ×Gênero; ×Faixa Etária; ×Geração; ×Escolaridade; e as
 combinações de 3-4 dimensões) × 2 escopos (Todas as raças / Apenas negros, Preta vs. Parda
 separadas) × 2 métricas (Valores / Hiato) = **48 subseções**, com um índice no início do
@@ -705,11 +691,11 @@ seção nova quanto na antiga).
 
 ## Nona rodada de expansão (2026-09-05): série histórica em toda abertura da seção "Renda média"
 
-Feedback do usuário sobre a rodada anterior: os gráficos que só mostravam o trimestre mais
+Ao revisar a rodada anterior, percebi que os gráficos que só mostravam o trimestre mais
 recente (ex.: Raça × Faixa Etária) precisavam TAMBÉM da série histórica completa — um slide
 por categoria (14-17, 18-24, 25-39... por raça, ao longo de 2012-2026), não só o snapshot.
-Pedido explícito: manter os snapshots, acrescentar as séries históricas, "isso para todas as
-aberturas" (gênero, faixa etária, geração, escolaridade, em toda combinação onde aparecem).
+Decisão: manter os snapshots, acrescentar as séries históricas, em todas as aberturas
+(gênero, faixa etária, geração, escolaridade, em toda combinação onde aparecem).
 
 Boa parte já existia: as séries históricas "um gráfico por categoria" pra gênero, faixa
 etária e escolaridade (Todas e Preta/Parda) já tinham sido construídas em rodadas bem
@@ -748,11 +734,10 @@ várias subseções (mesmas imagens, vários slides).
 
 ## Décima rodada de expansão (2026-09-05): mesma abertura em série histórica nas 21 seções antigas
 
-Pedido do usuário: "faça as mesmas aberturas para as outras análises" — estender o padrão da
-seção "Renda média" (manter snapshot, acrescentar série histórica por categoria) pras 21
-seções antigas do PPT (as que ficaram no final do deck desde a oitava rodada). Perguntado o
-escopo antes de mexer: usuário confirmou todas as 21 seções, e pediu explicitamente pra NÃO
-fazer abertura por região (só nível nacional) — decisão que, por extensão, também resolveu a
+Estendi o padrão da seção "Renda média" (manter snapshot, acrescentar série histórica por
+categoria) pras 21 seções antigas do PPT (as que ficaram no final do deck desde a oitava
+rodada). Escopo decidido antes de mexer: todas as 21 seções, sem abertura por região (só
+nível nacional) — decisão que, por extensão, também resolveu a
 questão de ocupação/setor econômico (11 e várias categorias, já agrupadas em janelas de 8
 trimestres numa rodada bem anterior justamente por amostra fina por trimestre isolado):
 ficaram de fora da abertura em série histórica, mantidas como já estavam (snapshot/pooled).
@@ -812,7 +797,7 @@ distintas (algumas em 11 slides diferentes).
 próprio, diferente de Mulheres sozinho ou de 14-17 sozinho), 10 combinações principais.
 Regra de ouro: cada PNG aparece em EXATAMENTE 1 slide.
 
-**Decisões do usuário (2026-09-06)** antes de gerar:
+**Decisões tomadas (2026-09-06)** antes de gerar:
 - Itens 9-10 (Raça×Gênero×Faixa×Escolaridade e ×Geração×Escolaridade): gerar TODAS as 126
   folhas-célula (70 + 56), não colapsar em heatmap.
 - Cada folha "Valores" = 2 imagens irmãs: série histórica (linha) + snapshot (barra). As
@@ -834,8 +819,8 @@ dentro de gênero / dentro de raça×gênero).
 
 ### Decisão adicional (2026-09-06): texto fora da imagem
 
-Pedido do usuário: os slides devem ter a IMAGEM do gráfico, mas os TEXTOS em caixa de
-texto do PowerPoint, não rasterizados. Escolha confirmada (menu AskUserQuestion): **título,
+Decisão: os slides devem ter a IMAGEM do gráfico, mas os TEXTOS em caixa de
+texto do PowerPoint, não rasterizados. Escolha confirmada: **título,
 subtítulo, linha de fonte e legenda do slide viram caixa de texto**; o PNG fica só com
 dados, eixos, grade, rótulos de eixo, rótulos de valor e legenda de séries. (A opção de
 extrair TAMBÉM cada rótulo de valor / asterisco de Welch pra caixa de texto foi
@@ -900,8 +885,8 @@ inteira (itens 1-10), com renderizadores próprios sem `_titulo`/`_rodape`
   árvore): renda Branca/Negra 2012 T1 vs. 2026 T2, % de crescimento de cada, hiato em R$
   no início vs. no fim. Leitura: Negra cresceu mais (em %) em 101 das 181 folhas, mas a
   diferença em R$ AUMENTOU em 92 — hiato relativo cai enquanto a distância absoluta sobe.
-  XLSX tem uma aba por item + aba "Tudo". Não é slide (decisão do usuário) — o deck tem só
-  um slide-ponteiro.
+  XLSX tem uma aba por item + aba "Tudo". Não vira slide, por decisão de escopo — o deck
+  tem só um slide-ponteiro.
 
 **Fase F — deck final** (`src/processing/apresentacao_final.py` →
 `docs/Datahub_Racial_Brasil_Fase1.pptx`, **~490 slides**, ~29 MB):
@@ -925,8 +910,8 @@ Metodologia dos limiares novos JÁ escrita em `LIMITACOES_E_METODOLOGIA.md`.
 
 ### v2 (2026-09-06): correção pelo exemplo de "Raça × Gênero"
 
-Usuário corrigiu a estrutura da árvore com um exemplo (5 slides pra Raça × Gênero) e pediu
-pra estender aos 10 itens. Decisões (AskUserQuestion):
+Corrigi a estrutura da árvore com um exemplo (5 slides pra Raça × Gênero) e estendi aos 10
+itens. Decisões:
 
 - **Sem snapshot de renda** — cada folha de renda vira SÓ a série histórica. A foto do
   trimestre recente fica só no hiato.
@@ -947,7 +932,9 @@ hiato histórico com Welch pras 10 combinações da árvore × {Negra, Indígena
 `COMBOS_HIATO_ARVORE` lista as combinações. Célula com < 30 de qualquer grupo é pulada
 (linha do gráfico fica com buraco — comum pra Indígena em cortes finos).
 
-`graficos_arvore.py` reescrito (v1 salvo em `graficos_arvore_v1_backup.py`): renderizadores
+`graficos_arvore.py` reescrito (v1 preservado só no histórico do git, não como arquivo
+solto — removido do controle de versão na rodada de hardening de 2026-09-13, ver seção
+correspondente mais abaixo): renderizadores
 crus `_fig_serie`, `_fig_serie_multipanel` (painel por raça / por comparação),
 `_fig_hiato_bar_pareado` (barras vs. Negra / vs. Indígena com Welch), `_fig_hiato_heatmap`.
 **393 folhas** (itens 1-10): 1→3, 2→7, 3→13, 4→11, 5→17, 6→26, 7→22, 8→34, 9→144, 10→116.
@@ -960,9 +947,9 @@ snapshot pareado homem/mulher × negra/indígena; multipainel combinado).
 
 ### v3 (2026-09-06): um slide por gráfico de hiato (Negra / Indígena separados)
 
-Feedback do usuário: a série de Indígena tem muitos picos (amostra pequena) e, sobreposta
-à de Negra no mesmo gráfico, atrapalha a leitura. "Faça um slide pra cada gráfico" — nos de
-hiato e "pras demais análises também".
+Percebi que a série de Indígena tem muitos picos (amostra pequena) e, sobreposta
+à de Negra no mesmo gráfico, atrapalha a leitura. Decisão: um slide pra cada gráfico — nos de
+hiato e nas demais análises também.
 
 Mudança: **todo gráfico de hiato virou 2 slides**, um por comparação:
 - `hiato_serie` por recorte: era 1 gráfico (2 linhas) → 2 gráficos (`_ne.png` / `_in.png`),
@@ -987,7 +974,7 @@ envio). "Outras análises" sem mudança (não tinha sobreposição de Indígena)
 
 ### v4 (2026-09-06): ajustes finos por slide
 
-Feedback do usuário (referenciando slides do v3):
+Ajustes finos, revisando os slides do v3:
 1. **Snapshot de hiato da análise de Raça (item 1)**: era 2 slides de 1 barra cada →
    1 gráfico com 2 barras (vs. Negra / vs. Indígena). `_fig_hiato_bar_2cmp`. Nos demais
    itens o snapshot continua separado por comparação.
@@ -1012,8 +999,9 @@ título rasterizado.
 
 ### v5 (2026-09-06): item 11 — fecha o dashboard geração×escolaridade×gênero
 
-Pergunta do usuário: um dashboard com filtros de gênero × escolaridade × geração nos
-gráficos de histórico de renda e de hiato já estaria 100% coberto pelo deck? Resposta:
+Pergunta que motivou esta rodada: um dashboard com filtros de gênero × escolaridade ×
+geração nos gráficos de histórico de renda e de hiato já estaria 100% coberto pelo deck?
+Resposta:
 92 dos 120 estados de filtro, sim — faltava só **gênero = "ambos" + escolaridade
 específica + geração específica** (28 estados). Motivo: os cruzamentos de 3-4 dimensões
 (itens 9-10) sempre foram quebrados por gênero, nunca "os dois juntos".
@@ -1036,7 +1024,7 @@ Deck: `apresentacao_final.py` VERSAO="v5" → `Datahub_Racial_Brasil_Fase1_v5.pp
 
 ### v6 (2026-09-06): seção "Aprofundamentos — sugestões novas"
 
-O usuário pediu sugestões de novas análises e escolheu TODAS as apresentadas. 6 agregações
+Listei sugestões de novas análises e decidi seguir com TODAS. 6 agregações
 novas em `agregacoes_pnadc.py` + `src/processing/graficos_aprofundamentos.py` (11 gráficos
 crus) + seção nova no deck (`apresentacao_final.py::secao_aprofundamentos`, VERSAO="v6",
 `Datahub_Racial_Brasil_Fase1_v6.pptx`, 656 slides, ~30 MB).
@@ -1078,9 +1066,8 @@ Fontes #12: [IBGE — Desigualdades Sociais por Cor ou Raça](https://www.ibge.g
 
 ## Outras fontes de dados (além de PNAD/Censo/DataSUS já previstos)
 
-Você pediu pra eu incluir outras ideias de fonte, não só as já citadas. Lista de módulos
-candidatos — independentes entre si, para intercalar com as Fases 2-3 conforme o interesse,
-sem ordem fixa:
+Lista de módulos candidatos além das fontes já citadas — independentes entre si, para
+intercalar com as Fases 2-3 conforme o interesse, sem ordem fixa:
 
 | Módulo | Fonte | Formato de acesso | Esforço aprox. | Ângulo |
 |---|---|---|---|---|
@@ -1095,7 +1082,7 @@ sem ordem fixa:
 Nenhum desses substitui as Fases 2 (Censo) e 3 (DataSUS) já previstas no escopo original —
 são adições ao roadmap, a priorizar conforme o interesse depois que a Fase 1 fechar.
 
-### Ferramentas/fontes de referência para cruzar dados (anotado a pedido, 2026-09-04)
+### Ferramentas/fontes de referência para cruzar dados (2026-09-04)
 
 Não avaliadas em profundidade ainda — só registradas aqui como ponto de partida pra quando
 formos expandir a análise (Fase 2+ ou aprofundamento da Fase 1):
@@ -1151,19 +1138,18 @@ Fase 1 funcionou — o IBGE mudou o modelo de acesso aos **microdados da amostra
 O nível que a Fase 2 precisa é o **Controlado**. Isso muda o "passo imediato" desta fase
 em relação ao que foi a Fase 1:
 
-- Não é um download manual simples (como foi o zip do Drive) — é **você pessoalmente**
-  (com seu login GovBR) que precisa preencher o formulário e assinar o termo de
+- Não é um download manual simples (como foi o zip do Drive) — sou eu pessoalmente
+  (com meu login GovBR) que preciso preencher o formulário e assinar o termo de
   compromisso em [microdados.ibge.gov.br](https://microdados.ibge.gov.br/). O termo
-  proíbe redistribuir/publicar os microdados brutos (arquivo vem rastreável ao seu
-  usuário) — só o agregado, que é exatamente o que este projeto publica (`data/raw/` já
-  é git-ignored, então isso já está coberto).
-  Isso é **fora do Claude**, como já era a etapa de recuperação da base na Fase 1, só que
-  com uma camada extra de autenticação/aceite legal que só você pode fazer.
+  proíbe redistribuir/publicar os microdados brutos (arquivo vem rastreável a mim) — só
+  o agregado, que é exatamente o que este projeto publica (`data/raw/` já é git-ignored,
+  então isso já está coberto). É uma etapa manual, como já foi a recuperação da base na
+  Fase 1, só que com uma camada extra de autenticação/aceite legal.
 - Não encontrei um prazo documentado de aprovação do pedido de acesso — pesquisa web não
   achou essa informação; a notícia de lançamento fala em concessão "rastreável" por
-  usuário mas não é claro se é imediata ou passa por análise manual do IBGE. **Risco a
+  usuário, mas não é claro se é imediata ou passa por análise manual do IBGE. **Risco a
   monitorar**: se houver fila de aprovação, isso pode atrasar o início real da Fase 2 além
-  do que uma sessão de trabalho controla.
+  do ritmo normal de trabalho.
 
 ### Critério de "pronto"
 
@@ -1176,7 +1162,7 @@ permitia.
 
 | # | Etapa | Estimativa | Marco |
 |---|---|---|---|
-| 0 | **[fora do Claude]** Criar login GovBR (se ainda não tiver), preencher formulário e assinar termo de compromisso em microdados.ibge.gov.br; baixar o pacote de microdados da amostra + dicionário/layout de variáveis | 1-2h + tempo de espera de aprovação (desconhecido) | ⏳ não iniciado |
+| 0 | **[manual]** Criar login GovBR (se ainda não tiver), preencher formulário e assinar termo de compromisso em microdados.ibge.gov.br; baixar o pacote de microdados da amostra + dicionário/layout de variáveis | 1-2h + tempo de espera de aprovação (desconhecido) | ⏳ não iniciado |
 | 1 | Validar o dicionário: confirmar nome exato da variável de cor/raça, código de Área de Ponderação, e quais variáveis de renda/escolaridade/domicílio existem na amostra (comparar com o que a Fase 1 já cobre) | 2h | ⏳ |
 | 2 | Portar/adaptar o padrão de `extrator_pnadc.py` para um `extrator_censo.py` — mas como a fonte não é mais FTP anônimo em lote, provavelmente processar o(s) arquivo(s) já baixados na Etapa 0 em vez de baixar programaticamente; layout de largura fixa como na PNAD (a confirmar) | 3h | ⏳ |
 | 3 | Aplicar o recorte racial de 3 grupos (mesma lógica de `pnadc_core.py`, reaproveitada) sobre o Censo; documentar se a variável de cor/raça precisa de algum mapeamento diferente da PNAD | 2h | ⏳ |
@@ -1190,9 +1176,8 @@ Total estimado: ~25h ativas (Etapa 0 à parte, por depender de aprovação exter
 assumido 3-5h/semana → **~5-7 semanas de trabalho ativo**, sem contar o tempo de espera
 da Etapa 0.
 
-**Antes de começar a Etapa 0**: confirmar com o usuário se ele já tem conta GovBR e se
-está disposto a passar pelo fluxo de termo de compromisso — essa é uma decisão pessoal
-(aceite de termos legais), não algo que se decide dentro de uma sessão de planejamento.
+**Antes de começar a Etapa 0**: confirmar se já tenho conta GovBR e se estou disposto a
+passar pelo fluxo de termo de compromisso — decisão pessoal (aceite de termos legais).
 
 ## Fase 3 — Saúde (DataSUS/SIM/SINASC/PNS) (não detalhada ainda)
 
@@ -1305,7 +1290,7 @@ sinal de que os números fazem sentido, não só que o código rodou sem erro.
 
 ### Deflator oficial do IBGE (2026-09-04)
 
-Você pediu pra buscar um deflator oficial, priorizando o próprio IBGE antes de outras
+Busquei um deflator oficial, priorizando o próprio IBGE antes de outras
 fontes. Achado: o IBGE publica, na MESMA pasta de documentação dos microdados (não em
 outro lugar), um deflator pronto para a PNAD Contínua — `Documentacao/Deflatores.zip`,
 atualizado junto com cada nova divulgação trimestral (a versão baixada em 2026-09-04 já
@@ -1350,3 +1335,136 @@ veio com o T2/2026, calibrado nesse mesmo dia). Não foi preciso recorrer ao IPE
   2015-2016, pandemia de COVID-19 (2020-2021, incl. mudança temporária de coleta por
   telefone — visível na queda de registros por trimestre no `_resumo_extracao.csv` herdado),
   reforma trabalhista (2017) e da previdência (2019).
+
+---
+
+## Rodada de hardening: robustez estatística e testes automatizados (2026-09-13)
+
+Antes de partir pra novas análises, uma rodada de correções sobre o que já existe — mesmo
+padrão das rodadas anteriores (investigar, corrigir, documentar, registrar o que mudou e o
+que não mudou). Cinco frentes, nenhuma delas motivada por um número errado publicado — são
+ajustes de rigor estatístico e de qualidade de repositório encontrados numa auditoria
+proativa, não uma correção de bug relatado.
+
+### 1. Erro padrão clusterizado por UPA no Oaxaca-Blinder
+
+`pnadc_core.decomposicao_oaxaca_blinder` ajustava os três modelos WLS (`modelo_fav`,
+`modelo_desf`, `modelo_restrito`) só com peso analítico (V1028), sem usar o conglomerado por
+UPA do desenho amostral complexo da PNAD Contínua — UPA já estava extraída
+(`src/ingestion/extrator_pnadc.py`) mas nunca chegava à tabela `base` de
+`agregacoes_pnadc.py`, então nunca tinha sido usada por nenhuma função. Adicionada à
+`CRIAR_BASE` e aos três `.fit()` como `cov_type='cluster', cov_kwds={'groups': upa}`.
+
+**Antes/depois** (`decomposicao_oaxaca_blinder.parquet`, últimos 8 trimestres, Branca vs.
+Negra):
+
+| Controles | Coef. residual (log) | EP antes | EP depois | Razão EP | p-valor depois |
+|---|---|---|---|---|---|
+| + faixa etária | 0,4219 (igual) | 0,00132 | 0,00575 | 4,35× | < 1e-300 |
+| + faixa etária + escolaridade | 0,2354 (igual) | 0,00120 | 0,00351 | 2,93× | < 1e-300 |
+| + faixa etária + escolaridade + ocupação | 0,2023 (igual) | 0,00115 | 0,00314 | 2,74× | < 1e-300 |
+| Só ocupação | 0,2554 (igual) | 0,00120 | 0,00357 | 2,98× | < 1e-300 |
+| RIF P10 | 0,2672 (igual) | 0,00296 | 0,00634 | 2,14× | < 1e-300 |
+| RIF P50 | 0,1389 (igual) | 0,00102 | 0,00270 | 2,64× | < 1e-300 |
+| RIF P90 | 0,3085 (igual) | 0,00328 | 0,00942 | 2,87× | 2,8e-235 |
+
+E na série `oaxaca_blinder_temporal.parquet` (60 linhas = ~15 anos × 4 pontos): mesma
+história — coeficientes idênticos (a covariância não entra no ponto estimado, só no
+erro-padrão), erro-padrão abre entre 1,81× e 3,12× (média 2,33×), e o **pior p-valor da
+série inteira depois do ajuste é 1,9e-73** — ainda ordens de grandeza abaixo de qualquer
+limiar de significância razoável. Nenhuma das 67 linhas testadas (7 + 60) muda de
+significativo pra não-significativo. Conclusão do projeto não muda; o que muda é o rigor do
+IC reportado.
+
+### 2. Checagem de robustez: bootstrap por cluster nos hiatos históricos (Welch)
+
+`tabela_hiatos_significancia` (usada em `gerar_hiato_racial`, `gerar_hiato_preta_parda`
+etc.) tem a mesma limitação — só peso analítico, sem UPA. Diferente do Oaxaca-Blinder (que
+usa regressão e por isso ganha `cov_type='cluster'` de graça via statsmodels), o teste de
+Welch é calculado à mão (`erro_padrao_media_ponderada` + fórmula de Welch-Satterthwaite),
+sem equivalente direto de "erro-padrão clusterizado" pronto numa biblioteca. Em vez de
+reescrever o método em produção, implementei uma segunda função,
+`pnadc_core.erro_padrao_cluster_bootstrap` (bootstrap por cluster: reamostra UPAs inteiras
+com reposição, recalcula a média ponderada a cada réplica — implementação otimizada que
+agrega `sum(peso*valor)`/`sum(peso)` por UPA uma vez e soma esses agregados por réplica, em
+vez de reamostrar linha a linha; validada batendo exatamente com uma reimplementação
+ingênua linha-a-linha antes de usar em dados reais), e rodei como CHECAGEM DE ROBUSTEZ sobre
+a série `hiato_racial.parquet` inteira (58 trimestres, `src/processing/checagem_robustez_hiato.py`,
+200 réplicas bootstrap por grupo por trimestre) — sem substituir o método em produção em
+lugar nenhum.
+
+**Resultado, e por que ele é bem mais dramático que o do Oaxaca-Blinder**: o erro-padrão via
+bootstrap por cluster ficou entre **54× e 90× maior** que o erro-padrão só-peso (média 67×),
+nos 58 trimestres — uma inflação MUITO maior que os 2-3× vistos na decomposição de
+Oaxaca-Blinder acima. Investigado antes de aceitar o número (mesma disciplina de sempre:
+não publicar um resultado "esquisito" sem entender a causa): a causa não é o desenho
+amostral em si, é a combinação de dois fatores — (1) renda tem cauda pesada de verdade
+(no trimestre auditado manualmente, 2012 T1, Branca: mediana R\$2.089, mas máximo
+R\$328.247 — um valor 157× a mediana); (2) o bootstrap por cluster reamostra a UPA
+**inteira** como bloco. Quando uma UPA específica concentra 1-2 pessoas com renda muito
+acima da mediana (achado real, não erro de pipeline — conferido direto no microdado bruto: uma
+UPA no Acre com 3 pessoas, renda média de R\$103.708 por causa de duas declarações de
+R\$269.240 e R\$44.873), essa UPA entra e sai do bootstrap às vezes 0 vezes, às vezes 3-4
+vezes em 200 réplicas — e cada entrada pesa seu valor extremo inteiro na média. Isso infla
+MUITO mais a variância do que a fórmula fechada (que só usa peso analítico, sem tratar UPA
+como bloco de reamostragem) ou que o erro-padrão clusterizado da regressão (que usa a
+contribuição de score de cada observação, não o valor bruto, e por isso é bem menos sensível
+a um outlier isolado).
+
+**Apesar da inflação enorme, a conclusão não muda**: mesmo com esse erro-padrão 67× mais
+conservador em média, os **58 trimestres continuam significativos** — o hiato (~R\$1.750 a
+R\$2.040) segue muitas vezes maior que o erro-padrão bootstrap (~R\$55 a R\$90), então o
+z-score mesmo no caso mais apertado da série ainda passa de ~19 (p efetivamente 0 em ponto
+flutuante). Nenhum dos 58 trimestres muda de significativo pra não-significativo. Resultado
+salvo em `data/processed/checagem_robustez_hiato_racial.parquet`
+(`ep_peso_apenas`/`ep_cluster_bootstrap`/`p_valor_cluster_bootstrap` por trimestre, pra quem
+quiser conferir).
+
+Documentado em `docs/LIMITACOES_E_METODOLOGIA.md` — essa era a checagem que faltava: a
+ressalva "peso analítico, não desenho complexo" já existia pro Oaxaca-Blinder, mas nunca
+tinha sido testada explicitamente pra série de hiatos por Welch, que é o gráfico mais citado
+do projeto (README, capa da apresentação). E o resultado é mais informativo do que uma
+simples confirmação — expõe que a MAGNITUDE da incerteza real da série depende muito de como
+ela é medida (fórmula fechada vs. bootstrap por bloco geográfico), mesmo quando a
+SIGNIFICÂNCIA não muda em nenhum dos dois métodos.
+
+### 3. Nota sobre múltiplas comparações
+
+A série tem 58 trimestres × dezenas de cruzamentos testados, sem correção de Bonferroni/FDR.
+Parágrafo novo em `docs/LIMITACOES_E_METODOLOGIA.md` explicando por que isso não muda as
+conclusões principais (tamanho de efeito de 60-70 p.p. de hiato é ordens de grandeza maior
+que qualquer coisa que ruído de múltiplas comparações explicaria) — registrado como
+limitação conhecida, não omitida, especialmente relevante nos cortes de amostra pequena
+(Indígena, células finas) onde os p-valores já vêm mais perto da fronteira.
+
+### 4. Suíte de testes automatizados
+
+Várias validações existiam só como texto neste PLANO.md — agora em `tests/test_pnadc_core.py`
+(pytest, 13 casos):
+
+- round-trip `quantil_ponderado` ↔ `percentil_ponderado_de_valor` nos 5 percentis já
+  testados manualmente (P10/P25/P50/P75/P90), agora como assert automatizado;
+- os 3 casos sintéticos de `decomposicao_theil_entre_dentro` (grupos idênticos, médias
+  diferentes com variância zero, grupo único) como teste de regressão;
+- `erro_padrao_media_ponderada` batendo exatamente com a fórmula clássica s/√n no caso de
+  pesos iguais, mais um teste de guarda explícito contra o fator ~√n do bug histórico
+  (replicar a amostra 100× tem que DIVIDIR o erro padrão por ~10, não multiplicar);
+- Gini ponderado nos dois extremos: igualdade perfeita (Gini=0) e uma pessoa com toda a
+  renda (Gini = (n-1)/n, → 1 conforme n cresce).
+
+`pytest` adicionado ao `requirements.txt`; `pytest tests/` documentado no README.
+
+### 5. Limpeza de repositório
+
+`src/processing/graficos_arvore_v1_backup.py` (575 linhas, backup versionado, superado por
+`graficos_arvore.py`) removido do controle de versão — git preserva o histórico se precisar
+recuperar.
+
+### Critério de "pronto" desta rodada
+
+`docs/PLANO.md` com esta seção; `docs/LIMITACOES_E_METODOLOGIA.md` atualizado nos dois
+pontos (clustering, múltiplas comparações); `tests/` rodando via `pytest` (13/13 passando);
+arquivo de backup removido. Nenhuma conclusão do README/ANALISE_FASE1.md mudou — a checagem
+de robustez confirmou os números já publicados, só tornou o erro-padrão reportado mais
+conservador nos dois lugares que usam teste de significância (Oaxaca-Blinder e hiato
+histórico).
