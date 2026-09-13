@@ -358,3 +358,70 @@ ocupação, entre outros) — nenhum desses testes usa correção pra múltiplas
 - **Não corrigido, mas não escondido**: registrado aqui como limitação conhecida em vez de
   omitida — quem for reusar os dados pra um teste específico isolado (não os ~60 já
   publicados) deve aplicar sua própria correção se for testar múltiplas hipóteses novas.
+
+## Aprofundamento raça×gênero (2026-09-13): Branca-Indígena e Preta-Parda em pé de igualdade
+
+Ver [ANALISE_RACA_GENERO.md](ANALISE_RACA_GENERO.md) pros achados completos. Limitações de
+amostra novas encontradas ao levar o toolkit pesado (Oaxaca-Blinder, segregação de Duncan,
+hiato regional, topo10/quartis) pros pares Branca-Indígena e Preta-Parda:
+
+- **Segregação setorial (VD4010) Branca-Indígena: não publicada.** Mesmo agrupando os 58
+  trimestres inteiros, a menor categoria de `setor_atividade` (12 categorias) fica com
+  n=11 — abaixo do `n_minimo`=30 já usado no projeto. Diferente da segregação
+  ocupacional (11 categorias, pooling de 8 trimestres já fecha com folga, menor categoria
+  n=66), aqui nem o pooling máximo resolve — deixado como lacuna documentada, não forçado.
+- **Indígena: pooled snapshot em vez de série trimestral, em três lugares novos.**
+  Segregação ocupacional Branca-Indígena (`segregacao_ocupacional_indigena.parquet`) e
+  topo10%/quartis dentro de Indígena (`perfil_topo10_racial_indigena.parquet`,
+  `perfil_quartis_racial_indigena.parquet`) só publicam UMA janela (últimos 8 trimestres,
+  mesmo padrão já usado em `gerar_decomposicao_oaxaca_blinder_indigena` e
+  `renda_multidimensional_faixa/geracao`), não uma série histórica — checado antes de
+  escrever cada função que a amostra trimestre a trimestre não fecha (11 categorias
+  ocupacionais ou 3 limiares de quartil precisam de mais gente por corte do que ~750-1.100
+  pessoas indígenas/trimestre entregam isoladamente).
+- **Boa notícia, checada empiricamente antes de decidir onde agrupar**: nem toda análise
+  envolvendo Indígena precisou de pooling. Hiato regional Branca-Indígena por Região
+  (`hiato_regional_indigena.parquet`) e a decomposição raça×gênero
+  (`decomposicao_raca_genero.parquet`) rodam trimestre a trimestre sem nenhum
+  agrupamento — a amostra de Indígena só fica pequena demais quando o corte abre uma
+  dimensão categórica FINA (11-12 categorias de ocupação/setor, ou 3 limiares de
+  quantil), não em recortes de 2 a 5 categorias (região, sexo).
+- **Oaxaca-Blinder Preta-Parda: "% do hiato explicado" sai instável, não é bug.** O hiato
+  bruto médio Preta-Parda é pequeno (~-5,8% no trimestre mais recente) — dividir
+  parcela-explicada/não-explicada por um `hiato_total` perto de zero produz percentuais
+  que variam de -191% a +345% conforme o conjunto de controles
+  (`decomposicao_oaxaca_blinder_pretaparda.parquet`). O coeficiente residual em
+  log-pontos (não dividido por nada) é a leitura confiável nesse caso — e ele revela um
+  padrão real: não-significativo na média (p=0,449), mas significativo e com SINAIS
+  OPOSTOS nos extremos da distribuição (positivo no P10, negativo no P90) — ver
+  ANALISE_RACA_GENERO.md. Ao reportar Oaxaca-Blinder pra qualquer par com hiato bruto
+  pequeno, preferir o coeficiente em log-pontos à porcentagem-do-hiato.
+- **Painel rotativo real (`gerar_transicoes_painel`)**: liga a MESMA pessoa entre
+  trimestres calendário consecutivos via (UPA, V1008, V2003) — mas essa chave só é
+  válida quando `V1016` (número da entrevista) avança exatamente +1 entre os dois
+  trimestres. Checado empiricamente antes de implementar (traçando um domicílio real ao
+  longo de vários anos): UPA/V1008 são REAPROVEITADOS por um domicílio novo assim que o
+  ciclo de 5 entrevistas anterior termina, então essa condição sozinha já evita a maior
+  parte dos falsos pareamentos entre pessoas diferentes que passaram pelo mesmo número de
+  ordem em ciclos diferentes. Ainda assim, adicionamos duas checagens de robustez
+  (sexo idêntico e idade variando no máximo 1 ano entre os dois trimestres) pra descartar
+  o caso mais raro de troca de residente DENTRO do mesmo ciclo de 5 entrevistas (ex.:
+  alguém muda de domicílio e outra pessoa assume o mesmo número de ordem). Taxa de match
+  geral ~68% das pessoas-trimestre da base — compatível com o desenho (cada ciclo dura só
+  5 visitas, quem está na 5ª visita não tem continuação). Publicado só POOLED no período
+  inteiro (2012-2026), Brasil apenas — mesmo Indígena, que era a preocupação central de
+  amostra, chega a n~1.450-1.650 (desemprego→emprego) e n~3.900-4.150 (informal→formal)
+  pareados por sexo, mas isso só fecha agregando os 57 pares de trimestres inteiros; uma
+  série trimestral ou um corte por UF deixaria a maioria das células abaixo do mínimo.
+- **Bug real encontrado e corrigido durante a construção de `gerar_ritmo_convergencia`**:
+  a primeira versão do cálculo de "anos pra zerar" só checava se a inclinação da
+  tendência era negativa, sem considerar o sinal do NÍVEL atual do hiato. Isso é
+  suficiente quando o hiato é positivo (caso Branca-Negra/Branca-Indígena), mas quebra
+  quando o hiato já é negativo (caso Preta-Parda, onde Preta já ganha menos que Parda):
+  nível negativo + inclinação negativa significa o hiato está ficando MAIS negativo
+  (divergindo), não convergindo — a versão com bug teria devolvido "-16,7 anos pra
+  zerar", um número sem sentido. Corrigido para exigir que nível e inclinação tenham
+  SINAIS OPOSTOS antes de calcular qualquer projeção (a condição real de "aproximando de
+  zero"). Mesma classe de bug (comparar/combinar duas quantidades com sinal sem checar
+  consistência de sinal primeiro) vale a pena ter em mente em qualquer métrica futura que
+  combine nível + tendência.

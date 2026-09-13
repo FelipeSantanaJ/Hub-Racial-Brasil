@@ -1468,3 +1468,117 @@ arquivo de backup removido. Nenhuma conclusão do README/ANALISE_FASE1.md mudou 
 de robustez confirmou os números já publicados, só tornou o erro-padrão reportado mais
 conservador nos dois lugares que usam teste de significância (Oaxaca-Blinder e hiato
 histórico).
+
+## Décima segunda rodada — Branca/Negra/Indígena e Preta/Parda em pé de igualdade (2026-09-13)
+
+Pedido explícito do usuário: aprofundar dois eixos que só tinham tratamento parcial —
+(1) Branca vs. Negra vs. Indígena lado a lado (não só Indígena como nota de rodapé em
+renda bruta) e (2) Preta vs. Parda, a diferença DENTRO da população negra. Regra geral
+pra Indígena: tentar destravar amostra pequena com pooling de trimestres (mesmo padrão
+já usado em `renda_multidimensional_faixa/geracao`) antes de descartar um cruzamento;
+se mesmo pooling máximo não fechar o `n_minimo`=30, deixar em branco/documentado, nunca
+forçar. Ver [ANALISE_RACA_GENERO.md](ANALISE_RACA_GENERO.md) pros achados completos e
+[LIMITACOES_E_METODOLOGIA.md](LIMITACOES_E_METODOLOGIA.md) pras limitações de amostra
+encontradas.
+
+**Checagem de amostra ANTES de implementar** (seguindo o padrão do projeto de checar
+custo/ambiguidade antes de construir): rodei consultas diretas na base pra medir n do
+Indígena em cada corte pedido — resultado foi bem melhor do que o esperado. Hiato
+regional Branca-Indígena por Região e a decomposição raça×gênero rodam trimestre a
+trimestre SEM pooling (min n=28 em região×trimestre, min n=136 em sexo×trimestre,
+Brasil). Só os cortes com dimensão categórica FINA (11-12 categorias de
+ocupação/setor, ou 3 limiares de quantil) precisaram de pooling — e mesmo assim, só a
+segregação SETORIAL Branca-Indígena não fechou nem agregando os 58 trimestres
+inteiros (menor categoria n=11). O único item genuinamente custoso/ambíguo era o
+painel rotativo real (item 4, metodologia nova) — perguntado ao usuário via
+AskUserQuestion se construía nesta rodada ou deixava pra próxima; resposta foi
+construir agora também.
+
+### 1. Toolkit pesado (Oaxaca-Blinder, segregação de Duncan, hiato regional, topo10/
+   quartis) levado pra Branca-Indígena e Preta-Parda
+
+Novos parquets: `decomposicao_oaxaca_blinder_indigena.parquet`,
+`decomposicao_oaxaca_blinder_pretaparda.parquet`, `segregacao_ocupacional_indigena.parquet`
+(pooled, últimos 8 trimestres — não é série trimestral, ver LIMITACOES),
+`segregacao_ocupacional_pretaparda.parquet`, `segregacao_setorial_pretaparda.parquet`,
+`hiato_branca_indigena.parquet`, `hiato_regional_indigena.parquet` (por Região),
+`hiato_regional_pretaparda.parquet` (por UF), `perfil_topo10_racial_pretaparda.parquet`,
+`perfil_quartis_racial_pretaparda.parquet`, `perfil_topo10_racial_indigena.parquet` e
+`perfil_quartis_racial_indigena.parquet` (esses dois últimos pooled, mesma razão da
+segregação ocupacional). Sem par setorial Branca-Indígena (não fecha amostra, ver
+LIMITACOES). Convenção de sinal explícita: Oaxaca-Blinder Preta-Parda usa
+`grupo_favorecido="Preta"` pra bater com o sinal já usado em `hiato_preta_parda.parquet`
+(`grupo_referencia="Parda"`) — evita duas convenções de sinal diferentes pro mesmo par.
+
+Achado que exigiu cuidado na hora de reportar: o hiato bruto Preta-Parda é pequeno
+(~-5,8%), então "% do hiato explicado" pelo Oaxaca-Blinder sai instável (divisão por
+denominador perto de zero) — não é bug, é propriedade matemática esperada. O
+coeficiente residual em log-pontos (sem dividir por nada) é a leitura confiável, e ele
+revela uma "teto de vidro" específico de Preta dentro da população negra (residual
+positivo no P10, negativo e significativo no P90) que a média sozinha esconde.
+
+### 2. Decomposição raça × gênero (2 fatores), nove combinações vs. Homem Branco
+
+`gerar_decomposicao_raca_genero` generaliza `gerar_dupla_desvantagem` (que só cobria
+Homem Branco vs. Mulher Negra) pras cinco combinações de três grupos raciais + as
+quatro repetindo com Preta/Parda separadas → `decomposicao_raca_genero.parquet`.
+Fórmula ANOVA de 2 fatores (efeito raça + efeito gênero − interação) generalizada pra
+qualquer grupo-alvo; quando o alvo é "Homem X", efeito_gênero e interação saem 0 por
+construção (comportamento esperado). Achado: Homem Indígena tem o maior "efeito raça
+puro" isolado de todos os grupos, mas o termo de interação de Mulher Indígena é o mais
+negativo — o gap total de Mulher Indígena acaba ficando ABAIXO do de Mulher
+Preta/Negra/Parda, apesar do efeito-raça maior. Termo de interação negativo em toda
+combinação "Mulher + raça não-branca" — lido com o mesmo cuidado epistêmico já aplicado
+ao Gini/Theil (não decompor médias implica "não acumula desvantagem").
+
+### 3. Ritmo de convergência — Branca-Negra, Branca-Indígena, Preta-Parda
+
+`gerar_ritmo_convergencia` ajusta tendência linear (e log-linear quando a série é toda
+positiva) no hiato percentual de cada par, com uma versão suavizada (média móvel de 4
+trimestres) específica pra Branca-Indígena (a mais ruidosa das três) →
+`ritmo_convergencia_hiatos.parquet`. **Bug real encontrado e corrigido**: a primeira
+versão do "anos pra zerar" só checava se a inclinação era negativa, ignorando o sinal
+do nível atual — quebrava exatamente no caso Preta-Parda (hiato já negativo E
+inclinação negativa = divergindo, não convergindo), devolvendo um "-16,7 anos" sem
+sentido. Corrigido pra exigir sinais OPOSTOS entre nível e inclinação antes de projetar
+qualquer coisa. Achado: Branca-Negra converge lentamente (~78 anos, extrapolação
+ingênua); Branca-Indígena e Preta-Parda estão DIVERGINDO no ritmo atual, não
+convergindo.
+
+### 4. Painel rotativo real (UPA/V1008/V1016/V2003) — transições de mercado de trabalho
+
+Item mais custoso da rodada, confirmado via pergunta explícita ao usuário antes de
+construir. `CRIAR_BASE` ganhou `v1008`, `v1016`, `v2003`, `idade` (antes só tinha `upa`
+pra clustering). Traçando um domicílio real ao longo de vários anos (checagem empírica
+antes de escrever qualquer código): UPA/V1008 são REAPROVEITADOS por um domicílio novo
+assim que o ciclo de 5 entrevistas anterior termina — a chave de ligação
+(UPA, V1008, V2003) só identifica a MESMA pessoa quando `V1016` avança exatamente +1
+entre trimestres calendário consecutivos; checagens extras de sexo idêntico e idade
+variando no máximo 1 ano descartam o caso raro de troca de residente dentro do mesmo
+ciclo. `gerar_transicoes_painel` → `transicao_desemprego_emprego.parquet` e
+`transicao_informal_formal.parquet`, pooled no período 2012-2026 inteiro (não
+trimestre a trimestre, não por UF — Indígena não fecharia amostra em nenhuma das duas
+aberturas), Brasil apenas, por raça (Branca/Negra/Indígena/Preta/Parda) × sexo. Taxa de
+match geral ~68% das pessoas-trimestre da base. Achado contra-intuitivo que pede
+leitura cuidadosa: homens negros/pardos/pretos/indígenas SAEM do desemprego mais rápido
+que homens brancos (36-38% vs. 33%) — não é "situação melhor", é maior rotatividade em
+trabalho mais precário; a transição informal→formal (onde Indígena é a mais baixa das
+cinco, ~10,5%) conta a história oposta e mais esperada.
+
+Candidato registrado pra rodada futura (não construído agora, pra não estourar escopo
+além do pedido): Branca/Negra/Preta/Parda têm amostra grande o bastante pra sustentar
+uma série TRIMESTRAL de transição (não só pooled) — só Indígena de fato precisa do
+período inteiro agregado.
+
+### Critério de "pronto" desta rodada
+
+19 novos parquets em `data/processed/` (convenção `*_indigena`/`*_pretaparda` onde já
+existe equivalente `*_racial`, mais os 2 de transição e o de ritmo de convergência);
+`docs/ANALISE_RACA_GENERO.md` novo com os achados completos; `docs/
+LIMITACOES_E_METODOLOGIA.md` com as limitações de amostra novas (setorial
+Branca-Indígena não publicada, pooled vs. série trimestral, instabilidade de % no
+Oaxaca-Blinder Preta-Parda, metodologia de pareamento do painel, bug do sinal em
+ritmo de convergência). Sem gráficos/PPTX novos — fora do critério de pronto pedido
+desta vez. Item 1 priorizado primeiro, como pedido; itens 2-4 completos na mesma
+rodada (usuário optou por construir o item 4 — painel rotativo — junto, em vez de
+adiar pra próxima rodada).

@@ -178,7 +178,20 @@ CREATE TEMP TABLE base AS
         -- Contínua) — usada só como cluster de erro-padrão robusto (ver
         -- pnadc_core.decomposicao_oaxaca_blinder e erro_padrao_cluster_bootstrap), nunca
         -- como dimensão de agregação.
-        m.UPA AS upa
+        m.UPA AS upa,
+        -- V1008 (número de seleção do domicílio dentro da UPA), V1016 (número da
+        -- entrevista/visita, 1 a 5) e V2003 (número de ordem da pessoa dentro do
+        -- domicílio) — chave de ligação do painel rotativo real (ver
+        -- gerar_transicoes_painel): (upa, v1008, v2003) identifica o MESMO domicílio +
+        -- número de ordem entre trimestres, mas só é a MESMA PESSOA quando v1016 avança
+        -- exatamente +1 entre trimestres calendário consecutivos dentro do mesmo ciclo
+        -- de 5 visitas (checado empiricamente: UPA/V1008 são reaproveitados por um NOVO
+        -- domicílio assim que o ciclo de 5 visitas anterior termina, então v1016=1 de um
+        -- ciclo novo nunca "encaixa" como v1016_anterior+1 de um ciclo antigo que tenha
+        -- terminado em v1016=5). V2009 (idade) guardada de novo aqui, sem faixa, como
+        -- checagem adicional de que é a mesma pessoa (idade não pode cair nem saltar
+        -- mais de 1 ano entre trimestres consecutivos).
+        m.V1008 AS v1008, m.V1016 AS v1016, m.V2003 AS v2003, m.V2009 AS idade
     FROM read_parquet('{PARQUET_GLOB}', hive_partitioning = 1) AS m
     LEFT JOIN read_parquet('{DEFLATOR_PATH}') AS d
         ON m.ano = d.ano AND m.trimestre = d.trimestre AND m.UF = d.UF
@@ -494,6 +507,119 @@ def gerar_decomposicao_oaxaca_blinder(con: duckdb.DuckDBPyConnection, n_trimestr
               "residuo_restrito_significativo"]].to_string(index=False), flush=True)
 
 
+def gerar_decomposicao_oaxaca_blinder_indigena(con: duckdb.DuckDBPyConnection, n_trimestres: int = 8) -> None:
+    """Mesmo método de `gerar_decomposicao_oaxaca_blinder` (Oaxaca-Blinder + RIF em
+    log(renda), controles progressivos, erro-padrão clusterizado por UPA), mas Branca
+    vs. Indígena em vez de Branca vs. Negra — pedido explícito de tratar os três grupos
+    raciais em pé de igualdade metodológica, não só Indígena como nota de rodapé em
+    renda bruta.
+
+    Amostra checada antes de escrever esta função: últimos 8 trimestres agrupados dão
+    n≈8.550 pessoas indígenas ocupadas com ocupação identificada — de sobra pra uma
+    regressão (o `n_minimo=30` só importa pro método de padronização direta por
+    célula, não pra uma regressão OLS/WLS de tabela inteira). Mesmo `n_trimestres=8`
+    já usado pra Preta/Parda, sem precisar agregar mais."""
+    micro = con.execute(f"""
+        SELECT raca_cor, faixa_etaria, nivel_instrucao, grupamento_ocupacional,
+               renda_habitual_real, peso, upa
+        FROM base
+        WHERE raca_cor IN ('Branca', 'Indígena')
+          AND grupamento_ocupacional IS NOT NULL
+          AND renda_habitual_real IS NOT NULL AND renda_habitual_real > 0
+          AND (ano, trimestre) IN (
+              SELECT ano, trimestre FROM (SELECT DISTINCT ano, trimestre FROM base ORDER BY ano DESC, trimestre DESC LIMIT {n_trimestres})
+          )
+    """).df()
+    micro["log_renda"] = np.log(micro["renda_habitual_real"])
+
+    resultados = []
+    for controles in [["faixa_etaria"], ["faixa_etaria", "nivel_instrucao"],
+                       ["faixa_etaria", "nivel_instrucao", "grupamento_ocupacional"],
+                       ["grupamento_ocupacional"]]:
+        r = pnadc_core.decomposicao_oaxaca_blinder(
+            micro, "log_renda", controles, "peso", "raca_cor", "Branca", "Indígena", cluster="upa"
+        )
+        r["controles"] = " + ".join(controles)
+        r["ponto"] = "média"
+        resultados.append(r)
+
+    controles_completos = ["faixa_etaria", "nivel_instrucao", "grupamento_ocupacional"]
+    for quantil, rotulo in [(0.1, "p10"), (0.5, "p50"), (0.9, "p90")]:
+        rif, _, _ = pnadc_core.rif_quantil(micro["log_renda"].values, micro["peso"].values, quantil)
+        micro_rif = micro.copy()
+        micro_rif["rif"] = rif
+        r = pnadc_core.decomposicao_oaxaca_blinder(
+            micro_rif, "rif", controles_completos, "peso", "raca_cor", "Branca", "Indígena", cluster="upa"
+        )
+        r["controles"] = " + ".join(controles_completos)
+        r["ponto"] = rotulo
+        resultados.append(r)
+
+    df = pd.DataFrame(resultados)
+    destino = OUTPUT_DIR / "decomposicao_oaxaca_blinder_indigena.parquet"
+    df.to_parquet(destino, index=False)
+    print(f"decomposicao_oaxaca_blinder_indigena.parquet: {len(df)} linhas", flush=True)
+    print(df[["ponto", "controles", "pct_explicada", "pct_nao_explicada",
+              "residuo_restrito_coef", "residuo_restrito_p_valor",
+              "residuo_restrito_significativo"]].to_string(index=False), flush=True)
+
+
+def gerar_decomposicao_oaxaca_blinder_preta_parda(con: duckdb.DuckDBPyConnection, n_trimestres: int = 8) -> None:
+    """Mesmo método de `gerar_decomposicao_oaxaca_blinder`, mas DENTRO da população
+    negra: Preta vs. Parda. Nunca tinha sido decomposto — só existia o hiato bruto de
+    média (`hiato_preta_parda.parquet`). Amostra enorme (centenas de milhares por
+    trimestre pra cada grupo), nenhuma ressalva necessária.
+
+    Convenção de sinal: `grupo_favorecido="Preta"`, `grupo_desfavorecido="Parda"` — os
+    nomes do parâmetro são só rótulos (a decomposição não assume quem ganha mais), mas
+    manter Preta como o lado "não-referência" faz `hiato_total` sair na MESMA direção
+    (Preta - Parda) que `hiato_preta_parda.parquet` (`grupo_referencia="Parda"`), pra
+    não haver duas convenções de sinal diferentes pro mesmo par de grupos."""
+    micro = con.execute(f"""
+        SELECT raca_cor, faixa_etaria, nivel_instrucao, grupamento_ocupacional,
+               renda_habitual_real, peso, upa
+        FROM base
+        WHERE raca_cor IN ('Preta', 'Parda')
+          AND grupamento_ocupacional IS NOT NULL
+          AND renda_habitual_real IS NOT NULL AND renda_habitual_real > 0
+          AND (ano, trimestre) IN (
+              SELECT ano, trimestre FROM (SELECT DISTINCT ano, trimestre FROM base ORDER BY ano DESC, trimestre DESC LIMIT {n_trimestres})
+          )
+    """).df()
+    micro["log_renda"] = np.log(micro["renda_habitual_real"])
+
+    resultados = []
+    for controles in [["faixa_etaria"], ["faixa_etaria", "nivel_instrucao"],
+                       ["faixa_etaria", "nivel_instrucao", "grupamento_ocupacional"],
+                       ["grupamento_ocupacional"]]:
+        r = pnadc_core.decomposicao_oaxaca_blinder(
+            micro, "log_renda", controles, "peso", "raca_cor", "Preta", "Parda", cluster="upa"
+        )
+        r["controles"] = " + ".join(controles)
+        r["ponto"] = "média"
+        resultados.append(r)
+
+    controles_completos = ["faixa_etaria", "nivel_instrucao", "grupamento_ocupacional"]
+    for quantil, rotulo in [(0.1, "p10"), (0.5, "p50"), (0.9, "p90")]:
+        rif, _, _ = pnadc_core.rif_quantil(micro["log_renda"].values, micro["peso"].values, quantil)
+        micro_rif = micro.copy()
+        micro_rif["rif"] = rif
+        r = pnadc_core.decomposicao_oaxaca_blinder(
+            micro_rif, "rif", controles_completos, "peso", "raca_cor", "Preta", "Parda", cluster="upa"
+        )
+        r["controles"] = " + ".join(controles_completos)
+        r["ponto"] = rotulo
+        resultados.append(r)
+
+    df = pd.DataFrame(resultados)
+    destino = OUTPUT_DIR / "decomposicao_oaxaca_blinder_pretaparda.parquet"
+    df.to_parquet(destino, index=False)
+    print(f"decomposicao_oaxaca_blinder_pretaparda.parquet: {len(df)} linhas", flush=True)
+    print(df[["ponto", "controles", "pct_explicada", "pct_nao_explicada",
+              "residuo_restrito_coef", "residuo_restrito_p_valor",
+              "residuo_restrito_significativo"]].to_string(index=False), flush=True)
+
+
 def gerar_perfil_topo10_racial(con: duckdb.DuckDBPyConnection) -> None:
     """Perfil demográfico de quem está no topo 10% de renda DENTRO de cada raça (Branca
     e Negra — Indígena fica de fora, amostra insuficiente pra um quantil confiável por
@@ -700,6 +826,169 @@ def gerar_perfil_quartis_racial(con: duckdb.DuckDBPyConnection) -> None:
     destino = OUTPUT_DIR / "perfil_quartis_racial.parquet"
     df.to_parquet(destino, index=False)
     print(f"perfil_quartis_racial.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
+
+
+def gerar_perfil_topo10_quartis_pretaparda(con: duckdb.DuckDBPyConnection) -> None:
+    """Espelha `gerar_perfil_topo10_racial` + `gerar_perfil_quartis_racial`, mas dentro
+    de Preta e dentro de Parda SEPARADAMENTE (em vez de somadas em Negra) — limiar P90 /
+    P25 / P50 / P75 calculado dentro do próprio grupo Preta e dentro do próprio grupo
+    Parda, cada um com seu próprio "topo 10%"/quartis. Amostra grande o bastante (dezenas
+    de milhares por trimestre, em qualquer trimestre) pra manter a série trimestral
+    inteira nos dois recortes, sem pooling."""
+    dimensoes = ["sexo", "faixa_etaria", "geracao", "nivel_instrucao"]
+    trimestres = con.execute("SELECT DISTINCT ano, trimestre FROM base ORDER BY ano, trimestre").df()
+
+    topo10, quartis = [], []
+    for _, row in trimestres.iterrows():
+        ano, trimestre = int(row["ano"]), int(row["trimestre"])
+        micro = con.execute(f"""
+            SELECT raca_cor, sexo, faixa_etaria, geracao, nivel_instrucao,
+                   renda_habitual_real, peso
+            FROM base
+            WHERE ano = {ano} AND trimestre = {trimestre}
+              AND raca_cor IN ('Preta', 'Parda')
+              AND renda_habitual_real IS NOT NULL AND renda_habitual_real > 0
+        """).df()
+        if micro.empty:
+            continue
+
+        for raca in ("Preta", "Parda"):
+            grupo = micro[micro["raca_cor"] == raca].copy()
+            if len(grupo) < 200:
+                continue
+            peso_grupo = grupo["peso"].sum()
+
+            limiar = pnadc_core.quantil_ponderado(grupo["renda_habitual_real"], grupo["peso"], 0.9)
+            topo = grupo[grupo["renda_habitual_real"] >= limiar]
+            peso_topo = topo["peso"].sum()
+            if peso_topo > 0:
+                pct_capturado = 100 * peso_topo / peso_grupo
+                for dimensao in dimensoes:
+                    for categoria, sub in topo.groupby(dimensao, observed=True):
+                        topo10.append({
+                            "ano": ano, "trimestre": trimestre, "raca_cor": raca,
+                            "limiar_p90": limiar, "n_topo10": len(topo),
+                            "pct_populacao_capturada": pct_capturado,
+                            "dimensao": dimensao, "categoria": categoria,
+                            "pct_do_topo10": 100 * sub["peso"].sum() / peso_topo,
+                        })
+
+            p25 = pnadc_core.quantil_ponderado(grupo["renda_habitual_real"], grupo["peso"], 0.25)
+            p50 = pnadc_core.quantil_ponderado(grupo["renda_habitual_real"], grupo["peso"], 0.50)
+            p75 = pnadc_core.quantil_ponderado(grupo["renda_habitual_real"], grupo["peso"], 0.75)
+            grupo["quartil"] = np.select(
+                [grupo["renda_habitual_real"] < p25,
+                 grupo["renda_habitual_real"] < p50,
+                 grupo["renda_habitual_real"] < p75],
+                ["Q1 (25% que menos ganham)", "Q2", "Q3"],
+                default="Q4 (25% que mais ganham)",
+            )
+            for quartil, fatia in grupo.groupby("quartil", observed=True):
+                peso_fatia = fatia["peso"].sum()
+                if peso_fatia == 0:
+                    continue
+                pct_capturado = 100 * peso_fatia / peso_grupo
+                for dimensao in dimensoes:
+                    for categoria, sub in fatia.groupby(dimensao, observed=True):
+                        quartis.append({
+                            "ano": ano, "trimestre": trimestre, "raca_cor": raca,
+                            "quartil": quartil, "n_quartil": len(fatia),
+                            "pct_populacao_capturada": pct_capturado,
+                            "dimensao": dimensao, "categoria": categoria,
+                            "pct_do_quartil": 100 * sub["peso"].sum() / peso_fatia,
+                        })
+
+    df_topo10 = pd.DataFrame(topo10)
+    destino_topo10 = OUTPUT_DIR / "perfil_topo10_racial_pretaparda.parquet"
+    df_topo10.to_parquet(destino_topo10, index=False)
+    print(f"perfil_topo10_racial_pretaparda.parquet: {len(df_topo10):,} linhas".replace(",", "."), flush=True)
+
+    df_quartis = pd.DataFrame(quartis)
+    destino_quartis = OUTPUT_DIR / "perfil_quartis_racial_pretaparda.parquet"
+    df_quartis.to_parquet(destino_quartis, index=False)
+    print(f"perfil_quartis_racial_pretaparda.parquet: {len(df_quartis):,} linhas".replace(",", "."), flush=True)
+
+
+def gerar_perfil_topo10_quartis_indigena(con: duckdb.DuckDBPyConnection, n_trimestres: int = 8) -> None:
+    """Espelha `gerar_perfil_topo10_racial` + `gerar_perfil_quartis_racial`, mas dentro
+    de Indígena — AO CONTRÁRIO das versões Branca/Negra/Preta/Parda (série trimestral
+    inteira), aqui só dá pra publicar UMA janela pooled (últimos `n_trimestres`, mesmo
+    padrão de `gerar_decomposicao_oaxaca_blinder_indigena`): amostra checada antes de
+    escrever esta função — trimestre a trimestre a população indígena ocupada com renda
+    fica abaixo do mínimo de 200 usado pro quartil (3 limiares); pooling 8 trimestres dá
+    n≈8.550, de sobra pros dois recortes (100 pro P90, 200 pros quartis)."""
+    dimensoes = ["sexo", "faixa_etaria", "geracao", "nivel_instrucao"]
+    micro = con.execute(f"""
+        SELECT sexo, faixa_etaria, geracao, nivel_instrucao, renda_habitual_real, peso
+        FROM base
+        WHERE raca_cor = 'Indígena'
+          AND renda_habitual_real IS NOT NULL AND renda_habitual_real > 0
+          AND (ano, trimestre) IN (
+              SELECT ano, trimestre FROM (SELECT DISTINCT ano, trimestre FROM base ORDER BY ano DESC, trimestre DESC LIMIT {n_trimestres})
+          )
+    """).df()
+    # pega as LINHAS (ano,trimestre) de fato, não MIN/MAX por coluna separado — o mesmo
+    # bug de "MIN(ano)+MIN(trimestre) não formam necessariamente um par real" já
+    # documentado em docs/PLANO.md (`_trimestre_mais_recente`).
+    janela = con.execute(
+        f"SELECT DISTINCT ano, trimestre FROM base ORDER BY ano DESC, trimestre DESC LIMIT {n_trimestres}"
+    ).df().sort_values(["ano", "trimestre"]).reset_index(drop=True)
+    trimestre_inicio = f"{int(janela.iloc[0]['ano'])}T{int(janela.iloc[0]['trimestre'])}"
+    trimestre_fim = f"{int(janela.iloc[-1]['ano'])}T{int(janela.iloc[-1]['trimestre'])}"
+
+    topo10, quartis = [], []
+    peso_grupo = micro["peso"].sum()
+
+    limiar = pnadc_core.quantil_ponderado(micro["renda_habitual_real"], micro["peso"], 0.9)
+    topo = micro[micro["renda_habitual_real"] >= limiar]
+    peso_topo = topo["peso"].sum()
+    pct_capturado_topo = 100 * peso_topo / peso_grupo
+    for dimensao in dimensoes:
+        for categoria, sub in topo.groupby(dimensao, observed=True):
+            topo10.append({
+                "trimestre_inicio": trimestre_inicio, "trimestre_fim": trimestre_fim,
+                "limiar_p90": limiar, "n_topo10": len(topo),
+                "pct_populacao_capturada": pct_capturado_topo,
+                "dimensao": dimensao, "categoria": categoria,
+                "pct_do_topo10": 100 * sub["peso"].sum() / peso_topo,
+            })
+
+    p25 = pnadc_core.quantil_ponderado(micro["renda_habitual_real"], micro["peso"], 0.25)
+    p50 = pnadc_core.quantil_ponderado(micro["renda_habitual_real"], micro["peso"], 0.50)
+    p75 = pnadc_core.quantil_ponderado(micro["renda_habitual_real"], micro["peso"], 0.75)
+    micro["quartil"] = np.select(
+        [micro["renda_habitual_real"] < p25,
+         micro["renda_habitual_real"] < p50,
+         micro["renda_habitual_real"] < p75],
+        ["Q1 (25% que menos ganham)", "Q2", "Q3"],
+        default="Q4 (25% que mais ganham)",
+    )
+    for quartil, fatia in micro.groupby("quartil", observed=True):
+        peso_fatia = fatia["peso"].sum()
+        if peso_fatia == 0:
+            continue
+        pct_capturado = 100 * peso_fatia / peso_grupo
+        for dimensao in dimensoes:
+            for categoria, sub in fatia.groupby(dimensao, observed=True):
+                quartis.append({
+                    "trimestre_inicio": trimestre_inicio, "trimestre_fim": trimestre_fim,
+                    "quartil": quartil, "n_quartil": len(fatia),
+                    "pct_populacao_capturada": pct_capturado,
+                    "dimensao": dimensao, "categoria": categoria,
+                    "pct_do_quartil": 100 * sub["peso"].sum() / peso_fatia,
+                })
+
+    df_topo10 = pd.DataFrame(topo10)
+    destino_topo10 = OUTPUT_DIR / "perfil_topo10_racial_indigena.parquet"
+    df_topo10.to_parquet(destino_topo10, index=False)
+    print(f"perfil_topo10_racial_indigena.parquet: {len(df_topo10):,} linhas "
+          f"(pooled {trimestre_inicio}-{trimestre_fim})".replace(",", "."), flush=True)
+
+    df_quartis = pd.DataFrame(quartis)
+    destino_quartis = OUTPUT_DIR / "perfil_quartis_racial_indigena.parquet"
+    df_quartis.to_parquet(destino_quartis, index=False)
+    print(f"perfil_quartis_racial_indigena.parquet: {len(df_quartis):,} linhas "
+          f"(pooled {trimestre_inicio}-{trimestre_fim})".replace(",", "."), flush=True)
 
 
 DIMS_COMPOSICAO_EXTREMO = ["nivel_instrucao", "faixa_etaria", "geracao"]
@@ -1044,6 +1333,94 @@ def gerar_hiato_regional(con: duckdb.DuckDBPyConnection) -> None:
     print(f"hiato_regional.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
+def gerar_hiato_regional_indigena(con: duckdb.DuckDBPyConnection) -> None:
+    """Espelha `gerar_hiato_regional`, mas Branca vs. Indígena por Região (não por UF —
+    a amostra indígena por UF individual é inviável na maioria dos estados; por Região
+    já é o recorte geográfico mais fino que fecha o `n_minimo`=30 quase sempre). Amostra
+    checada antes de escrever esta função: 288 de 290 células (região x trimestre) têm
+    n>=30; as 2 exceções (regiões com população indígena residual e trimestre com sorte
+    amostral ruim) ficam de fora automaticamente porque `tabela_hiatos_significancia`
+    já descarta grupo sem dado suficiente pro teste — não precisou de pooling."""
+    combinacoes = con.execute(
+        "SELECT DISTINCT ano, trimestre, regiao FROM base WHERE regiao IS NOT NULL "
+        "ORDER BY ano, trimestre, regiao"
+    ).df()
+
+    resultados = []
+    for _, row in combinacoes.iterrows():
+        ano, trimestre, regiao = int(row["ano"]), int(row["trimestre"]), row["regiao"]
+        micro = con.execute(f"""
+            SELECT raca_cor, renda_habitual_real, peso
+            FROM base
+            WHERE ano = {ano} AND trimestre = {trimestre} AND regiao = '{regiao}'
+              AND raca_cor IN ('Branca', 'Indígena')
+              AND renda_habitual_real IS NOT NULL
+        """).df()
+        if micro.empty:
+            continue
+        tabela = pnadc_core.tabela_hiatos_significancia(
+            micro, "renda_habitual_real", "raca_cor", grupo_referencia="Indígena", peso="peso"
+        )
+        if "Branca" not in tabela.index:
+            continue
+        linha_branca = tabela.loc["Branca"]
+        media_indigena = tabela.loc["Indígena", "media"]
+        resultados.append({
+            "ano": ano, "trimestre": trimestre, "regiao": regiao,
+            "renda_media_branca": linha_branca["media"], "renda_media_indigena": media_indigena,
+            "hiato_absoluto": linha_branca["hiato_media"],
+            "hiato_percentual": 100 * linha_branca["hiato_media"] / media_indigena if media_indigena else None,
+            "p_valor": linha_branca["p_valor"], "significativo": linha_branca["significativo"],
+        })
+
+    df = pd.DataFrame(resultados)
+    destino = OUTPUT_DIR / "hiato_regional_indigena.parquet"
+    df.to_parquet(destino, index=False)
+    print(f"hiato_regional_indigena.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
+
+
+def gerar_hiato_regional_preta_parda(con: duckdb.DuckDBPyConnection) -> None:
+    """Espelha `gerar_hiato_regional`, mas Preta vs. Parda por UF (nível mais fino que
+    Região — viável porque Parda é ~50% da amostra e Preta tem n mínimo de 277 por UF já
+    NUM SÓ trimestre, checado antes de escrever esta função)."""
+    combinacoes = con.execute(
+        "SELECT DISTINCT ano, trimestre, UF FROM base WHERE UF IS NOT NULL "
+        "ORDER BY ano, trimestre, UF"
+    ).df()
+
+    resultados = []
+    for _, row in combinacoes.iterrows():
+        ano, trimestre, uf = int(row["ano"]), int(row["trimestre"]), row["UF"]
+        micro = con.execute(f"""
+            SELECT raca_cor, renda_habitual_real, peso
+            FROM base
+            WHERE ano = {ano} AND trimestre = {trimestre} AND UF = '{uf}'
+              AND raca_cor IN ('Preta', 'Parda')
+              AND renda_habitual_real IS NOT NULL
+        """).df()
+        if micro.empty:
+            continue
+        tabela = pnadc_core.tabela_hiatos_significancia(
+            micro, "renda_habitual_real", "raca_cor", grupo_referencia="Parda", peso="peso"
+        )
+        if "Preta" not in tabela.index:
+            continue
+        linha_preta = tabela.loc["Preta"]
+        media_parda = tabela.loc["Parda", "media"]
+        resultados.append({
+            "ano": ano, "trimestre": trimestre, "UF": uf,
+            "renda_media_preta": linha_preta["media"], "renda_media_parda": media_parda,
+            "hiato_absoluto": linha_preta["hiato_media"],
+            "hiato_percentual": 100 * linha_preta["hiato_media"] / media_parda if media_parda else None,
+            "p_valor": linha_preta["p_valor"], "significativo": linha_preta["significativo"],
+        })
+
+    df = pd.DataFrame(resultados)
+    destino = OUTPUT_DIR / "hiato_regional_pretaparda.parquet"
+    df.to_parquet(destino, index=False)
+    print(f"hiato_regional_pretaparda.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
+
+
 def gerar_hiato_setor_publico_privado(con: duckdb.DuckDBPyConnection) -> None:
     """Hiato Branca vs. Negra DENTRO do setor Público e DENTRO do setor Privado,
     separadamente, trimestre a trimestre — mesmo método de `gerar_hiato_racial`. Testa
@@ -1164,6 +1541,117 @@ def gerar_segregacao_setorial(con: duckdb.DuckDBPyConnection) -> None:
           f"{resultado_df['indice_duncan_branca_negra'].iloc[-1] * 100:.1f}%", flush=True)
 
 
+def gerar_segregacao_ocupacional_preta_parda(con: duckdb.DuckDBPyConnection) -> None:
+    """Espelha `gerar_indice_segregacao_ocupacional`, mas Preta vs. Parda (sem
+    pré-combinar em Negra) — amostra de ambos os grupos é grande o bastante pra manter
+    a série trimestral inteira, sem pooling."""
+    df = con.execute("""
+        SELECT ano, trimestre, raca_cor, grupamento_ocupacional, SUM(peso) AS peso
+        FROM base
+        WHERE raca_cor IN ('Preta', 'Parda') AND grupamento_ocupacional IS NOT NULL
+        GROUP BY ano, trimestre, raca_cor, grupamento_ocupacional
+    """).df()
+
+    resultados = []
+    for (ano, trimestre), grupo in df.groupby(["ano", "trimestre"]):
+        pivot = grupo.pivot_table(index="grupamento_ocupacional", columns="raca_cor", values="peso", fill_value=0.0)
+        if "Preta" not in pivot.columns or "Parda" not in pivot.columns:
+            continue
+        p_preta = pivot["Preta"] / pivot["Preta"].sum()
+        p_parda = pivot["Parda"] / pivot["Parda"].sum()
+        duncan = 0.5 * (p_preta - p_parda).abs().sum()
+        resultados.append({"ano": int(ano), "trimestre": int(trimestre), "indice_duncan_preta_parda": duncan})
+
+    resultado_df = pd.DataFrame(resultados).sort_values(["ano", "trimestre"])
+    destino = OUTPUT_DIR / "segregacao_ocupacional_pretaparda.parquet"
+    resultado_df.to_parquet(destino, index=False)
+    print(f"segregacao_ocupacional_pretaparda.parquet: {len(resultado_df)} linhas", flush=True)
+    print(f"  Índice de Duncan ocupacional Preta-Parda (trimestre mais recente): "
+          f"{resultado_df['indice_duncan_preta_parda'].iloc[-1] * 100:.1f}%", flush=True)
+
+
+def gerar_segregacao_setorial_preta_parda(con: duckdb.DuckDBPyConnection) -> None:
+    """Espelha `gerar_segregacao_setorial`, mas Preta vs. Parda — mesma justificativa de
+    amostra de `gerar_segregacao_ocupacional_preta_parda`: série trimestral inteira, sem
+    pooling. Branca vs. Indígena NÃO tem uma versão setorial equivalente — ver
+    `gerar_indice_segregacao_ocupacional_indigena` pra por quê (12 categorias não fecham
+    nem agrupando os 58 trimestres inteiros)."""
+    df = con.execute("""
+        SELECT ano, trimestre, raca_cor, setor_atividade, SUM(peso) AS peso
+        FROM base
+        WHERE raca_cor IN ('Preta', 'Parda') AND setor_atividade IS NOT NULL
+        GROUP BY ano, trimestre, raca_cor, setor_atividade
+    """).df()
+
+    resultados = []
+    for (ano, trimestre), grupo in df.groupby(["ano", "trimestre"]):
+        pivot = grupo.pivot_table(index="setor_atividade", columns="raca_cor", values="peso", fill_value=0.0)
+        if "Preta" not in pivot.columns or "Parda" not in pivot.columns:
+            continue
+        p_preta = pivot["Preta"] / pivot["Preta"].sum()
+        p_parda = pivot["Parda"] / pivot["Parda"].sum()
+        duncan = 0.5 * (p_preta - p_parda).abs().sum()
+        resultados.append({"ano": int(ano), "trimestre": int(trimestre), "indice_duncan_preta_parda": duncan})
+
+    resultado_df = pd.DataFrame(resultados).sort_values(["ano", "trimestre"])
+    destino = OUTPUT_DIR / "segregacao_setorial_pretaparda.parquet"
+    resultado_df.to_parquet(destino, index=False)
+    print(f"segregacao_setorial_pretaparda.parquet: {len(resultado_df)} linhas", flush=True)
+    print(f"  Índice de Duncan setorial Preta-Parda (trimestre mais recente): "
+          f"{resultado_df['indice_duncan_preta_parda'].iloc[-1] * 100:.1f}%", flush=True)
+
+
+def gerar_indice_segregacao_ocupacional_indigena(con: duckdb.DuckDBPyConnection, n_trimestres: int = 8) -> None:
+    """Índice de Duncan Branca vs. Indígena por ocupação (grupamento_ocupacional) — AO
+    CONTRÁRIO de `gerar_indice_segregacao_ocupacional` (série trimestral inteira), aqui
+    só dá pra publicar UM valor (pooling dos últimos `n_trimestres`, mesma janela default
+    já usada em `gerar_decomposicao_oaxaca_blinder_indigena`): amostra checada antes de
+    escrever esta função — trimestre a trimestre a distribuição de 11 categorias do
+    Indígena fica ruidosa demais (algumas categorias raras ficam com poucas dezenas de
+    pessoas SOMANDO os 58 trimestres inteiros, imagina num trimestre só). Pooling de 8
+    trimestres dá n≈9.030, 10 das 11 categorias presentes (a 11ª, "Forças armadas,
+    policiais e bombeiros militares", é rara mas ainda teria n=66 pooling 8 trimestres —
+    na prática pode não aparecer em toda janela; tratada como 0% quando ausente, o que é
+    o comportamento correto do índice de Duncan, não um erro).
+
+    NÃO tem par setorial (`setor_atividade` tem 12 categorias e mesmo somando os 58
+    trimestres inteiros a menor categoria fica com n=11, abaixo do mínimo de 30 já usado
+    no projeto) — documentado como limitação em vez de publicado instável."""
+    df = con.execute(f"""
+        SELECT raca_cor, grupamento_ocupacional, SUM(peso) AS peso
+        FROM base
+        WHERE raca_cor IN ('Branca', 'Indígena') AND grupamento_ocupacional IS NOT NULL
+          AND (ano, trimestre) IN (
+              SELECT ano, trimestre FROM (SELECT DISTINCT ano, trimestre FROM base ORDER BY ano DESC, trimestre DESC LIMIT {n_trimestres})
+          )
+        GROUP BY raca_cor, grupamento_ocupacional
+    """).df()
+    pivot = df.pivot_table(index="grupamento_ocupacional", columns="raca_cor", values="peso", fill_value=0.0)
+    p_branca = pivot["Branca"] / pivot["Branca"].sum()
+    p_indigena = pivot["Indígena"] / pivot["Indígena"].sum()
+    duncan = 0.5 * (p_branca - p_indigena).abs().sum()
+
+    # pega as LINHAS (ano,trimestre) de fato, não MIN/MAX por coluna separado — mesmo
+    # cuidado de `gerar_perfil_topo10_quartis_indigena` (bug de pareamento já visto
+    # antes no projeto com `df[["ano","trimestre"]].max()`).
+    janela = con.execute(
+        f"SELECT DISTINCT ano, trimestre FROM base ORDER BY ano DESC, trimestre DESC LIMIT {n_trimestres}"
+    ).df().sort_values(["ano", "trimestre"]).reset_index(drop=True)
+    trimestre_inicio = f"{int(janela.iloc[0]['ano'])}T{int(janela.iloc[0]['trimestre'])}"
+    trimestre_fim = f"{int(janela.iloc[-1]['ano'])}T{int(janela.iloc[-1]['trimestre'])}"
+    resultado_df = pd.DataFrame([{
+        "n_trimestres_pooled": n_trimestres,
+        "trimestre_inicio": trimestre_inicio,
+        "trimestre_fim": trimestre_fim,
+        "indice_duncan_branca_indigena": duncan,
+    }])
+    destino = OUTPUT_DIR / "segregacao_ocupacional_indigena.parquet"
+    resultado_df.to_parquet(destino, index=False)
+    print(f"segregacao_ocupacional_indigena.parquet: 1 linha (pooled)", flush=True)
+    print(f"  Índice de Duncan ocupacional Branca-Indígena ({resultado_df['trimestre_inicio'].iloc[0]}"
+          f"-{resultado_df['trimestre_fim'].iloc[0]}, pooled): {duncan * 100:.1f}%", flush=True)
+
+
 EVENTOS_ESTRUTURAIS = {
     "reforma_trabalhista_2017": (2017, 3),
     "reforma_previdencia_2019": (2019, 4),
@@ -1211,6 +1699,127 @@ def gerar_quebra_estrutural() -> None:
     df.to_parquet(destino, index=False)
     print(f"quebra_estrutural.parquet: {len(df)} linhas", flush=True)
     print(df.to_string(index=False), flush=True)
+
+
+PARES_RITMO_CONVERGENCIA = [
+    ("Branca-Negra", "hiato_racial.parquet"),
+    ("Branca-Indígena", "hiato_branca_indigena.parquet"),
+    ("Preta-Parda", "hiato_preta_parda.parquet"),
+]
+
+
+def _ajustar_tendencia(serie: pd.DataFrame) -> dict:
+    """OLS de hiato_percentual em índice de trimestre — inclinação em pontos
+    percentuais por trimestre, R² e p-valor da inclinação."""
+    modelo = smf.ols("hiato_percentual ~ indice_trimestre", data=serie).fit()
+    return {
+        "inclinacao_pp_por_trimestre": modelo.params["indice_trimestre"],
+        "p_valor_inclinacao": modelo.pvalues["indice_trimestre"],
+        "r2": modelo.rsquared,
+    }
+
+
+def gerar_ritmo_convergencia() -> None:
+    """Compara o ritmo de convergência do hiato de renda (%) nos TRÊS pares — Branca-
+    Negra, Branca-Indígena, Preta-Parda — ajustando uma tendência linear simples
+    (hiato_percentual ~ índice de trimestre) em cada série histórica já publicada.
+    Roda DEPOIS de `gerar_hiato_racial`, `gerar_hiato_branca_indigena` e
+    `gerar_hiato_preta_parda` (lê os parquets que elas geram).
+
+    Inclinação negativa = hiato caindo ao longo do tempo (convergindo); positiva =
+    hiato subindo (divergindo); perto de zero = estagnado. Reporta também um log-linear
+    (log(hiato_percentual) ~ índice) quando a série é toda positiva, pra capturar
+    convergência proporcional (ex.: "cai X% ao ano", não só "cai X pontos percentuais
+    ao ano") — as duas leituras podem discordar sobre qual série converge mais rápido
+    quando o NÍVEL de partida é muito diferente entre os pares.
+
+    Branca-Indígena é a série mais ruidosa das três (menor amostra por trimestre) —
+    ajusta a tendência TANTO na série bruta quanto numa versão suavizada (média móvel
+    de 4 trimestres, mesmo padrão já usado nos gráficos de série temporal de Indígena
+    em `graficos_fase1.py`) e compara o R² das duas: se mesmo suavizada o R² continuar
+    muito baixo, marca a série como `tendencia_confiavel=False` e NÃO reporta um "anos
+    pra zerar" pra ela — segue a regra do projeto de não forçar uma leitura de uma
+    série ruidosa demais.
+
+    "Anos pra zerar no ritmo atual" é só um exercício ILUSTRATIVO de extrapolação
+    ingênua (assume a mesma inclinação linear projetada pra frente indefinidamente,
+    o que quase certamente não vai se sustentar) — nunca uma projeção de verdade.
+    """
+    resultados = []
+    for nome_par, arquivo in PARES_RITMO_CONVERGENCIA:
+        caminho = OUTPUT_DIR / arquivo
+        if not caminho.exists():
+            print(f"  aviso: {arquivo} não encontrado, pulando {nome_par}", flush=True)
+            continue
+        serie = pd.read_parquet(caminho).sort_values(["ano", "trimestre"]).reset_index(drop=True)
+        serie = serie.dropna(subset=["hiato_percentual"])
+        if len(serie) < 8:
+            continue
+        serie["indice_trimestre"] = range(len(serie))
+
+        linear = _ajustar_tendencia(serie)
+
+        log_linear = {}
+        if (serie["hiato_percentual"] > 0).all():
+            serie_log = serie.copy()
+            serie_log["hiato_percentual"] = np.log(serie_log["hiato_percentual"])
+            modelo_log = smf.ols("hiato_percentual ~ indice_trimestre", data=serie_log).fit()
+            log_linear = {
+                "inclinacao_pct_por_trimestre_log": 100 * modelo_log.params["indice_trimestre"],
+                "p_valor_inclinacao_log": modelo_log.pvalues["indice_trimestre"],
+                "r2_log": modelo_log.rsquared,
+            }
+
+        suavizada = {}
+        tendencia_confiavel = linear["r2"] >= 0.1
+        inclinacao_para_projecao = linear["inclinacao_pp_por_trimestre"]
+        if nome_par == "Branca-Indígena":
+            serie_suave = serie.copy()
+            serie_suave["hiato_percentual"] = serie_suave["hiato_percentual"].rolling(4, min_periods=4).mean()
+            serie_suave = serie_suave.dropna(subset=["hiato_percentual"])
+            serie_suave["indice_trimestre"] = range(len(serie_suave))
+            ajuste_suave = _ajustar_tendencia(serie_suave)
+            suavizada = {
+                "inclinacao_pp_por_trimestre_suavizada": ajuste_suave["inclinacao_pp_por_trimestre"],
+                "r2_suavizada": ajuste_suave["r2"],
+            }
+            tendencia_confiavel = ajuste_suave["r2"] >= 0.1
+            # se a bruta não é confiável mas a suavizada é, projeta com a inclinação
+            # suavizada (é ela que sustenta o `tendencia_confiavel=True` nesse caso) —
+            # nunca projeta com uma inclinação cujo R² não passou no próprio critério.
+            inclinacao_para_projecao = ajuste_suave["inclinacao_pp_por_trimestre"]
+
+        nivel_atual = serie["hiato_percentual"].iloc[-1]
+        inclinacao_ano = linear["inclinacao_pp_por_trimestre"] * 4
+        # Convergindo pra zero = hiato e inclinação com sinais OPOSTOS (hiato positivo
+        # caindo, OU hiato negativo subindo) — se os dois têm o MESMO sinal, o hiato
+        # está se afastando de zero (divergindo), não faz sentido nenhum "anos pra
+        # zerar" (daria um número negativo sem significado, bug corrigido depois de
+        # notar isso no par Preta-Parda, que tem hiato_percentual_atual negativo).
+        inclinacao_ano_projecao = inclinacao_para_projecao * 4
+        convergindo = (nivel_atual > 0 > inclinacao_ano_projecao) or (nivel_atual < 0 < inclinacao_ano_projecao)
+        if tendencia_confiavel and convergindo:
+            anos_para_zerar = abs(nivel_atual / inclinacao_ano_projecao)
+        else:
+            anos_para_zerar = None
+
+        resultados.append({
+            "par": nome_par, "n_trimestres": len(serie),
+            "hiato_percentual_atual": nivel_atual,
+            "inclinacao_pp_por_trimestre": linear["inclinacao_pp_por_trimestre"],
+            "inclinacao_pp_por_ano": inclinacao_ano,
+            "r2": linear["r2"], "p_valor_inclinacao": linear["p_valor_inclinacao"],
+            **log_linear, **suavizada,
+            "tendencia_confiavel": tendencia_confiavel,
+            "anos_para_zerar_extrapolacao_ingenua": anos_para_zerar,
+        })
+
+    df = pd.DataFrame(resultados)
+    destino = OUTPUT_DIR / "ritmo_convergencia_hiatos.parquet"
+    df.to_parquet(destino, index=False)
+    print(f"ritmo_convergencia_hiatos.parquet: {len(df)} linhas", flush=True)
+    print(df[["par", "hiato_percentual_atual", "inclinacao_pp_por_ano", "r2",
+              "tendencia_confiavel", "anos_para_zerar_extrapolacao_ingenua"]].to_string(index=False), flush=True)
 
 
 def gerar_informalidade(con: duckdb.DuckDBPyConnection) -> None:
@@ -1436,6 +2045,59 @@ def gerar_hiato_preta_parda(con: duckdb.DuckDBPyConnection) -> None:
     if n_nao_significativo:
         print(
             f"  aviso: {n_nao_significativo} trimestre(s) com hiato Preta-Parda "
+            "NÃO significativo a 95% (checar antes de destacar no gráfico)", flush=True,
+        )
+
+
+def gerar_hiato_branca_indigena(con: duckdb.DuckDBPyConnection) -> None:
+    """Espelha `gerar_hiato_racial`, mas Branca vs. Indígena em vez de Branca vs. Negra —
+    trata as TRÊS populações em pé de igualdade (até agora só Negra tinha uma série
+    histórica de hiato com teste de significância formal; Indígena só aparecia em
+    renda.parquet, descritivamente). Amostra checada antes de escrever esta função: n
+    mínimo por trimestre em nível Brasil é 354 (2014 T1) — bem acima do que Welch
+    trimestre a trimestre precisa, SEM pooling nenhum."""
+    trimestres = con.execute("SELECT DISTINCT ano, trimestre FROM base ORDER BY ano, trimestre").df()
+
+    resultados = []
+    for _, row in trimestres.iterrows():
+        ano, trimestre = int(row["ano"]), int(row["trimestre"])
+        micro = con.execute(f"""
+            SELECT raca_cor, renda_habitual_real, peso
+            FROM base
+            WHERE ano = {ano} AND trimestre = {trimestre}
+              AND raca_cor IN ('Branca', 'Indígena')
+              AND renda_habitual_real IS NOT NULL
+        """).df()
+        if micro.empty:
+            continue
+
+        tabela = pnadc_core.tabela_hiatos_significancia(
+            micro, "renda_habitual_real", "raca_cor", grupo_referencia="Indígena", peso="peso"
+        )
+        if "Branca" not in tabela.index:
+            continue
+        linha_branca = tabela.loc["Branca"]
+        media_indigena = tabela.loc["Indígena", "media"]
+        resultados.append({
+            "ano": ano, "trimestre": trimestre,
+            "renda_media_branca": linha_branca["media"],
+            "renda_media_indigena": media_indigena,
+            "hiato_absoluto": linha_branca["hiato_media"],
+            "hiato_percentual": 100 * linha_branca["hiato_media"] / media_indigena if media_indigena else None,
+            "ic_inferior": linha_branca["ic_inferior"],
+            "ic_superior": linha_branca["ic_superior"],
+            "p_valor": linha_branca["p_valor"],
+            "significativo": linha_branca["significativo"],
+        })
+
+    df = pd.DataFrame(resultados)
+    destino = OUTPUT_DIR / "hiato_branca_indigena.parquet"
+    df.to_parquet(destino, index=False)
+    n_nao_significativo = (~df["significativo"]).sum()
+    print(f"hiato_branca_indigena.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
+    if n_nao_significativo:
+        print(
+            f"  aviso: {n_nao_significativo} trimestre(s) com hiato Branca-Indígena "
             "NÃO significativo a 95% (checar antes de destacar no gráfico)", flush=True,
         )
 
@@ -2078,6 +2740,209 @@ def gerar_dupla_desvantagem(con: duckdb.DuckDBPyConnection) -> None:
     print(f"dupla_desvantagem.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
+COMBOS_RACA_GENERO = [
+    ("Mulher", "Branca"), ("Homem", "Negra"), ("Mulher", "Negra"),
+    ("Homem", "Indígena"), ("Mulher", "Indígena"),
+    ("Homem", "Preta"), ("Mulher", "Preta"), ("Homem", "Parda"), ("Mulher", "Parda"),
+]
+
+
+def gerar_decomposicao_raca_genero(con: duckdb.DuckDBPyConnection) -> None:
+    """Generaliza `gerar_dupla_desvantagem` (que só cobria Homem Branco vs. Mulher
+    Negra) pras NOVE combinações pedidas, todas vs. Homem Branco (referência): as cinco
+    de três grupos raciais (Mulher Branca, Homem Negro, Mulher Negra, Homem Indígena,
+    Mulher Indígena) + as quatro repetindo a mesma decomposição separando Negra em
+    Preta e Parda (Homem Preto, Mulher Preta, Homem Pardo, Mulher Pardo).
+
+    Mesma fórmula ANOVA de 2 fatores de `gerar_dupla_desvantagem`, generalizada pro
+    grupo-alvo (sexo_t, raca_t) qualquer, com HB = renda(Homem, Branca):
+        gap_total     = HB − Y(sexo_t, raca_t)
+        efeito_raca   = HB − Y(Homem, raca_t)      (raça sozinha, sexo=Homem fixo)
+        efeito_genero = HB − Y(sexo_t, Branca)      (gênero sozinho, raça=Branca fixa)
+        interacao     = gap_total − efeito_raca − efeito_genero
+
+    Quando sexo_t=Homem (Homem Negro/Preto/Pardo/Indígena), efeito_genero e interação
+    saem 0 por construção — é só o efeito de raça puro contra a referência, comportamento
+    esperado, não um bug.
+
+    Amostra checada antes de escrever esta função: mesmo Indígena x sexo, Brasil,
+    trimestre a trimestre, tem n mínimo de 136 (min histórico, 2012-2026) — série
+    trimestral inteira sem pooling, igual às outras combinações (que têm amostra bem
+    maior). `n_minimo=30` por célula é só uma rede de segurança, não deveria descartar
+    nada na prática."""
+    trimestres = con.execute("SELECT DISTINCT ano, trimestre FROM base ORDER BY ano, trimestre").df()
+    n_minimo = 30
+
+    res = []
+    for _, row in trimestres.iterrows():
+        ano, tri = int(row["ano"]), int(row["trimestre"])
+        micro = con.execute(f"""
+            SELECT raca_cor, sexo, renda_habitual_real, peso
+            FROM base
+            WHERE ano={ano} AND trimestre={tri} AND sexo IS NOT NULL
+              AND raca_cor IN ('Branca','Preta','Parda','Indígena')
+              AND renda_habitual_real IS NOT NULL
+        """).df()
+        if micro.empty:
+            continue
+        micro_negra = micro.copy()
+        micro_negra["raca_cor"] = micro_negra["raca_cor"].replace({"Preta": "Negra", "Parda": "Negra"})
+
+        def celula(base_df, raca, sx):
+            return base_df[(base_df["raca_cor"] == raca) & (base_df["sexo"] == sx)]
+
+        def media(base_df, raca, sx):
+            g = celula(base_df, raca, sx)
+            return pnadc_core.media_ponderada(g["renda_habitual_real"], g["peso"]) if len(g) >= n_minimo else np.nan
+
+        hb = media(micro, "Branca", "Homem")
+        if pd.isna(hb):
+            continue
+
+        for sexo_t, raca_t in COMBOS_RACA_GENERO:
+            base_df = micro_negra if raca_t == "Negra" else micro
+            h_t = media(base_df, raca_t, "Homem")
+            mb = media(base_df, "Branca", "Mulher")
+            y_t = media(base_df, raca_t, sexo_t)
+            if any(pd.isna(x) for x in (h_t, mb, y_t)):
+                continue
+
+            gap_total = hb - y_t
+            efeito_raca = hb - h_t
+            efeito_genero = hb - mb
+            interacao = gap_total - efeito_raca - efeito_genero
+
+            base_df = base_df.copy()
+            base_df["grp"] = base_df["raca_cor"] + " · " + base_df["sexo"]
+            rotulo_alvo = f"{raca_t} · {sexo_t}"
+            par = base_df[base_df["grp"].isin(["Branca · Homem", rotulo_alvo])]
+            tab = pnadc_core.tabela_hiatos_significancia(
+                par, "renda_habitual_real", "grp", grupo_referencia=rotulo_alvo, peso="peso"
+            )
+            p_val = tab.loc["Branca · Homem", "p_valor"] if "Branca · Homem" in tab.index else np.nan
+
+            res.append({
+                "ano": ano, "trimestre": tri, "combinacao": f"{sexo_t} {raca_t}",
+                "sexo": sexo_t, "raca_cor": raca_t,
+                "renda_homem_branco": hb, "renda_alvo": y_t,
+                "gap_total": gap_total, "efeito_raca": efeito_raca,
+                "efeito_genero": efeito_genero, "interacao": interacao,
+                "p_valor_gap_total": p_val,
+            })
+
+    df = pd.DataFrame(res)
+    destino = OUTPUT_DIR / "decomposicao_raca_genero.parquet"
+    df.to_parquet(destino, index=False)
+    print(f"decomposicao_raca_genero.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
+
+
+def _tabela_transicao(con, condicao_t0: str, coluna_evento_t1: str, nome_saida: str, n_minimo: int = 30) -> None:
+    """Motor comum das duas taxas de transição do painel rotativo real (ver
+    `gerar_transicoes_painel` pro contexto completo da ligação UPA/V1008/V1016/V2003).
+
+    Pareia CADA par de trimestres CALENDÁRIO CONSECUTIVOS (57 pares nos 58 trimestres
+    disponíveis) via `base b0 JOIN base b1 ON (upa, v1008, v2003) AND sexo igual AND
+    v1016 avança exatamente +1 AND idade não varia mais que 1 ano` — as duas últimas
+    condições são checagens de robustez (confirmar que é a MESMA pessoa, não um número
+    de ordem reaproveitado por outra pessoa no mesmo domicílio; ver comentário em
+    CRIAR_BASE). Filtra em `condicao_t0` (a população de partida: desocupados, ou
+    empregados informais) e calcula a taxa ponderada de atingir `coluna_evento_t1` no
+    trimestre seguinte, POOLED nos 57 pares inteiros (não trimestre a trimestre — amostra
+    de transição é bem menor que amostra de nível, span do painel real força agregar o
+    período inteiro pra ter n suficiente, sobretudo pra Indígena).
+
+    Publica por raça (Branca, Negra, Indígena, Preta, Parda) x sexo, Brasil apenas (sem
+    UF/Região — abrir mais uma dimensão geográfica deixaria a maioria das células,
+    principalmente Indígena, abaixo do `n_minimo`)."""
+    trimestres = con.execute("SELECT DISTINCT ano, trimestre FROM base ORDER BY ano, trimestre").df()
+    pares_trimestre = list(zip(trimestres["ano"].astype(int), trimestres["trimestre"].astype(int)))
+
+    partes = []
+    for (a0, t0), (a1, t1) in zip(pares_trimestre[:-1], pares_trimestre[1:]):
+        q = f"""
+            SELECT b0.raca_cor, b0.sexo, b0.peso,
+                   ({coluna_evento_t1}) AS evento
+            FROM (SELECT * FROM base WHERE ano={a0} AND trimestre={t0}) b0
+            JOIN (SELECT * FROM base WHERE ano={a1} AND trimestre={t1}) b1
+              ON b0.upa = b1.upa AND b0.v1008 = b1.v1008 AND b0.v2003 = b1.v2003
+             AND b0.sexo = b1.sexo
+             AND TRY_CAST(b1.v1016 AS INT) = TRY_CAST(b0.v1016 AS INT) + 1
+             AND ABS(b1.idade - b0.idade) <= 1
+            WHERE {condicao_t0} AND b0.raca_cor IN ('Branca', 'Preta', 'Parda', 'Indígena')
+              AND b0.sexo IS NOT NULL
+        """
+        partes.append(con.execute(q).df())
+
+    pareado = pd.concat(partes, ignore_index=True)
+    pareado["evento"] = pareado["evento"].astype(float)
+
+    resultados = []
+    versoes = [pareado, pareado.assign(raca_cor=pareado["raca_cor"].replace({"Preta": "Negra", "Parda": "Negra"}))]
+    racas_por_versao = [("Branca", "Preta", "Parda", "Indígena"), ("Negra",)]
+    for versao, racas in zip(versoes, racas_por_versao):
+        for raca in racas:
+            for sexo in ("Homem", "Mulher"):
+                cel = versao[(versao["raca_cor"] == raca) & (versao["sexo"] == sexo)]
+                if len(cel) < n_minimo:
+                    resultados.append({
+                        "raca_cor": raca, "sexo": sexo, "n_amostra": len(cel),
+                        "taxa": None, "ic_inferior": None, "ic_superior": None,
+                    })
+                    continue
+                taxa = pnadc_core.media_ponderada(cel["evento"], cel["peso"])
+                ic_inf, ic_sup = pnadc_core.intervalo_confianca_media_ponderada(cel, "evento", peso="peso")
+                resultados.append({
+                    "raca_cor": raca, "sexo": sexo, "n_amostra": len(cel),
+                    "taxa": 100 * taxa, "ic_inferior": 100 * ic_inf, "ic_superior": 100 * ic_sup,
+                })
+
+    df = pd.DataFrame(resultados)
+    destino = OUTPUT_DIR / nome_saida
+    df.to_parquet(destino, index=False)
+    n_vazio = df["taxa"].isna().sum()
+    print(f"{nome_saida}: {len(df)} linhas ({len(pareado):,} pessoas pareadas na população de base)"
+          .replace(",", "."), flush=True)
+    if n_vazio:
+        print(f"  aviso: {n_vazio} célula(s) raça x sexo abaixo do n_minimo={n_minimo}, "
+              "deixadas em branco (não publicadas)", flush=True)
+    print(df.to_string(index=False), flush=True)
+
+
+def gerar_transicoes_painel(con: duckdb.DuckDBPyConnection) -> None:
+    """Painel rotativo REAL da PNAD Contínua (não a coorte sintética de `geracao`):
+    liga a MESMA pessoa entre trimestres consecutivos via (UPA, V1008, V2003) + V1016
+    avançando exatamente +1 + sexo/idade consistentes (ver `_tabela_transicao` pro
+    método completo de pareamento). Mede duas transições clássicas da literatura de
+    mercado de trabalho, por raça x gênero:
+
+    1. Desemprego -> emprego: entre quem estava desocupado (na força de trabalho, sem
+       ocupação) num trimestre, qual % está ocupado no trimestre seguinte?
+    2. Informal -> formal: entre quem estava empregado SEM carteira assinada (posição
+       classificável — exclui empregador/conta-própria/familiar auxiliar, onde o
+       conceito não se aplica), qual % está COM carteira assinada no trimestre seguinte?
+
+    Amostra checada empiricamente antes de escrever esta função (taxa de match geral
+    ~68% das pessoas-trimestre da base, dentro do esperado dado que cada ciclo de painel
+    dura só 5 visitas): mesmo Indígena, pooled nos 57 pares de trimestres inteiros,
+    chega a n~1.450-1.650 desocupados pareados e n~3.900-4.150 informais pareados por
+    sexo — de sobra pro `n_minimo`=30. Por isso as taxas saem POOLED no período inteiro
+    (2012-2026), Brasil apenas, não trimestre a trimestre nem por UF/Região — abrir
+    qualquer uma dessas dimensões deixaria as células, sobretudo de Indígena, abaixo do
+    mínimo (ver docs/LIMITACOES_E_METODOLOGIA.md)."""
+    _tabela_transicao(
+        con,
+        condicao_t0="b0.forca_trabalho = '1' AND b0.condicao_ocupacao = '2'",
+        coluna_evento_t1="CASE WHEN b1.condicao_ocupacao = '1' THEN 1 ELSE 0 END",
+        nome_saida="transicao_desemprego_emprego.parquet",
+    )
+    _tabela_transicao(
+        con,
+        condicao_t0="b0.tem_carteira_assinada = FALSE",
+        coluna_evento_t1="CASE WHEN b1.tem_carteira_assinada THEN 1 ELSE 0 END",
+        nome_saida="transicao_informal_formal.parquet",
+    )
+
+
 def main() -> None:
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     con = duckdb.connect()
@@ -2096,6 +2961,7 @@ def main() -> None:
     gerar_renda_multidimensional_geracao(con)
     gerar_hiato_racial(con)
     gerar_hiato_preta_parda(con)
+    gerar_hiato_branca_indigena(con)
     gerar_hiatos_multidimensionais(con)
     gerar_hiatos_arvore(con)
     gerar_hiatos_historicos_por_categoria(con)
@@ -2103,7 +2969,10 @@ def main() -> None:
     gerar_gini_por_raca(con)
     gerar_theil_racial(con)
     gerar_quebra_estrutural()
+    gerar_ritmo_convergencia()
     gerar_hiato_regional(con)
+    gerar_hiato_regional_indigena(con)
+    gerar_hiato_regional_preta_parda(con)
     gerar_hiato_setor_publico_privado(con)
     gerar_decomposicao_hiato_ocupacional(con)
     gerar_hiato_capital_interior(con)
@@ -2112,20 +2981,29 @@ def main() -> None:
     gerar_faixas_salario_minimo(con)
     gerar_oaxaca_blinder_temporal(con)
     gerar_dupla_desvantagem(con)
+    gerar_decomposicao_raca_genero(con)
     gerar_decomposicao_oaxaca_blinder(con)
+    gerar_decomposicao_oaxaca_blinder_indigena(con)
+    gerar_decomposicao_oaxaca_blinder_preta_parda(con)
     gerar_perfil_topo10_racial(con)
     gerar_perfil_quartis_racial(con)
+    gerar_perfil_topo10_quartis_pretaparda(con)
+    gerar_perfil_topo10_quartis_indigena(con)
     gerar_extremos_racial(con)
     gerar_quartis_multi_racial(con)
     gerar_funcao_quantil_racial(con)
     gerar_indice_segregacao_ocupacional(con)
     gerar_segregacao_setorial(con)
+    gerar_segregacao_ocupacional_preta_parda(con)
+    gerar_segregacao_setorial_preta_parda(con)
+    gerar_indice_segregacao_ocupacional_indigena(con)
     gerar_ocupacao(con)
     gerar_informalidade(con)
     gerar_horas_trabalhadas(con)
     gerar_alfabetizacao(con)
     gerar_desalento_subutilizacao(con)
     gerar_sobrequalificacao(con)
+    gerar_transicoes_painel(con)
 
 
 if __name__ == "__main__":
