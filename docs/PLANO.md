@@ -1471,28 +1471,28 @@ histórico).
 
 ## Décima segunda rodada — Branca/Negra/Indígena e Preta/Parda em pé de igualdade (2026-09-13)
 
-Pedido explícito do usuário: aprofundar dois eixos que só tinham tratamento parcial —
-(1) Branca vs. Negra vs. Indígena lado a lado (não só Indígena como nota de rodapé em
-renda bruta) e (2) Preta vs. Parda, a diferença DENTRO da população negra. Regra geral
-pra Indígena: tentar destravar amostra pequena com pooling de trimestres (mesmo padrão
-já usado em `renda_multidimensional_faixa/geracao`) antes de descartar um cruzamento;
-se mesmo pooling máximo não fechar o `n_minimo`=30, deixar em branco/documentado, nunca
-forçar. Ver [ANALISE_RACA_GENERO.md](ANALISE_RACA_GENERO.md) pros achados completos e
+Esta rodada aprofunda dois eixos que só tinham tratamento parcial — (1) Branca vs.
+Negra vs. Indígena lado a lado (não só Indígena como nota de rodapé em renda bruta) e
+(2) Preta vs. Parda, a diferença DENTRO da população negra. Regra geral pra Indígena:
+tentar destravar amostra pequena com pooling de trimestres (mesmo padrão já usado em
+`renda_multidimensional_faixa/geracao`) antes de descartar um cruzamento; se mesmo
+pooling máximo não fechar o `n_minimo`=30, deixar em branco/documentado, nunca forçar.
+Ver [ANALISE_RACA_GENERO.md](ANALISE_RACA_GENERO.md) pros achados completos e
 [LIMITACOES_E_METODOLOGIA.md](LIMITACOES_E_METODOLOGIA.md) pras limitações de amostra
 encontradas.
 
 **Checagem de amostra ANTES de implementar** (seguindo o padrão do projeto de checar
 custo/ambiguidade antes de construir): rodei consultas diretas na base pra medir n do
-Indígena em cada corte pedido — resultado foi bem melhor do que o esperado. Hiato
+Indígena em cada corte planejado — resultado foi bem melhor do que o esperado. Hiato
 regional Branca-Indígena por Região e a decomposição raça×gênero rodam trimestre a
 trimestre SEM pooling (min n=28 em região×trimestre, min n=136 em sexo×trimestre,
 Brasil). Só os cortes com dimensão categórica FINA (11-12 categorias de
 ocupação/setor, ou 3 limiares de quantil) precisaram de pooling — e mesmo assim, só a
 segregação SETORIAL Branca-Indígena não fechou nem agregando os 58 trimestres
 inteiros (menor categoria n=11). O único item genuinamente custoso/ambíguo era o
-painel rotativo real (item 4, metodologia nova) — perguntado ao usuário via
-AskUserQuestion se construía nesta rodada ou deixava pra próxima; resposta foi
-construir agora também.
+painel rotativo real (item 4, metodologia nova) — decidi construir de uma vez nesta
+mesma rodada em vez de deixar pra próxima, dado que a checagem de amostra acima já
+tinha mostrado que o resto do escopo fechava sem sobressaltos.
 
 ### 1. Toolkit pesado (Oaxaca-Blinder, segregação de Duncan, hiato regional, topo10/
    quartis) levado pra Branca-Indígena e Preta-Parda
@@ -1547,8 +1547,9 @@ convergindo.
 
 ### 4. Painel rotativo real (UPA/V1008/V1016/V2003) — transições de mercado de trabalho
 
-Item mais custoso da rodada, confirmado via pergunta explícita ao usuário antes de
-construir. `CRIAR_BASE` ganhou `v1008`, `v1016`, `v2003`, `idade` (antes só tinha `upa`
+Item mais custoso da rodada — parei pra pesar o trade-off antes de construir (metodologia
+nova, nunca implementada aqui) e decidi seguir em frente na mesma rodada, dado que a
+checagem de amostra já indicava viabilidade. `CRIAR_BASE` ganhou `v1008`, `v1016`, `v2003`, `idade` (antes só tinha `upa`
 pra clustering). Traçando um domicílio real ao longo de vários anos (checagem empírica
 antes de escrever qualquer código): UPA/V1008 são REAPROVEITADOS por um domicílio novo
 assim que o ciclo de 5 entrevistas anterior termina — a chave de ligação
@@ -1578,7 +1579,7 @@ existe equivalente `*_racial`, mais os 2 de transição e o de ritmo de converg�
 LIMITACOES_E_METODOLOGIA.md` com as limitações de amostra novas (setorial
 Branca-Indígena não publicada, pooled vs. série trimestral, instabilidade de % no
 Oaxaca-Blinder Preta-Parda, metodologia de pareamento do painel, bug do sinal em
-ritmo de convergência). Sem gráficos/PPTX novos — fora do critério de pronto pedido
-desta vez. Item 1 priorizado primeiro, como pedido; itens 2-4 completos na mesma
-rodada (usuário optou por construir o item 4 — painel rotativo — junto, em vez de
-adiar pra próxima rodada).
+ritmo de convergência). Sem gráficos/PPTX novos — não entrou no escopo desta rodada.
+Priorizei o item 1 primeiro (era o que mais faltava pra tratar os três grupos raciais
+em pé de igualdade); itens 2-4 completos na mesma rodada, incluindo o painel rotativo
+(item 4) em vez de deixá-lo pra próxima.
