@@ -240,6 +240,97 @@ def rodar_mecanismo_renda_cohortes(con: duckdb.DuckDBPyConnection) -> None:
 
 
 # --------------------------------------------------------------------------------------
+# Heterogeneidade geográfica — Desenho A (Região, área urbana/rural)
+# --------------------------------------------------------------------------------------
+
+REGIOES = ["Norte", "Nordeste", "Centro-Oeste", "Sudeste", "Sul"]
+
+
+def construir_painel_cohortes_por_estrato(con: duckdb.DuckDBPyConnection, expressao_estrato: str) -> pd.DataFrame:
+    """Como `construir_painel_cohortes`, mas mantendo um estrato geográfico extra
+    (`expressao_estrato`, uma expressão SQL sobre `base` — ex.: `'regiao'` ou
+    `"CASE WHEN regiao='Norte' THEN 'Norte' ELSE 'Resto do Brasil' END"`), pra rodar o
+    DiD separado por estrato."""
+    micro = con.execute(f"""
+        SELECT (ano - idade) AS ano_nascimento, raca_cor, nivel_instrucao, peso,
+               {expressao_estrato} AS estrato
+        FROM base
+        WHERE idade BETWEEN {IDADE_MEDICAO[0]} AND {IDADE_MEDICAO[1]}
+          AND raca_cor IN ('Branca', 'Preta', 'Parda', 'Indígena')
+          AND nivel_instrucao IS NOT NULL
+    """).df()
+    micro["raca_cor"] = micro["raca_cor"].replace({"Preta": "Negra", "Parda": "Negra"})
+    micro["superior"] = (micro["nivel_instrucao"] == "Superior completo").astype(float)
+
+    linhas = []
+    for (ano_nasc, raca, estrato), grupo in micro.groupby(["ano_nascimento", "raca_cor", "estrato"]):
+        linhas.append({
+            "ano_nascimento": int(ano_nasc), "raca_cor": raca, "estrato": estrato,
+            "pct_superior": pnadc_core.media_ponderada(grupo["superior"], grupo["peso"]) * 100,
+            "n_amostra": len(grupo),
+        })
+    return pd.DataFrame(linhas)
+
+
+def _rodar_bateria_desenho_a(painel_estrato: pd.DataFrame, raca_tratado: str, estrato_tipo: str) -> list[dict]:
+    """Roda tendência pré-lei + DiD real + os 2 placebos pra CADA valor de estrato
+    presente em `painel_estrato`, reaproveitando as mesmas `_testar_tendencias_paralelas`/
+    `_rodar_did_cohortes` do desenho nacional (elas já operam sobre um painel
+    ano_nascimento x raca_cor x pct_superior x n_amostra — um estrato de cada vez é só
+    filtrar antes de chamar)."""
+    resultados = []
+    for estrato in sorted(painel_estrato["estrato"].dropna().unique()):
+        sub = painel_estrato[painel_estrato["estrato"] == estrato].drop(columns="estrato")
+
+        tendencia = _testar_tendencias_paralelas(sub, raca_tratado, ANO_LEI_UNIVERSITARIA)
+        resultados.append({**tendencia, "estrato_tipo": estrato_tipo, "estrato": estrato, "tipo": "tendencia_pre_2012"})
+
+        did_real = _rodar_did_cohortes(sub, raca_tratado, ANO_LEI_UNIVERSITARIA)
+        resultados.append({**did_real, "estrato_tipo": estrato_tipo, "estrato": estrato, "tipo": "did_real_2012"})
+
+        for ano_placebo in PLACEBOS_UNIVERSITARIA:
+            did_placebo = _rodar_did_cohortes(sub, raca_tratado, ano_placebo)
+            resultados.append({**did_placebo, "estrato_tipo": estrato_tipo, "estrato": estrato, "tipo": f"placebo_{ano_placebo}"})
+    return resultados
+
+
+def rodar_desenho_a_heterogeneidade(con: duckdb.DuckDBPyConnection) -> None:
+    """Heterogeneidade geográfica do Desenho A — testa se o resultado nulo (ver
+    `rodar_desenho_a`) é uniforme pelo país ou esconde alguma diferença regional.
+
+    Amostra checada antes de escrever esta função: Negra fecha `n_minimo` em TODAS as
+    5 regiões (célula mais fina, Sul, n=706) e nas duas áreas (Rural, a mais fina,
+    n=2.047) — série completa nos dois recortes. Indígena não fecha em 4 das 5 regiões
+    (células chegando a n=7) — só Norte (n mínimo 48, a região com a maior população
+    indígena do país) fica de pé sozinha; testado como Norte vs. Resto do Brasil (2
+    categorias, não 5), não a partição completa. Por área, Indígena Rural também não
+    fecha (n mínimo 25, abaixo de 30) — só a área Urbana é publicada pra Indígena; Rural
+    fica de fora, documentado como limitação, não forçado."""
+    painel_regiao = construir_painel_cohortes_por_estrato(con, "regiao")
+    painel_regiao.to_parquet(OUTPUT_DIR / "painel_cohortes_superior_completo_regiao.parquet", index=False)
+    painel_norte_resto = construir_painel_cohortes_por_estrato(
+        con, "CASE WHEN regiao='Norte' THEN 'Norte' ELSE 'Resto do Brasil' END"
+    )
+    painel_area = construir_painel_cohortes_por_estrato(con, "area")
+    painel_area.to_parquet(OUTPUT_DIR / "painel_cohortes_superior_completo_area.parquet", index=False)
+
+    resultados = []
+    resultados += _rodar_bateria_desenho_a(painel_regiao, "Negra", "regiao")
+    resultados += _rodar_bateria_desenho_a(painel_norte_resto, "Indígena", "regiao_norte_resto")
+    resultados += _rodar_bateria_desenho_a(painel_area, "Negra", "area")
+    resultados += _rodar_bateria_desenho_a(
+        painel_area[painel_area["estrato"] == "Urbana"], "Indígena", "area"
+    )
+
+    df = pd.DataFrame(resultados)
+    destino = OUTPUT_DIR / "did_cotas_universitarias_heterogeneidade.parquet"
+    df.to_parquet(destino, index=False)
+    print(f"did_cotas_universitarias_heterogeneidade.parquet: {len(df)} linhas", flush=True)
+    print(df[["estrato_tipo", "estrato", "raca_tratado", "tipo", "did_nivel_coef", "did_nivel_p_valor",
+              "tendencia_pre_coef", "tendencia_pre_p_valor"]].to_string(index=False), flush=True)
+
+
+# --------------------------------------------------------------------------------------
 # Desenho B — Lei de Cotas no Serviço Público Federal (12.990/2014)
 # --------------------------------------------------------------------------------------
 
@@ -268,7 +359,8 @@ def _construir_microdados_evento_setor(con: duckdb.DuckDBPyConnection) -> pd.Dat
     idx_evento = idx_map[TRIMESTRE_LEI_SERVICO_PUBLICO]
 
     micro = con.execute("""
-        SELECT ano, trimestre, raca_cor, setor_trabalho, renda_habitual_real, peso, upa
+        SELECT ano, trimestre, raca_cor, setor_trabalho, renda_habitual_real, peso, upa,
+               regiao, area, UF
         FROM base
         WHERE setor_trabalho IS NOT NULL AND raca_cor IN ('Branca','Preta','Parda','Indígena')
     """).df()
@@ -372,16 +464,22 @@ def _resumo_regressao_evento(micro: pd.DataFrame, outcome_col: str) -> dict:
     }
 
 
-def rodar_desenho_b_participacao(micro_evento: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
+def rodar_desenho_b_participacao(
+    micro_evento: pd.DataFrame, racas: list[str] | None = None,
+) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Event-study DiD na PARTICIPAÇÃO de cada raça entre ocupados do setor público,
     usando o setor PRIVADO como grupo de controle (não afetado pela Lei 12.990/2014) —
     testa se a participação de Negra/Preta/Parda/Indígena no setor público muda de
     trajetória especificamente ali, além de qualquer tendência que já estivesse
     acontecendo nos dois setores. Outcome, no nível pessoa: `1[raca_cor == raça-alvo]`,
     então "participação" é a média ponderada dessa dummy dentro de cada
-    (trimestre relativo, setor) — uma proporção, calculada em forma fechada."""
+    (trimestre relativo, setor) — uma proporção, calculada em forma fechada.
+
+    `racas` (default `RACAS_SERVICO_PUBLICO`, as 4) permite restringir a lista — usado
+    pela heterogeneidade geográfica, que só roda Indígena nos estratos que fecham
+    amostra (ver `rodar_desenho_b_heterogeneidade`)."""
     curvas, resumos = [], []
-    for raca in RACAS_SERVICO_PUBLICO:
+    for raca in (racas or RACAS_SERVICO_PUBLICO):
         micro = micro_evento.copy()
         # x100: outcome em PONTOS PERCENTUAIS (não fração 0-1) — mesma escala usada nos
         # gráficos/subtítulos ("pontos percentuais"), pra `did_coef`/`tendencia_pre_coef`
@@ -483,6 +581,76 @@ def _resumo_regressao_hiato_evento(micro: pd.DataFrame) -> dict:
     }
 
 
+def _rodar_par_desenho_b(micro_estrato: pd.DataFrame, racas: list[str]) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Roda participação (pras `racas` pedidas) + hiato de renda Branca-Negra (só se
+    'Negra' estiver em `racas` — hiato é sempre Branca vs. Negra, não generaliza pras
+    outras raças) num subconjunto JÁ FILTRADO por estrato geográfico de
+    `micro_evento`. Motor comum de `rodar_desenho_b_heterogeneidade`."""
+    curvas_p, resumo_p = rodar_desenho_b_participacao(micro_estrato, racas=racas)
+    partes_curva, partes_resumo = [curvas_p], [resumo_p]
+    if "Negra" in racas:
+        curva_r, resumo_r = rodar_desenho_b_renda(micro_estrato)
+        partes_curva.append(curva_r)
+        partes_resumo.append(resumo_r)
+    return pd.concat(partes_curva, ignore_index=True), pd.concat(partes_resumo, ignore_index=True)
+
+
+def rodar_desenho_b_heterogeneidade(micro_evento: pd.DataFrame) -> None:
+    """Heterogeneidade geográfica do Desenho B — Região, área urbana/rural, e Distrito
+    Federal vs. resto do Brasil (aproximação parcial da limitação de esfera de governo:
+    ver docs/LIMITACOES_E_METODOLOGIA.md — o funcionalismo federal é desproporcionalmente
+    concentrado no DF, então um efeito mais forte ali é evidência indireta, não uma
+    medida direta, de que o efeito federal isolado é maior que o estimado hoje).
+
+    Amostra checada antes de escrever esta função: Negra (e Preta/Parda) fecham
+    `n_minimo` em TODAS as 5 regiões, nas duas áreas e no DF isoladamente (célula mais
+    fina, DF x Negra x Público, n mínimo 277 por trimestre). Indígena só fecha em
+    Norte (n mínimo 32 por trimestre; as outras 4 regiões chegam a n=1) e em área
+    Urbana (n mínimo 48; Rural chega a n=8) — testado como Norte vs. Resto do Brasil
+    (não as 5 regiões) e só Urbana (Rural fica de fora). Indígena no DF não roda de
+    jeito nenhum (n mínimo 1 por trimestre) — nem tentado."""
+    resultados_curva, resultados_resumo = [], []
+
+    def _registrar(curva, resumo, estrato_tipo, estrato):
+        curva = curva.assign(estrato_tipo=estrato_tipo, estrato=estrato)
+        resumo = resumo.assign(estrato_tipo=estrato_tipo, estrato=estrato)
+        resultados_curva.append(curva)
+        resultados_resumo.append(resumo)
+
+    for regiao in REGIOES:
+        sub = micro_evento[micro_evento["regiao"] == regiao]
+        curva, resumo = _rodar_par_desenho_b(sub, ["Negra", "Preta", "Parda"])
+        _registrar(curva, resumo, "regiao", regiao)
+
+    estrato_norte = np.where(micro_evento["regiao"] == "Norte", "Norte", "Resto do Brasil")
+    for valor in ["Norte", "Resto do Brasil"]:
+        sub = micro_evento[estrato_norte == valor]
+        curva, resumo = _rodar_par_desenho_b(sub, ["Indígena"])
+        _registrar(curva, resumo, "regiao_norte_resto", valor)
+
+    for area in ["Urbana", "Rural"]:
+        sub = micro_evento[micro_evento["area"] == area]
+        curva, resumo = _rodar_par_desenho_b(sub, ["Negra", "Preta", "Parda"])
+        _registrar(curva, resumo, "area", area)
+
+    curva, resumo = _rodar_par_desenho_b(micro_evento[micro_evento["area"] == "Urbana"], ["Indígena"])
+    _registrar(curva, resumo, "area", "Urbana (Indígena)")
+
+    estrato_df = np.where(micro_evento["UF"] == "53", "Distrito Federal", "Resto do Brasil")
+    for valor in ["Distrito Federal", "Resto do Brasil"]:
+        sub = micro_evento[estrato_df == valor]
+        curva, resumo = _rodar_par_desenho_b(sub, ["Negra"])
+        _registrar(curva, resumo, "df_vs_resto", valor)
+
+    curvas = pd.concat(resultados_curva, ignore_index=True)
+    resumo = pd.concat(resultados_resumo, ignore_index=True)
+    curvas.to_parquet(OUTPUT_DIR / "did_cotas_servico_publico_heterogeneidade_curvas.parquet", index=False)
+    resumo.to_parquet(OUTPUT_DIR / "did_cotas_servico_publico_heterogeneidade.parquet", index=False)
+    print(f"did_cotas_servico_publico_heterogeneidade.parquet: {len(resumo)} linhas", flush=True)
+    print(resumo[["estrato_tipo", "estrato", "raca_cor", "outcome", "tendencia_pre_p_valor",
+                  "tendencias_paralelas_sustentadas", "did_coef", "did_p_valor"]].to_string(index=False), flush=True)
+
+
 def main() -> None:
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     con = duckdb.connect()
@@ -492,6 +660,8 @@ def main() -> None:
     print("=== Desenho A: Lei de Cotas Universitárias (12.711/2012) ===", flush=True)
     rodar_desenho_a(con)
     rodar_mecanismo_renda_cohortes(con)
+    print("\n--- Heterogeneidade geográfica, Desenho A ---", flush=True)
+    rodar_desenho_a_heterogeneidade(con)
 
     print("\n=== Desenho B: Lei de Cotas no Serviço Público Federal (12.990/2014) ===", flush=True)
     micro_evento = _construir_microdados_evento_setor(con)
@@ -503,6 +673,9 @@ def main() -> None:
     curvas.to_parquet(OUTPUT_DIR / "did_cotas_servico_publico_curvas.parquet", index=False)
     resumo.to_parquet(OUTPUT_DIR / "did_cotas_servico_publico.parquet", index=False)
     print(f"\ndid_cotas_servico_publico.parquet: {len(resumo)} linhas", flush=True)
+
+    print("\n--- Heterogeneidade geográfica, Desenho B ---", flush=True)
+    rodar_desenho_b_heterogeneidade(micro_evento)
 
 
 if __name__ == "__main__":

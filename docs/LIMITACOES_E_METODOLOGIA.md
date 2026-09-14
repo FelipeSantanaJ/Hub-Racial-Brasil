@@ -482,3 +482,35 @@ limitações abaixo são específicas dela.
   resultado significativo (o hiato de renda dentro do setor público, p=0,041) entre
   vários testes (2 outcomes × várias raças/especificações) — um p isolado perto de 0,05
   entre vários testes pede mais cautela do que um p ordens de grandeza menor teria.
+
+## Heterogeneidade geográfica na identificação causal (2026-09-13)
+
+Ver seção 3 de [ANALISE_CAUSAL_COTAS.md](ANALISE_CAUSAL_COTAS.md) pro detalhe completo.
+
+- **`V1022`/`V1023` decodificadas em `CRIAR_BASE` pela primeira vez** (`area`,
+  `tipo_area`) — extraídas desde o início do projeto (`src/ingestion/extrator_pnadc.py`)
+  mas nunca usadas em nenhuma função até agora. `V1022`: Urbana/Rural. `V1023`: Capital /
+  Região Metropolitana (exceto capital) / RIDE (exceto capital) / Resto da UF — mais fino
+  que `Capital`/`RM_RIDE` já usados, mas cobre geografia parecida; só `area` virou
+  dimensão nova de fato usada, `tipo_area` fica disponível sem ser padrão do projeto.
+- **Amostra por estrato geográfico, checada antes de rodar**: Negra fecha `n_minimo` em
+  toda Região, nas duas áreas e no Distrito Federal isoladamente, nos dois desenhos
+  causais. Indígena só fecha em Região Norte (as outras 4 regiões chegam a n=1 por
+  trimestre no Desenho B, n=7 por coorte no Desenho A) e em área Urbana (Rural chega a
+  n=8 por trimestre no Desenho B, n=25 por coorte no Desenho A, abaixo do mínimo de 30)
+  — testado como Norte vs. Resto do Brasil (2 categorias, não 5) e só Urbana; Indígena no
+  Distrito Federal não roda de jeito nenhum (n mínimo 1 por trimestre) — nem tentado.
+- **Identificação falha em pontos geográficos específicos que o nível nacional não
+  revelava**: tendências paralelas pré-lei REJEITADAS (p<0,05) em Negra-Região Norte e
+  Negra-área Rural (Desenho A); Negra-Nordeste, Parda-Nordeste, Parda-Sul (participação,
+  Desenho B); Negra-Norte (hiato de renda, Desenho B, p=0,049, no limite). Reportado como
+  está — "identificação não se sustenta aqui" nesses pontos específicos, mesmo o
+  agregado nacional passando no mesmo teste.
+- **A hipótese do Distrito Federal (usá-lo como aproximação de "federal puro" pra
+  contornar parcialmente a limitação de esfera de governo) NÃO se confirmou** — o efeito
+  no DF saiu praticamente zero (hiato de renda p=0,89), enquanto Centro-Oeste como região
+  INTEIRA (que contém o DF) mostrou o efeito mais forte e mais bem-identificado de toda a
+  análise (+5,6%, p=0,030, tendências paralelas sustentadas com folga). Como o efeito
+  regional parece vir dos outros 3 estados do Centro-Oeste, não do DF, esse teste não
+  resolveu a limitação de esfera de governo — documentado como um resultado real e
+  contraintuitivo, não escondido por não confirmar a hipótese que motivou o teste.

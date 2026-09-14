@@ -1677,3 +1677,46 @@ resultado foi suavizado pra parecer mais definitivo do que é — dois dos quatr
 sub-resultados (Desenho A completo, participação do Desenho B) são nulos, e um
 (Indígena no Desenho B) falha o teste de tendências paralelas — todos reportados com o
 mesmo destaque que o único resultado significativo (hiato de renda do Desenho B).
+
+## Décima quarta rodada — heterogeneidade geográfica nos dois desenhos causais (2026-09-13)
+
+Estendi os dois desenhos causais da rodada anterior pra testar se o resultado nacional
+(majoritariamente nulo) é uniforme pelo país — Região, área urbana/rural (decodifiquei
+`V1022`/`V1023` em `CRIAR_BASE` pela primeira vez, extraídas desde o início mas nunca
+usadas) e, só pro Desenho B, Distrito Federal vs. resto do Brasil (tentativa parcial de
+contornar a limitação de esfera de governo já documentada, já que o funcionalismo federal
+é desproporcionalmente concentrado no DF).
+
+Checagem de amostra antes de rodar: Negra fecha `n_minimo` em toda região/área/DF nos dois
+desenhos. Indígena só fecha em Região Norte (testado como Norte vs. Resto do Brasil, não
+as 5 regiões) e em área Urbana (Rural fica de fora) — nas outras combinações a amostra cai
+pra 1-25 por célula, abaixo do mínimo de 30.
+
+Dois achados que valem destaque:
+
+- **Identificação falha em pontos geográficos específicos que o nacional não revelava**:
+  tendências paralelas pré-lei rejeitadas em Negra-Região Norte e Negra-área Rural
+  (Desenho A); Negra-Nordeste, Parda-Nordeste, Parda-Sul (participação, Desenho B);
+  Negra-Norte (hiato de renda, Desenho B, no limite, p=0,049). Reportado como está —
+  identificação não se sustenta nesses pontos, mesmo o agregado nacional passando no
+  mesmo teste.
+- **A hipótese do Distrito Federal não se confirmou**: esperava um efeito mais forte no
+  DF (aproximação de "federal puro"), e saiu praticamente zero (hiato de renda p=0,89).
+  Em compensação, Centro-Oeste como região INTEIRA (que contém o DF) mostrou o efeito
+  mais forte e mais bem-identificado de toda a análise causal até aqui (+5,6% no hiato de
+  renda, p=0,030, tendências paralelas sustentadas com folga) — maior que o próprio
+  resultado nacional (+2,0%, p=0,041). Como o efeito parece vir dos outros 3 estados do
+  Centro-Oeste, não do DF, esse teste não resolveu a limitação de esfera de governo — se
+  algo, complicou a leitura simples de "efeito federal diluído". Documentei o resultado
+  como saiu, sem forçar uma confirmação da hipótese que motivou o teste.
+
+### Critério de "pronto" desta rodada
+
+Novos parquets (`did_cotas_universitarias_heterogeneidade`,
+`painel_cohortes_superior_completo_regiao/_area`,
+`did_cotas_servico_publico_heterogeneidade` + `..._curvas`); nova seção "3.
+Heterogeneidade geográfica" em `ANALISE_CAUSAL_COTAS.md` (renumerando "Comparação com a
+literatura" pra seção 4); `LIMITACOES_E_METODOLOGIA.md` com a decodificação de
+V1022/V1023, a amostra checada por estrato, e os dois achados acima. Sem gráficos novos —
+os já existentes (event-study nacional, coortes) seguem válidos como referência visual,
+a heterogeneidade fica só em tabela nos parquets/doc.

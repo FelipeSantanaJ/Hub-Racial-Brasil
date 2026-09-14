@@ -182,7 +182,59 @@ ressalvas:
    significativa" não é o mesmo que "série plana" — é uma leitura mais fraca de tendências
    paralelas do que se a série pré-lei fosse visualmente estável.
 
-## 3. Comparação com a literatura
+## 3. Heterogeneidade geográfica
+
+O resultado nacional dos dois desenhos é majoritariamente nulo. Esta seção testa se esse
+nulo é uniforme pelo país, quebrando por Região, área urbana/rural, e (só pro Desenho B)
+Distrito Federal vs. resto do Brasil. Amostra checada antes de rodar: Negra fecha
+`n_minimo` em toda região/área/DF nos dois desenhos; Indígena só fecha em Norte (vs. Resto
+do Brasil, não as 5 regiões) e em área Urbana (Rural fica de fora, célula mais fina com
+n=25, abaixo do mínimo de 30) — ver `docs/LIMITACOES_E_METODOLOGIA.md`.
+
+### Desenho A por região/área
+
+`did_cotas_universitarias_heterogeneidade.parquet`. A maioria dos recortes repete o nulo
+nacional (nenhum DiD significativo em nenhuma região/área/raça), mas dois deles **falham
+o teste de tendências paralelas** — a identificação não se sustenta nesses dois pontos
+específicos, mesmo o nacional estando ok:
+
+- **Negra, Região Norte**: tendência pré-2012 coef=-0,39 pp/ano, **p=0,025**.
+- **Negra, área Rural**: tendência pré-2012 coef=-0,36 pp/ano, **p=0,000004** — falha bem
+  mais forte que a do Norte.
+
+Indígena (Norte vs. Resto do Brasil, e área Urbana) tem tendências paralelas sustentadas
+nos três recortes, mas os DiDs são extremamente ruidosos (coeficientes de -5,7 a +5,3 pp,
+todos não significativos) — esperado dado o tamanho de amostra, não uma novidade.
+
+### Desenho B por região/área/DF
+
+`did_cotas_servico_publico_heterogeneidade.parquet` +
+`..._heterogeneidade_curvas.parquet`. Dois achados que pedem destaque:
+
+- **Falhas de tendências paralelas na participação**: Negra no Nordeste (p=0,012), Parda
+  no Nordeste (p=0,009) e Parda no Sul (p=0,004) — identificação não se sustenta nesses
+  três pontos. O hiato de renda no Norte também falha (p=0,049, no limite). Todo o resto
+  (Centro-Oeste, Sudeste, as duas áreas, Indígena Norte/Resto, DF/Resto) sustenta
+  tendências paralelas.
+- **Centro-Oeste tem o efeito mais forte e mais bem-identificado de toda a análise**: o
+  hiato de renda encolhe **+5,6% (log-pontos), p=0,030**, com tendências paralelas
+  sustentadas com folga (p=0,30) — maior e mais significativo que o próprio resultado
+  nacional (+2,0%, p=0,041).
+- **A hipótese do Distrito Federal NÃO se confirmou**. A ideia era usar o DF como
+  aproximação parcial de "federal puro" (funcionalismo federal concentrado lá), esperando
+  um efeito mais forte que a média nacional — o resultado saiu **praticamente zero**
+  (hiato de renda: coef=-0,006, p=0,89; participação: p=0,26). Como o DF está DENTRO do
+  Centro-Oeste, isso é um resultado genuinamente contraintuitivo: o efeito significativo do
+  Centro-Oeste parece vir dos OUTROS três estados da região (Goiás, Mato Grosso, Mato
+  Grosso do Sul), não do DF especificamente. Duas leituras possíveis, nenhuma confirmável
+  com este dado: (a) o efeito da lei não está de fato concentrado onde o funcionalismo é
+  mais federal, o que enfraqueceria a leitura "federal" do resultado nacional; ou (b) o
+  mercado de trabalho do DF é atípico o bastante (salários e composição muito diferentes da
+  média) pra não seguir o padrão regional mesmo se o mecanismo for real. **Não resolve a
+  limitação de esfera de governo — se algo, complica a história simples** de que o efeito é
+  "federal, só diluído".
+
+## 4. Comparação com a literatura
 
 O RDD usado por Mello (2022) e Francis-Tan & Tannuri-Pianto — comparando candidatos
 aprovados por pouco pela cota com candidatos reprovados por pouco, dentro de uma
@@ -213,8 +265,13 @@ distinguir entre essas duas leituras, não este documento.
 - **Nenhum dos dois desenhos identifica o MECANISMO** pelo qual um efeito (quando
   detectado) ocorre — a extensão de mecanismo do Desenho A é correlacional, explicitamente.
 - **Nada aqui substitui o RDD da literatura** como estimativa de referência do efeito
-  causal das cotas universitárias — ver seção 3.
+  causal das cotas universitárias — ver seção 4.
 - **"Tendências paralelas sustentadas" é uma leitura de PODER ESTATÍSTICO insuficiente
   pra REJEITAR a suposição, não uma prova de que a suposição é verdadeira** — com poucos
   pontos de coorte/trimestre, um teste pouco potente pode simplesmente não conseguir
   detectar uma divergência real que existe.
+- **O resultado nulo do teste do Distrito Federal (seção 3) NÃO refuta a hipótese
+  "federal" do resultado nacional** — é um teste de baixo poder (amostra de Indígena no DF
+  é praticamente inexistente; mesmo pra Negra, o DF sozinho é uma fração pequena da
+  amostra nacional) e um resultado atípico de UMA unidade geográfica específica. Ele
+  complica a leitura simples, mas não decide a questão num sentido ou no outro.

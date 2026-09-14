@@ -191,7 +191,20 @@ CREATE TEMP TABLE base AS
         -- terminado em v1016=5). V2009 (idade) guardada de novo aqui, sem faixa, como
         -- checagem adicional de que é a mesma pessoa (idade não pode cair nem saltar
         -- mais de 1 ano entre trimestres consecutivos).
-        m.V1008 AS v1008, m.V1016 AS v1016, m.V2003 AS v2003, m.V2009 AS idade
+        m.V1008 AS v1008, m.V1016 AS v1016, m.V2003 AS v2003, m.V2009 AS idade,
+        -- V1022 (situação do domicílio) e V1023 (tipo de área) — extraídas desde o
+        -- início mas nunca decodificadas neste projeto até agora. V1023 é mais fino
+        -- que Capital/RM_RIDE já usados (separa RIDE de RM, e "resto da UF" de
+        -- "capital"), mas os dois cobrem geografias parecidas — usar `area` (Urbana/
+        -- Rural) como a adição realmente nova; `tipo_area` fica disponível pra quem
+        -- quiser cruzar, sem virar dimensão de agregação padrão do projeto.
+        CASE m.V1022 WHEN '1' THEN 'Urbana' WHEN '2' THEN 'Rural' END AS area,
+        CASE m.V1023
+            WHEN '1' THEN 'Capital'
+            WHEN '2' THEN 'Região Metropolitana (exceto capital)'
+            WHEN '3' THEN 'RIDE (exceto capital)'
+            WHEN '4' THEN 'Resto da UF'
+        END AS tipo_area
     FROM read_parquet('{PARQUET_GLOB}', hive_partitioning = 1) AS m
     LEFT JOIN read_parquet('{DEFLATOR_PATH}') AS d
         ON m.ano = d.ano AND m.trimestre = d.trimestre AND m.UF = d.UF
