@@ -226,7 +226,8 @@ trimestres) para trazer essa coluna — usada na decomposição do hiato racial 
   média da RIF recupera o quantil da distribuição de referência correta.
 - **Teste de quebra estrutural** (`agregacoes_pnadc.gerar_quebra_estrutural`): é um teste de
   Chow simplificado — uma quebra conhecida a priori (a data do evento), testada isoladamente
-  na série inteira (58 pontos trimestrais). NÃO é uma busca por múltiplas quebras
+  na série inteira (58 pontos trimestrais). Desde a Onda 2 o EP é EWC (`src/inference/tendencia.py`) e os
+  3 eventos são corrigidos por BH. NÃO é uma busca por múltiplas quebras
   desconhecidas (ex.: Bai-Perron) e não controla por outros eventos concorrentes no mesmo
   período (ex.: a pandemia caiu perto da reforma da previdência) — tratar como evidência de
   correlação temporal, não de causalidade.

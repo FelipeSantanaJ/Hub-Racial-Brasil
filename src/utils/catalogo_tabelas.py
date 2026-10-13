@@ -104,6 +104,26 @@ CATALOGO: list[tuple[str, str, str]] = [
     (r"^s14_margens_intensiva_extensiva$", "Pessoas 18+ (Ignorado fora); renda do trabalho principal por adulto "
      "(fora de P1 = 0) = Pr(P1) × horas habituais (V4039) × renda por hora", T),
     (r"^(s15_selecao_no_tempo|s15_selecao_episodios)$", "Séries do S0.1, S0.2 (refeito por ano) e S1.1; pessoas 18+", T),
+    # --- Onda 2: Bloco B (src/processing/bloco_b.py) ---
+    (r"^(b1_tendencia_hiato|b1_degraus_hiato)$", "Séries publicadas do hiato: P1 (hiato_racial, hiato_branca_indigena, "
+     "hiato_preta_parda, a2_*), P4 (sensibilidade_hiato_populacao) e renda domiciliar per capita (t1)", INSUMO_DERIVADO),
+    (r"^b6_projecao_condicional$", "Saída do B1 (tendência do hiato); projeção condicional", INSUMO_DERIVADO),
+    (r"^b5_ciclo_tendencia$", "Séries do S1 (P1 e P4, Branca × Negra) + taxa de desocupação (14+, IBGE)", T),
+    (r"^b5_taxa_desocupacao$", "Pessoas de 14+ na força de trabalho; desocupados ÷ força", T),
+    (r"^(b3_hiato_quantis_serie|b3_quantis_janelas)$", P1 + "; Branca × Negra; quantis incondicionais", T),
+    (r"^b3_tendencia_quantis$", P1 + " (trimestral) e renda domiciliar per capita (t1, anual); tendência por quantil", T),
+    (r"^b2_decomposicao_tempo$", P1 + " e P4 (pessoas 18+, fora de P1 = 0); Branca × Negra (Preta/Parda); janelas "
+     "2012 e 2025T3–2026T2", T),
+    (r"^b2_composicao_racial_coortes$", "Pessoas 18+ dos 2º trimestres, coortes de nascimento 1950–1994", T),
+    (r"^(b4_mesma_idade_coortes|b4_celulas_idade_ano|b4_apc)$", P1 + "; 25–59 anos; Branca × Negra; células ano × idade", T),
+    # --- Onda 2: Bloco C (src/processing/bloco_c.py) ---
+    (r"^(c123_racaxsexo_celulas|c2_interacao_regressao|c1_theil_celulas|c1_quantis_celulas|c2_interacao_tendencia)$",
+     P1 + " e P4 (pessoas 18+, fora de P1 = 0); células Branca/Negra/Indígena × sexo", T),
+    (r"^c123_racaxsexo_domiciliar_anual$", "Pessoas 18+ da PNAD Contínua anual (Visita 1; Visita 5 em 2020–2021), exceto "
+     "V2005 17–19; renda domiciliar per capita (VD5008) por raça × sexo da pessoa", "anual_v2"),
+    (r"^c4_penalidade_maternidade$", "Pessoas de 25–44 anos (responsáveis ou cônjuges na definição principal); filho(a) "
+     "de 0–5 no domicílio (UPA + V1008 + V1014); janelas 2012 e 2025T3–2026T2", T),
+    (r"^(c5_trabalho_domestico|c5_tendencia)$", "Mulheres 18+ (P1 e todas); trabalho doméstico = VD4009 03/04", T),
     (r"^habitacao_.*$", "Moradores (pessoas) da PNAD Contínua anual, Visita 1, tema Habitação: 2016–2019 e 2022–2025",
      INSUMO_ANUAL_VISITA1_V1),
     (r"^deflator_ibge$", "Não se aplica (deflatores oficiais do IBGE por UF × trimestre)", "ibge_deflator"),

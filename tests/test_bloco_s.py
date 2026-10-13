@@ -158,3 +158,18 @@ def test_medias_episodios():
     assert r["media"].tolist() == pytest.approx([0, 2, 4, 6, 8])
     assert r["dif_vs_referencia"].tolist() == pytest.approx([0, 2, 4, 6, 8])
     assert r["n_periodos"].tolist() == [12, 8, 12, 8, 18]
+
+
+def test_degraus_e_quebra_resposta_conhecida():
+    ano = np.repeat(np.arange(2012, 2027), 4)[:58]
+    tri = np.tile([1, 2, 3, 4], 15)[:58]
+    t = tendencia.tempo_anos(ano, tri)
+    rng = np.random.default_rng(9)
+    y = 70 - 0.5 * (t - 2012) - 4.0 * ((ano >= 2022)) + rng.normal(0, 0.05, 58)
+    d = tendencia.degraus_ewc(ano, tri, y, {"2015": (2015, 1), "2022": (2022, 1)}).set_index("termo")
+    assert d.loc["inclinacao_por_ano", "estimativa"] == pytest.approx(-0.5, abs=0.02)
+    assert d.loc["degrau_2022", "estimativa"] == pytest.approx(-4.0, abs=0.1)
+    assert d.loc["degrau_2015", "estimativa"] == pytest.approx(0.0, abs=0.1)
+    q = tendencia.quebra_ewc(ano, tri, y, (2022, 1))
+    assert q["coef_mudanca_patamar"] == pytest.approx(-4.0, abs=0.15)
+    assert q["coef_mudanca_inclinacao"] == pytest.approx(0.0, abs=0.1)

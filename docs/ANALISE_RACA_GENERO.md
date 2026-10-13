@@ -136,9 +136,15 @@ construir a função).
 
 ## 3. Ritmo de convergência do hiato — Branca-Negra, Branca-Indígena, Preta-Parda
 
-`ritmo_convergencia_hiatos.parquet` ajusta uma tendência linear simples no hiato
+> **Atualizado na Onda 2 (13/10/2026, estudo [B1](studies/B1/ficha.md)):** EP refeito com EWC (Newey-West e GLS AR(1)
+> ao lado); "tendência confiável" = os três IC excluem zero. Branca-Negra: −0,78 p.p./ano (IC −1,25 a −0,32),
+> confiável — mas com degraus no modelo a tendência some e a queda é um degrau de −5 p.p. em 2022. Branca-Indígena:
+> +0,52 (IC −0,16 a 1,21), **não** confiável. Preta-Parda: −0,31 (−0,51 a −0,12), confiável. "Anos para zerar"
+> saiu da tabela: a projeção condicional é o [B6](studies/B6/ficha.md). A tabela abaixo é o registro histórico.
+
+`ritmo_convergencia_hiatos.parquet` ajustava uma tendência linear simples no hiato
 percentual de cada par ao longo dos 58 trimestres (OLS com EP i.i.d. sobre a série; sem correção
-para autocorrelação, R6 da auditoria, pendente para a Onda 2 com HAC):
+para autocorrelação, R6 da auditoria):
 
 | Par | Hiato atual | Inclinação (p.p./ano) | R² | Tendência confiável? | Anos p/ zerar (extrapolação ingênua) |
 |---|---:|---:|---:|---|---:|

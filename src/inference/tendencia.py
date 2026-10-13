@@ -132,3 +132,48 @@ def medias_episodios_hac(ano, trimestre, y, episodios: dict = EPISODIOS_PADRAO, 
                        "dif_ic_inferior": dif - q * ep_d, "dif_ic_superior": dif + q * ep_d,
                        "p_valor_dif": p if i != i0 else np.nan, "referencia": ref, "gl_ewc": nu})
     return pd.DataFrame(linhas)
+
+
+def _apos(ano, trimestre, data: tuple[int, int]) -> np.ndarray:
+    return ((np.asarray(ano, int) * 10 + np.asarray(trimestre, int)) >= data[0] * 10 + data[1]).astype(float)
+
+
+def degraus_ewc(ano, trimestre, y, datas: dict[str, tuple[int, int]]) -> pd.DataFrame:
+    """y = a + b·t + Σ_k γ_k·1[t ≥ t_k]: mudanças de PATAMAR em datas fixadas antes, com a
+    tendência comum; covariância EWC e t com ν g.l. Devolve uma linha por termo (inclinação e
+    cada degrau)."""
+    t = tempo_anos(ano, trimestre)
+    y = np.asarray(y, float)
+    ok = np.isfinite(y)
+    cols = [np.ones(ok.sum()), t[ok] - t[ok].mean()] + [_apos(ano, trimestre, d)[ok] for d in datas.values()]
+    X = np.column_stack(cols)
+    fit = sm.OLS(y[ok], X).fit()
+    V, nu = cov_ewc(X, fit.resid)
+    q = float(stats.t.ppf(0.975, nu))
+    nomes = ["inclinacao_por_ano"] + [f"degrau_{k}" for k in datas]
+    linhas = []
+    for i, nome in enumerate(nomes, start=1):
+        b, ep = float(fit.params[i]), float(np.sqrt(max(V[i, i], 0.0)))
+        linhas.append({"termo": nome, "estimativa": b, "ep_ewc": ep, "ic_inferior": b - q * ep, "ic_superior": b + q * ep,
+                       "p_valor_ewc": float(2 * stats.t.sf(abs(b / ep), nu)) if ep > 0 else np.nan, "gl_ewc": nu})
+    return pd.DataFrame(linhas)
+
+
+def quebra_ewc(ano, trimestre, y, data: tuple[int, int]) -> dict:
+    """Teste tipo Chow com data conhecida: y = a + b·t + c·D + d·D·(t − t0), D = 1[t ≥ t0];
+    c = mudança de patamar, d = mudança de inclinação (por ano), EP EWC."""
+    t = tempo_anos(ano, trimestre)
+    y = np.asarray(y, float)
+    ok = np.isfinite(y)
+    t0 = data[0] + (data[1] - 1) / 4
+    D = _apos(ano, trimestre, data)[ok]
+    X = np.column_stack([np.ones(ok.sum()), t[ok] - t0, D, D * (t[ok] - t0)])
+    fit = sm.OLS(y[ok], X).fit()
+    V, nu = cov_ewc(X, fit.resid)
+    out = {"gl_ewc": nu}
+    for i, nome in ((2, "patamar"), (3, "inclinacao")):
+        b, ep = float(fit.params[i]), float(np.sqrt(max(V[i, i], 0.0)))
+        out[f"coef_mudanca_{nome}"] = b
+        out[f"ep_mudanca_{nome}"] = ep
+        out[f"p_valor_mudanca_{nome}"] = float(2 * stats.t.sf(abs(b / ep), nu)) if ep > 0 else np.nan
+    return out

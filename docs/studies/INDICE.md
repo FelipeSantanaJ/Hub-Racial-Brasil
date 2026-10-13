@@ -19,6 +19,7 @@ de publicação. Estudos entram aqui quando a ficha é criada, não quando o res
 | S1.4 | Margem extensiva × intensiva × renda por hora | C | 1 | Aprovado com ressalvas (proposto) | [S1.4/ficha.md](S1.4/ficha.md) | Onda 1, pendências |
 | S1.3 | Limites do hiato sob suposições sobre quem não é observado | C | 1 | Aprovado com ressalvas (proposto) | [S1.3/ficha.md](S1.3/ficha.md) | Onda 1, pendências |
 | S1.5 | A seleção mudou no tempo (recessão, pandemia)? | D | 1 | Aprovado com ressalvas (proposto) | [S1.5/ficha.md](S1.5/ficha.md) | Onda 1, pendências |
+| B1 | Tendência 2012–2026 do hiato (EP robusto a autocorrelação, degraus) | D | 2 | Aprovado com ressalvas (proposto) | [B1/ficha.md](B1/ficha.md) | Onda 2 |
 
 O que já existe no Hub e a qual pergunta corresponde está em
 [`docs/auditoria/mapa_cobertura_plano.md`](../auditoria/mapa_cobertura_plano.md).

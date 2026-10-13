@@ -173,8 +173,10 @@ ocupacional em si, à parte do efeito dela na renda (já coberto pela decomposi�
 
 ![Quebra estrutural](img/hiato_quebra_estrutural.png)
 
-Teste tipo Chow (simplificado) nos 3 eventos já mapeados como possíveis pontos de inflexão:
-os 3 mostram mudança estatisticamente significativa de patamar e/ou inclinação — não é
+Teste tipo Chow (simplificado) nos 3 eventos já mapeados como possíveis pontos de inflexão,
+com EP robusto a autocorrelação (EWC; Onda 2, [B1](studies/B1/ficha.md)) e correção para os 3 eventos:
+reforma trabalhista (2017) e recessão (2015) mostram mudança significativa de patamar e/ou
+inclinação; a reforma da previdência (2019) **não** (com o EP antigo, i.i.d., as três apareciam) — não é
 prova de causalidade (a série tem só 58 pontos e outros eventos concorrentes, como a
 pandemia perto da reforma da previdência, não são controlados), mas é evidência de
 correlação temporal que vale documentar.
