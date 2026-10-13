@@ -266,15 +266,17 @@ tem os dois blocos.
   o P90 cai bem em cima de um valor populoso desses, o filtro `>= limiar` inclui todo mundo
   empatado ali, capturando mais que 10% de fato (checado manualmente: ~11,5% de Branca,
   ~12,8% de Negra no trimestre mais recente). A coluna `pct_populacao_capturada` em
-  `perfil_topo10_racial.parquet` registra o valor real capturado a cada trimestre — não
-  tentamos uma correção de desempate mais sofisticada (fracionar a inclusão de quem está
-  exatamente no limiar) por estar fora do escopo desta etapa.
+  `perfil_topo10_racial.parquet` registra o valor real capturado a cada trimestre.
+  **Correção decidida em 13/10/2026 (R9; vale na regeneração da Onda 1):** o peso de quem está
+  empatado no limiar passa a ser repartido proporcionalmente entre as fatias
+  (`pnadc_core.fracao_na_fatia`), e cada fatia soma exatamente 10% ou 25%. Prévia 2026T2: Superior
+  completo no topo 10% Negra vai de 56,9% para 61,4%, e no topo 10% Branca de 83,0% para 84,3%.
 - **4 quartis por raça** (`perfil_quartis_racial.parquet`): generaliza o "topo 10%" acima —
   em vez de só o P90, calcula P25/P50/P75 dentro de cada raça e classifica cada pessoa em
   Q1-Q4. O topo 10% é o recorte mais estreito; os 4 quartis cobrem a distribuição inteira. Mesma ressalva de heaping do P90 vale aqui: cada quartil
   deveria capturar ~25% da população do grupo, mas pode desviar um pouco (checado no
-  trimestre mais recente: entre 22% e 31% conforme quartil/raça) — mesma coluna de
-  diagnóstico (`pct_populacao_capturada`), sem correção de desempate.
+  trimestre mais recente: entre 22% e 31% conforme quartil/raça). Com a correção de
+  13/10/2026, cada quartil dá 25,0% (`pct_populacao_capturada` fica como checagem).
 
 ## Gini/Theil por raça, setor econômico e sobre-qualificação
 
@@ -394,8 +396,11 @@ Universo: ocupados com `renda_habitual_real > 0` (mesmo escopo da decomposição
 do topo10% dentro-da-raça). Amostra mínima antes de calcular um quantil: 200 (escopo com 3
 limiares), 100-150 nas células raça×gênero. Vale a **mesma ressalva de heaping** já
 documentada para o topo10% dentro-da-raça — renda autodeclarada concentra em valores
-redondos, então o filtro `>= limiar` captura um pouco mais que 10%/25% exatos; as tabelas
-gravam `pct_populacao_capturada` como diagnóstico.
+redondos, e o filtro `>= limiar` capturava um pouco mais que 10%/25% exatos. Desde 13/10/2026
+(vale na regeneração da Onda 1), o peso empatado é repartido e `pct_populacao_capturada` dá 10,0/25,0.
+O escopo `brasil` passa a incluir **Amarela** no universo e nas raças reportadas (R10): na prévia de
+2026T2, Amarela é 1,45% do topo 10% nacional e a participação Branca cai de 68,2% para 67,3%.
+Ignorado continua fora.
 
 `gerar_quartis_multi_racial` generaliza `gerar_perfil_quartis_racial` para os recortes
 `raca` (limiar dentro da raça; dimensões sexo/escolaridade/faixa/geração) e `raca_sexo`

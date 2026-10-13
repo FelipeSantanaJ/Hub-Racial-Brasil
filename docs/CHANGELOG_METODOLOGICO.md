@@ -48,6 +48,28 @@ regeneração única da Onda 1**.
   golden-file de `renda` foi regerado (intencional): as 13 colunas antigas ficam idênticas e
   entram 4 colunas novas.
 
+### 3. Valores redondos nos limiares de quantil (R9) e Amarela em `extremos` (R10) — **no código; vale na regeneração da Onda 1**
+
+- **O quê.** `pnadc_core.fracao_na_fatia` dá a cada observação a fração do seu peso que cai na
+  fatia [q_inf, q_sup] da distribuição ponderada, e reparte o peso de quem está empatado no limiar.
+  Cada fatia soma **exatamente** 10% (topo/base) ou 25% (quartis). Usada (via `_fatia_ponderada` /
+  `_quartis_ponderados`) em `gerar_perfil_topo10_racial`, `gerar_perfil_quartis_racial`,
+  `gerar_perfil_topo10_quartis_pretaparda`, `gerar_perfil_topo10_quartis_indigena`,
+  `gerar_extremos_racial` e `gerar_quartis_multi_racial`. `n_topo10`/`n_quartil`/`n_extremo`
+  passam a contar quem tem fração > 0. R10: o escopo `brasil` de `extremos_distribuicao_racial`
+  inclui Amarela no universo e nas raças reportadas; Ignorado e o escopo `genero` ficam como estavam.
+- **Por quê.** Com renda declarada em valores redondos, o corte `>= limiar` capturava de 22% a 31%
+  nos quartis e até 12,8% no topo 10%.
+- **Impacto previsto** (prévia 2026T2, sem gravar parquet): o topo 10% passa de 11,5% (Branca) e
+  12,8% (Negra) de captura para 10,0%. Os quartis Negra passam de 23,6/23,2/22,4/30,9% para 25% cada.
+  Superior completo no topo 10%: Negra 56,9% → 61,4%; Branca 83,0% → 84,3%. No topo 10% nacional,
+  a participação Branca vai de 67,3% (antes, sem Amarela, corte simples) para 67,3% (com Amarela e
+  repartição): os dois efeitos se compensam (−0,9 p.p. de Amarela, +0,9 p.p. da repartição). Amarela
+  = 1,45%. **Números do `ANALISE_FASE1.md` sobre o topo e os quartis mudam na Onda 1.**
+- Testes: `TestFracaoNaFatia` (soma = 100%; sem empates, igual ao corte simples salvo a observação
+  que contém o limiar; massa empatada ⇒ fatias exatas) e `tests/test_heaping_tabelas.py`
+  (geradores sobre sintético com 20% em R$ 3.000: captura = 10/25 exatos; composições somam 100).
+
 ---
 
 ## 13/10/2026 — Etapa 2, Fase 2 (branch `auditoria/fase2-infra`)

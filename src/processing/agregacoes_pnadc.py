@@ -746,6 +746,29 @@ def gerar_decomposicao_oaxaca_blinder_preta_parda(con: duckdb.DuckDBPyConnection
               "residuo_restrito_significativo"]].to_string(index=False), flush=True)
 
 
+QUARTIS = [("Q1 (25% que menos ganham)", 0.0, 0.25), ("Q2", 0.25, 0.50), ("Q3", 0.50, 0.75),
+           ("Q4 (25% que mais ganham)", 0.75, 1.0)]
+
+
+def _fatia_ponderada(grupo: pd.DataFrame, q_inf: float, q_sup: float,
+                     coluna: str = "renda_habitual_real") -> pd.DataFrame:
+    """Linhas de `grupo` na fatia [q_inf, q_sup] da distribuição ponderada de `coluna`, com
+    `peso` trocado pelo peso EFETIVO na fatia (peso × fração; `pnadc_core.fracao_na_fatia`).
+    Quem está empatado no limiar entra com parte do peso, e a fatia soma exatamente
+    (q_sup − q_inf) do peso do grupo (R9; decisão de 13/10/2026). Contagens de linhas (`n_*`)
+    passam a contar quem tem fração > 0."""
+    f = pnadc_core.fracao_na_fatia(grupo[coluna].to_numpy(), grupo["peso"].to_numpy(), q_inf, q_sup)
+    fatia = grupo[f > 0].copy()
+    fatia["peso"] = fatia["peso"].to_numpy() * f[f > 0]
+    return fatia
+
+
+def _quartis_ponderados(grupo: pd.DataFrame):
+    """(rótulo, fatia) dos 4 quartis, com o peso dos empatados nos limiares repartido."""
+    for rotulo, a, b in QUARTIS:
+        yield rotulo, _fatia_ponderada(grupo, a, b)
+
+
 def gerar_perfil_topo10_racial(con: duckdb.DuckDBPyConnection) -> None:
     """Perfil demográfico de quem está no topo 10% de renda DENTRO de cada raça (Branca
     e Negra — Indígena fica de fora, amostra insuficiente pra um quantil confiável por
@@ -761,13 +784,10 @@ def gerar_perfil_topo10_racial(con: duckdb.DuckDBPyConnection) -> None:
     do hiato). Formato longo: uma linha por (trimestre, raça, dimensão, categoria).
 
     Nota sobre "topo 10%": renda autodeclarada tem "heaping" — concentração forte em
-    valores redondos (R$1.000, R$2.000, R$5.000, R$10.000 etc., checado direto no
-    parquet bruto). Quando o limiar do P90 cai bem em cima de um desses valores muito
-    populosos, o filtro `>= limiar` inclui TODO mundo empatado naquele valor, capturando
-    um pouco mais que 10% de fato (no 2026 T2, por exemplo, ~11,5% de Branca e ~12,8% de
-    Negra — checado manualmente). Por isso a função grava `pct_populacao_capturada`
-    (peso do grupo "topo" / peso total do grupo racial naquele trimestre) — use essa
-    coluna pra saber o quão perto de "exatamente 10%" cada linha está de fato.
+    valores redondos (R$1.000, R$2.000, R$5.000, R$10.000 etc.). Até 13/10/2026 o filtro
+    `>= limiar` incluía TODO mundo empatado no P90 e o "topo" capturava 11–12%. Agora o
+    peso dos empatados no limiar é repartido (`_fatia_ponderada`; R9) e
+    `pct_populacao_capturada` dá 10,0 por construção (fica como checagem).
     """
     dimensoes = ["sexo", "faixa_etaria", "geracao", "nivel_instrucao"]
     trimestres = con.execute("SELECT DISTINCT ano, trimestre FROM base ORDER BY ano, trimestre").df()
@@ -793,7 +813,7 @@ def gerar_perfil_topo10_racial(con: duckdb.DuckDBPyConnection) -> None:
                 continue
             peso_grupo = grupo["peso"].sum()
             limiar = pnadc_core.quantil_ponderado(grupo["renda_habitual_real"], grupo["peso"], 0.9)
-            topo = grupo[grupo["renda_habitual_real"] >= limiar]
+            topo = _fatia_ponderada(grupo, 0.9, 1.0)
             peso_topo = topo["peso"].sum()
             if peso_topo == 0:
                 continue
@@ -895,10 +915,9 @@ def gerar_perfil_quartis_racial(con: duckdb.DuckDBPyConnection) -> None:
     "Q1 de Branca" e "Q1 de Negra" não têm o mesmo intervalo de R$, cada um é "os 25% que
     menos ganham dentro do próprio grupo".
 
-    Universo/dimensões/formato: iguais a `gerar_perfil_topo10_racial`. Mesma ressalva de
-    heaping documentada lá — `pct_populacao_capturada` aqui é o peso de cada quartil
-    sobre o total do grupo (deveria ficar perto de 25%, pode desviar um pouco pela mesma
-    razão: renda autodeclarada concentrada em valores redondos).
+    Universo/dimensões/formato: iguais a `gerar_perfil_topo10_racial`. Mesma repartição do
+    peso empatado nos limiares (R9) —
+    `pct_populacao_capturada` (peso do quartil / peso do grupo) dá 25,0 por construção.
     """
     dimensoes = ["sexo", "faixa_etaria", "geracao", "nivel_instrucao"]
     trimestres = con.execute("SELECT DISTINCT ano, trimestre FROM base ORDER BY ano, trimestre").df()
@@ -923,17 +942,7 @@ def gerar_perfil_quartis_racial(con: duckdb.DuckDBPyConnection) -> None:
             if len(grupo) < 200:  # amostra mínima maior — 3 limiares em vez de 1
                 continue
             peso_grupo = grupo["peso"].sum()
-            p25 = pnadc_core.quantil_ponderado(grupo["renda_habitual_real"], grupo["peso"], 0.25)
-            p50 = pnadc_core.quantil_ponderado(grupo["renda_habitual_real"], grupo["peso"], 0.50)
-            p75 = pnadc_core.quantil_ponderado(grupo["renda_habitual_real"], grupo["peso"], 0.75)
-            grupo["quartil"] = np.select(
-                [grupo["renda_habitual_real"] < p25,
-                 grupo["renda_habitual_real"] < p50,
-                 grupo["renda_habitual_real"] < p75],
-                ["Q1 (25% que menos ganham)", "Q2", "Q3"],
-                default="Q4 (25% que mais ganham)",
-            )
-            for quartil, fatia in grupo.groupby("quartil", observed=True):
+            for quartil, fatia in _quartis_ponderados(grupo):
                 peso_fatia = fatia["peso"].sum()
                 if peso_fatia == 0:
                     continue
@@ -985,7 +994,7 @@ def gerar_perfil_topo10_quartis_pretaparda(con: duckdb.DuckDBPyConnection) -> No
             peso_grupo = grupo["peso"].sum()
 
             limiar = pnadc_core.quantil_ponderado(grupo["renda_habitual_real"], grupo["peso"], 0.9)
-            topo = grupo[grupo["renda_habitual_real"] >= limiar]
+            topo = _fatia_ponderada(grupo, 0.9, 1.0)
             peso_topo = topo["peso"].sum()
             if peso_topo > 0:
                 pct_capturado = 100 * peso_topo / peso_grupo
@@ -999,17 +1008,7 @@ def gerar_perfil_topo10_quartis_pretaparda(con: duckdb.DuckDBPyConnection) -> No
                             "pct_do_topo10": 100 * sub["peso"].sum() / peso_topo,
                         })
 
-            p25 = pnadc_core.quantil_ponderado(grupo["renda_habitual_real"], grupo["peso"], 0.25)
-            p50 = pnadc_core.quantil_ponderado(grupo["renda_habitual_real"], grupo["peso"], 0.50)
-            p75 = pnadc_core.quantil_ponderado(grupo["renda_habitual_real"], grupo["peso"], 0.75)
-            grupo["quartil"] = np.select(
-                [grupo["renda_habitual_real"] < p25,
-                 grupo["renda_habitual_real"] < p50,
-                 grupo["renda_habitual_real"] < p75],
-                ["Q1 (25% que menos ganham)", "Q2", "Q3"],
-                default="Q4 (25% que mais ganham)",
-            )
-            for quartil, fatia in grupo.groupby("quartil", observed=True):
+            for quartil, fatia in _quartis_ponderados(grupo):
                 peso_fatia = fatia["peso"].sum()
                 if peso_fatia == 0:
                     continue
@@ -1066,7 +1065,7 @@ def gerar_perfil_topo10_quartis_indigena(con: duckdb.DuckDBPyConnection, n_trime
     peso_grupo = micro["peso"].sum()
 
     limiar = pnadc_core.quantil_ponderado(micro["renda_habitual_real"], micro["peso"], 0.9)
-    topo = micro[micro["renda_habitual_real"] >= limiar]
+    topo = _fatia_ponderada(micro, 0.9, 1.0)
     peso_topo = topo["peso"].sum()
     pct_capturado_topo = 100 * peso_topo / peso_grupo
     for dimensao in dimensoes:
@@ -1079,17 +1078,7 @@ def gerar_perfil_topo10_quartis_indigena(con: duckdb.DuckDBPyConnection, n_trime
                 "pct_do_topo10": 100 * sub["peso"].sum() / peso_topo,
             })
 
-    p25 = pnadc_core.quantil_ponderado(micro["renda_habitual_real"], micro["peso"], 0.25)
-    p50 = pnadc_core.quantil_ponderado(micro["renda_habitual_real"], micro["peso"], 0.50)
-    p75 = pnadc_core.quantil_ponderado(micro["renda_habitual_real"], micro["peso"], 0.75)
-    micro["quartil"] = np.select(
-        [micro["renda_habitual_real"] < p25,
-         micro["renda_habitual_real"] < p50,
-         micro["renda_habitual_real"] < p75],
-        ["Q1 (25% que menos ganham)", "Q2", "Q3"],
-        default="Q4 (25% que mais ganham)",
-    )
-    for quartil, fatia in micro.groupby("quartil", observed=True):
+    for quartil, fatia in _quartis_ponderados(micro):
         peso_fatia = fatia["peso"].sum()
         if peso_fatia == 0:
             continue
@@ -1124,15 +1113,16 @@ _GERACOES_VALIDAS = {
 }
 
 
-def _micro_renda_trimestre(con, ano: int, trimestre: int) -> pd.DataFrame:
+def _micro_renda_trimestre(con, ano: int, trimestre: int, incluir_amarela: bool = False) -> pd.DataFrame:
     """Ocupados com renda habitual real > 0 no trimestre, com Negra = Preta+Parda
-    combinadas e Indígena preservada. Colunas demográficas + renda + peso."""
+    combinadas e Indígena preservada (e Amarela, se pedido). Colunas demográficas + renda + peso."""
+    racas = "'Branca', 'Preta', 'Parda', 'Indígena'" + (", 'Amarela'" if incluir_amarela else "")
     micro = con.execute(f"""
         SELECT raca_cor, sexo, faixa_etaria, geracao, nivel_instrucao,
                renda_habitual_real, peso, upa, estrato
         FROM base
         WHERE ano = {ano} AND trimestre = {trimestre}
-          AND raca_cor IN ('Branca', 'Preta', 'Parda', 'Indígena')
+          AND raca_cor IN ({racas})
           AND renda_habitual_real IS NOT NULL AND renda_habitual_real > 0
           AND sexo IS NOT NULL
     """).df()
@@ -1166,30 +1156,31 @@ def gerar_extremos_racial(con: duckdb.DuckDBPyConnection) -> None:
       dentro do topo/base: ano, trimestre, extremo, recorte ('raca'/'raca_sexo'),
       grupo, dimensao, categoria, pct_no_extremo.
 
-    Mesma ressalva de heaping de `gerar_perfil_topo10_racial` — `pct_populacao_capturada`
-    diz o quão perto de 10% exato cada linha ficou.
+    Peso dos empatados nos limiares repartido (R9): `pct_populacao_capturada` = 10,0. O escopo
+    'brasil' inclui Amarela no universo e na lista de raças (R10, 13/10/2026); Ignorado segue
+    fora. Os escopos 'genero' e os recortes por raça continuam sem Amarela.
     """
     def _fatia(grupo: pd.DataFrame, extremo: str, q: float):
         limiar = pnadc_core.quantil_ponderado(grupo["renda_habitual_real"], grupo["peso"], q)
-        fatia = grupo[grupo["renda_habitual_real"] >= limiar] if extremo == "topo10" \
-            else grupo[grupo["renda_habitual_real"] <= limiar]
+        fatia = _fatia_ponderada(grupo, q, 1.0) if extremo == "topo10" else _fatia_ponderada(grupo, 0.0, q)
         return limiar, fatia
 
     trimestres = con.execute("SELECT DISTINCT ano, trimestre FROM base ORDER BY ano, trimestre").df()
     distrib, renda, comp = [], [], []
     for _, row in trimestres.iterrows():
         ano, tri = int(row["ano"]), int(row["trimestre"])
-        micro = _micro_renda_trimestre(con, ano, tri)
+        micro_todos = _micro_renda_trimestre(con, ano, tri, incluir_amarela=True)
+        micro = micro_todos[micro_todos["raca_cor"] != "Amarela"]
         if len(micro) < 200:
             continue
 
         for extremo, q in (("topo10", 0.9), ("base10", 0.1)):
-            # --- escopo 'brasil': limiar único --------------------------------- #
-            peso_tot = micro["peso"].sum()
-            limiar_br, fatia_br = _fatia(micro, extremo, q)
+            # --- escopo 'brasil': limiar único, universo com Amarela (R10) ---- #
+            peso_tot = micro_todos["peso"].sum()
+            limiar_br, fatia_br = _fatia(micro_todos, extremo, q)
             peso_fatia = fatia_br["peso"].sum()
             if peso_fatia:
-                for raca in ("Branca", "Negra", "Indígena"):
+                for raca in ("Branca", "Negra", "Indígena", "Amarela"):
                     distrib.append({
                         "ano": ano, "trimestre": tri, "extremo": extremo,
                         "escopo_limiar": "brasil", "grupo_limiar": "Brasil", "raca_cor": raca,
@@ -1273,8 +1264,8 @@ def gerar_quartis_multi_racial(con: duckdb.DuckDBPyConnection) -> None:
       "quartil por raça × gênero", "…× escolaridade", "…× faixa etária".
 
     Formato longo: ano, trimestre, recorte, grupo, quartil, dimensao, categoria,
-    pct_do_quartil, pct_populacao_capturada. Brasil, 2012-2026. Mesma ressalva de heaping
-    de `gerar_perfil_quartis_racial`.
+    pct_do_quartil, pct_populacao_capturada. Brasil, 2012-2026. Mesma repartição do peso
+    empatado nos limiares de `gerar_perfil_quartis_racial` (R9).
     """
     trimestres = con.execute("SELECT DISTINCT ano, trimestre FROM base ORDER BY ano, trimestre").df()
     resultados = []
@@ -1296,15 +1287,7 @@ def gerar_quartis_multi_racial(con: duckdb.DuckDBPyConnection) -> None:
                 continue
             g = g.copy()
             peso_g = g["peso"].sum()
-            p25 = pnadc_core.quantil_ponderado(g["renda_habitual_real"], g["peso"], 0.25)
-            p50 = pnadc_core.quantil_ponderado(g["renda_habitual_real"], g["peso"], 0.50)
-            p75 = pnadc_core.quantil_ponderado(g["renda_habitual_real"], g["peso"], 0.75)
-            g["quartil"] = np.select(
-                [g["renda_habitual_real"] < p25, g["renda_habitual_real"] < p50,
-                 g["renda_habitual_real"] < p75],
-                ["Q1 (25% que menos ganham)", "Q2", "Q3"], default="Q4 (25% que mais ganham)",
-            )
-            for quartil, fatia in g.groupby("quartil", observed=True):
+            for quartil, fatia in _quartis_ponderados(g):
                 peso_q = fatia["peso"].sum()
                 if not peso_q:
                     continue

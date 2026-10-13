@@ -305,6 +305,37 @@ def quantil_ponderado(valores, pesos, quantil):
     return float(valores[ordem][min(pos, len(valores) - 1)])
 
 
+def fracao_na_fatia(valores, pesos, q_inf: float, q_sup: float) -> np.ndarray:
+    """Fração do peso de cada observação que pertence à fatia [q_inf, q_sup] da distribuição
+    acumulada ponderada de `valores` (ex.: topo 10% = (0.9, 1.0); Q2 = (0.25, 0.50)).
+
+    Corrige o heaping nos limiares (R9 da auditoria Rodada 2; decisão de 13/10/2026): com renda
+    declarada em valores redondos, um corte `>= limiar` põe TODOS os empatados no limiar de um
+    lado só, e a fatia sai com 11–12% em vez de 10%. Aqui cada valor distinto ocupa um bloco
+    [C⁻, C⁺] do peso acumulado, e todas as observações desse valor recebem a mesma fração,
+    |bloco ∩ fatia| / |bloco|. Logo Σ peso·fração = (q_sup − q_inf)·Σ peso EXATAMENTE, e
+    fatias contíguas somam 100%. Sem empates, só a observação que contém o limiar pode
+    receber fração entre 0 e 1; todas as outras ficam iguais ao corte simples.
+
+    Pré-condição: sem NaN e pesos > 0 (filtrar antes de chamar)."""
+    valores = np.asarray(valores, dtype=float)
+    pesos = np.asarray(pesos, dtype=float)
+    if not 0.0 <= q_inf <= q_sup <= 1.0:
+        raise ValueError("exige 0 <= q_inf <= q_sup <= 1")
+    unicos, idx = np.unique(valores, return_inverse=True)
+    peso_valor = np.bincount(idx, weights=pesos, minlength=len(unicos))
+    total = peso_valor.sum()
+    c_sup = np.cumsum(peso_valor)
+    c_inf = c_sup - peso_valor
+    a, b = q_inf * total, q_sup * total
+    sobreposicao = np.clip(np.minimum(c_sup, b) - np.maximum(c_inf, a), 0.0, None)
+    fracao = sobreposicao / peso_valor
+    # ruído de ponto flutuante do cumsum: 0,9999999999 vira 1 e 1e-13 vira 0
+    fracao = np.where(np.isclose(fracao, 1.0, rtol=0, atol=1e-9), 1.0,
+                      np.where(np.isclose(fracao, 0.0, rtol=0, atol=1e-9), 0.0, fracao))
+    return fracao[idx]
+
+
 def percentil_ponderado_de_valor(valores, pesos, valor_referencia):
     """Função INVERSA de `quantil_ponderado`: dado um valor de referência (ex.: R$3.000
     de renda), retorna o percentil (0-100) que ele ocupa na distribuição ponderada de
