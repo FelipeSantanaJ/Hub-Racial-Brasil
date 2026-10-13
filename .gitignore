@@ -26,3 +26,6 @@ Thumbs.db
 
 # Editor
 .vscode/
+
+# Snapshots locais dos parquets antes de regenerações (a versão anterior fica no histórico do git)
+data/processed/_legado/

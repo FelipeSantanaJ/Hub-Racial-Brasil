@@ -42,6 +42,7 @@ import pandas as pd
 import statsmodels.formula.api as smf
 
 from src.processing.agregacoes_pnadc import CRIAR_BASE, OUTPUT_DIR
+from src.inference import variancia
 from src.utils import pnadc_core
 
 # --------------------------------------------------------------------------------------
@@ -359,7 +360,7 @@ def _construir_microdados_evento_setor(con: duckdb.DuckDBPyConnection) -> pd.Dat
     idx_evento = idx_map[TRIMESTRE_LEI_SERVICO_PUBLICO]
 
     micro = con.execute("""
-        SELECT ano, trimestre, raca_cor, setor_trabalho, renda_habitual_real, peso, upa,
+        SELECT ano, trimestre, raca_cor, setor_trabalho, renda_habitual_real, peso, upa, estrato,
                regiao, area, UF
         FROM base
         WHERE setor_trabalho IS NOT NULL AND raca_cor IN ('Branca','Preta','Parda','Indígena')
@@ -372,11 +373,12 @@ def _construir_microdados_evento_setor(con: duckdb.DuckDBPyConnection) -> pd.Dat
     return micro
 
 
-def _media_se(valores, pesos) -> tuple[float, float, int]:
+def _media_se(sub: pd.DataFrame, coluna: str) -> tuple[float, float, int]:
+    """Média ponderada, EP design-based (Estrato/UPA; correção E1 de 12/10/2026) e n."""
     return (
-        pnadc_core.media_ponderada(valores, pesos),
-        pnadc_core.erro_padrao_media_ponderada(valores, pesos),
-        int(len(valores)),
+        pnadc_core.media_ponderada(sub[coluna], sub["peso"]),
+        pnadc_core.erro_padrao_media_ponderada(sub[coluna], sub["peso"], sub["upa"], sub["estrato"]),
+        int(len(sub)),
     )
 
 
@@ -394,7 +396,13 @@ def _curva_event_study(
         DiD_k = (m_pub_k - m_pub_ref) - (m_priv_k - m_priv_ref)
     erro padrão combinado assumindo as 4 médias independentes (amostras disjuntas):
         se_k = sqrt(se_pub_k² + se_pub_ref² + se_priv_k² + se_priv_ref²)
-    `ref` = trimestre -1 (último antes da lei)."""
+    `ref` = trimestre -1 (último antes da lei).
+
+    LIMITAÇÃO conhecida (12/10/2026): cada se_* é design-based (Estrato/UPA), mas a soma
+    ignora a covariância entre células — público e privado do mesmo trimestre dividem
+    UPAs, e trimestres próximos repetem domicílios (rotação de 5 visitas). O sinal do viés
+    não é óbvio. Reespecificação completa do Desenho B no B4b (Onda 5); até lá a curva é
+    "Bloqueada" para publicação (docs/auditoria/rodada1.md)."""
     linhas = []
     for setor_publico in (0, 1):
         sub = micro[micro["setor_publico"] == setor_publico]
@@ -488,7 +496,7 @@ def rodar_desenho_b_participacao(
         micro["outcome"] = indicador.astype(float) * 100
 
         def _outcome_setor(sub):
-            return _media_se(sub["outcome"], sub["peso"])
+            return _media_se(sub, "outcome")
 
         curva = _curva_event_study(micro, _outcome_setor)
         curva["raca_cor"] = raca
@@ -520,18 +528,20 @@ def rodar_desenho_b_renda(micro_evento: pd.DataFrame) -> tuple[pd.DataFrame, pd.
     micro["raca_cor"] = micro["raca_cor"].replace({"Preta": "Negra", "Parda": "Negra"})
 
     def _hiato_setor(sub):
-        b = sub[sub["raca_cor"] == "Branca"]
-        n = sub[sub["raca_cor"] == "Negra"]
-        mb, seb, _ = _media_se(b["renda_habitual_real"], b["peso"])
-        mn, sen, nn = _media_se(n["renda_habitual_real"], n["peso"])
-        if not mn:
+        y, w = sub["renda_habitual_real"].to_numpy(float), sub["peso"].to_numpy(float)
+        em_b = (sub["raca_cor"] == "Branca").to_numpy()
+        em_n = (sub["raca_cor"] == "Negra").to_numpy()
+        zb, mb = variancia.influencia_media(y, w, em_b)
+        zn, mn = variancia.influencia_media(y, w, em_n)
+        if not mn or np.isnan(mn) or np.isnan(mb):
             return np.nan, np.nan, 0
         hiato_pct = 100 * (mb - mn) / mn
-        # método delta pro erro padrão de h = 100*(mb-mn)/mn = 100*(mb/mn - 1),
-        # assumindo mb e mn independentes (amostras disjuntas, Branca x Negra):
-        # dh/dmb = 100/mn, dh/dmn = -100*mb/mn^2
-        se_pct = 100 * np.sqrt((seb / mn) ** 2 + (mb * sen / mn**2) ** 2)
-        return hiato_pct, se_pct, min(len(b), nn)
+        # método delta de h = 100*(mb/mn - 1) sobre as variáveis linearizadas dos dois
+        # domínios na MESMA amostra (Estrato/UPA): inclui a covariância entre mb e mn,
+        # que dividem UPAs (a versão anterior as tratava como independentes).
+        se_pct = 100 * variancia.razao_delta_design(zb, zn, mb, mn, sub["upa"].to_numpy(object),
+                                                    sub["estrato"].to_numpy(object))
+        return hiato_pct, se_pct, int(min(em_b.sum(), em_n.sum()))
 
     curva = _curva_event_study(micro, _hiato_setor)
     curva["raca_cor"] = "Negra"

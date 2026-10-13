@@ -179,6 +179,9 @@ CREATE TEMP TABLE base AS
         -- pnadc_core.decomposicao_oaxaca_blinder e erro_padrao_cluster_bootstrap), nunca
         -- como dimensão de agregação.
         m.UPA AS upa,
+        -- Estrato do desenho amostral: junto com a UPA, define a variância design-based
+        -- (src/inference/variancia.py; correção E1 de 12/10/2026). Nunca é dimensão de agregação.
+        m.Estrato AS estrato,
         -- V1008 (número de seleção do domicílio dentro da UPA), V1016 (número da
         -- entrevista/visita, 1 a 5) e V2003 (número de ordem da pessoa dentro do
         -- domicílio) — chave de ligação do painel rotativo real (ver
@@ -334,7 +337,7 @@ def gerar_hiato_por_geracao(con: duckdb.DuckDBPyConnection) -> None:
     for _, row in combinacoes.iterrows():
         ano, trimestre, geracao = int(row["ano"]), int(row["trimestre"]), row["geracao"]
         micro = con.execute(f"""
-            SELECT raca_cor, renda_habitual_real, peso
+            SELECT raca_cor, renda_habitual_real, peso, upa, estrato
             FROM base
             WHERE ano = {ano} AND trimestre = {trimestre} AND geracao = '{geracao}'
               AND raca_cor IN ('Branca', 'Preta', 'Parda')
@@ -344,7 +347,7 @@ def gerar_hiato_por_geracao(con: duckdb.DuckDBPyConnection) -> None:
             continue
         micro["raca_cor"] = micro["raca_cor"].replace({"Preta": "Negra", "Parda": "Negra"})
         tabela = pnadc_core.tabela_hiatos_significancia(
-            micro, "renda_habitual_real", "raca_cor", grupo_referencia="Negra", peso="peso"
+            micro, "renda_habitual_real", "raca_cor", grupo_referencia="Negra", peso="peso", upa="upa", estrato="estrato"
         )
         if "Branca" not in tabela.index:
             continue
@@ -383,7 +386,7 @@ def gerar_decomposicao_hiato_ocupacional(con: duckdb.DuckDBPyConnection, n_trime
     """
     micro = con.execute(f"""
         SELECT raca_cor, faixa_etaria, nivel_instrucao, grupamento_ocupacional,
-               renda_habitual_real, peso
+               renda_habitual_real, peso, upa, estrato
         FROM base
         WHERE raca_cor IN ('Branca', 'Preta', 'Parda')
           AND grupamento_ocupacional IS NOT NULL
@@ -664,7 +667,7 @@ def gerar_perfil_topo10_racial(con: duckdb.DuckDBPyConnection) -> None:
         ano, trimestre = int(row["ano"]), int(row["trimestre"])
         micro = con.execute(f"""
             SELECT raca_cor, sexo, faixa_etaria, geracao, nivel_instrucao,
-                   renda_habitual_real, peso
+                   renda_habitual_real, peso, upa, estrato
             FROM base
             WHERE ano = {ano} AND trimestre = {trimestre}
               AND raca_cor IN ('Branca', 'Preta', 'Parda')
@@ -729,7 +732,7 @@ def gerar_funcao_quantil_racial(con: duckdb.DuckDBPyConnection) -> None:
     for _, row in trimestres.iterrows():
         ano, trimestre = int(row["ano"]), int(row["trimestre"])
         micro = con.execute(f"""
-            SELECT raca_cor, renda_habitual_real, peso
+            SELECT raca_cor, renda_habitual_real, peso, upa, estrato
             FROM base
             WHERE ano = {ano} AND trimestre = {trimestre}
               AND raca_cor IN ('Branca', 'Preta', 'Parda')
@@ -795,7 +798,7 @@ def gerar_perfil_quartis_racial(con: duckdb.DuckDBPyConnection) -> None:
         ano, trimestre = int(row["ano"]), int(row["trimestre"])
         micro = con.execute(f"""
             SELECT raca_cor, sexo, faixa_etaria, geracao, nivel_instrucao,
-                   renda_habitual_real, peso
+                   renda_habitual_real, peso, upa, estrato
             FROM base
             WHERE ano = {ano} AND trimestre = {trimestre}
               AND raca_cor IN ('Branca', 'Preta', 'Parda')
@@ -856,7 +859,7 @@ def gerar_perfil_topo10_quartis_pretaparda(con: duckdb.DuckDBPyConnection) -> No
         ano, trimestre = int(row["ano"]), int(row["trimestre"])
         micro = con.execute(f"""
             SELECT raca_cor, sexo, faixa_etaria, geracao, nivel_instrucao,
-                   renda_habitual_real, peso
+                   renda_habitual_real, peso, upa, estrato
             FROM base
             WHERE ano = {ano} AND trimestre = {trimestre}
               AND raca_cor IN ('Preta', 'Parda')
@@ -932,7 +935,7 @@ def gerar_perfil_topo10_quartis_indigena(con: duckdb.DuckDBPyConnection, n_trime
     n≈8.550, de sobra pros dois recortes (100 pro P90, 200 pros quartis)."""
     dimensoes = ["sexo", "faixa_etaria", "geracao", "nivel_instrucao"]
     micro = con.execute(f"""
-        SELECT sexo, faixa_etaria, geracao, nivel_instrucao, renda_habitual_real, peso
+        SELECT sexo, faixa_etaria, geracao, nivel_instrucao, renda_habitual_real, peso, upa, estrato
         FROM base
         WHERE raca_cor = 'Indígena'
           AND renda_habitual_real IS NOT NULL AND renda_habitual_real > 0
@@ -1016,7 +1019,7 @@ def _micro_renda_trimestre(con, ano: int, trimestre: int) -> pd.DataFrame:
     combinadas e Indígena preservada. Colunas demográficas + renda + peso."""
     micro = con.execute(f"""
         SELECT raca_cor, sexo, faixa_etaria, geracao, nivel_instrucao,
-               renda_habitual_real, peso
+               renda_habitual_real, peso, upa, estrato
         FROM base
         WHERE ano = {ano} AND trimestre = {trimestre}
           AND raca_cor IN ('Branca', 'Preta', 'Parda', 'Indígena')
@@ -1248,7 +1251,7 @@ def gerar_hiatos_arvore(con: duckdb.DuckDBPyConnection) -> None:
         ano, tri = int(row["ano"]), int(row["trimestre"])
         micro = con.execute(f"""
             SELECT raca_cor, sexo, faixa_etaria, geracao, nivel_instrucao,
-                   renda_habitual_real, peso
+                   renda_habitual_real, peso, upa, estrato
             FROM base
             WHERE ano = {ano} AND trimestre = {tri}
               AND raca_cor IN ('Branca', 'Preta', 'Parda', 'Indígena')
@@ -1275,7 +1278,7 @@ def gerar_hiatos_arvore(con: duckdb.DuckDBPyConnection) -> None:
                     par = pd.concat([brancos, outro])
                     tab = pnadc_core.tabela_hiatos_significancia(
                         par, "renda_habitual_real", "raca_cor",
-                        grupo_referencia=comparacao, peso="peso",
+                        grupo_referencia=comparacao, peso="peso", upa="upa", estrato="estrato",
                     )
                     if "Branca" not in tab.index or comparacao not in tab.index:
                         continue
@@ -1316,7 +1319,7 @@ def gerar_hiato_regional(con: duckdb.DuckDBPyConnection) -> None:
     for _, row in combinacoes.iterrows():
         ano, trimestre, regiao = int(row["ano"]), int(row["trimestre"]), row["regiao"]
         micro = con.execute(f"""
-            SELECT raca_cor, renda_habitual_real, peso
+            SELECT raca_cor, renda_habitual_real, peso, upa, estrato
             FROM base
             WHERE ano = {ano} AND trimestre = {trimestre} AND regiao = '{regiao}'
               AND raca_cor IN ('Branca', 'Preta', 'Parda')
@@ -1326,7 +1329,7 @@ def gerar_hiato_regional(con: duckdb.DuckDBPyConnection) -> None:
             continue
         micro["raca_cor"] = micro["raca_cor"].replace({"Preta": "Negra", "Parda": "Negra"})
         tabela = pnadc_core.tabela_hiatos_significancia(
-            micro, "renda_habitual_real", "raca_cor", grupo_referencia="Negra", peso="peso"
+            micro, "renda_habitual_real", "raca_cor", grupo_referencia="Negra", peso="peso", upa="upa", estrato="estrato"
         )
         if "Branca" not in tabela.index:
             continue
@@ -1363,7 +1366,7 @@ def gerar_hiato_regional_indigena(con: duckdb.DuckDBPyConnection) -> None:
     for _, row in combinacoes.iterrows():
         ano, trimestre, regiao = int(row["ano"]), int(row["trimestre"]), row["regiao"]
         micro = con.execute(f"""
-            SELECT raca_cor, renda_habitual_real, peso
+            SELECT raca_cor, renda_habitual_real, peso, upa, estrato
             FROM base
             WHERE ano = {ano} AND trimestre = {trimestre} AND regiao = '{regiao}'
               AND raca_cor IN ('Branca', 'Indígena')
@@ -1372,7 +1375,7 @@ def gerar_hiato_regional_indigena(con: duckdb.DuckDBPyConnection) -> None:
         if micro.empty:
             continue
         tabela = pnadc_core.tabela_hiatos_significancia(
-            micro, "renda_habitual_real", "raca_cor", grupo_referencia="Indígena", peso="peso"
+            micro, "renda_habitual_real", "raca_cor", grupo_referencia="Indígena", peso="peso", upa="upa", estrato="estrato"
         )
         if "Branca" not in tabela.index:
             continue
@@ -1405,7 +1408,7 @@ def gerar_hiato_regional_preta_parda(con: duckdb.DuckDBPyConnection) -> None:
     for _, row in combinacoes.iterrows():
         ano, trimestre, uf = int(row["ano"]), int(row["trimestre"]), row["UF"]
         micro = con.execute(f"""
-            SELECT raca_cor, renda_habitual_real, peso
+            SELECT raca_cor, renda_habitual_real, peso, upa, estrato
             FROM base
             WHERE ano = {ano} AND trimestre = {trimestre} AND UF = '{uf}'
               AND raca_cor IN ('Preta', 'Parda')
@@ -1414,7 +1417,7 @@ def gerar_hiato_regional_preta_parda(con: duckdb.DuckDBPyConnection) -> None:
         if micro.empty:
             continue
         tabela = pnadc_core.tabela_hiatos_significancia(
-            micro, "renda_habitual_real", "raca_cor", grupo_referencia="Parda", peso="peso"
+            micro, "renda_habitual_real", "raca_cor", grupo_referencia="Parda", peso="peso", upa="upa", estrato="estrato"
         )
         if "Preta" not in tabela.index:
             continue
@@ -1451,7 +1454,7 @@ def gerar_hiato_setor_publico_privado(con: duckdb.DuckDBPyConnection) -> None:
     for _, row in combinacoes.iterrows():
         ano, trimestre, setor = int(row["ano"]), int(row["trimestre"]), row["setor_trabalho"]
         micro = con.execute(f"""
-            SELECT raca_cor, renda_habitual_real, peso
+            SELECT raca_cor, renda_habitual_real, peso, upa, estrato
             FROM base
             WHERE ano = {ano} AND trimestre = {trimestre} AND setor_trabalho = '{setor}'
               AND raca_cor IN ('Branca', 'Preta', 'Parda')
@@ -1461,7 +1464,7 @@ def gerar_hiato_setor_publico_privado(con: duckdb.DuckDBPyConnection) -> None:
             continue
         micro["raca_cor"] = micro["raca_cor"].replace({"Preta": "Negra", "Parda": "Negra"})
         tabela = pnadc_core.tabela_hiatos_significancia(
-            micro, "renda_habitual_real", "raca_cor", grupo_referencia="Negra", peso="peso"
+            micro, "renda_habitual_real", "raca_cor", grupo_referencia="Negra", peso="peso", upa="upa", estrato="estrato"
         )
         if "Branca" not in tabela.index:
             continue
@@ -1969,7 +1972,7 @@ def gerar_hiato_racial(con: duckdb.DuckDBPyConnection) -> None:
     for _, row in trimestres.iterrows():
         ano, trimestre = int(row["ano"]), int(row["trimestre"])
         micro = con.execute(f"""
-            SELECT raca_cor, renda_habitual_real, peso
+            SELECT raca_cor, renda_habitual_real, peso, upa, estrato
             FROM base
             WHERE ano = {ano} AND trimestre = {trimestre}
               AND raca_cor IN ('Branca', 'Preta', 'Parda')
@@ -1980,7 +1983,7 @@ def gerar_hiato_racial(con: duckdb.DuckDBPyConnection) -> None:
         micro["raca_cor"] = micro["raca_cor"].replace({"Preta": "Negra", "Parda": "Negra"})
 
         tabela = pnadc_core.tabela_hiatos_significancia(
-            micro, "renda_habitual_real", "raca_cor", grupo_referencia="Negra", peso="peso"
+            micro, "renda_habitual_real", "raca_cor", grupo_referencia="Negra", peso="peso", upa="upa", estrato="estrato"
         )
         if "Branca" not in tabela.index:
             continue
@@ -2022,7 +2025,7 @@ def gerar_hiato_preta_parda(con: duckdb.DuckDBPyConnection) -> None:
     for _, row in trimestres.iterrows():
         ano, trimestre = int(row["ano"]), int(row["trimestre"])
         micro = con.execute(f"""
-            SELECT raca_cor, renda_habitual_real, peso
+            SELECT raca_cor, renda_habitual_real, peso, upa, estrato
             FROM base
             WHERE ano = {ano} AND trimestre = {trimestre}
               AND raca_cor IN ('Preta', 'Parda')
@@ -2032,7 +2035,7 @@ def gerar_hiato_preta_parda(con: duckdb.DuckDBPyConnection) -> None:
             continue
 
         tabela = pnadc_core.tabela_hiatos_significancia(
-            micro, "renda_habitual_real", "raca_cor", grupo_referencia="Parda", peso="peso"
+            micro, "renda_habitual_real", "raca_cor", grupo_referencia="Parda", peso="peso", upa="upa", estrato="estrato"
         )
         if "Preta" not in tabela.index:
             continue
@@ -2075,7 +2078,7 @@ def gerar_hiato_branca_indigena(con: duckdb.DuckDBPyConnection) -> None:
     for _, row in trimestres.iterrows():
         ano, trimestre = int(row["ano"]), int(row["trimestre"])
         micro = con.execute(f"""
-            SELECT raca_cor, renda_habitual_real, peso
+            SELECT raca_cor, renda_habitual_real, peso, upa, estrato
             FROM base
             WHERE ano = {ano} AND trimestre = {trimestre}
               AND raca_cor IN ('Branca', 'Indígena')
@@ -2085,7 +2088,7 @@ def gerar_hiato_branca_indigena(con: duckdb.DuckDBPyConnection) -> None:
             continue
 
         tabela = pnadc_core.tabela_hiatos_significancia(
-            micro, "renda_habitual_real", "raca_cor", grupo_referencia="Indígena", peso="peso"
+            micro, "renda_habitual_real", "raca_cor", grupo_referencia="Indígena", peso="peso", upa="upa", estrato="estrato"
         )
         if "Branca" not in tabela.index:
             continue
@@ -2158,7 +2161,7 @@ def _gerar_hiato_multidimensional_para_escopo(
     ).fetchone()
     racas_sql = "', '".join(racas_incluidas)
     micro = con.execute(f"""
-        SELECT raca_cor, sexo, faixa_etaria, geracao, nivel_instrucao, renda_habitual_real, peso
+        SELECT raca_cor, sexo, faixa_etaria, geracao, nivel_instrucao, renda_habitual_real, peso, upa, estrato
         FROM base
         WHERE ano = {ultimo_ano} AND trimestre = {ultimo_trimestre}
           AND raca_cor IN ('{racas_sql}')
@@ -2176,7 +2179,7 @@ def _gerar_hiato_multidimensional_para_escopo(
                 continue
             tabela = pnadc_core.tabela_hiatos_significancia(
                 grupo_df, "renda_habitual_real", "raca_cor",
-                grupo_referencia=grupo_referencia, peso="peso",
+                grupo_referencia=grupo_referencia, peso="peso", upa="upa", estrato="estrato",
             )
             if grupo_nao_referencia not in tabela.index or grupo_referencia not in tabela.index:
                 continue
@@ -2256,7 +2259,7 @@ def gerar_hiato_historico_por_categoria(
     for _, row in combinacoes.iterrows():
         ano, trimestre, categoria = int(row["ano"]), int(row["trimestre"]), row[col_dim]
         micro = con.execute(f"""
-            SELECT raca_cor, renda_habitual_real, peso
+            SELECT raca_cor, renda_habitual_real, peso, upa, estrato
             FROM base
             WHERE ano = {ano} AND trimestre = {trimestre} AND {col_dim} = '{categoria}'
               AND raca_cor IN ('{racas_sql}')
@@ -2270,7 +2273,7 @@ def gerar_hiato_historico_por_categoria(
         if grupo_referencia not in racas_presentes or grupo_nao_referencia not in racas_presentes:
             continue
         tabela = pnadc_core.tabela_hiatos_significancia(
-            micro, "renda_habitual_real", "raca_cor", grupo_referencia=grupo_referencia, peso="peso"
+            micro, "renda_habitual_real", "raca_cor", grupo_referencia=grupo_referencia, peso="peso", upa="upa", estrato="estrato"
         )
         if grupo_nao_referencia not in tabela.index:
             continue
@@ -2339,7 +2342,7 @@ def gerar_gini_por_raca(con: duckdb.DuckDBPyConnection) -> None:
     for _, row in trimestres.iterrows():
         ano, trimestre = int(row["ano"]), int(row["trimestre"])
         micro = con.execute(f"""
-            SELECT raca_cor, renda_habitual_real, peso
+            SELECT raca_cor, renda_habitual_real, peso, upa, estrato
             FROM base
             WHERE ano = {ano} AND trimestre = {trimestre}
               AND raca_cor IN ('Branca', 'Preta', 'Parda', 'Indígena')
@@ -2376,7 +2379,7 @@ def gerar_theil_racial(con: duckdb.DuckDBPyConnection, n_trimestres: int | None 
     for _, row in trimestres.iterrows():
         ano, trimestre = int(row["ano"]), int(row["trimestre"])
         micro = con.execute(f"""
-            SELECT raca_cor, renda_habitual_real, peso
+            SELECT raca_cor, renda_habitual_real, peso, upa, estrato
             FROM base
             WHERE ano = {ano} AND trimestre = {trimestre}
               AND raca_cor IN ('Branca', 'Preta', 'Parda', 'Indígena')
@@ -2556,7 +2559,7 @@ def gerar_hiato_capital_interior(con: duckdb.DuckDBPyConnection) -> None:
     for _, row in combos.iterrows():
         ano, tri, loc = int(row["ano"]), int(row["trimestre"]), row["localizacao"]
         micro = con.execute(f"""
-            SELECT raca_cor, renda_habitual_real, peso FROM base
+            SELECT raca_cor, renda_habitual_real, peso, upa, estrato FROM base
             WHERE ano={ano} AND trimestre={tri} AND localizacao='{loc}'
               AND raca_cor IN ('Branca','Preta','Parda') AND renda_habitual_real IS NOT NULL
         """).df()
@@ -2564,7 +2567,7 @@ def gerar_hiato_capital_interior(con: duckdb.DuckDBPyConnection) -> None:
             continue
         micro["raca_cor"] = micro["raca_cor"].replace({"Preta": "Negra", "Parda": "Negra"})
         tab = pnadc_core.tabela_hiatos_significancia(micro, "renda_habitual_real", "raca_cor",
-                                                    grupo_referencia="Negra", peso="peso")
+                                                    grupo_referencia="Negra", peso="peso", upa="upa", estrato="estrato")
         if "Branca" not in tab.index:
             continue
         lb, mn = tab.loc["Branca"], tab.loc["Negra", "media"]
@@ -2616,7 +2619,7 @@ def gerar_hiato_formal_informal(con: duckdb.DuckDBPyConnection) -> None:
         ano, tri, setor = int(row["ano"]), int(row["trimestre"]), row["setor"]
         flag = "TRUE" if setor == "Formal" else "FALSE"
         micro = con.execute(f"""
-            SELECT raca_cor, renda_habitual_real, peso FROM base
+            SELECT raca_cor, renda_habitual_real, peso, upa, estrato FROM base
             WHERE ano={ano} AND trimestre={tri} AND contribui_previdencia={flag}
               AND raca_cor IN ('Branca','Preta','Parda') AND renda_habitual_real IS NOT NULL
         """).df()
@@ -2624,7 +2627,7 @@ def gerar_hiato_formal_informal(con: duckdb.DuckDBPyConnection) -> None:
             continue
         micro["raca_cor"] = micro["raca_cor"].replace({"Preta": "Negra", "Parda": "Negra"})
         tab = pnadc_core.tabela_hiatos_significancia(micro, "renda_habitual_real", "raca_cor",
-                                                    grupo_referencia="Negra", peso="peso")
+                                                    grupo_referencia="Negra", peso="peso", upa="upa", estrato="estrato")
         if "Branca" not in tab.index:
             continue
         lb, mn = tab.loc["Branca"], tab.loc["Negra", "media"]
@@ -2722,7 +2725,7 @@ def gerar_dupla_desvantagem(con: duckdb.DuckDBPyConnection) -> None:
         ano, tri = int(row["ano"]), int(row["trimestre"])
         micro = con.execute(f"""
             SELECT CASE WHEN raca_cor IN ('Preta','Parda') THEN 'Negra' ELSE raca_cor END AS raca_cor,
-                   sexo, renda_habitual_real, peso
+                   sexo, renda_habitual_real, peso, upa, estrato
             FROM base
             WHERE ano={ano} AND trimestre={tri} AND sexo IS NOT NULL
               AND raca_cor IN ('Branca','Preta','Parda') AND renda_habitual_real IS NOT NULL
@@ -2740,7 +2743,7 @@ def gerar_dupla_desvantagem(con: duckdb.DuckDBPyConnection) -> None:
         micro["grp"] = micro["raca_cor"] + " · " + micro["sexo"]
         par = micro[micro["grp"].isin(["Branca · Homem", "Negra · Mulher"])]
         tab = pnadc_core.tabela_hiatos_significancia(par, "renda_habitual_real", "grp",
-                                                    grupo_referencia="Negra · Mulher", peso="peso")
+                                                    grupo_referencia="Negra · Mulher", peso="peso", upa="upa", estrato="estrato")
         p_val = tab.loc["Branca · Homem", "p_valor"] if "Branca · Homem" in tab.index else np.nan
         res.append({
             "ano": ano, "trimestre": tri,
@@ -2790,7 +2793,7 @@ def gerar_decomposicao_raca_genero(con: duckdb.DuckDBPyConnection) -> None:
     for _, row in trimestres.iterrows():
         ano, tri = int(row["ano"]), int(row["trimestre"])
         micro = con.execute(f"""
-            SELECT raca_cor, sexo, renda_habitual_real, peso
+            SELECT raca_cor, sexo, renda_habitual_real, peso, upa, estrato
             FROM base
             WHERE ano={ano} AND trimestre={tri} AND sexo IS NOT NULL
               AND raca_cor IN ('Branca','Preta','Parda','Indígena')
@@ -2830,7 +2833,7 @@ def gerar_decomposicao_raca_genero(con: duckdb.DuckDBPyConnection) -> None:
             rotulo_alvo = f"{raca_t} · {sexo_t}"
             par = base_df[base_df["grp"].isin(["Branca · Homem", rotulo_alvo])]
             tab = pnadc_core.tabela_hiatos_significancia(
-                par, "renda_habitual_real", "grp", grupo_referencia=rotulo_alvo, peso="peso"
+                par, "renda_habitual_real", "grp", grupo_referencia=rotulo_alvo, peso="peso", upa="upa", estrato="estrato"
             )
             p_val = tab.loc["Branca · Homem", "p_valor"] if "Branca · Homem" in tab.index else np.nan
 
@@ -2873,7 +2876,7 @@ def _tabela_transicao(con, condicao_t0: str, coluna_evento_t1: str, nome_saida: 
     partes = []
     for (a0, t0), (a1, t1) in zip(pares_trimestre[:-1], pares_trimestre[1:]):
         q = f"""
-            SELECT b0.raca_cor, b0.sexo, b0.peso,
+            SELECT b0.raca_cor, b0.sexo, b0.peso, b0.upa, b0.estrato,
                    ({coluna_evento_t1}) AS evento
             FROM (SELECT * FROM base WHERE ano={a0} AND trimestre={t0}) b0
             JOIN (SELECT * FROM base WHERE ano={a1} AND trimestre={t1}) b1
@@ -2903,7 +2906,8 @@ def _tabela_transicao(con, condicao_t0: str, coluna_evento_t1: str, nome_saida: 
                     })
                     continue
                 taxa = pnadc_core.media_ponderada(cel["evento"], cel["peso"])
-                ic_inf, ic_sup = pnadc_core.intervalo_confianca_media_ponderada(cel, "evento", peso="peso")
+                ic_inf, ic_sup = pnadc_core.intervalo_confianca_media_ponderada(
+                    cel, "evento", peso="peso", upa="upa", estrato="estrato")
                 resultados.append({
                     "raca_cor": raca, "sexo": sexo, "n_amostra": len(cel),
                     "taxa": 100 * taxa, "ic_inferior": 100 * ic_inf, "ic_superior": 100 * ic_sup,

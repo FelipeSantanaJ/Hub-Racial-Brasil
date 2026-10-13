@@ -13,6 +13,8 @@ import statsmodels.formula.api as smf
 from scipy import stats
 from scipy.stats import gaussian_kde
 
+from src.inference import variancia
+
 COLUNA_PESO = 'V1028'
 # V2010/V2007/UF/Capital/RM_RIDE são lidos do layout fixo do IBGE como TEXTO (largura
 # fixa "$N.", não numérico) — as chaves destes dicionários são strings de propósito,
@@ -42,47 +44,33 @@ def media_ponderada(valores, pesos):
     return np.average(valores[valid], weights=pesos[valid])
 
 
-def erro_padrao_media_ponderada(valores, pesos):
-    """Erro padrão de média ponderada, ignorando NaNs e pesos zero ou negativos."""
-    valores = np.asarray(valores, dtype=float)
-    pesos = np.asarray(pesos, dtype=float)
-    valid = ~np.isnan(valores) & ~np.isnan(pesos) & (pesos > 0)
-    if not valid.any() or len(valores[valid]) == 1: # precisa de pelo menos 2 pontos para calcular EP
-        return np.nan
-    valores = valores[valid]
-    pesos = pesos[valid]
+def erro_padrao_media_ponderada(valores, pesos, upa=None, estrato=None, dominio=None):
+    """Erro padrão *design-based* da média ponderada (linearização de Taylor com
+    `Estrato` e `UPA` — ver `src/inference/variancia.py`). Ignora NaNs e pesos ≤ 0.
 
-    # Cochran (1977), Sampling Techniques, p. 30
-    # Variância (da MÉDIA) = (n / (n-1)) * (sum(w_i * (x_i - mean)^2) / (sum(w_i)^2))
-    # O termo (n / (n-1)) é para amostras finitas.
-    # BUG histórico corrigido em 2026-09-04: a versão anterior usava um denominador
-    # diferente do documentado aqui (sum(w)^2 - sum(w^2)) e ainda multiplicava o
-    # resultado por len(valores) no final — isso inflava o erro padrão em ~sqrt(n)x
-    # (para n ~ centenas de milhares, um fator de centenas de vezes), gerando
-    # intervalos de confiança absurdamente largos mesmo com amostras enormes. Ver
-    # docs/PLANO.md para como isso foi encontrado (banda de IC do gráfico de hiato
-    # racial cobrindo de 40% a mais de 100%, incompatível com p-valores já
-    # extremamente pequenos calculados com a mesma fórmula).
-    n = len(valores)
-    media = np.average(valores, weights=pesos)
-    variancia_media = (n / (n - 1)) * np.sum(pesos * (valores - media)**2) / (np.sum(pesos)**2)
-    erro_padrao = np.sqrt(variancia_media)
-    return erro_padrao
+    `upa` e `estrato` são OBRIGATÓRIOS. Correção de 12/10/2026 (E1 da auditoria Rodada 1):
+    a versão anterior calculava `Σ w(x−m)² / (Σw)²`, que trata V1028 como peso de
+    FREQUÊNCIA — o EP caía com a escala dos pesos (pesos ×500 → EP ÷22) e ignorava a
+    conglomeração por UPA. Ver docs/CHANGELOG_METODOLOGICO.md e
+    docs/LIMITACOES_E_METODOLOGIA.md ("Correção de 12/10/2026").
+    """
+    if upa is None or estrato is None:
+        raise ValueError(
+            "erro_padrao_media_ponderada exige `upa` e `estrato` (desenho da PNAD Contínua). "
+            "A fórmula antiga, só com o peso, foi removida por não ser invariante à escala "
+            "dos pesos (E1, docs/auditoria/rodada1.md)."
+        )
+    return variancia.erro_padrao_media_design(valores, pesos, upa, estrato, dominio=dominio)
 
 
 def erro_padrao_cluster_bootstrap(df, coluna_valor, peso, cluster_col='UPA', n_boot=200, seed=0):
     """Erro padrão da média ponderada de `coluna_valor`, via bootstrap por CLUSTER (UPA) —
     reamostra UPAs inteiras com reposição e recalcula a média ponderada a cada réplica;
-    erro padrão = desvio-padrão das réplicas. Diferente de `erro_padrao_media_ponderada`
-    (que só usa o peso analítico, V1028), este método incorpora o efeito de conglomerado
-    da UPA no desenho amostral complexo da PNAD Contínua — mais conservador (erro padrão
-    maior ou igual), mais lento de calcular.
+    erro padrão = desvio-padrão das réplicas.
 
-    Usado (ver `docs/PLANO.md`, bloco de robustez estatística) como CHECAGEM DE
-    ROBUSTEZ da série histórica de hiatos (`tabela_hiatos_significancia`), que segue
-    usando `erro_padrao_media_ponderada` em produção — este método não a substitui, só
-    confirma se as conclusões de significância se mantêm sob um erro padrão mais
-    conservador (ver `docs/LIMITACOES_E_METODOLOGIA.md`).
+    LEGADO (12/10/2026): ignora o `Estrato` e sorteia n UPAs (não n_h − 1 por estrato).
+    Mantido só para reproduzir a checagem histórica; a checagem independente atual é
+    `src.inference.variancia.erro_padrao_bootstrap_estrato_upa` (Rao-Wu dentro do estrato).
 
     Implementação otimizada: em vez de reamostrar linha a linha a cada réplica (caro para
     centenas de milhares de registros), agrega `sum(peso*valor)` e `sum(peso)` por UPA uma
@@ -127,12 +115,15 @@ def coeficiente_variacao_ponderado(valores, pesos):
     return desvio_padrao / media
 
 
-def intervalo_confianca_media_ponderada(df, coluna_valor, peso=COLUNA_PESO, nivel_confianca=0.95):
-    """Calcula o intervalo de confiança para a média ponderada.
-    Retorna uma tupla (inferior, superior).
+def intervalo_confianca_media_ponderada(df, coluna_valor, peso=COLUNA_PESO, nivel_confianca=0.95,
+                                        upa=None, estrato=None):
+    """Calcula o intervalo de confiança para a média ponderada (EP design-based; `upa` e
+    `estrato` são nomes de coluna obrigatórios). Retorna uma tupla (inferior, superior).
     """
+    if upa is None or estrato is None:
+        raise ValueError("intervalo_confianca_media_ponderada exige `upa` e `estrato` (nomes de coluna).")
     media = media_ponderada(df[coluna_valor], df[peso])
-    ep = erro_padrao_media_ponderada(df[coluna_valor], df[peso])
+    ep = erro_padrao_media_ponderada(df[coluna_valor], df[peso], df[upa], df[estrato])
 
     if np.isnan(media) or np.isnan(ep):
         return np.nan, np.nan
@@ -241,46 +232,56 @@ def aplicar_deflator(df, df_deflator):
     return df
 
 
-def tabela_hiatos_significancia(df, coluna_valor, col_grupo, grupo_referencia, peso=COLUNA_PESO, nivel_confianca=0.95):
-    """Calcula hiatos de média, seus intervalos de confiança e p-valor (teste t).
-    Retorna um DataFrame com os resultados.
+def tabela_hiatos_significancia(df, coluna_valor, col_grupo, grupo_referencia, peso=COLUNA_PESO,
+                                nivel_confianca=0.95, upa=None, estrato=None):
+    """Calcula hiatos de média (grupo − referência), seus intervalos de confiança e
+    p-valor (teste t). Retorna um DataFrame indexado por grupo.
+
+    Inferência *design-based* (12/10/2026, E1 da auditoria): `upa` e `estrato` são nomes
+    de coluna OBRIGATÓRIOS. O DataFrame passado é o universo do cálculo; cada grupo é um
+    DOMÍNIO dentro dele (as UPAs sem ninguém do grupo continuam no cálculo com
+    contribuição zero) e o EP da diferença inclui a covariância entre as duas médias
+    (grupos diferentes dividem UPAs) — ver `src.inference.variancia.diferenca_medias_design`.
     """
+    if upa is None or estrato is None:
+        raise ValueError(
+            "tabela_hiatos_significancia exige `upa` e `estrato` (nomes de coluna) para o "
+            "erro-padrão design-based (E1, docs/auditoria/rodada1.md)."
+        )
     grupos = sorted(df[col_grupo].unique())
 
     if grupo_referencia not in grupos:
         raise ValueError(f"Grupo de referência '{grupo_referencia}' não encontrado na coluna '{col_grupo}'.")
 
-    df_ref = df[df[col_grupo] == grupo_referencia].copy()
-    media_ref = media_ponderada(df_ref[coluna_valor], df_ref[peso])
-    ep_ref = erro_padrao_media_ponderada(df_ref[coluna_valor], df_ref[peso])
+    y, w = df[coluna_valor].to_numpy(dtype=float), df[peso].to_numpy(dtype=float)
+    u, e = df[upa].to_numpy(dtype=object), df[estrato].to_numpy(dtype=object)
+    em_ref = (df[col_grupo] == grupo_referencia).to_numpy()
+    ep_ref = variancia.erro_padrao_media_design(y, w, u, e, dominio=em_ref)
 
     resultados = []
     for grupo in grupos:
+        em_grupo = (df[col_grupo] == grupo).to_numpy()
+        n_grupo = int((em_grupo & ~np.isnan(y) & ~np.isnan(w)).sum())
         if grupo == grupo_referencia:
             hiato_media = 0.0
             p_valor = 1.0
             ic_inferior = 0.0
             ic_superior = 0.0
             significativo = False
+            ep_media, ep_hiato = ep_ref, 0.0
         else:
-            df_grupo = df[df[col_grupo] == grupo].copy()
-            media_grupo = media_ponderada(df_grupo[coluna_valor], df_grupo[peso])
-            ep_grupo = erro_padrao_media_ponderada(df_grupo[coluna_valor], df_grupo[peso])
-
-            hiato_media = media_grupo - media_ref
-
-            # Erro padrão da diferença de médias (assumindo amostras independentes)
-            ep_diferenca = np.sqrt(ep_grupo**2 + ep_ref**2)
+            r = variancia.diferenca_medias_design(y, w, u, e, em_grupo, em_ref)
+            hiato_media = r["diferenca"]
+            ep_media, ep_ref_d, ep_diferenca = r["ep_a"], r["ep_b"], r["ep_diferenca"]
+            ep_hiato = ep_diferenca
+            n1, n2 = r["n_a"], r["n_b"]
 
             # Teste t para diferença de médias
             if ep_diferenca > 0:
                 t_stat = hiato_media / ep_diferenca
                 # Graus de liberdade aproximados (Welch-Satterthwaite)
-                n1 = len(df_grupo.dropna(subset=[coluna_valor, peso]))
-                n2 = len(df_ref.dropna(subset=[coluna_valor, peso]))
                 if n1 > 1 and n2 > 1:
-                    df_welch = (ep_grupo**2/n1 + ep_ref**2/n2)**2 / \
-                               ((ep_grupo**2/n1)**2 / (n1-1) + (ep_ref**2/n2)**2 / (n2-1))
+                    df_welch = (ep_media**2/n1 + ep_ref_d**2/n2)**2 /                                ((ep_media**2/n1)**2 / (n1-1) + (ep_ref_d**2/n2)**2 / (n2-1))
                     p_valor = 2 * (1 - stats.t.cdf(abs(t_stat), df=df_welch))
                 else:
                     p_valor = np.nan # Não há dados suficientes para teste t
@@ -311,7 +312,10 @@ def tabela_hiatos_significancia(df, coluna_valor, col_grupo, grupo_referencia, p
             'p_valor': p_valor,
             'ic_inferior': ic_inferior,
             'ic_superior': ic_superior,
-            'significativo': significativo
+            'significativo': significativo,
+            'ep_media': ep_media,
+            'ep_hiato': ep_hiato,
+            'n_amostra': n_grupo,
         })
 
     return pd.DataFrame(resultados).set_index(col_grupo)

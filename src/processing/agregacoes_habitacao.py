@@ -124,7 +124,7 @@ def hiato_por_ano(df: pd.DataFrame, col_grupo: str, grupo_referencia: str) -> pd
                 continue
             tabela = core.tabela_hiatos_significancia(
                 sub, coluna_valor=indicador, col_grupo=col_grupo,
-                grupo_referencia=grupo_referencia, peso=PESO,
+                grupo_referencia=grupo_referencia, peso=PESO, upa="UPA", estrato="Estrato",
             ).reset_index()
             tabela["ano"] = ano
             tabela["indicador"] = indicador
@@ -165,7 +165,7 @@ def main() -> None:
                 continue
             tabela = core.tabela_hiatos_significancia(
                 sub, coluna_valor=indicador, col_grupo="raca_cor",
-                grupo_referencia="Branca", peso=PESO,
+                grupo_referencia="Branca", peso=PESO, upa="UPA", estrato="Estrato",
             ).reset_index()
             tabela["regiao"] = regiao
             tabela["indicador"] = indicador
