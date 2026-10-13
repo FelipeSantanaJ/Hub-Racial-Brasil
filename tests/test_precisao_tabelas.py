@@ -78,8 +78,17 @@ def test_n_renda_conta_so_quem_tem_renda(saidas):
 
 
 def test_peso_do_denominador(saidas):
-    """peso_<ind> = Σ pesos de quem entra no indicador: ≤ população da célula; 14–17 sem renda."""
+    """peso_<ind> = Σ pesos de quem entra no indicador: ≤ população da célula. A faixa 14–17
+    tem renda na tabela (ocupados 14+), mas fica fora das análises."""
     df = saidas[0]["renda"]
     assert (df["peso_renda"] <= df["populacao_estimada"] + 1e-6).all()
-    assert (df.loc[df["faixa_etaria"] == "14-17", "peso_renda"] == 0).all()
+    assert (df.loc[df["faixa_etaria"] == "14-17", "peso_renda"] > 0).any()
     assert ((df["peso_renda"] > 0) == (df["n_renda"] > 0)).all()
+
+
+def test_graficos_ignoram_14_17_ao_combinar_renda():
+    """Combinar células de renda nos gráficos usa só 18+ (população de referência)."""
+    from src.processing.graficos_fase1 import media_ponderada_celulas
+    g = pd.DataFrame({"faixa_etaria": ["14-17", "18-24"], "renda_habitual_real_media": [500.0, 2000.0],
+                      "peso_renda": [1000.0, 1000.0], "populacao_estimada": [5000.0, 2000.0]})
+    assert media_ponderada_celulas(g, "renda_habitual_real_media") == pytest.approx(2000.0)

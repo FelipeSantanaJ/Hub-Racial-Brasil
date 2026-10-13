@@ -29,7 +29,10 @@ CSV = REPO_ROOT / "docs" / "tabela_crescimento_renda.csv"
 def _wmean(sub: pd.DataFrame) -> float:
     if sub.empty:
         return np.nan
-    # peso de quem tem renda na célula (Onda 1); populacao_estimada só em tabelas antigas
+    # peso de quem tem renda na célula (Onda 1); populacao_estimada só em tabelas antigas.
+    # A faixa 14–17 existe nas tabelas por faixa etária, mas fica fora da análise (18+).
+    if "faixa_etaria" in sub.columns:
+        sub = sub[sub["faixa_etaria"] != "14-17"]
     w = sub["peso_renda"] if "peso_renda" in sub.columns else sub["populacao_estimada"]
     tot = w.sum()
     return float((sub["renda_habitual_real_media"] * w).sum() / tot) if tot else np.nan

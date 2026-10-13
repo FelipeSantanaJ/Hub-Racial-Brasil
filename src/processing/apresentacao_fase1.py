@@ -396,7 +396,7 @@ def slide_titulo(prs: Presentation) -> None:
     p2.space_before = Pt(12)
 
     p3 = tf.add_paragraph()
-    p3.text = "Fonte: IBGE, PNAD Contínua Trimestral (microdados). Renda (quando houver): habitual do trabalho principal, ocupados 18+ com renda > 0, a preços do último trimestre. Elaboração própria."
+    p3.text = "Fonte: IBGE, PNAD Contínua Trimestral. Renda: trabalho principal, ocupados 18+ com renda > 0, R$ do último trimestre. Elaboração própria."
     p3.font.size = Pt(13)
     p3.font.color.rgb = TINTA_SECUNDARIA
     p3.space_before = Pt(24)

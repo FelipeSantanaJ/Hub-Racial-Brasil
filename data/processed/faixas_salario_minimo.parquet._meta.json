@@ -2,9 +2,9 @@
   "esquema": "hub-racial-meta/1",
   "arquivo": "faixas_salario_minimo.parquet",
   "n_linhas": 174,
-  "gerado_em": "2026-10-13T14:45:24.069348+00:00",
+  "gerado_em": "2026-10-13T16:20:17.990838+00:00",
   "codigo": {
-    "commit": "c1202a10fd9cedb6ee7d78647d0188dfd6dea81e-modificado",
+    "commit": "bf6ef01d7bc45bb47a3066bf1b2ec95616d66631-modificado",
     "modulo": "src.processing.agregacoes_pnadc"
   },
   "insumos": {

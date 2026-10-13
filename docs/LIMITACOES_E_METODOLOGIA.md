@@ -96,13 +96,24 @@ gravam `peso_<ind>` (Σ pesos de quem entra no indicador), o peso certo para com
   qualquer comparação que atravesse mais de um trimestre.
 - **Desde a Onda 1 (13/10/2026)**, renda vem de `VD4016` (habitual) e `VD4017` (efetivo), do
   **trabalho principal**, e só para a **população de referência**: ocupados de 18+ anos com `VD4016`
-  > 0 (`src/utils/populacao.py`). A faixa 14–17 não tem renda nas tabelas. Antes era `VD4019`/`VD4020`
+  > 0 (`src/utils/populacao.py`). As tabelas **com** faixa etária (`renda`, `renda_completa`, `renda_multidimensional_faixa`,
+  `horas_trabalhadas`) trazem também a faixa 14–17 (ocupados de 14+ com renda do trabalho principal),
+  que **fica fora das análises** (hiatos, decomposições, gráficos): ao combinar células, os gráficos
+  ignoram 14–17. As tabelas **sem** faixa etária (por escolaridade, por geração, faixas de salário mínimo)
+  usam só 18+. Antes era `VD4019`/`VD4020`
   (todos os trabalhos) para 14+, recorte que segue disponível na base como `renda_todos_trabalhos_*`
   (sensibilidade P3). Quanto o hiato muda com outras populações (todos os adultos; renda domiciliar
   per capita): `docs/studies/S1/ficha.md`.
 - **Para combinar células** (ex.: Preta + Parda, sexos juntos), ponderar pela coluna `peso_renda`
   (Σ pesos de quem tem renda na célula), **não** por `populacao_estimada` (a célula inteira). Até a
   Onda 1 os gráficos usavam `populacao_estimada` e superestimavam o hiato % em 4,3 p.p. em média.
+
+## Salário mínimo de 2026
+
+`SALARIO_MINIMO_NOMINAL[2026]` = **R$ 1.621** desde 13/10/2026 (antes, R$ 1.630, "valor anunciado", nunca
+verificado). Evidência interna: em 2026T2, 12,7% das pessoas com renda do trabalho principal declaram exatamente
+R$ 1.621, contra 0,06% em R$ 1.630 (o mesmo padrão de R$ 1.518 em 2025). Fonte oficial: **a confirmar**. Afeta
+`faixas_salario_minimo` (2026: até −0,4 p.p.).
 
 ## Rupturas e mudanças conhecidas que afetam comparabilidade histórica
 

@@ -39,12 +39,12 @@ o único motivo, a linha passa a "Já existe" na leitura do Ponto de parada da O
 | ID | Estado | Onde | Por quê |
 |---|---|---|---|
 | A1 | Existe, precisa refazer | `hiato_racial`, `hiato_branca_indigena`, `hiato_preta_parda`, `renda*` | `pop` |
-| A2 | Existe, precisa refazer | Só R$ e % relativo à Negra (`hiato_racial`). Faltam razão e log-pontos lado a lado | `pop`, `met` |
-| A3 | Existe, precisa refazer | `funcao_quantil_racial`, `percentil_de_valor_racial`, `extremos_*`, `perfil_topo10*`, `perfil_quartis*`. Falta hiato por quantil P10…P99 com IC e razões P90/P50, P50/P10 | `pop`, `ic`, `met` |
-| A4 | Existe, precisa refazer | `theil_racial` (Theil T), `gini_por_raca`. Falta Theil L (MLD) e Amarela | `pop`, `met` |
-| A5 | Existe, precisa refazer | `extremos_distribuicao_racial`, `extremos_composicao_racial` (limiar em R$). Falta razão de chances e índice de representação por décimo | `pop`, `met` |
-| A6 | Novo | Dominância estocástica: nada | — |
-| A7 | Existe, precisa refazer | `horas_trabalhadas` (renda/hora com `VD4031`, todos os trabalhos). Renda domiciliar per capita: dado já extraído (v2 anual), nenhuma tabela | `pop`, `met` |
+| A2 | Já existe | `a2_metricas_hiato` (R$, razão, log-pontos, % da renda Branca, hiato %, IC) | — |
+| A3 | Já existe | `a3_hiato_quantis` (P10…P99, razões P90/P50 e P50/P10, bootstrap Rao-Wu, 2º trimestres) | — |
+| A4 | Já existe | `a4_desigualdade_decomposicao` (Gini, Theil T e L com Amarela) | — |
+| A5 | Já existe | `a5_representacao_decimos` (índice de representação por décimo; razão de chances topo/base 10%) | — |
+| A6 | Já existe | `a6_dominancia` (Branca domina Negra em todos os anos) | — |
+| A7 | Já existe | `a2_metricas_hiato` (conceito `por_hora`, `V4039`) e `t1_renda_domiciliar_per_capita` | — |
 
 ## Bloco B — Tendência e ritmo
 
@@ -72,11 +72,11 @@ o único motivo, a linha passa a "Já existe" na leitura do Ponto de parada da O
 
 | ID | Estado | Onde | Por quê |
 |---|---|---|---|
-| S0.1 | Existe, precisa refazer | `populacao.resumo_exclusoes` (função); `ocupacao`, `desalento_subutilizacao` (14+). Falta a tabela por raça × gênero no tempo | `met` |
-| S0.2 | Novo | Logit de estar em P1: nada | — |
+| S0.1 | Já existe | `composicao_populacao_referencia` | — |
+| S0.2 | Já existe | `selecao_entrada_populacao_referencia` (efeito marginal com EP design-based) | — |
 | S0.3 | Novo | Perfis de quem fica de fora: nada | — |
-| S1.1 | Novo | Hiato em P1–P5: nada (P5 depende da tabela de renda domiciliar, dado já extraído) | — |
-| S1.2 | Novo | Idem raça × gênero | — |
+| S1.1 | Já existe | `sensibilidade_hiato_populacao` (P1–P4) e `sensibilidade_hiato_p5_anual` | — |
+| S1.2 | Já existe | Idem, por sexo | — |
 | S1.3 | Novo | Limites de Manski/Lee: nada | — |
 | S1.4 | Novo | Margem intensiva × extensiva: nada | — |
 | S1.5 | Novo | Seleção no tempo: nada | — |
@@ -85,11 +85,11 @@ o único motivo, a linha passa a "Já existe" na leitura do Ponto de parada da O
 
 | ID | Estado | Onde | Por quê |
 |---|---|---|---|
-| T1 | Novo | Renda domiciliar per capita (`VD5008`/`VD5011`) extraída em `data/raw/pnadc_anual_v2`, sem tabela | — |
-| T2 | Existe, precisa refazer | `faixas_salario_minimo` (renda individual em salários mínimos). Pobreza domiciliar: nada | `met` |
-| T3 | Novo | Fontes `V5001A…V5008A` extraídas, sem tabela | — |
+| T1 | Já existe | `t1_renda_domiciliar_per_capita` (por raça da pessoa e raça × sexo do responsável) | — |
+| T2 | Já existe | `t2_pobreza` (FGT 0/1/2; ¼ SM, ½ SM, 50% da mediana). Linhas em PPC pendentes | `met` (PPC) |
+| T3 | Já existe | `t3_fontes_de_renda` (2016+) | — |
 | T4 | Novo | Décimos de renda domiciliar per capita: nada | — |
-| T5 | Novo | Depende de S1.1 e T1 | — |
+| T5 | Já existe | S1 (P1 × P5) e ficha T | — |
 
 ## Bloco D — Por que a diferença existe? (decomposição)
 

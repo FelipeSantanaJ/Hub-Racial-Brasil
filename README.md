@@ -61,6 +61,19 @@ Onda 1, 13/10/2026); com todos os adultos (não ocupados = 0) o hiato fica maior
 mulheres — ver [`docs/studies/S1/ficha.md`](docs/studies/S1/ficha.md). *A banda de IC do hiato % no
 gráfico divide o IC absoluto pela média Negra e ignora a incerteza do denominador (R11, pendente).*
 
+### O hiato depende de quem você olha (Onda 1)
+
+![Hiato por população](docs/img/onda1_s1_hiato_por_populacao.png)
+
+Entre quem trabalha e tem renda, o hiato Branca × Negra é de 65,7% (2026 T2): pessoas negras ganham 60% do que
+ganham pessoas brancas. Contando **todos os adultos** (quem não está ocupado entra com zero), o hiato sobe, e muito
+mais entre mulheres (+17,5 p.p. em média). Pela **renda do domicílio por pessoa**, todas as idades, o hiato era de
+99% em 2012 e de 82% em 2025, e 29% das pessoas negras viviam abaixo de meio salário mínimo por pessoa (15% das
+brancas). Uma pessoa negra ocupada tem um terço da chance de uma pessoa branca de estar entre os 10% que mais
+ganham. Fichas: [`docs/studies`](docs/studies/INDICE.md) (F, S0, S1, T, A).
+
+![Pobreza por raça](docs/img/onda1_t2_pobreza_meio_sm.png)
+
 ### Quanto do hiato a ocupação explica?
 
 ![Decomposição do hiato por ocupação](docs/img/decomposicao_hiato_ocupacional.png)
@@ -127,7 +140,7 @@ P58 da distribuição de Branca (pouco acima da mediana), mas no P77 da distribu
 ganha quem está em cada percentil —, os 10% mais pobres entre os brancos ganham R$1.500,
 contra R$766 entre os 10% mais pobres dos negros (2026 T2).
 
-**682 imagens em `docs/img`** (503 da árvore `arv_*` + 179 das demais análises; contagem da Onda 1, 13/10/2026, sem as séries de renda 14–17, que deixaram de existir; a galeria
+**687 imagens em `docs/img`** (503 da árvore `arv_*` + 184 das demais análises, 5 delas da Onda 1 `onda1_*`; contagem de 13/10/2026, sem as séries de renda 14–17, que ficam fora das análises; a galeria
 narrada em `docs/ANALISE_FASE1.md` usa 87 delas). O deck em PPTX
 ([docs/Datahub_Racial_Brasil_Fase1.pptx](docs/Datahub_Racial_Brasil_Fase1.pptx), 620
 slides; eram 657 até a Onda 1, que tirou as 37 folhas de renda 14–17) é organizado como uma **árvore cruzada** de renda por raça (Branca /

@@ -22,8 +22,10 @@ from src.utils import populacao as pop
 # (decisão do Ponto de parada 2: o Hub não fica com duas populações). Tabelas cujo indicador
 # não é renda (escolaridade, ocupação, desalento…) mantêm o universo do próprio indicador (14+).
 P1 = pop.DESCRICAO_POPULACAO_REFERENCIA + "; renda: " + pop.DESCRICAO_RENDA_REFERENCIA
-PESSOAS_14_RENDA = ("Pessoas de 14+ anos (contagens e população); médias de renda na população de referência ("
-                    + pop.DESCRICAO_POPULACAO_REFERENCIA + "); faixa 14–17 sem renda por construção")
+PESSOAS_14_RENDA = ("Pessoas de 14+ anos (contagens e população); médias de renda dos ocupados com renda do "
+                    "trabalho principal (VD4016) > 0. Tabelas COM faixa etária (renda, renda_completa, "
+                    "renda_multidimensional_faixa) trazem também a faixa 14–17, que fica fora das análises; "
+                    "tabelas SEM faixa etária usam só 18+ (" + pop.DESCRICAO_POPULACAO_REFERENCIA + ")")
 PESSOAS_14 = "Todas as pessoas de 14+ anos"
 FORCA_14 = "Pessoas de 14+ anos na força de trabalho (ocupados + desocupados)"
 HEAPING = "; fatias com o peso empatado no limiar repartido (R9)"
@@ -52,7 +54,8 @@ CATALOGO: list[tuple[str, str, str]] = [
     (r"^(perfil_topo10.*|perfil_quartis.*|extremos_.*|quartis_multi_racial)$", P1 + HEAPING, T),
     (r"^(funcao_quantil_racial|percentil_de_valor_racial)$", P1, T),
     (r"^faixas_salario_minimo$", P1 + " (renda NOMINAL do trabalho principal × salário mínimo do ano)", T),
-    (r"^horas_trabalhadas$", P1 + "; horas habituais do trabalho principal (V4039)", T),
+    (r"^horas_trabalhadas$", "Ocupados de 14+ com renda do trabalho principal > 0 (a faixa 14–17 fica fora das "
+     "análises); horas habituais do trabalho principal (V4039)", T),
     (r"^(renda|renda_.*)$", PESSOAS_14_RENDA, T),
     (r"^(escolaridade|alfabetizacao)$", PESSOAS_14, T),
     (r"^(ocupacao|desocupacao_por_escolaridade)$", FORCA_14, T),
@@ -82,6 +85,14 @@ CATALOGO: list[tuple[str, str, str]] = [
      "de referência)", T),
     (r"^composicao_racial_declarada$", "Pessoas 14+, 18+ e população de referência; cor/raça declarada (V2010)", T),
     (r"^heaping_renda$", P1 + "; % com renda nominal múltipla de R$ 100/500/1.000", T),
+    # --- Onda 1: Bloco A (src/processing/bloco_a.py) ---
+    (r"^(a2_metricas_hiato|a3_hiato_quantis|a4_desigualdade_decomposicao|a5_representacao_decimos|a6_dominancia)$",
+     P1 + "; Branca, Negra (Preta+Parda), Indígena e Amarela; Ignorado fora", T),
+    # --- Onda 1: Bloco T (src/processing/bloco_t.py) ---
+    (r"^(t1_renda_domiciliar_per_capita|t2_pobreza|t3_fontes_de_renda)$",
+     "Todas as pessoas (todas as idades) da PNAD Contínua anual (Visita 1; Visita 5 em 2020–2021), exceto "
+     "pensionistas/empregados domésticos e parentes (V2005 17–19); renda domiciliar per capita habitual (VD5008), "
+     "valores nominais do ano", "anual_v2"),
     (r"^habitacao_.*$", "Moradores (pessoas) da PNAD Contínua anual, Visita 1, tema Habitação: 2016–2019 e 2022–2025",
      INSUMO_ANUAL_VISITA1_V1),
     (r"^deflator_ibge$", "Não se aplica (deflatores oficiais do IBGE por UF × trimestre)", "ibge_deflator"),
