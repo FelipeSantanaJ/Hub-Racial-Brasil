@@ -1,0 +1,24 @@
+{
+  "esquema": "hub-racial-meta/1",
+  "arquivo": "desocupacao_por_escolaridade.parquet",
+  "n_linhas": 1218,
+  "gerado_em": "2026-10-13T04:51:07.579330+00:00",
+  "codigo": {
+    "commit": "da7b04b",
+    "modulo": "(retroativo)"
+  },
+  "insumos": {
+    "chave": "trimestral_v1",
+    "descricao": "PNAD Contínua trimestral, extrato v1 + deflator IBGE",
+    "hash": "524457dd7482fc957d4a0f46ac8810fd4402a35d2c1dd703acec80ba40cbee01",
+    "n_arquivos": 228
+  },
+  "se_metodo": "sem_inferencia",
+  "populacao": "Pessoas de 14+ anos na força de trabalho (ocupados + desocupados)",
+  "periodo": {
+    "inicio": "2012T1",
+    "fim": "2026T2"
+  },
+  "meta_retroativo": true,
+  "meta_preenchido_em": "2026-10-13T04:59:21.492502+00:00"
+}

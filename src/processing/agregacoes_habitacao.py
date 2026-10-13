@@ -15,7 +15,7 @@ import duckdb
 import numpy as np
 import pandas as pd
 
-from src.inference.saida import salvar_com_inferencia
+from src.inference.saida import salvar_com_inferencia, salvar_tabela
 
 from src.utils import pnadc_core as core
 

@@ -1,0 +1,24 @@
+{
+  "esquema": "hub-racial-meta/1",
+  "arquivo": "theil_racial.parquet",
+  "n_linhas": 58,
+  "gerado_em": "2026-10-13T04:51:08.325897+00:00",
+  "codigo": {
+    "commit": "da7b04b",
+    "modulo": "(retroativo)"
+  },
+  "insumos": {
+    "chave": "trimestral_v1",
+    "descricao": "PNAD Contínua trimestral, extrato v1 + deflator IBGE",
+    "hash": "524457dd7482fc957d4a0f46ac8810fd4402a35d2c1dd703acec80ba40cbee01",
+    "n_arquivos": 228
+  },
+  "se_metodo": "sem_inferencia",
+  "populacao": "Ocupados de 14+ anos com rendimento habitual de qualquer trabalho (VD4019) > 0; Branca, Negra e Indígena (Amarela e Ignorado fora)",
+  "periodo": {
+    "inicio": "2012T1",
+    "fim": "2026T2"
+  },
+  "meta_retroativo": true,
+  "meta_preenchido_em": "2026-10-13T04:59:23.443583+00:00"
+}

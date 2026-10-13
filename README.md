@@ -11,8 +11,8 @@ O projeto tem **duas árvores**:
 
 - **A. Análises** — dados públicos → pipeline → análises → deck → dashboard
   ([docs/PLANO.md](docs/PLANO.md))
-- **B. Conteúdo** — achados validados → posts para Instagram/TikTok, com planejamento de
-  postagens ([conteudo/](conteudo/))
+- **B. Conteúdo** — *superseded*: a produção de conteúdo (Instagram/TikTok) foi adiada para 2027
+  e é gerida fora deste repositório; `conteudo/` fica só como histórico
 
 ## Status
 
@@ -20,8 +20,16 @@ O projeto tem **duas árvores**:
 deflator oficial do IBGE, agregações por raça/gênero/faixa etária/geografia), análises
 descritivas, decomposições, distribuição, primeira identificação causal e testes
 automatizados.
-⏳ **Etapas 2 a 6 e árvore de conteúdo: não iniciadas — planejadas para 2027.** Ver
-[docs/PLANO.md](docs/PLANO.md).
+🔧 **Auditoria científica em andamento (out/2026).** A Rodada 1 encontrou um erro no erro-padrão
+(corrigido: ver "O que é validado" abaixo e [docs/auditoria/](docs/auditoria/)). A agenda de
+análises seguinte está em [docs/PLANO_DE_ANALISE.md](docs/PLANO_DE_ANALISE.md).
+⏳ **Etapas 2 a 6: não iniciadas.** Ver [docs/PLANO.md](docs/PLANO.md).
+
+> **Atenção (13/10/2026):** os gráficos com banda de IC ou asterisco de significância em
+> `docs/img` ainda foram gerados com o erro-padrão antigo e serão regenerados depois da troca
+> da população de referência (lista em
+> [docs/auditoria/graficos_a_regenerar.md](docs/auditoria/graficos_a_regenerar.md)). As
+> estimativas pontuais não mudaram.
 
 ### Renda habitual do trabalho, por raça (2012–2026)
 
@@ -44,18 +52,24 @@ entre pessoas com o mesmo nível de instrução — ele se abre dramaticamente j
 
 ![Hiato percentual Branca vs. Negra](docs/img/hiato_racial_percentual.png)
 
-Testado (Welch, IC 95%) trimestre a trimestre a partir dos microdados: os 58 trimestres da
-série são estatisticamente significativos — o hiato caiu de ~76% para ~66% entre 2012 e 2026.
+Testado trimestre a trimestre a partir dos microdados, com erro-padrão que respeita o desenho
+amostral da PNAD Contínua (Estrato e UPA): os 58 trimestres da série são estatisticamente
+significativos (z entre 18,8 e 36,6) — o hiato caiu de ~76% para ~66% entre 2012 e 2026. O
+hiato % é **relativo à renda média Negra** (Branca ganha ~66% a mais; Negra ganha ~60% da
+renda Branca). *A banda de IC desta imagem ainda é a antiga, estreita demais (~57×).*
 
-### É ocupação, ou é cor da pele?
+### Quanto do hiato a ocupação explica?
 
 ![Decomposição do hiato por ocupação](docs/img/decomposicao_hiato_ocupacional.png)
 
 Controlando por idade, escolaridade e ocupação (mesma categoria ocupacional), o hiato bruto
 de 67% cai para 24% — mas não desaparece. Boa parte do hiato racial de renda não se explica
 por "estar em ocupações diferentes". Confirmado por um segundo método (regressão de
-Oaxaca-Blinder, com teste de significância formal — p < 0,001): resíduo de +22%, muito perto
-do resultado da padronização direta acima. E ocupação SOZINHA (sem nem controlar
+Oaxaca-Blinder, com teste de significância formal — p < 0,001): resíduo de +22,4% (coeficiente
+restrito, controlando por idade, instrução e ocupação), perto da padronização direta acima
+(24,3%; são estimandos diferentes). O resíduo é a parte **não associada às covariáveis
+incluídas**: não é medida de discriminação e não inclui região, horas trabalhadas, sexo ou
+informalidade, que serão adicionados na Onda 3 do plano. E ocupação SOZINHA (sem nem controlar
 idade/escolaridade) já explica quase tanto quanto as duas juntas — hiato cai de 67% pra 33%
 só com essa variável. Dentro de **cada** categoria ocupacional, aliás, Branca ganha mais que
 Negra — o hiato não é só "estar em ocupações diferentes".
@@ -109,7 +123,8 @@ P57 da distribuição de Branca (pouco acima da mediana), mas no P76 da distribu
 ganha quem está em cada percentil —, os 10% mais pobres entre os brancos ganham R$1.500,
 contra R$720 entre os 10% mais pobres dos negros.
 
-**721 gráficos ao todo.** O deck em PPTX
+**721 imagens em `docs/img`** (540 da árvore `arv_*` + 181 das demais análises; a galeria
+narrada em `docs/ANALISE_FASE1.md` usa 89 delas). O deck em PPTX
 ([docs/Datahub_Racial_Brasil_Fase1.pptx](docs/Datahub_Racial_Brasil_Fase1.pptx), ~657
 slides) é organizado como uma **árvore cruzada** de renda por raça (Branca /
 Negra=Preta+Parda / Indígena): 11 itens — Raça; ×Gênero; ×Faixa Etária; ×Geração;
@@ -150,23 +165,87 @@ src/
 notebooks/pnad/      # exploração e validação
 docs/                # árvore de análises: plano, análises, limitações, decks
 tests/               # testes automatizados (pytest) das funções estatísticas
-conteudo/            # árvore de conteúdo: plano, banco de pautas, calendário de postagens
+src/inference/       # variância design-based, multiplicidade, gravação com proveniência
+src/auditoria/       # inventário e relatórios antes × depois
+docs/auditoria/      # auditoria científica (rodadas, linha de base, antes × depois)
+conteudo/            # SUPERSEDED (histórico): conteúdo é gerido fora do repositório
 ```
 
-## Como rodar
+## Como reproduzir
+
+Requisitos: Python 3.12, ~15 GB de download do FTP do IBGE e ~2 GB livres depois da extração.
 
 ```bash
 python -m venv .venv
-.venv\Scripts\activate
-pip install -r requirements.txt
+.venv\Scripts\activate            # Linux/Mac: source .venv/bin/activate
+pip install -r requirements.lock   # versões exatas testadas (requirements.txt traz os mínimos)
+
+# 1. Microdados (baixa do FTP do IBGE; idempotente, retoma de onde parou)
+python -m src.ingestion.extrator_pnadc                        # trimestral 2012-atual
+python -m src.ingestion.extrator_pnadc_visita_anual           # anual, Visita 1
+python -m src.ingestion.extrator_pnadc_visita_anual --visita 5 --anos 2020 2021
+python -m src.ingestion.baixar_deflator
+
+# 2. Tabelas agregadas (data/processed/*.parquet + _meta.json); ~1h30
+python -m src.processing.agregacoes_pnadc
+python -m src.processing.analise_causal_cotas
+python -m src.processing.agregacoes_habitacao
+python -m src.processing.checagem_robustez_hiato
+
+# 3. Gráficos e decks
+python -m src.processing.graficos_fase1
+python -m src.processing.graficos_arvore
+python -m src.processing.graficos_extremos
+python -m src.processing.graficos_aprofundamentos
+python -m src.processing.graficos_causal_cotas
+python -m src.processing.apresentacao_fase1       # decks PPTX
+python -m src.processing.apresentacao_arvore
 ```
 
-Testes automatizados (round-trip de quantil, casos sintéticos de Theil e Gini, regressão
-do erro padrão ponderado):
+Testes (rodam sem microdados, com dados sintéticos; também no CI a cada push):
 
 ```bash
-pytest tests/
+python -m pytest -q
 ```
+
+Para conferir que uma regeneração não mudou estimativas pontuais:
+`python -m src.auditoria.antes_depois --legado <pasta em data/processed/_legado>`.
+
+> Nota: o pipeline de produção ainda lê o extrato trimestral v1 (`data/raw/pnadc_extraido`); a
+> troca para o v2 (`pnadc_extraido_v2`) acontece junto com a nova população de referência.
+> NÃO VERIFICADO: reprodução completa numa máquina limpa (o CI só roda os testes).
+
+## O que é validado
+
+| Item | Estado | Evidência |
+|---|---|---|
+| Estimativas pontuais do hiato, Theil, Gini, quantis, topo/base 10% | Conferidas na auditoria Rodada 1 e idênticas após a correção de 12/10/2026 | `docs/auditoria/rodada1.md`, `docs/auditoria/antes_depois.md` |
+| Erro-padrão, IC e p-valores das tabelas de hiato | **Corrigidos em 12/10/2026** (linearização com Estrato/UPA); razão linearização/bootstrap = 1,005 nos 58 trimestres | `docs/LIMITACOES_E_METODOLOGIA.md`, `checagem_robustez_hiato_racial.parquet` |
+| Multiplicidade | `significativo_fdr` (Benjamini-Hochberg por família) em toda tabela com p-valor | `src/inference/multiplicidade.py` |
+| Funções estatísticas | Testes automatizados, inclusive golden-file da pipeline e guarda contra a fórmula antiga | `tests/`, CI |
+| Desenhos causais (cotas) | **Não validados**: resultados exploratórios; nenhum teste do Desenho B sobrevive à correção de multiplicidade | `docs/auditoria/rodada1.md` (R2, R3) |
+| Decomposição Oaxaca-Blinder | Implementação correta; **especificação insuficiente** (faltam região, horas, sexo, informalidade) | R5 da auditoria |
+| Gráficos com IC/asterisco | **Desatualizados** até a regeneração | `docs/auditoria/graficos_a_regenerar.md` |
+
+## Limitações conhecidas
+
+- **População e renda:** as tabelas publicadas hoje usam ocupados de 14+ anos e o rendimento
+  habitual de **todos** os trabalhos (`VD4019`). A referência decidida é ocupados de **18+** com
+  rendimento habitual do **trabalho principal** (`VD4016`) > 0; a troca está em implementação
+  ([docs/PLANO_DE_ANALISE.md](docs/PLANO_DE_ANALISE.md), Bloco F).
+- PNAD Contínua é corte transversal repetido (com rotação de domicílios), não painel; 58
+  trimestres não são 58 evidências independentes.
+- Amostra pequena de Indígena e de células finas; Amarela fora de Theil/Gini.
+- Resíduo de decomposição ≠ discriminação; nenhuma conclusão causal sai das decomposições.
+- Sem origem social, qualidade da escola ou território fino (Censo 2022 bloqueado).
+- Detalhes: [docs/LIMITACOES_E_METODOLOGIA.md](docs/LIMITACOES_E_METODOLOGIA.md) e
+  [docs/auditoria/](docs/auditoria/).
+
+## Licença
+
+Código sob [MIT](LICENSE). Tabelas derivadas, gráficos e textos sob
+[CC BY 4.0](LICENSE-DATA.md). Os microdados são do IBGE, não são redistribuídos aqui e seguem os
+termos do IBGE.
 
 ## Roadmap
 
@@ -184,8 +263,7 @@ pytest tests/
    para 2027
 6. ⏳ **Etapa 6 — Dashboard**: publicação via Observable Framework — planejada para 2027
 
-**B. Árvore de Conteúdo (Instagram/TikTok)** — planejada para 2027, lançamento em
-21/03/2027: linha editorial, banco de pautas, produção piloto, calendário de postagens e
-revisão por métricas. Ver [conteudo/](conteudo/).
+**B. Árvore de Conteúdo (Instagram/TikTok)** — *superseded*: adiada para 2027 e gerida fora
+deste repositório. `conteudo/` é mantido só como histórico.
 
 Detalhes, prazos e marcos em [docs/PLANO.md](docs/PLANO.md).

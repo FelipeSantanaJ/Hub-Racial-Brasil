@@ -1,8 +1,26 @@
 {
+  "esquema": "hub-racial-meta/1",
   "arquivo": "habitacao_hiato_racial_genero.parquet",
-  "se_metodo": "linearizacao_taylor_estrato_upa",
-  "commit": "e27278b4e61e4ede0d809e20e6110fc30a81d643",
+  "n_linhas": 288,
   "gerado_em": "2026-10-13T04:27:36.280938+00:00",
+  "codigo": {
+    "commit": "e27278b4e61e4ede0d809e20e6110fc30a81d643",
+    "modulo": "(retroativo)"
+  },
+  "insumos": {
+    "chave": "anual_visita1_v1",
+    "descricao": "PNAD Contínua anual, Visita 1, extrato v1 (tema Habitação)",
+    "hash": "bda790785bbbd69fc3c2aa5f7974ff7ce4151b5316770843274f976220146993",
+    "n_arquivos": 29
+  },
+  "se_metodo": "linearizacao_taylor_estrato_upa",
+  "populacao": "Moradores (pessoas) da PNAD Contínua anual, Visita 1, tema Habitação: 2016–2019 e 2022–2025",
+  "periodo": {
+    "inicio": "2016",
+    "fim": "2025"
+  },
+  "meta_retroativo": true,
+  "meta_preenchido_em": "2026-10-13T04:59:22.199577+00:00",
   "familia_fdr": [
     "ano",
     "indicador"

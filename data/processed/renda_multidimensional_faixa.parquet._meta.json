@@ -1,0 +1,21 @@
+{
+  "esquema": "hub-racial-meta/1",
+  "arquivo": "renda_multidimensional_faixa.parquet",
+  "n_linhas": 2869,
+  "gerado_em": "2026-10-13T04:51:08.212123+00:00",
+  "codigo": {
+    "commit": "da7b04b",
+    "modulo": "(retroativo)"
+  },
+  "insumos": {
+    "chave": "trimestral_v1",
+    "descricao": "PNAD Contínua trimestral, extrato v1 + deflator IBGE",
+    "hash": "524457dd7482fc957d4a0f46ac8810fd4402a35d2c1dd703acec80ba40cbee01",
+    "n_arquivos": 228
+  },
+  "se_metodo": "sem_inferencia",
+  "populacao": "Pessoas de 14+ anos (contagens e população); médias de renda sobre os ocupados 14+ com VD4019 informado",
+  "periodo": null,
+  "meta_retroativo": true,
+  "meta_preenchido_em": "2026-10-13T04:59:23.153065+00:00"
+}

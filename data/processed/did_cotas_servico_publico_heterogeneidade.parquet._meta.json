@@ -1,8 +1,23 @@
 {
+  "esquema": "hub-racial-meta/1",
   "arquivo": "did_cotas_servico_publico_heterogeneidade.parquet",
-  "se_metodo": "wls_statsmodels_cluster_upa",
-  "commit": "e27278b4e61e4ede0d809e20e6110fc30a81d643",
+  "n_linhas": 35,
   "gerado_em": "2026-10-13T04:23:14.073592+00:00",
+  "codigo": {
+    "commit": "e27278b4e61e4ede0d809e20e6110fc30a81d643",
+    "modulo": "(retroativo)"
+  },
+  "insumos": {
+    "chave": "trimestral_v1",
+    "descricao": "PNAD Contínua trimestral, extrato v1 + deflator IBGE",
+    "hash": "524457dd7482fc957d4a0f46ac8810fd4402a35d2c1dd703acec80ba40cbee01",
+    "n_arquivos": 228
+  },
+  "se_metodo": "wls_statsmodels_cluster_upa",
+  "populacao": "Ocupados de 14+ anos com setor público/privado classificável (empregados e militares/estatutários), janela de −10 a +12 trimestres em torno de 2014T2 (Desenho B)",
+  "periodo": null,
+  "meta_retroativo": true,
+  "meta_preenchido_em": "2026-10-13T04:59:21.515150+00:00",
   "familia_fdr": null,
   "alfa": 0.05
 }

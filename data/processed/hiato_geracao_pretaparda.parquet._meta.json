@@ -1,8 +1,26 @@
 {
+  "esquema": "hub-racial-meta/1",
   "arquivo": "hiato_geracao_pretaparda.parquet",
-  "se_metodo": "linearizacao_taylor_estrato_upa",
-  "commit": "da7b04baa2aaebe5544137b8f35e0197688b592e",
+  "n_linhas": 5,
   "gerado_em": "2026-10-13T03:00:25.056223+00:00",
+  "codigo": {
+    "commit": "da7b04baa2aaebe5544137b8f35e0197688b592e",
+    "modulo": "(retroativo)"
+  },
+  "insumos": {
+    "chave": "trimestral_v1",
+    "descricao": "PNAD Contínua trimestral, extrato v1 + deflator IBGE",
+    "hash": "524457dd7482fc957d4a0f46ac8810fd4402a35d2c1dd703acec80ba40cbee01",
+    "n_arquivos": 228
+  },
+  "se_metodo": "linearizacao_taylor_estrato_upa",
+  "populacao": "Ocupados de 14+ anos com rendimento habitual de qualquer trabalho (VD4019) informado; no extrato não há VD4019 = 0, então equivale a renda > 0; Preta × Parda",
+  "periodo": {
+    "inicio": "2026T2",
+    "fim": "2026T2"
+  },
+  "meta_retroativo": true,
+  "meta_preenchido_em": "2026-10-13T04:59:22.474992+00:00",
   "familia_fdr": null,
   "alfa": 0.05
 }

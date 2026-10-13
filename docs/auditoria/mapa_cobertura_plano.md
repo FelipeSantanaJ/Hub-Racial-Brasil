@@ -1,0 +1,174 @@
+# Mapa de cobertura do plano de análise (v1.0)
+
+**Data:** 13/10/2026 · **Base:** `docs/PLANO_DE_ANALISE.md` v1.0 (com as decisões dos Pontos de parada 0 e 1)
+× o que existe hoje em `data/processed` (101 parquets), `docs/` e `src/`.
+
+**Legenda**
+- **Já existe**: responde a pergunta como o plano pede.
+- **Existe, precisa refazer**: há tabela/gráfico, mas fora do padrão do plano. Quase sempre por pelo
+  menos um destes motivos, indicados na coluna "Por quê":
+  `pop` = recorte histórico (14+, renda de todos os trabalhos `VD4019`) em vez da referência (18+, `VD4016`);
+  `ic` = sem IC ou com gráfico de IC antigo; `esp` = especificação ou método insuficiente (auditoria);
+  `ser` = só foto do último trimestre, sem série; `met` = métrica pedida não calculada.
+- **Novo**: nada no Hub.
+- **Bloqueado por dado**: depende de fonte que não temos ou não podemos obter (decisão de 12/10/2026: sem
+  vínculo institucional, logo sem RAIS identificada nem SEDAP/INEP).
+- **NÃO VERIFICADO**: não conferi o conteúdo da tabela/documento contra a pergunta; a classificação é
+  pelo nome e pelo gerador.
+
+Desde a Fase 2, `hiato_racial`, `gini_por_raca`, `theil_racial` e `decomposicao_oaxaca_blinder*` **já
+usam a população de referência no código**, mas os parquets ainda não foram regenerados: contam como
+"precisa refazer" até a próxima regeneração.
+
+## Bloco F — Fundações
+
+| ID | Estado | Onde / o que falta | Por quê |
+|---|---|---|---|
+| F1 | Novo | Composição declarada 2012–2026 e efeito composição × renda: nada | — |
+| F2 | Existe, precisa refazer | `VD4016` e `VD4019` na base; prévia do hiato sob os dois conceitos no CHANGELOG (13/10/2026). Falta a tabela de sensibilidade com IC (todas as fontes, por hora, domiciliar per capita) | `met` |
+| F3 | Existe, precisa refazer | `src/utils/populacao.py` (definição e flags 18+/14+); falta a tabela de sensibilidade de população | `met` |
+| F4 | Novo | Heaping, subdeclaração, topo: nada | — |
+| F5 | Já existe | `src/inference/` (linearização Estrato/UPA, Rao-Wu, FDR); `checagem_robustez_hiato_racial`. Réplicas não usadas por decisão | — |
+| F6 | Existe, precisa refazer | `quebra_estrutural` (3 eventos, OLS i.i.d.); sem marcação de 4T2015 (educação), 2020–21 (telefone), reponderação | `esp` |
+
+## Bloco A — A diferença existe? De quanto?
+
+| ID | Estado | Onde | Por quê |
+|---|---|---|---|
+| A1 | Existe, precisa refazer | `hiato_racial`, `hiato_branca_indigena`, `hiato_preta_parda`, `renda*` | `pop` |
+| A2 | Existe, precisa refazer | Só R$ e % relativo à Negra (`hiato_racial`). Faltam razão e log-pontos lado a lado | `pop`, `met` |
+| A3 | Existe, precisa refazer | `funcao_quantil_racial`, `percentil_de_valor_racial`, `extremos_*`, `perfil_topo10*`, `perfil_quartis*`. Falta hiato por quantil P10…P99 com IC e razões P90/P50, P50/P10 | `pop`, `ic`, `met` |
+| A4 | Existe, precisa refazer | `theil_racial` (Theil T), `gini_por_raca`. Falta Theil L (MLD) e Amarela | `pop`, `met` |
+| A5 | Existe, precisa refazer | `extremos_distribuicao_racial`, `extremos_composicao_racial` (limiar em R$). Falta razão de chances e índice de representação por décimo | `pop`, `met` |
+| A6 | Novo | Dominância estocástica: nada | — |
+| A7 | Existe, precisa refazer | `horas_trabalhadas` (renda/hora com `VD4031`, todos os trabalhos). Renda domiciliar per capita: dado já extraído (v2 anual), nenhuma tabela | `pop`, `met` |
+
+## Bloco B — Tendência e ritmo
+
+| ID | Estado | Onde | Por quê |
+|---|---|---|---|
+| B1 | Existe, precisa refazer | `ritmo_convergencia_hiatos` (OLS i.i.d. sobre a série) | `esp` (R6: sem HAC, sem quebras) |
+| B2 | Novo | Decomposição no tempo (Kitagawa/OB/JMP): nada. `oaxaca_blinder_temporal` decompõe por período, não a mudança | — |
+| B3 | Novo | RIF/quantis por ano: nada como tabela (há `oaxaca_blinder_quantis.png`, só foto) | — |
+| B4 | Existe, precisa refazer | `hiato_por_geracao`, `renda_por_geracao`, `painel_cohortes_superior_completo`. Sem tratamento formal de APC | `pop`, `esp` |
+| B5 | Novo | Ciclo × tendência: nada | — |
+| B6 | Existe, precisa refazer | `ritmo_convergencia_hiatos` tem projeção linear. Precisa virar projeção condicional com premissas explícitas | `esp` |
+
+## Bloco C — Raça × gênero
+
+| ID | Estado | Onde | Por quê |
+|---|---|---|---|
+| C1 | Existe, precisa refazer | `hiato_genero_*`, `dupla_desvantagem`, `decomposicao_raca_genero`, `renda` (por sexo) | `pop` |
+| C2 | Existe, precisa refazer | `decomposicao_raca_genero` (ANOVA 2 fatores, 9 combinações); sem modelo com interação e IC da interação | `esp` |
+| C3 | Novo | Shapley/Shorrocks de 3 vias: nada (a decomposição atual é sequencial) | — |
+| C4 | Novo | Penalidade da maternidade: nada (falta ligar filhos pequenos no domicílio; `V2005`/`VD2004` extraídos na v2) | — |
+| C5 | Existe, precisa refazer | `ocupacao`, `informalidade` por raça × sexo; trabalho doméstico não destacado (`VD4009` 03/04) | `met` |
+| C6 | Novo | Chefia/estado conjugal: nada | — |
+
+## Bloco S — Seleção (o recorte "ocupados com renda" distorce o hiato?)
+
+| ID | Estado | Onde | Por quê |
+|---|---|---|---|
+| S0.1 | Existe, precisa refazer | `populacao.resumo_exclusoes` (função); `ocupacao`, `desalento_subutilizacao` (14+). Falta a tabela por raça × gênero no tempo | `met` |
+| S0.2 | Novo | Logit de estar em P1: nada | — |
+| S0.3 | Novo | Perfis de quem fica de fora: nada | — |
+| S1.1 | Novo | Hiato em P1–P5: nada (P5 depende da tabela de renda domiciliar, dado já extraído) | — |
+| S1.2 | Novo | Idem raça × gênero | — |
+| S1.3 | Novo | Limites de Manski/Lee: nada | — |
+| S1.4 | Novo | Margem intensiva × extensiva: nada | — |
+| S1.5 | Novo | Seleção no tempo: nada | — |
+
+## Bloco T — População inteira
+
+| ID | Estado | Onde | Por quê |
+|---|---|---|---|
+| T1 | Novo | Renda domiciliar per capita (`VD5008`/`VD5011`) extraída em `data/raw/pnadc_anual_v2`, sem tabela | — |
+| T2 | Existe, precisa refazer | `faixas_salario_minimo` (renda individual em salários mínimos). Pobreza domiciliar: nada | `met` |
+| T3 | Novo | Fontes `V5001A…V5008A` extraídas, sem tabela | — |
+| T4 | Novo | Décimos de renda domiciliar per capita: nada | — |
+| T5 | Novo | Depende de S1.1 e T1 | — |
+
+## Bloco D — Por que a diferença existe? (decomposição)
+
+| ID | Estado | Onde | Por quê |
+|---|---|---|---|
+| D1.1 | Existe, precisa refazer | `decomposicao_oaxaca_blinder*` (3 especificações: idade, instrução, ocupação), `decomposicao_hiato_ocupacional` | `pop`, `esp` (R5: faltam região, sexo, horas, informalidade, setor, posição) |
+| D1.2 | Novo | Gelbach/Shapley: nada | — |
+| D1.3 | Existe, precisa refazer | RIF por quantil (gráfico `oaxaca_blinder_quantis.png`; função `rif_quantil`) | `esp` (R4: banda/heaping) |
+| D1.4 | Novo | Oster/Cinelli-Hazlett: nada | — |
+| D2.1 | Existe, precisa refazer | Contribuição de instrução nas especificações do OB | `pop`, `esp` |
+| D2.2 | Existe, precisa refazer | `renda_por_escolaridade`, `hiato_escolaridade_*` (hiato por nível); sem interação raça × nível em regressão | `pop`, `esp` |
+| D2.3 | Novo | RIF por nível: nada | — |
+| D2.4 | Existe, precisa refazer | `sobrequalificacao` (Superior completo em ocupação de menor nível) | `pop`; NÃO VERIFICADO o índice usado |
+| D2.5 | — | Remete ao Bloco E | — |
+| D3.1 | Existe, precisa refazer | Contribuição de ocupação no OB | `pop`, `esp` |
+| D3.2 | Existe, precisa refazer | `segregacao_ocupacional*`, `segregacao_setorial*` (Duncan); falta índice de entropia | `met` |
+| D3.3 | Novo | OB com FE de CBO 4 dígitos: `V4010` extraída na v2, nada calculado | — |
+| D3.4 | Existe, precisa refazer | OB tem especificação com e sem ocupação; falta o enquadramento de mediador por escrito | `esp` |
+| D3.5 | Bloqueado por dado | Dentro da firma exige RAIS identificada (sem vínculo institucional). Só literatura | — |
+| D4.1 | Novo | Decomposição entre/dentro de região: nada | — |
+| D4.2 | Existe, precisa refazer | `hiato_regional` (região), `hiato_regional_pretaparda` (UF, Preta × Parda). Falta Branca × Negra por UF | `pop`, `met` |
+| D4.3 | Existe, precisa refazer | `hiato_capital_interior`; urbano/rural (`V1022`) na base, sem tabela | `pop` |
+| D4.4 | Bloqueado por dado | Segregação residencial exige Censo 2022 (GovBR) | — |
+| D5.1 | Existe, precisa refazer | `horas_trabalhadas`; horas do trabalho principal (`V4039`) só na v2 | `pop`, `met` |
+| D5.2 | Existe, precisa refazer | `hiato_formal_informal`, `hiato_setor_publico_privado`, `informalidade` | `pop` |
+| D5.3 | Novo | Logit multinomial/DFL: nada | — |
+| D5.4 | Bloqueado por dado (parcial) | Literatura + RAIS/CAGED públicos; RAIS identificada fora de alcance | — |
+| D6.1 | Existe, precisa refazer | `renda_por_geracao`, `renda_completa_geracao` | `pop` |
+| D6.2 | Existe, precisa refazer | `hiato_faixa_etaria_historico_*`, `hiato_por_geracao` | `pop` |
+| D7.1 | Novo | Ver C4–C6 | — |
+| D8.1 | Novo | Faixa do resíduo (Oster): nada | — |
+| D8.2 | Bloqueado por dado | RAIS identificada; só literatura de auditoria | — |
+| D8.3 | Novo | Texto de conclusão do bloco | — |
+
+## Bloco E — Educação
+
+| ID | Estado | Onde | Por quê |
+|---|---|---|---|
+| E1 | Novo | `V3002`, `V3003A`, `V3006` extraídas na v2; nenhuma tabela. Quebra em 4T2015 | — |
+| E2 | Novo (parcial bloqueado) | PNADC: possível. Censo Escolar por aluno com raça: só SEDAP (fora de alcance); público simplificado: NÃO VERIFICADO se traz raça agregada por escola | — |
+| E3 | Novo (parcial bloqueado) | SAEB público (694 MB, 2023); raça no SAEB público: NÃO VERIFICADO | — |
+| E4 | Existe, precisa refazer | Rede pública/privada (`V3002A`, desde 4T2015) extraída na v2; nada calculado | — |
+| E5 | Novo | Ligação filhos–pais via `V2005` (extraída); viés de corresidência a quantificar | — |
+| E6 | Bloqueado por dado (parcial) | Censo da Educação Superior por aluno com raça/cota: só SEDAP. Agregados públicos por curso: possível, NÃO VERIFICADO | — |
+| E7 | Bloqueado por dado | Território fino: Censo 2022 / Censo Escolar por escola | — |
+| E8 | Novo | Só literatura (`M`) | — |
+
+## Bloco G — Políticas e causalidade
+
+| ID | Estado | Onde | Por quê |
+|---|---|---|---|
+| G1 | Existe, precisa refazer | Desenho A: `did_cotas_universitarias*`, `painel_cohortes_superior_completo*`, `docs/ANALISE_CAUSAL_COTAS.md`. Dado administrativo por aluno fora de alcance (SEDAP) | `esp` (R2: células i.i.d., coorte × período, EMD ausente) |
+| G2 | Existe, precisa refazer | `mecanismo_renda_cohortes_cotas` (correlacional) | `esp` |
+| G3 | Existe, precisa refazer | Desenho B: `did_cotas_servico_publico*`. **0 de 40 testes sobrevivem ao FDR**; o título "efeito significativo" em `ANALISE_CAUSAL_COTAS.md` §2 não se sustenta. Painel de Pessoal: raça/cor NÃO VERIFICADA | `esp` (R3) |
+| G4 | Novo | Salário mínimo (bite index): nada | — |
+| G5 | Bloqueado por dado | CadÚnico (acesso restrito) | — |
+| G6 | Novo | EMD por desenho: nada | — |
+
+## Bloco H — Origem social, mobilidade e patrimônio
+
+| ID | Estado | Onde | Por quê |
+|---|---|---|---|
+| H1.1–H1.4 | Novo | `V2005` + escolaridade (`VD3004`) dos moradores permitem a ligação; nada calculado. Suplemento de mobilidade só na PNAD antiga de 2014 | — |
+| H2.1–H2.4 | Novo | Depende de H1 e D1 | — |
+| H3.1 | Existe, precisa refazer | `habitacao_hiato_racial*` (`imovel_proprio`, de `S01017`), Visita 1, 2016–2019/2022–2025 | `esp` (unidade é pessoa; população não é a de referência; lacuna 2020–21 agora coberta pela Visita 5 extraída) |
+| H3.2 | Novo | POF: não baixada | — |
+| H3.3 | Novo | `V5007A` (aluguel) e `V5008A` (aplicações) extraídos na v2; nada calculado | — |
+| H3.4 | Bloqueado por dado | Riqueza: IR/RAIS não acessíveis; só proxy | — |
+| H4.1 | Existe, precisa refazer | Igual a D6.1/B4 | `pop` |
+| H4.2 | Existe, precisa refazer | `transicao_desemprego_emprego`, `transicao_informal_formal` (painel de 5 visitas, pooled) | `esp` (atrito; sem série) |
+
+## Resumo
+
+| Estado | Perguntas |
+|---|---|
+| Já existe | 1 (F5) |
+| Existe, precisa refazer | 38 |
+| Novo | 44 |
+| Bloqueado por dado, total ou parcial | 10 (D3.5, D4.4, D5.4, D8.2, E2, E3, E6, E7, G5, H3.4) |
+| Remete a outro bloco | 1 (D2.5 → Bloco E) |
+| **Total** | **94** |
+
+Contagem feita por script sobre as linhas das tabelas acima (H1.1–H1.4 e H2.1–H2.4 contadas como 4
+cada). Itens com **NÃO VERIFICADO**: `sobrequalificacao` (índice usado), raça/cor no SAEB público, no
+Censo Escolar simplificado e no Painel Estatístico de Pessoal.

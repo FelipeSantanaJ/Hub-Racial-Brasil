@@ -1,3 +1,8 @@
+> **SUPERSEDED (13/10/2026).** A produção de conteúdo para Instagram/TikTok foi adiada para 2027 e
+> é gerida **fora deste repositório**. Este arquivo é mantido só como histórico: não é o plano
+> vigente, e datas, pautas e números aqui podem estar desatualizados. Números de análise valem
+> só depois de conferidos contra `data/processed` (ver `docs/auditoria/`).
+
 # Árvore de Conteúdo — Instagram / TikTok
 
 Segunda árvore do projeto, separada da [árvore de análises](../docs/PLANO.md). Ela traduz os

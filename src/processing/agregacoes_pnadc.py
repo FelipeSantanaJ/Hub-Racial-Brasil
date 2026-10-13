@@ -33,8 +33,9 @@ import numpy as np
 import pandas as pd
 import statsmodels.formula.api as smf
 
-from src.inference.saida import escrever_meta, salvar_com_inferencia
+from src.inference.saida import salvar_com_inferencia, salvar_tabela
 from src.utils import pnadc_core
+from src.utils import populacao as pop
 
 # Inferência que NÃO passa pelo EP corrigido no B1 (12/10/2026) — registrada no _meta.json.
 SE_METODO_WLS_CLUSTER = "wls_statsmodels_cluster_upa"  # Oaxaca-Blinder (coeficiente restrito)
@@ -135,6 +136,7 @@ CREATE TEMP TABLE base AS
         -- de referência (ver src/ingestion/baixar_deflator.py) — não divide.
         m.VD4019 * d.deflator_habitual AS renda_habitual_real,
         m.VD4020 * d.deflator_efetivo AS renda_efetiva_real,
+{pop.sql_colunas_criar_base()}
         -- posição na ocupação com carteira assinada: só definida p/ empregados
         -- (privado/doméstico/público) e militar/estatutário (sempre "protegido"); NULL
         -- p/ empregador, conta-própria e familiar auxiliar (o conceito não se aplica).
@@ -274,7 +276,7 @@ def gerar_renda(con: duckdb.DuckDBPyConnection) -> None:
                AS renda_efetiva_real_media"""
     df = _agregar_por_geografia(con, select_agregado)
     destino = OUTPUT_DIR / "renda.parquet"
-    df.to_parquet(destino, index=False)
+    salvar_tabela(df, destino)
     print(f"renda.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -296,7 +298,7 @@ def gerar_renda_por_escolaridade(con: duckdb.DuckDBPyConnection) -> None:
     )
     df = df[df["nivel_instrucao"].notna()]
     destino = OUTPUT_DIR / "renda_por_escolaridade.parquet"
-    df.to_parquet(destino, index=False)
+    salvar_tabela(df, destino)
     print(f"renda_por_escolaridade.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -316,7 +318,7 @@ def gerar_renda_por_geracao(con: duckdb.DuckDBPyConnection) -> None:
         con, select_agregado, group_by_extra="geracao", incluir_faixa_etaria=False
     )
     destino = OUTPUT_DIR / "renda_por_geracao.parquet"
-    df.to_parquet(destino, index=False)
+    salvar_tabela(df, destino)
     print(f"renda_por_geracao.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -459,7 +461,7 @@ def gerar_decomposicao_hiato_ocupacional(con: duckdb.DuckDBPyConnection, n_trime
 
     df = pd.DataFrame(resultados)
     destino = OUTPUT_DIR / "decomposicao_hiato_ocupacional.parquet"
-    df.to_parquet(destino, index=False)
+    salvar_tabela(df, destino)
     print(f"decomposicao_hiato_ocupacional.parquet: {len(df)} linhas (controles progressivos)", flush=True)
     print(df[["controles", "hiato_absoluto", "hiato_percentual", "pct_amostra_negra_incluida"]].to_string(index=False), flush=True)
 
@@ -481,17 +483,17 @@ def gerar_decomposicao_oaxaca_blinder(con: duckdb.DuckDBPyConnection, n_trimestr
     """
     micro = con.execute(f"""
         SELECT raca_cor, faixa_etaria, nivel_instrucao, grupamento_ocupacional,
-               renda_habitual_real, peso, upa
+               renda_referencia_real, peso, upa
         FROM base
         WHERE raca_cor IN ('Branca', 'Preta', 'Parda')
           AND grupamento_ocupacional IS NOT NULL
-          AND renda_habitual_real IS NOT NULL AND renda_habitual_real > 0
+          AND {pop.filtro_sql()}
           AND (ano, trimestre) IN (
               SELECT ano, trimestre FROM (SELECT DISTINCT ano, trimestre FROM base ORDER BY ano DESC, trimestre DESC LIMIT {n_trimestres})
           )
     """).df()
     micro["raca_cor"] = micro["raca_cor"].replace({"Preta": "Negra", "Parda": "Negra"})
-    micro["log_renda"] = np.log(micro["renda_habitual_real"])
+    micro["log_renda"] = np.log(micro["renda_referencia_real"])
 
     resultados = []
     # "grupamento_ocupacional" sozinho, no final, é uma comparação ISOLADA (sem idade/
@@ -521,8 +523,7 @@ def gerar_decomposicao_oaxaca_blinder(con: duckdb.DuckDBPyConnection, n_trimestr
 
     df = pd.DataFrame(resultados)
     destino = OUTPUT_DIR / "decomposicao_oaxaca_blinder.parquet"
-    df.to_parquet(destino, index=False)
-    escrever_meta(destino, se_metodo=SE_METODO_WLS_CLUSTER)
+    salvar_tabela(df, destino, se_metodo=SE_METODO_WLS_CLUSTER)
     print(f"decomposicao_oaxaca_blinder.parquet: {len(df)} linhas", flush=True)
     print(df[["ponto", "controles", "pct_explicada", "pct_nao_explicada",
               "residuo_restrito_coef", "residuo_restrito_p_valor",
@@ -543,16 +544,16 @@ def gerar_decomposicao_oaxaca_blinder_indigena(con: duckdb.DuckDBPyConnection, n
     já usado pra Preta/Parda, sem precisar agregar mais."""
     micro = con.execute(f"""
         SELECT raca_cor, faixa_etaria, nivel_instrucao, grupamento_ocupacional,
-               renda_habitual_real, peso, upa
+               renda_referencia_real, peso, upa
         FROM base
         WHERE raca_cor IN ('Branca', 'Indígena')
           AND grupamento_ocupacional IS NOT NULL
-          AND renda_habitual_real IS NOT NULL AND renda_habitual_real > 0
+          AND {pop.filtro_sql()}
           AND (ano, trimestre) IN (
               SELECT ano, trimestre FROM (SELECT DISTINCT ano, trimestre FROM base ORDER BY ano DESC, trimestre DESC LIMIT {n_trimestres})
           )
     """).df()
-    micro["log_renda"] = np.log(micro["renda_habitual_real"])
+    micro["log_renda"] = np.log(micro["renda_referencia_real"])
 
     resultados = []
     for controles in [["faixa_etaria"], ["faixa_etaria", "nivel_instrucao"],
@@ -579,8 +580,7 @@ def gerar_decomposicao_oaxaca_blinder_indigena(con: duckdb.DuckDBPyConnection, n
 
     df = pd.DataFrame(resultados)
     destino = OUTPUT_DIR / "decomposicao_oaxaca_blinder_indigena.parquet"
-    df.to_parquet(destino, index=False)
-    escrever_meta(destino, se_metodo=SE_METODO_WLS_CLUSTER)
+    salvar_tabela(df, destino, se_metodo=SE_METODO_WLS_CLUSTER)
     print(f"decomposicao_oaxaca_blinder_indigena.parquet: {len(df)} linhas", flush=True)
     print(df[["ponto", "controles", "pct_explicada", "pct_nao_explicada",
               "residuo_restrito_coef", "residuo_restrito_p_valor",
@@ -600,16 +600,16 @@ def gerar_decomposicao_oaxaca_blinder_preta_parda(con: duckdb.DuckDBPyConnection
     não haver duas convenções de sinal diferentes pro mesmo par de grupos."""
     micro = con.execute(f"""
         SELECT raca_cor, faixa_etaria, nivel_instrucao, grupamento_ocupacional,
-               renda_habitual_real, peso, upa
+               renda_referencia_real, peso, upa
         FROM base
         WHERE raca_cor IN ('Preta', 'Parda')
           AND grupamento_ocupacional IS NOT NULL
-          AND renda_habitual_real IS NOT NULL AND renda_habitual_real > 0
+          AND {pop.filtro_sql()}
           AND (ano, trimestre) IN (
               SELECT ano, trimestre FROM (SELECT DISTINCT ano, trimestre FROM base ORDER BY ano DESC, trimestre DESC LIMIT {n_trimestres})
           )
     """).df()
-    micro["log_renda"] = np.log(micro["renda_habitual_real"])
+    micro["log_renda"] = np.log(micro["renda_referencia_real"])
 
     resultados = []
     for controles in [["faixa_etaria"], ["faixa_etaria", "nivel_instrucao"],
@@ -636,8 +636,7 @@ def gerar_decomposicao_oaxaca_blinder_preta_parda(con: duckdb.DuckDBPyConnection
 
     df = pd.DataFrame(resultados)
     destino = OUTPUT_DIR / "decomposicao_oaxaca_blinder_pretaparda.parquet"
-    df.to_parquet(destino, index=False)
-    escrever_meta(destino, se_metodo=SE_METODO_WLS_CLUSTER)
+    salvar_tabela(df, destino, se_metodo=SE_METODO_WLS_CLUSTER)
     print(f"decomposicao_oaxaca_blinder_pretaparda.parquet: {len(df)} linhas", flush=True)
     print(df[["ponto", "controles", "pct_explicada", "pct_nao_explicada",
               "residuo_restrito_coef", "residuo_restrito_p_valor",
@@ -708,7 +707,7 @@ def gerar_perfil_topo10_racial(con: duckdb.DuckDBPyConnection) -> None:
 
     df = pd.DataFrame(resultados)
     destino = OUTPUT_DIR / "perfil_topo10_racial.parquet"
-    df.to_parquet(destino, index=False)
+    salvar_tabela(df, destino)
     print(f"perfil_topo10_racial.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -771,12 +770,12 @@ def gerar_funcao_quantil_racial(con: duckdb.DuckDBPyConnection) -> None:
 
     df1 = pd.DataFrame(resultado_percentil_para_valor)
     destino1 = OUTPUT_DIR / "funcao_quantil_racial.parquet"
-    df1.to_parquet(destino1, index=False)
+    salvar_tabela(df1, destino1)
     print(f"funcao_quantil_racial.parquet: {len(df1):,} linhas".replace(",", "."), flush=True)
 
     df2 = pd.DataFrame(resultado_valor_para_percentil)
     destino2 = OUTPUT_DIR / "percentil_de_valor_racial.parquet"
-    df2.to_parquet(destino2, index=False)
+    salvar_tabela(df2, destino2)
     print(f"percentil_de_valor_racial.parquet: {len(df2):,} linhas".replace(",", "."), flush=True)
 
 
@@ -848,7 +847,7 @@ def gerar_perfil_quartis_racial(con: duckdb.DuckDBPyConnection) -> None:
 
     df = pd.DataFrame(resultados)
     destino = OUTPUT_DIR / "perfil_quartis_racial.parquet"
-    df.to_parquet(destino, index=False)
+    salvar_tabela(df, destino)
     print(f"perfil_quartis_racial.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -924,12 +923,12 @@ def gerar_perfil_topo10_quartis_pretaparda(con: duckdb.DuckDBPyConnection) -> No
 
     df_topo10 = pd.DataFrame(topo10)
     destino_topo10 = OUTPUT_DIR / "perfil_topo10_racial_pretaparda.parquet"
-    df_topo10.to_parquet(destino_topo10, index=False)
+    salvar_tabela(df_topo10, destino_topo10)
     print(f"perfil_topo10_racial_pretaparda.parquet: {len(df_topo10):,} linhas".replace(",", "."), flush=True)
 
     df_quartis = pd.DataFrame(quartis)
     destino_quartis = OUTPUT_DIR / "perfil_quartis_racial_pretaparda.parquet"
-    df_quartis.to_parquet(destino_quartis, index=False)
+    salvar_tabela(df_quartis, destino_quartis)
     print(f"perfil_quartis_racial_pretaparda.parquet: {len(df_quartis):,} linhas".replace(",", "."), flush=True)
 
 
@@ -1004,13 +1003,13 @@ def gerar_perfil_topo10_quartis_indigena(con: duckdb.DuckDBPyConnection, n_trime
 
     df_topo10 = pd.DataFrame(topo10)
     destino_topo10 = OUTPUT_DIR / "perfil_topo10_racial_indigena.parquet"
-    df_topo10.to_parquet(destino_topo10, index=False)
+    salvar_tabela(df_topo10, destino_topo10)
     print(f"perfil_topo10_racial_indigena.parquet: {len(df_topo10):,} linhas "
           f"(pooled {trimestre_inicio}-{trimestre_fim})".replace(",", "."), flush=True)
 
     df_quartis = pd.DataFrame(quartis)
     destino_quartis = OUTPUT_DIR / "perfil_quartis_racial_indigena.parquet"
-    df_quartis.to_parquet(destino_quartis, index=False)
+    salvar_tabela(df_quartis, destino_quartis)
     print(f"perfil_quartis_racial_indigena.parquet: {len(df_quartis):,} linhas "
           f"(pooled {trimestre_inicio}-{trimestre_fim})".replace(",", "."), flush=True)
 
@@ -1154,7 +1153,7 @@ def gerar_extremos_racial(con: duckdb.DuckDBPyConnection) -> None:
                         ("extremos_renda_racial", renda),
                         ("extremos_composicao_racial", comp)]:
         df = pd.DataFrame(dados)
-        df.to_parquet(OUTPUT_DIR / f"{nome}.parquet", index=False)
+        salvar_tabela(df, OUTPUT_DIR / f"{nome}.parquet")
         print(f"{nome}.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -1220,7 +1219,7 @@ def gerar_quartis_multi_racial(con: duckdb.DuckDBPyConnection) -> None:
                         })
 
     df = pd.DataFrame(resultados)
-    df.to_parquet(OUTPUT_DIR / "quartis_multi_racial.parquet", index=False)
+    salvar_tabela(df, OUTPUT_DIR / "quartis_multi_racial.parquet")
     print(f"quartis_multi_racial.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -1524,7 +1523,7 @@ def gerar_indice_segregacao_ocupacional(con: duckdb.DuckDBPyConnection) -> None:
 
     resultado_df = pd.DataFrame(resultados).sort_values(["ano", "trimestre"])
     destino = OUTPUT_DIR / "segregacao_ocupacional.parquet"
-    resultado_df.to_parquet(destino, index=False)
+    salvar_tabela(resultado_df, destino)
     print(f"segregacao_ocupacional.parquet: {len(resultado_df)} linhas", flush=True)
     print(f"  Índice de Duncan Branca-Negra (trimestre mais recente): "
           f"{resultado_df['indice_duncan_branca_negra'].iloc[-1] * 100:.1f}%", flush=True)
@@ -1559,7 +1558,7 @@ def gerar_segregacao_setorial(con: duckdb.DuckDBPyConnection) -> None:
 
     resultado_df = pd.DataFrame(resultados).sort_values(["ano", "trimestre"])
     destino = OUTPUT_DIR / "segregacao_setorial.parquet"
-    resultado_df.to_parquet(destino, index=False)
+    salvar_tabela(resultado_df, destino)
     print(f"segregacao_setorial.parquet: {len(resultado_df)} linhas", flush=True)
     print(f"  Índice de Duncan setorial Branca-Negra (trimestre mais recente): "
           f"{resultado_df['indice_duncan_branca_negra'].iloc[-1] * 100:.1f}%", flush=True)
@@ -1588,7 +1587,7 @@ def gerar_segregacao_ocupacional_preta_parda(con: duckdb.DuckDBPyConnection) -> 
 
     resultado_df = pd.DataFrame(resultados).sort_values(["ano", "trimestre"])
     destino = OUTPUT_DIR / "segregacao_ocupacional_pretaparda.parquet"
-    resultado_df.to_parquet(destino, index=False)
+    salvar_tabela(resultado_df, destino)
     print(f"segregacao_ocupacional_pretaparda.parquet: {len(resultado_df)} linhas", flush=True)
     print(f"  Índice de Duncan ocupacional Preta-Parda (trimestre mais recente): "
           f"{resultado_df['indice_duncan_preta_parda'].iloc[-1] * 100:.1f}%", flush=True)
@@ -1619,7 +1618,7 @@ def gerar_segregacao_setorial_preta_parda(con: duckdb.DuckDBPyConnection) -> Non
 
     resultado_df = pd.DataFrame(resultados).sort_values(["ano", "trimestre"])
     destino = OUTPUT_DIR / "segregacao_setorial_pretaparda.parquet"
-    resultado_df.to_parquet(destino, index=False)
+    salvar_tabela(resultado_df, destino)
     print(f"segregacao_setorial_pretaparda.parquet: {len(resultado_df)} linhas", flush=True)
     print(f"  Índice de Duncan setorial Preta-Parda (trimestre mais recente): "
           f"{resultado_df['indice_duncan_preta_parda'].iloc[-1] * 100:.1f}%", flush=True)
@@ -1670,7 +1669,7 @@ def gerar_indice_segregacao_ocupacional_indigena(con: duckdb.DuckDBPyConnection,
         "indice_duncan_branca_indigena": duncan,
     }])
     destino = OUTPUT_DIR / "segregacao_ocupacional_indigena.parquet"
-    resultado_df.to_parquet(destino, index=False)
+    salvar_tabela(resultado_df, destino)
     print(f"segregacao_ocupacional_indigena.parquet: 1 linha (pooled)", flush=True)
     print(f"  Índice de Duncan ocupacional Branca-Indígena ({resultado_df['trimestre_inicio'].iloc[0]}"
           f"-{resultado_df['trimestre_fim'].iloc[0]}, pooled): {duncan * 100:.1f}%", flush=True)
@@ -1720,8 +1719,7 @@ def gerar_quebra_estrutural() -> None:
 
     df = pd.DataFrame(resultados)
     destino = OUTPUT_DIR / "quebra_estrutural.parquet"
-    df.to_parquet(destino, index=False)
-    escrever_meta(destino, se_metodo=SE_METODO_OLS_SERIE)
+    salvar_tabela(df, destino, se_metodo=SE_METODO_OLS_SERIE)
     print(f"quebra_estrutural.parquet: {len(df)} linhas", flush=True)
     print(df.to_string(index=False), flush=True)
 
@@ -1841,8 +1839,7 @@ def gerar_ritmo_convergencia() -> None:
 
     df = pd.DataFrame(resultados)
     destino = OUTPUT_DIR / "ritmo_convergencia_hiatos.parquet"
-    df.to_parquet(destino, index=False)
-    escrever_meta(destino, se_metodo=SE_METODO_OLS_SERIE)
+    salvar_tabela(df, destino, se_metodo=SE_METODO_OLS_SERIE)
     print(f"ritmo_convergencia_hiatos.parquet: {len(df)} linhas", flush=True)
     print(df[["par", "hiato_percentual_atual", "inclinacao_pp_por_ano", "r2",
               "tendencia_confiavel", "anos_para_zerar_extrapolacao_ingenua"]].to_string(index=False), flush=True)
@@ -1866,7 +1863,7 @@ def gerar_informalidade(con: duckdb.DuckDBPyConnection) -> None:
                AS pct_contribui_previdencia"""
     df = _agregar_por_geografia(con, select_agregado)
     destino = OUTPUT_DIR / "informalidade.parquet"
-    df.to_parquet(destino, index=False)
+    salvar_tabela(df, destino)
     print(f"informalidade.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -1889,7 +1886,7 @@ def gerar_horas_trabalhadas(con: duckdb.DuckDBPyConnection) -> None:
                AS renda_por_hora_real_media"""
     df = _agregar_por_geografia(con, select_agregado)
     destino = OUTPUT_DIR / "horas_trabalhadas.parquet"
-    df.to_parquet(destino, index=False)
+    salvar_tabela(df, destino)
     print(f"horas_trabalhadas.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -1920,7 +1917,7 @@ def gerar_alfabetizacao(con: duckdb.DuckDBPyConnection) -> None:
     """
     df = con.execute(query).df()
     destino = OUTPUT_DIR / "alfabetizacao.parquet"
-    df.to_parquet(destino, index=False)
+    salvar_tabela(df, destino)
     print(f"alfabetizacao.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -1942,7 +1939,7 @@ def gerar_desalento_subutilizacao(con: duckdb.DuckDBPyConnection) -> None:
                AS pct_desalento"""
     df = _agregar_por_geografia(con, select_agregado)
     destino = OUTPUT_DIR / "desalento_subutilizacao.parquet"
-    df.to_parquet(destino, index=False)
+    salvar_tabela(df, destino)
     print(f"desalento_subutilizacao.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -1965,7 +1962,7 @@ def gerar_sobrequalificacao(con: duckdb.DuckDBPyConnection) -> None:
                AS pct_sobrequalificado"""
     df = _agregar_por_geografia(con, select_agregado, incluir_faixa_etaria=False)
     destino = OUTPUT_DIR / "sobrequalificacao.parquet"
-    df.to_parquet(destino, index=False)
+    salvar_tabela(df, destino)
     print(f"sobrequalificacao.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -1982,18 +1979,18 @@ def gerar_hiato_racial(con: duckdb.DuckDBPyConnection) -> None:
     for _, row in trimestres.iterrows():
         ano, trimestre = int(row["ano"]), int(row["trimestre"])
         micro = con.execute(f"""
-            SELECT raca_cor, renda_habitual_real, peso, upa, estrato
+            SELECT raca_cor, renda_referencia_real, peso, upa, estrato
             FROM base
             WHERE ano = {ano} AND trimestre = {trimestre}
               AND raca_cor IN ('Branca', 'Preta', 'Parda')
-              AND renda_habitual_real IS NOT NULL
+              AND {pop.filtro_sql()}
         """).df()
         if micro.empty:
             continue
         micro["raca_cor"] = micro["raca_cor"].replace({"Preta": "Negra", "Parda": "Negra"})
 
         tabela = pnadc_core.tabela_hiatos_significancia(
-            micro, "renda_habitual_real", "raca_cor", grupo_referencia="Negra", peso="peso", upa="upa", estrato="estrato"
+            micro, "renda_referencia_real", "raca_cor", grupo_referencia="Negra", peso="peso", upa="upa", estrato="estrato"
         )
         if "Branca" not in tabela.index:
             continue
@@ -2352,23 +2349,23 @@ def gerar_gini_por_raca(con: duckdb.DuckDBPyConnection) -> None:
     for _, row in trimestres.iterrows():
         ano, trimestre = int(row["ano"]), int(row["trimestre"])
         micro = con.execute(f"""
-            SELECT raca_cor, renda_habitual_real, peso, upa, estrato
+            SELECT raca_cor, renda_referencia_real, peso, upa, estrato
             FROM base
             WHERE ano = {ano} AND trimestre = {trimestre}
               AND raca_cor IN ('Branca', 'Preta', 'Parda', 'Indígena')
-              AND renda_habitual_real IS NOT NULL AND renda_habitual_real > 0
+              AND {pop.filtro_sql()}
         """).df()
         if micro.empty:
             continue
         micro["raca_cor"] = micro["raca_cor"].replace({"Preta": "Negra", "Parda": "Negra"})
-        gini = pnadc_core.gini_ponderado_por_grupo(micro, "renda_habitual_real", by=["raca_cor"], peso="peso")
+        gini = pnadc_core.gini_ponderado_por_grupo(micro, "renda_referencia_real", by=["raca_cor"], peso="peso")
         gini["ano"] = ano
         gini["trimestre"] = trimestre
         resultados.append(gini)
 
     df = pd.concat(resultados, ignore_index=True)
     destino = OUTPUT_DIR / "gini_por_raca.parquet"
-    df.to_parquet(destino, index=False)
+    salvar_tabela(df, destino)
     print(f"gini_por_raca.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -2389,23 +2386,23 @@ def gerar_theil_racial(con: duckdb.DuckDBPyConnection, n_trimestres: int | None 
     for _, row in trimestres.iterrows():
         ano, trimestre = int(row["ano"]), int(row["trimestre"])
         micro = con.execute(f"""
-            SELECT raca_cor, renda_habitual_real, peso, upa, estrato
+            SELECT raca_cor, renda_referencia_real, peso, upa, estrato
             FROM base
             WHERE ano = {ano} AND trimestre = {trimestre}
               AND raca_cor IN ('Branca', 'Preta', 'Parda', 'Indígena')
-              AND renda_habitual_real IS NOT NULL AND renda_habitual_real > 0
+              AND {pop.filtro_sql()}
         """).df()
         if micro.empty:
             continue
         micro["raca_cor"] = micro["raca_cor"].replace({"Preta": "Negra", "Parda": "Negra"})
-        resumo, _ = pnadc_core.decomposicao_theil_entre_dentro(micro, "renda_habitual_real", "raca_cor", "peso")
+        resumo, _ = pnadc_core.decomposicao_theil_entre_dentro(micro, "renda_referencia_real", "raca_cor", "peso")
         resumo["ano"] = ano
         resumo["trimestre"] = trimestre
         resultados.append(resumo)
 
     df = pd.DataFrame(resultados)
     destino = OUTPUT_DIR / "theil_racial.parquet"
-    df.to_parquet(destino, index=False)
+    salvar_tabela(df, destino)
     print(f"theil_racial.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
     print(f"  Trimestre mais recente: {df['pct_entre_grupos'].iloc[-1]:.1f}% da desigualdade "
           f"total vem de diferenças ENTRE raças, {df['pct_dentro_grupos'].iloc[-1]:.1f}% de "
@@ -2441,7 +2438,7 @@ def gerar_renda_multidimensional_faixa(con: duckdb.DuckDBPyConnection, n_trimest
     df = con.execute(query).df()
     df = df[df["nivel_instrucao"].notna()]
     destino = OUTPUT_DIR / "renda_multidimensional_faixa.parquet"
-    df.to_parquet(destino, index=False)
+    salvar_tabela(df, destino)
     print(f"renda_multidimensional_faixa.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -2468,7 +2465,7 @@ def gerar_renda_multidimensional_geracao(con: duckdb.DuckDBPyConnection, n_trime
     df = con.execute(query).df()
     df = df[df["nivel_instrucao"].notna()]
     destino = OUTPUT_DIR / "renda_multidimensional_geracao.parquet"
-    df.to_parquet(destino, index=False)
+    salvar_tabela(df, destino)
     print(f"renda_multidimensional_geracao.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -2491,7 +2488,7 @@ def gerar_renda_completa(con: duckdb.DuckDBPyConnection) -> None:
     df = con.execute(query).df()
     df = df[df["nivel_instrucao"].notna()]
     destino = OUTPUT_DIR / "renda_completa.parquet"
-    df.to_parquet(destino, index=False)
+    salvar_tabela(df, destino)
     print(f"renda_completa.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -2515,7 +2512,7 @@ def gerar_renda_completa_geracao(con: duckdb.DuckDBPyConnection) -> None:
     df = con.execute(query).df()
     df = df[df["nivel_instrucao"].notna()]
     destino = OUTPUT_DIR / "renda_completa_geracao.parquet"
-    df.to_parquet(destino, index=False)
+    salvar_tabela(df, destino)
     print(f"renda_completa_geracao.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -2527,7 +2524,7 @@ def gerar_escolaridade(con: duckdb.DuckDBPyConnection) -> None:
     df = _agregar_por_geografia(con, select_agregado, group_by_extra="nivel_instrucao")
     df = df[df["nivel_instrucao"].notna()]
     destino = OUTPUT_DIR / "escolaridade.parquet"
-    df.to_parquet(destino, index=False)
+    salvar_tabela(df, destino)
     print(f"escolaridade.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -2543,7 +2540,7 @@ def gerar_ocupacao(con: duckdb.DuckDBPyConnection) -> None:
                AS taxa_desocupacao_pct"""
     df = _agregar_por_geografia(con, select_agregado)
     destino = OUTPUT_DIR / "ocupacao.parquet"
-    df.to_parquet(destino, index=False)
+    salvar_tabela(df, destino)
     print(f"ocupacao.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -2609,7 +2606,7 @@ def gerar_desocupacao_por_escolaridade(con: duckdb.DuckDBPyConnection) -> None:
         GROUP BY 1,2,3,4
     """).df()
     df["taxa_desocupacao_pct"] = 100 * df["pop_desocupados"] / df["pop_forca"]
-    df.to_parquet(OUTPUT_DIR / "desocupacao_por_escolaridade.parquet", index=False)
+    salvar_tabela(df, OUTPUT_DIR / "desocupacao_por_escolaridade.parquet")
     print(f"desocupacao_por_escolaridade.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -2675,7 +2672,7 @@ def gerar_faixas_salario_minimo(con: duckdb.DuckDBPyConnection) -> None:
     df = pd.concat(linhas, ignore_index=True)
     for c in ("ate_1sm", "ate_2sm", "acima_3sm"):
         df[f"pct_{c}"] = 100 * df[c] / df["pop"]
-    df.to_parquet(OUTPUT_DIR / "faixas_salario_minimo.parquet", index=False)
+    salvar_tabela(df, OUTPUT_DIR / "faixas_salario_minimo.parquet")
     print(f"faixas_salario_minimo.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -2715,8 +2712,7 @@ def gerar_oaxaca_blinder_temporal(con: duckdb.DuckDBPyConnection) -> None:
             r2.update({"ano": ano, "ponto": rot})
             res.append(r2)
     df = pd.DataFrame(res)
-    df.to_parquet(OUTPUT_DIR / "oaxaca_blinder_temporal.parquet", index=False)
-    escrever_meta(OUTPUT_DIR / "oaxaca_blinder_temporal.parquet", se_metodo=SE_METODO_WLS_CLUSTER)
+    salvar_tabela(df, OUTPUT_DIR / "oaxaca_blinder_temporal.parquet", se_metodo=SE_METODO_WLS_CLUSTER)
     print(f"oaxaca_blinder_temporal.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 

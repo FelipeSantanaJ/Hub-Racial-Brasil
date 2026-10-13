@@ -1,6 +1,24 @@
 {
+  "esquema": "hub-racial-meta/1",
   "arquivo": "oaxaca_blinder_temporal.parquet",
+  "n_linhas": 60,
+  "gerado_em": "2026-10-13T04:03:41.206342+00:00",
+  "codigo": {
+    "commit": "e27278b4e61e4ede0d809e20e6110fc30a81d643",
+    "modulo": "(retroativo)"
+  },
+  "insumos": {
+    "chave": "trimestral_v1",
+    "descricao": "PNAD Contínua trimestral, extrato v1 + deflator IBGE",
+    "hash": "524457dd7482fc957d4a0f46ac8810fd4402a35d2c1dd703acec80ba40cbee01",
+    "n_arquivos": 228
+  },
   "se_metodo": "wls_statsmodels_cluster_upa",
-  "commit": "e27278b4e61e4ede0d809e20e6110fc30a81d643",
-  "gerado_em": "2026-10-13T04:03:41.206342+00:00"
+  "populacao": "Ocupados de 14+ anos com rendimento habitual de qualquer trabalho (VD4019) > 0 e ocupação informada; log da renda",
+  "periodo": {
+    "inicio": "2012",
+    "fim": "2026"
+  },
+  "meta_retroativo": true,
+  "meta_preenchido_em": "2026-10-13T04:59:22.763173+00:00"
 }

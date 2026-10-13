@@ -2,7 +2,8 @@
 Negra): teste de aceitação do B1 da auditoria (docs/auditoria/rodada1.md, E1).
 
 Compara, trimestre a trimestre, três erros-padrão do hiato absoluto (média Branca −
-média Negra, renda habitual real, mesmo universo de `gerar_hiato_racial`):
+média Negra, renda habitual real, mesmo universo de `gerar_hiato_racial`: população de referência,
+`src/utils/populacao.py`):
 
 - `ep_linearizacao`: o de produção desde 12/10/2026 — linearização de Taylor com
   Estrato/UPA, incluindo a covariância entre as duas médias
@@ -25,9 +26,11 @@ import pandas as pd
 from scipy import stats
 
 from src.inference import variancia
-from src.inference.saida import escrever_meta
+from src.inference.variancia import SE_METODO as SE_METODO_DESENHO
+from src.inference.saida import salvar_tabela
 from src.processing.agregacoes_pnadc import CRIAR_BASE, OUTPUT_DIR
 from src.utils import pnadc_core
+from src.utils import populacao as pop
 
 N_BOOT = 1000
 N_BOOT_LEGADO = 200
@@ -45,16 +48,16 @@ def main() -> None:
     for _, row in trimestres.iterrows():
         ano, trimestre = int(row["ano"]), int(row["trimestre"])
         micro = con.execute(f"""
-            SELECT raca_cor, renda_habitual_real, peso, upa, estrato
+            SELECT raca_cor, renda_referencia_real, peso, upa, estrato
             FROM base
             WHERE ano = {ano} AND trimestre = {trimestre}
               AND raca_cor IN ('Branca', 'Preta', 'Parda')
-              AND renda_habitual_real IS NOT NULL
+              AND {pop.filtro_sql()}
         """).df()
         if micro.empty:
             continue
         micro["raca_cor"] = micro["raca_cor"].replace({"Preta": "Negra", "Parda": "Negra"})
-        y = micro["renda_habitual_real"].to_numpy(float)
+        y = micro["renda_referencia_real"].to_numpy(float)
         w = micro["peso"].to_numpy(float)
         u = micro["upa"].to_numpy(object)
         e = micro["estrato"].to_numpy(object)
@@ -65,8 +68,8 @@ def main() -> None:
         ep_boot = variancia.erro_padrao_bootstrap_estrato_upa(y, w, u, e, em_b, em_n, n_boot=N_BOOT, seed=42)
         df_b, df_n = micro[em_b], micro[em_n]
         ep_legado = float(np.sqrt(
-            pnadc_core.erro_padrao_cluster_bootstrap(df_b, "renda_habitual_real", "peso", "upa", N_BOOT_LEGADO, 42) ** 2
-            + pnadc_core.erro_padrao_cluster_bootstrap(df_n, "renda_habitual_real", "peso", "upa", N_BOOT_LEGADO, 42) ** 2
+            pnadc_core.erro_padrao_cluster_bootstrap(df_b, "renda_referencia_real", "peso", "upa", N_BOOT_LEGADO, 42) ** 2
+            + pnadc_core.erro_padrao_cluster_bootstrap(df_n, "renda_referencia_real", "peso", "upa", N_BOOT_LEGADO, 42) ** 2
         ))
 
         hiato = r["diferenca"]
@@ -93,8 +96,7 @@ def main() -> None:
     df["se_metodo"] = variancia.SE_METODO
 
     destino = OUTPUT_DIR / "checagem_robustez_hiato_racial.parquet"
-    df.to_parquet(destino, index=False)
-    escrever_meta(destino, n_boot=N_BOOT, bootstrap="rao_wu_estrato_upa")
+    salvar_tabela(df, destino, se_metodo=SE_METODO_DESENHO, n_boot=N_BOOT, bootstrap="rao_wu_estrato_upa")
 
     razao = df["razao_linearizacao_sobre_bootstrap"]
     print(f"checagem_robustez_hiato_racial.parquet: {len(df)} trimestres", flush=True)
