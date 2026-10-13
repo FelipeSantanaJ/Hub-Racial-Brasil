@@ -71,6 +71,17 @@ CATALOGO: list[tuple[str, str, str]] = [
     (r"^did_cotas_servico_publico.*$",
      "Participação: ocupados de 14+ anos com setor público/privado classificável (empregados e militares/estatutários); "
      "hiato de renda: " + P1 + "; janela de −10 a +12 trimestres em torno de 2014T2 (Desenho B)", T),
+    # --- Onda 1: Blocos F e S (src/processing/sensibilidade_populacao.py) ---
+    (r"^sensibilidade_hiato_populacao$", "Pessoas 18+; hiato em P1–P4 (ver coluna descricao_populacao); "
+     "P1 = " + pop.DESCRICAO_POPULACAO_REFERENCIA, T),
+    (r"^sensibilidade_hiato_p5_anual$", "Pessoas 18+ da PNAD Contínua anual (Visita 1; Visita 5 em 2020–2021); "
+     "P1 vs. P5 (renda domiciliar per capita VD5008), valores nominais do ano", "anual_v2"),
+    (r"^composicao_populacao_referencia$", "Pessoas 18+ por condição (população de referência, ocupado sem renda "
+     "do trabalho principal, desocupado, fora da força)", T),
+    (r"^selecao_entrada_populacao_referencia$", "Pessoas 18+ Brancas, Negras e Indígenas; Pr(estar na população "
+     "de referência)", T),
+    (r"^composicao_racial_declarada$", "Pessoas 14+, 18+ e população de referência; cor/raça declarada (V2010)", T),
+    (r"^heaping_renda$", P1 + "; % com renda nominal múltipla de R$ 100/500/1.000", T),
     (r"^habitacao_.*$", "Moradores (pessoas) da PNAD Contínua anual, Visita 1, tema Habitação: 2016–2019 e 2022–2025",
      INSUMO_ANUAL_VISITA1_V1),
     (r"^deflator_ibge$", "Não se aplica (deflatores oficiais do IBGE por UF × trimestre)", "ibge_deflator"),
