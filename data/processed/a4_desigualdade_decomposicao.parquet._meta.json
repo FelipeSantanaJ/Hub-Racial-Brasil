@@ -1,0 +1,22 @@
+{
+  "esquema": "hub-racial-meta/1",
+  "arquivo": "a4_desigualdade_decomposicao.parquet",
+  "n_linhas": 58,
+  "gerado_em": "2026-10-13T16:26:44.929891+00:00",
+  "codigo": {
+    "commit": "bf6ef01d7bc45bb47a3066bf1b2ec95616d66631-modificado",
+    "modulo": "__main__"
+  },
+  "insumos": {
+    "chave": "trimestral_v2",
+    "descricao": "PNAD Contínua trimestral, extrato v2 + deflator IBGE",
+    "hash": "9b64f579fa63981e9237190166d333a9ac546041a4df260d2c67dabf49f1ceda",
+    "n_arquivos": 228
+  },
+  "se_metodo": "sem_inferencia",
+  "populacao": "NÃO DOCUMENTADA (conferir o gerador e acrescentar ao catálogo)",
+  "periodo": {
+    "inicio": "2012T1",
+    "fim": "2026T2"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "esquema": "hub-racial-meta/1",
+  "arquivo": "t3_fontes_de_renda.parquet",
+  "n_linhas": 450,
+  "gerado_em": "2026-10-13T16:21:11.791663+00:00",
+  "codigo": {
+    "commit": "bf6ef01d7bc45bb47a3066bf1b2ec95616d66631-modificado",
+    "modulo": "__main__"
+  },
+  "insumos": {
+    "chave": "anual_v2",
+    "descricao": "PNAD Contínua anual, Visitas 1 e 5, extrato v2",
+    "hash": "27d6da89b515f8a7725534eb72c33059af69f15f2827b5f00f759695714ee107",
+    "n_arquivos": 63
+  },
+  "se_metodo": "sem_inferencia",
+  "populacao": "Todas as pessoas (todas as idades) da PNAD Contínua anual (Visita 1; Visita 5 em 2020–2021), exceto pensionistas/empregados domésticos e parentes (V2005 17–19); renda domiciliar per capita habitual (VD5008), valores nominais do ano",
+  "periodo": {
+    "inicio": "2016",
+    "fim": "2025"
+  },
+  "nota_renda": "Valores NOMINAIS do ano; VD5008 = renda habitual domiciliar per capita"
+}
