@@ -1,0 +1,526 @@
+"""Gera a apresentação em PowerPoint da Fase 1, com todos os gráficos de
+docs/img/ organizados por seção (mesma estrutura de docs/ANALISE_FASE1.md).
+
+Uso:
+    python -m src.processing.apresentacao_fase1
+"""
+from pathlib import Path
+
+from pptx import Presentation
+from pptx.util import Inches, Pt, Emu
+from pptx.dml.color import RGBColor
+from pptx.enum.text import PP_ALIGN
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+IMG_DIR = REPO_ROOT / "docs" / "img"
+DESTINO = REPO_ROOT / "docs" / "Datahub_Racial_Brasil_Fase1.pptx"
+
+LARGURA_SLIDE = Inches(13.333)
+ALTURA_SLIDE = Inches(7.5)
+
+
+# Identidade visual em tons terrosos — mesma paleta de src/processing/graficos_fase1.py.
+SUPERFICIE = RGBColor(0xF7, 0xF2, 0xEA)
+TINTA_PRIMARIA = RGBColor(0x2B, 0x20, 0x18)
+TINTA_SECUNDARIA = RGBColor(0x5C, 0x4F, 0x3F)
+COR_BRANCA = RGBColor(0x0D, 0x90, 0x86)
+
+# --- Séries históricas por categoria (reaproveitadas em toda combinação que envolve
+# aquela dimensão — vale para todas as aberturas: os snapshots do
+# trimestre mais recente continuam, mas cada abertura ganha também sua série histórica
+# completa, 2012-2026, um slide por categoria pros valores e um só gráfico
+# multi-linha pro hiato, mesmo padrão que "Raça × Geração" já usava).
+_SERIE_GENERO_TODAS = [
+    ("renda_por_raca_homens.png", "Série histórica — só Homens."),
+    ("renda_por_raca_mulheres.png", "Série histórica — só Mulheres."),
+]
+_SERIE_GENERO_PP = [
+    ("renda_preta_parda_homens.png", "Série histórica — só Homens."),
+    ("renda_preta_parda_mulheres.png", "Série histórica — só Mulheres."),
+]
+_SERIE_FAIXA_TODAS = [
+    ("renda_por_raca_faixa_14_17.png", "Série histórica — 14-17 anos."),
+    ("renda_por_raca_faixa_18_24.png", "Série histórica — 18-24 anos."),
+    ("renda_por_raca_faixa_25_39.png", "Série histórica — 25-39 anos."),
+    ("renda_por_raca_faixa_40_59.png", "Série histórica — 40-59 anos."),
+    ("renda_por_raca_faixa_60mais.png", "Série histórica — 60+ anos."),
+]
+_SERIE_FAIXA_PP = [
+    ("renda_preta_parda_faixa_14_17.png", "Série histórica — 14-17 anos."),
+    ("renda_preta_parda_faixa_18_24.png", "Série histórica — 18-24 anos."),
+    ("renda_preta_parda_faixa_25_39.png", "Série histórica — 25-39 anos."),
+    ("renda_preta_parda_faixa_40_59.png", "Série histórica — 40-59 anos."),
+    ("renda_preta_parda_faixa_60mais.png", "Série histórica — 60+ anos."),
+]
+_SERIE_GERACAO_TODAS = [
+    ("renda_por_raca_geracao_baby_boomer.png", "Série histórica — Baby Boomer."),
+    ("renda_por_raca_geracao_geracao_x.png", "Série histórica — Geração X."),
+    ("renda_por_raca_geracao_millennial.png", "Série histórica — Millennial."),
+    ("renda_por_raca_geracao_geracao_z.png", "Série histórica — Geração Z."),
+]
+_SERIE_GERACAO_PP = [
+    ("renda_preta_parda_geracao_baby_boomer.png", "Série histórica — Baby Boomer."),
+    ("renda_preta_parda_geracao_geracao_x.png", "Série histórica — Geração X."),
+    ("renda_preta_parda_geracao_millennial.png", "Série histórica — Millennial."),
+    ("renda_preta_parda_geracao_geracao_z.png", "Série histórica — Geração Z."),
+]
+_SERIE_ESCOLARIDADE_TODAS = [
+    ("renda_por_raca_escolaridade_sem_instrucao.png", "Série histórica — Sem instrução."),
+    ("renda_por_raca_escolaridade_fundamental_incompl.png", "Série histórica — Fundamental incompleto."),
+    ("renda_por_raca_escolaridade_fundamental_compl.png", "Série histórica — Fundamental completo."),
+    ("renda_por_raca_escolaridade_medio_incompl.png", "Série histórica — Médio incompleto."),
+    ("renda_por_raca_escolaridade_medio_compl.png", "Série histórica — Médio completo."),
+    ("renda_por_raca_escolaridade_superior_incompl.png", "Série histórica — Superior incompleto."),
+    ("renda_por_raca_escolaridade_superior_compl.png", "Série histórica — Superior completo."),
+]
+_SERIE_ESCOLARIDADE_PP = [
+    ("renda_preta_parda_escolaridade_sem_instrucao.png", "Série histórica — Sem instrução."),
+    ("renda_preta_parda_escolaridade_fundamental_incompl.png", "Série histórica — Fundamental incompleto."),
+    ("renda_preta_parda_escolaridade_fundamental_compl.png", "Série histórica — Fundamental completo."),
+    ("renda_preta_parda_escolaridade_medio_incompl.png", "Série histórica — Médio incompleto."),
+    ("renda_preta_parda_escolaridade_medio_compl.png", "Série histórica — Médio completo."),
+    ("renda_preta_parda_escolaridade_superior_incompl.png", "Série histórica — Superior incompleto."),
+    ("renda_preta_parda_escolaridade_superior_compl.png", "Série histórica — Superior completo."),
+]
+
+_HIATO_HIST_GENERO_TODAS = [("hiato_genero_historico_todas.png", "Série histórica do hiato, por gênero (Welch).")]
+_HIATO_HIST_GENERO_PP = [("hiato_genero_historico_pretaparda.png", "Série histórica do hiato, por gênero (Welch).")]
+_HIATO_HIST_FAIXA_TODAS = [("hiato_faixa_etaria_historico_todas.png", "Série histórica do hiato, por faixa etária (Welch).")]
+_HIATO_HIST_FAIXA_PP = [("hiato_faixa_etaria_historico_pretaparda.png", "Série histórica do hiato, por faixa etária (Welch).")]
+_HIATO_HIST_GERACAO_TODAS = [("hiato_racial_por_geracao.png", "Série histórica do hiato, por geração (Welch) — mesma coorte envelhecendo.")]
+_HIATO_HIST_GERACAO_PP = [("hiato_geracao_historico_pretaparda.png", "Série histórica do hiato, por geração (Welch) — mesma coorte envelhecendo.")]
+_HIATO_HIST_ESCOLARIDADE_TODAS = [("hiato_escolaridade_historico_todas.png", "Série histórica do hiato, por escolaridade (Welch).")]
+_HIATO_HIST_ESCOLARIDADE_PP = [("hiato_escolaridade_historico_pretaparda.png", "Série histórica do hiato, por escolaridade (Welch).")]
+
+
+# --- Seção "Renda média": as 12 combinações, x 2 escopos (Todas as raças /
+# Apenas negros, Preta vs. Parda) x 2 métricas (Valores / Hiato) = 48 subseções, cada
+# uma virando um slide-divisor + 1-2 slides de gráfico. Onde gênero ou escolaridade
+# entram na combinação, o PRÓPRIO gráfico já revela as 2 (Homens/Mulheres) ou 7 (níveis
+# de instrução) categorias — como painel ou eixo do heatmap — em vez de slides
+# separados; ver docs/LIMITACOES_E_METODOLOGIA.md.
+COMBOS_RENDA_MEDIA = [
+    {
+        "nome": "Raça",
+        "valor_todas": [("renda_por_raca.png",
+                          "Renda por raça — série histórica 2012-2026.")],
+        "valor_pretaparda": [("renda_preta_parda.png",
+                               "Preta vs. Parda — série histórica.")],
+        "hiato_todas": [("hiato_racial_percentual.png",
+                          "Hiato Branca vs. Negra — série histórica, com significância (Welch, IC 95%).")],
+        "hiato_pretaparda": [("hiato_preta_parda_percentual.png",
+                               "Hiato Preta vs. Parda — série histórica, com significância (Welch). O sinal virou: "
+                               "Preta chegou a ganhar mais que Parda até ~2015, hoje ganha menos (-6%).")],
+    },
+    {
+        "nome": "Raça × Gênero",
+        "valor_todas": [("renda_por_raca_genero.png", "Homens e mulheres, Branca/Negra/Indígena, série histórica — o hiato de gênero soma ao de raça.")] + _SERIE_GENERO_TODAS,
+        "valor_pretaparda": [("renda_preta_parda_genero.png", "Preta vs. Parda, por gênero, série histórica.")] + _SERIE_GENERO_PP,
+        "hiato_todas": [("hiato_genero_todas.png", "Hiato Branca vs. Negra dentro de cada gênero, snapshot — maior entre homens (71%) que entre mulheres (62%).")] + _HIATO_HIST_GENERO_TODAS,
+        "hiato_pretaparda": [("hiato_genero_pretaparda.png", "Hiato Preta vs. Parda dentro de cada gênero, snapshot.")] + _HIATO_HIST_GENERO_PP,
+    },
+    {
+        "nome": "Raça × Faixa Etária",
+        "valor_todas": [("renda_por_raca_faixa_etaria.png", "Hiato racial se abre nas faixas de maior potencial de renda (snapshot).")] + _SERIE_FAIXA_TODAS,
+        "valor_pretaparda": [("renda_preta_parda_faixa_etaria.png", "Preta vs. Parda, por faixa etária, snapshot.")] + _SERIE_FAIXA_PP,
+        "hiato_todas": [("hiato_faixa_etaria_todas.png", "Hiato Branca vs. Negra por faixa etária, snapshot — de 15-18% entre jovens a 81-94% depois dos 40.")] + _HIATO_HIST_FAIXA_TODAS,
+        "hiato_pretaparda": [("hiato_faixa_etaria_pretaparda.png", "Hiato Preta vs. Parda por faixa etária, snapshot.")] + _HIATO_HIST_FAIXA_PP,
+    },
+    {
+        "nome": "Raça × Geração",
+        "valor_todas": [("renda_por_geracao_raca.png", "Cada geração na idade em que está hoje, snapshot (não controla por idade).")] + _SERIE_GERACAO_TODAS,
+        "valor_pretaparda": [("renda_preta_parda_geracao.png", "Preta vs. Parda, por geração, snapshot.")] + _SERIE_GERACAO_PP,
+        "hiato_todas": [("hiato_geracao_todas.png", "Hiato Branca vs. Negra por geração, snapshot mais recente.")] + _HIATO_HIST_GERACAO_TODAS,
+        "hiato_pretaparda": [("hiato_geracao_pretaparda.png", "Hiato Preta vs. Parda por geração, snapshot — negativo em todas: Parda ganha mais que Preta em toda geração viva.")] + _HIATO_HIST_GERACAO_PP,
+    },
+    {
+        "nome": "Raça × Escolaridade",
+        "valor_todas": [("renda_por_raca_escolaridade.png", "O achado central da Fase 1, snapshot: o hiato SOBREVIVE ao controle por escolaridade, abrindo no Superior completo.")] + _SERIE_ESCOLARIDADE_TODAS,
+        "valor_pretaparda": [("renda_preta_parda_escolaridade.png", "Preta vs. Parda, por nível de instrução, snapshot.")] + _SERIE_ESCOLARIDADE_PP,
+        "hiato_todas": [("hiato_escolaridade_todas.png", "Hiato Branca vs. Negra por nível de instrução, snapshot.")] + _HIATO_HIST_ESCOLARIDADE_TODAS,
+        "hiato_pretaparda": [("hiato_escolaridade_pretaparda.png", "Hiato Preta vs. Parda por nível de instrução, snapshot.")] + _HIATO_HIST_ESCOLARIDADE_PP,
+    },
+    {
+        "nome": "Raça × Gênero × Faixa Etária",
+        "valor_todas": [("renda_por_faixa_etaria_raca_genero.png", "Mesmo efeito de abertura em 40-59 anos, visível nos dois gêneros (snapshot).")] + _SERIE_GENERO_TODAS + _SERIE_FAIXA_TODAS,
+        "valor_pretaparda": [("preta_parda_genero_faixa_etaria.png", "Preta vs. Parda, por gênero e faixa etária, snapshot.")] + _SERIE_GENERO_PP + _SERIE_FAIXA_PP,
+        "hiato_todas": [("hiato_genero_faixa_etaria_todas.png", "Hiato Branca vs. Negra por gênero e faixa etária, snapshot.")] + _HIATO_HIST_GENERO_TODAS + _HIATO_HIST_FAIXA_TODAS,
+        "hiato_pretaparda": [("hiato_genero_faixa_etaria_pretaparda.png", "Hiato Preta vs. Parda por gênero e faixa etária, snapshot.")] + _HIATO_HIST_GENERO_PP + _HIATO_HIST_FAIXA_PP,
+    },
+    {
+        "nome": "Raça × Gênero × Geração",
+        "valor_todas": [("raca_genero_geracao.png", "Renda por raça, gênero e geração, snapshot.")] + _SERIE_GENERO_TODAS + _SERIE_GERACAO_TODAS,
+        "valor_pretaparda": [("preta_parda_genero_geracao.png", "Preta vs. Parda, por gênero e geração, snapshot.")] + _SERIE_GENERO_PP + _SERIE_GERACAO_PP,
+        "hiato_todas": [("hiato_genero_geracao_todas.png", "Hiato Branca vs. Negra por gênero e geração, snapshot.")] + _HIATO_HIST_GENERO_TODAS + _HIATO_HIST_GERACAO_TODAS,
+        "hiato_pretaparda": [("hiato_genero_geracao_pretaparda.png", "Hiato Preta vs. Parda por gênero e geração, snapshot.")] + _HIATO_HIST_GENERO_PP + _HIATO_HIST_GERACAO_PP,
+    },
+    {
+        "nome": "Raça × Gênero × Escolaridade",
+        "valor_todas": [
+            ("renda_por_raca_escolaridade_homens.png", "Homens — hiato no Superior completo é maior (~46%), snapshot."),
+            ("renda_por_raca_escolaridade_mulheres.png", "Mulheres — hiato menor (~36%) que entre homens, snapshot."),
+        ] + _SERIE_GENERO_TODAS + _SERIE_ESCOLARIDADE_TODAS,
+        "valor_pretaparda": [("preta_parda_genero_escolaridade.png", "Preta vs. Parda, por gênero e nível de instrução, snapshot.")] + _SERIE_GENERO_PP + _SERIE_ESCOLARIDADE_PP,
+        "hiato_todas": [("hiato_genero_escolaridade_todas.png", "Hiato Branca vs. Negra por gênero e nível de instrução, snapshot.")] + _HIATO_HIST_GENERO_TODAS + _HIATO_HIST_ESCOLARIDADE_TODAS,
+        "hiato_pretaparda": [("hiato_genero_escolaridade_pretaparda.png", "Hiato Preta vs. Parda por gênero e nível de instrução, snapshot.")] + _HIATO_HIST_GENERO_PP + _HIATO_HIST_ESCOLARIDADE_PP,
+    },
+    {
+        "nome": "Raça × Faixa Etária × Escolaridade",
+        "valor_todas": [("raca_faixa_etaria_escolaridade.png", "Renda por raça, faixa etária e escolaridade, snapshot.")] + _SERIE_FAIXA_TODAS + _SERIE_ESCOLARIDADE_TODAS,
+        "valor_pretaparda": [("preta_parda_faixa_etaria_escolaridade.png", "Preta vs. Parda, por faixa etária e escolaridade, snapshot.")] + _SERIE_FAIXA_PP + _SERIE_ESCOLARIDADE_PP,
+        "hiato_todas": [("hiato_faixa_etaria_escolaridade_todas.png", "Hiato Branca vs. Negra por faixa etária e nível de instrução, snapshot.")] + _HIATO_HIST_FAIXA_TODAS + _HIATO_HIST_ESCOLARIDADE_TODAS,
+        "hiato_pretaparda": [("hiato_faixa_etaria_escolaridade_pretaparda.png", "Hiato Preta vs. Parda por faixa etária e nível de instrução, snapshot.")] + _HIATO_HIST_FAIXA_PP + _HIATO_HIST_ESCOLARIDADE_PP,
+    },
+    {
+        "nome": "Raça × Geração × Escolaridade",
+        "valor_todas": [("raca_geracao_escolaridade.png", "Renda por raça, geração e escolaridade, snapshot.")] + _SERIE_GERACAO_TODAS + _SERIE_ESCOLARIDADE_TODAS,
+        "valor_pretaparda": [("preta_parda_geracao_escolaridade.png", "Preta vs. Parda, por geração e escolaridade, snapshot.")] + _SERIE_GERACAO_PP + _SERIE_ESCOLARIDADE_PP,
+        "hiato_todas": [("hiato_geracao_escolaridade_todas.png", "Hiato Branca vs. Negra por geração e nível de instrução, snapshot.")] + _HIATO_HIST_GERACAO_TODAS + _HIATO_HIST_ESCOLARIDADE_TODAS,
+        "hiato_pretaparda": [("hiato_geracao_escolaridade_pretaparda.png", "Hiato Preta vs. Parda por geração e nível de instrução, snapshot.")] + _HIATO_HIST_GERACAO_PP + _HIATO_HIST_ESCOLARIDADE_PP,
+    },
+    {
+        "nome": "Raça × Gênero × Faixa Etária × Escolaridade",
+        "valor_todas": [("renda_completa_heatmap.png", "Seis painéis (raça×gênero), faixa etária × nível de instrução em cada um, snapshot.")] + _SERIE_GENERO_TODAS + _SERIE_FAIXA_TODAS + _SERIE_ESCOLARIDADE_TODAS,
+        "valor_pretaparda": [("preta_parda_genero_faixa_etaria_escolaridade.png", "Quatro painéis (Preta/Parda×gênero), faixa etária × escolaridade em cada um, snapshot.")] + _SERIE_GENERO_PP + _SERIE_FAIXA_PP + _SERIE_ESCOLARIDADE_PP,
+        "hiato_todas": [("hiato_genero_faixa_etaria_escolaridade_todas.png", "Hiato Branca vs. Negra por gênero, faixa etária e nível de instrução, snapshot (painéis = gênero).")] + _HIATO_HIST_GENERO_TODAS + _HIATO_HIST_FAIXA_TODAS + _HIATO_HIST_ESCOLARIDADE_TODAS,
+        "hiato_pretaparda": [("hiato_genero_faixa_etaria_escolaridade_pretaparda.png", "Hiato Preta vs. Parda por gênero, faixa etária e nível de instrução, snapshot.")] + _HIATO_HIST_GENERO_PP + _HIATO_HIST_FAIXA_PP + _HIATO_HIST_ESCOLARIDADE_PP,
+    },
+    {
+        "nome": "Raça × Gênero × Geração × Escolaridade",
+        "valor_todas": [("raca_genero_geracao_escolaridade.png", "Seis painéis (raça×gênero), geração × nível de instrução em cada um, snapshot.")] + _SERIE_GENERO_TODAS + _SERIE_GERACAO_TODAS + _SERIE_ESCOLARIDADE_TODAS,
+        "valor_pretaparda": [("preta_parda_genero_geracao_escolaridade.png", "Quatro painéis (Preta/Parda×gênero), geração × escolaridade em cada um, snapshot.")] + _SERIE_GENERO_PP + _SERIE_GERACAO_PP + _SERIE_ESCOLARIDADE_PP,
+        "hiato_todas": [("hiato_genero_geracao_escolaridade_todas.png", "Hiato Branca vs. Negra por gênero, geração e nível de instrução, snapshot (painéis = gênero).")] + _HIATO_HIST_GENERO_TODAS + _HIATO_HIST_GERACAO_TODAS + _HIATO_HIST_ESCOLARIDADE_TODAS,
+        "hiato_pretaparda": [("hiato_genero_geracao_escolaridade_pretaparda.png", "Hiato Preta vs. Parda por gênero, geração e nível de instrução, snapshot.")] + _HIATO_HIST_GENERO_PP + _HIATO_HIST_GERACAO_PP + _HIATO_HIST_ESCOLARIDADE_PP,
+    },
+]
+
+ESCOPOS_RENDA_MEDIA = [("todas", "Todas as raças"), ("pretaparda", "Apenas negros (Preta vs. Parda)")]
+METRICAS_RENDA_MEDIA = [("valor", "Valores"), ("hiato", "Hiato")]
+
+
+def _construir_secoes_renda_media():
+    """Monta as 48 subseções (12 combinações x 2 escopos x 2 métricas) na ordem do índice
+    — primeiro TODAS as raças (12 combinações, cada uma: valores, depois hiato), depois
+    APENAS NEGROS (mesma coisa) — e o índice correspondente pro slide de sumário."""
+    secoes = []
+    indice = []
+    n = 0
+    for escopo_key, escopo_label in ESCOPOS_RENDA_MEDIA:
+        for combo in COMBOS_RENDA_MEDIA:
+            for metrica_key, metrica_label in METRICAS_RENDA_MEDIA:
+                n += 1
+                imgs = combo[f"{metrica_key}_{escopo_key}"]
+                titulo = f"{n}. {combo['nome']} — {metrica_label} ({escopo_label})"
+                secoes.append((titulo, None, imgs))
+                indice.append(f"{n}. {combo['nome']} — {metrica_label}")
+    return secoes, indice
+
+
+# (título da seção, nota de rodapé opcional, [(arquivo, legenda), ...])
+SECOES = [
+    ("Raça", None, [
+        ("renda_por_raca.png", "Hiato grande e persistente entre Branca e Negra/Indígena; estreitamento leve 2012→2026."),
+        ("renda_preta_parda.png", "Preta e Parda andam próximas, com Parda ultrapassando levemente nos últimos anos."),
+    ]),
+    ("Hiato Branca vs. Negra — série histórica", "Com teste de significância (Welch, IC 95%)", [
+        ("hiato_racial_percentual.png", "Hiato relativo caiu de ~76% para ~66% — todos os 58 trimestres são estatisticamente significativos."),
+        ("hiato_racial_absoluto.png", "Em R$, o hiato disparou na pandemia (pico ~R$2.035) antes de recuar."),
+        ("hiato_genero_historico_todas.png", "Abertura por gênero — o hiato é maior entre homens que entre mulheres em quase todo o período."),
+        ("hiato_faixa_etaria_historico_todas.png", "Abertura por faixa etária — cresce muito com a idade, de ~15-18% entre jovens a acima de 80% depois dos 40."),
+        ("hiato_escolaridade_historico_todas.png", "Abertura por nível de instrução — mais ruidoso (amostra menor por célula), mas o padrão de abertura no Superior completo aparece na maior parte da série."),
+        ("hiato_racial_por_geracao.png", "Abertura por geração — a MESMA coorte de nascimento envelhecendo, não a mesma faixa etária com pessoas diferentes a cada trimestre."),
+    ]),
+    ("Hiato Preta vs. Parda — série histórica", "Mesmo teste de Welch, dentro da população negra", [
+        ("hiato_preta_parda_percentual.png", "O sinal do hiato virou ao longo da série: Preta chegou a ganhar mais que Parda até ~2015, hoje ganha menos (-6%)."),
+        ("hiato_genero_historico_pretaparda.png", "Abertura por gênero."),
+        ("hiato_faixa_etaria_historico_pretaparda.png", "Abertura por faixa etária."),
+        ("hiato_escolaridade_historico_pretaparda.png", "Abertura por nível de instrução."),
+        ("hiato_geracao_historico_pretaparda.png", "Abertura por geração — a MESMA coorte de nascimento envelhecendo."),
+    ]),
+    ("É ocupação, ou é cor da pele?", "Decomposição: quanto idade, escolaridade e ocupação explicam do hiato", [
+        ("decomposicao_hiato_ocupacional.png", "Hiato bruto 67% → 64% (só idade) → 30% (+escolaridade) → 24% (+ocupação, residual). Ocupação SOZINHA (isolada, sem outros controles) já leva o hiato a 33%."),
+        ("oaxaca_blinder_decomposicao.png", "Mesma pergunta via regressão (Oaxaca-Blinder), com teste de significância: resíduo de +22% (p<0,001) — bate com a padronização direta. Ocupação sozinha explica 40% do hiato (p<0,001)."),
+        ("oaxaca_blinder_quantis.png", "O hiato residual não é uniforme: menor na mediana (~15%), maior na base (~31%, 'piso pegajoso') e no topo (~36%, 'teto de vidro')."),
+        ("renda_por_raca_ocupacao.png", "Dentro de CADA categoria ocupacional, Branca ganha mais que Negra — o hiato não é só 'estar em ocupações diferentes'."),
+    ]),
+    ("Raça cruzada com tudo: as combinações que faltavam", "Heatmaps raça × 2 dimensões, um painel por raça — fecha a matriz completa de combinações. Ocupação fica só no snapshot (pooled 8 trimestres): 11 categorias já deixam a célula por trimestre isolado fina demais pra uma série histórica confiável.", [
+        ("raca_genero_geracao.png", "Renda por raça, gênero e geração."),
+        *_SERIE_GENERO_TODAS, *_SERIE_GERACAO_TODAS,
+        ("raca_genero_ocupacao.png", "Renda por raça, gênero e ocupação."),
+        ("raca_faixa_etaria_escolaridade.png", "Renda por raça, faixa etária e escolaridade."),
+        *_SERIE_FAIXA_TODAS, *_SERIE_ESCOLARIDADE_TODAS,
+        ("raca_faixa_etaria_ocupacao.png", "Renda por raça, faixa etária e ocupação."),
+        ("raca_geracao_escolaridade.png", "Renda por raça, geração e escolaridade."),
+        *_SERIE_GERACAO_TODAS, *_SERIE_ESCOLARIDADE_TODAS,
+        ("raca_geracao_ocupacao.png", "Renda por raça, geração e ocupação."),
+        ("raca_escolaridade_ocupacao.png", "Renda por raça, escolaridade e ocupação — dentro do mesmo nível de instrução E mesma ocupação, o hiato racial ainda aparece na maioria das células."),
+    ]),
+    ("Aprofundamentos: região, segregação e quebras estruturais", "Hiato por região, segregação ocupacional e quebras estruturais", [
+        ("hiato_racial_por_regiao.png", "O hiato racial varia MUITO por região: ~65-85% no Sudeste vs. ~45-55% no Sul."),
+        ("segregacao_ocupacional.png", "Índice de Duncan: ~17% da população Branca ou Negra precisaria trocar de categoria ocupacional pra igualar a distribuição do outro grupo."),
+        ("hiato_quebra_estrutural.png", "Teste tipo Chow: mudança de patamar/inclinação estatisticamente significativa nos 3 eventos testados (reforma trabalhista, reforma da previdência, recessão 2015-16)."),
+    ]),
+    ("Aprofundamentos: novas variáveis da PNAD", "Informalidade, jornada, alfabetização, desalento", [
+        ("informalidade_carteira_assinada.png", "% com carteira assinada: Branca 72%, Negra 63%, Indígena 52% (2026 T2)."),
+        ("renda_por_hora.png", "O hiato sobrevive quase intacto na renda POR HORA — não vem de jornada menor, é remuneração por hora menor mesmo."),
+        ("alfabetizacao_60mais.png", "Analfabetismo residual (60+ anos): Branca 93%, Negra 80%, Indígena 72% alfabetizados."),
+        ("desalento.png", "Entre quem está fora da força de trabalho, Negra e Indígena desistem de procurar emprego a taxas 2-4x maiores que Branca."),
+    ]),
+    ("Geração: seguindo a mesma coorte, não a mesma faixa etária", "A PNAD é um corte transversal repetido — 'pessoas de 14-17 anos' em 2012 e 2026 são pessoas diferentes", [
+        ("hiato_racial_por_geracao.png", "Cada linha é a MESMA coorte de nascimento envelhecendo — o hiato varia bastante entre gerações e ao longo do tempo dentro de cada uma."),
+        ("renda_por_geracao_raca.png", "Renda por geração e raça, cada uma na idade em que está hoje (snapshot)."),
+        *_SERIE_GERACAO_TODAS,
+        ("renda_preta_parda_geracao.png", "Preta vs. Parda por geração (snapshot)."),
+        *_SERIE_GERACAO_PP,
+        ("hiato_geracao_historico_pretaparda.png", "Hiato Preta vs. Parda por geração, série histórica com Welch."),
+    ]),
+    ("Quem está no topo 10%? Negra vs. Branca", "Limiar (P90) calculado DENTRO de cada raça, não um corte único pro Brasil", [
+        ("topo10_genero.png", "% de mulheres no topo 10% de cada raça — Branca sempre um pouco à frente, mas a distância vem encolhendo."),
+        ("topo10_escolaridade.png", "% com Superior completo no topo 10% — o topo dos negros ficou muito mais qualificado (38%→58%), mas ainda atrás do topo dos brancos (~83%)."),
+        ("topo10_escolaridade_composicao.png", "Distribuição completa pelos 7 níveis: o topo dos negros tem mais Médio completo (23%) que o dos brancos (10%) — o hiato de Superior completo não é a única diferença."),
+        ("topo10_faixa_etaria.png", "Composição por faixa etária do topo 10%, média dos últimos 8 trimestres."),
+        ("topo10_geracao.png", "Composição por geração do topo 10% — o topo dos negros pende um pouco mais para Millennial/Geração Z; o dos brancos, para Baby Boomer/Geração X."),
+    ]),
+    ("Decomposição dos 4 quartis de renda — Negra vs. Branca", "Generaliza o topo 10% pra toda a distribuição: Q1 (25% mais pobres) a Q4 (25% mais ricos), limiar DENTRO de cada raça", [
+        ("quartis_genero.png", "% de mulheres por quartil — maioria entre as mais pobres, minoria entre as mais ricas, nas duas raças; a distância entre raças é maior no Q4."),
+        ("quartis_escolaridade.png", "% com Superior completo cresce em todos os quartis nas duas raças, mas o hiato racial se abre dramaticamente no Q4 (~72% Branca vs. ~40% Negra)."),
+        ("quartis_escolaridade_composicao.png", "Distribuição completa pelos 7 níveis, um painel por quartil — mesmo padrão do topo 10% visível em cada fatia da distribuição."),
+        ("quartis_faixa_etaria.png", "Composição por faixa etária, um painel por quartil — perfil etário parecido entre as raças em cada quartil."),
+        ("quartis_geracao.png", "Composição por geração, um painel por quartil."),
+    ]),
+    ("Desigualdade interna, setor público/privado e sobre-qualificação", "Sugestões de análise validadas antes de executar", [
+        ("gini_por_raca.png", "Gini DENTRO de cada raça — Branca tem mais desigualdade interna que Negra (distribuição mais comprimida na base, não 'melhor situação')."),
+        ("theil_decomposicao.png", "Decomposição de Theil: só 7% da desigualdade total do Brasil vem de diferença ENTRE raças — 93% é desigualdade DENTRO de cada uma. Não diminui o hiato racial, mostra que a desigualdade brasileira tem várias causas."),
+        ("hiato_setor_publico_privado.png", "Confirma a hipótese: o hiato racial é menor no setor Público (~45-50%, tabela salarial padronizada) do que no Privado (~58-65%)."),
+        ("segregacao_setorial.png", "Segregação por setor econômico (10%) é menor que por ocupação (17%) — as raças se distribuem mais parecido entre setores do que entre cargos dentro deles."),
+        ("sobrequalificacao.png", "Negros com Superior completo têm taxa de 'sobre-qualificação' (acabar em ocupação elementar) quase o dobro da de brancos com o mesmo diploma."),
+    ]),
+    ("A função quantil da renda, em R$, e sua inversa", "'Os 10% mais pobres entre os negros ganham quanto comparado aos 10% mais pobres entre os brancos?'", [
+        ("funcao_quantil_racial.png", "Em R$: no P10, Branca ganha R$1.500 e Negra R$720. No P50 (mediana), R$3.000 vs. R$2.000. No P90, R$10.000 vs. R$5.000."),
+        ("hiato_por_percentil.png", "O hiato bruto (sem controles) por percentil não é uniforme — é maior na base (108% no P10) e no topo (100% no P90) do que no meio da distribuição."),
+        ("percentil_de_valor_racial.png", "A pergunta inversa: quem ganha R$3.000 está no P57 entre os brancos (mediano/meio da distribuição), mas já no P76 entre os negros (quase o topo)."),
+    ]),
+    ("Raça × Gênero", "Combinado + um por gênero", [
+        ("renda_por_raca_genero.png", "O hiato de gênero soma ao de raça, não substitui."),
+        ("renda_por_raca_homens.png", "Recorte só Homens."),
+        ("renda_por_raca_mulheres.png", "Recorte só Mulheres."),
+    ]),
+    ("Preta × Parda × Gênero", "Combinado + um por gênero", [
+        ("renda_preta_parda_genero.png", "Preta e Parda por gênero — quatro linhas, mesmo padrão de proximidade."),
+        ("renda_preta_parda_homens.png", "Recorte só Homens."),
+        ("renda_preta_parda_mulheres.png", "Recorte só Mulheres."),
+    ]),
+    ("Raça × Faixa etária", "Combinado + um por faixa etária", [
+        ("renda_por_raca_faixa_etaria.png", "Hiato racial se abre na faixa de maior potencial de renda (40-59 anos)."),
+        ("renda_por_raca_faixa_14_17.png", "14-17 anos."),
+        ("renda_por_raca_faixa_18_24.png", "18-24 anos."),
+        ("renda_por_raca_faixa_25_39.png", "25-39 anos."),
+        ("renda_por_raca_faixa_40_59.png", "40-59 anos — maior hiato."),
+        ("renda_por_raca_faixa_60mais.png", "60+ anos."),
+    ]),
+    ("Preta × Parda × Faixa etária", "Combinado + uma por faixa etária", [
+        ("renda_preta_parda_faixa_etaria.png", "Preta vs. Parda por faixa etária, snapshot mais recente."),
+        ("renda_preta_parda_faixa_14_17.png", "14-17 anos."),
+        ("renda_preta_parda_faixa_18_24.png", "18-24 anos."),
+        ("renda_preta_parda_faixa_25_39.png", "25-39 anos."),
+        ("renda_preta_parda_faixa_40_59.png", "40-59 anos."),
+        ("renda_preta_parda_faixa_60mais.png", "60+ anos."),
+    ]),
+    ("Raça × Escolaridade", "O achado central da Fase 1", [
+        ("renda_por_raca_escolaridade.png", "O hiato racial SOBREVIVE ao controle por escolaridade — abre no Superior completo."),
+        ("renda_por_raca_escolaridade_sem_instrucao.png", "Sem instrução."),
+        ("renda_por_raca_escolaridade_fundamental_incompl.png", "Fundamental incompleto."),
+        ("renda_por_raca_escolaridade_fundamental_compl.png", "Fundamental completo."),
+        ("renda_por_raca_escolaridade_medio_incompl.png", "Médio incompleto."),
+        ("renda_por_raca_escolaridade_medio_compl.png", "Médio completo."),
+        ("renda_por_raca_escolaridade_superior_incompl.png", "Superior incompleto."),
+        ("renda_por_raca_escolaridade_superior_compl.png", "Superior completo — maior hiato de todos."),
+    ]),
+    ("Preta × Parda × Escolaridade", "Combinado + um por nível", [
+        ("renda_preta_parda_escolaridade.png", "Preta vs. Parda por nível de instrução, snapshot mais recente."),
+        ("renda_preta_parda_escolaridade_sem_instrucao.png", "Sem instrução."),
+        ("renda_preta_parda_escolaridade_fundamental_incompl.png", "Fundamental incompleto."),
+        ("renda_preta_parda_escolaridade_fundamental_compl.png", "Fundamental completo."),
+        ("renda_preta_parda_escolaridade_medio_incompl.png", "Médio incompleto."),
+        ("renda_preta_parda_escolaridade_medio_compl.png", "Médio completo."),
+        ("renda_preta_parda_escolaridade_superior_incompl.png", "Superior incompleto."),
+        ("renda_preta_parda_escolaridade_superior_compl.png", "Superior completo."),
+    ]),
+    ("Raça × Gênero × Escolaridade", None, [
+        ("renda_por_raca_escolaridade_homens.png", "Hiato no Superior completo é maior entre homens (~46%), snapshot."),
+        ("renda_por_raca_escolaridade_mulheres.png", "...do que entre mulheres (~36%), snapshot."),
+        *_SERIE_GENERO_TODAS, *_SERIE_ESCOLARIDADE_TODAS,
+    ]),
+    ("Raça × Gênero × Faixa etária", None, [
+        ("renda_por_faixa_etaria_raca_genero.png", "Mesmo efeito de abertura em 40-59 anos, visível nos dois gêneros (snapshot)."),
+        *_SERIE_GENERO_TODAS, *_SERIE_FAIXA_TODAS,
+    ]),
+    ("Escolaridade × Raça × Gênero", "Combinado (Superior completo, o destaque) + um por nível", [
+        ("escolaridade_por_raca_genero.png", "Conclusão do superior: hiato racial >2x; mulheres à frente dos homens em todos os grupos."),
+        ("escolaridade_por_raca_genero_sem_instrucao.png", "Sem instrução."),
+        ("escolaridade_por_raca_genero_fundamental_incompl.png", "Fundamental incompleto."),
+        ("escolaridade_por_raca_genero_fundamental_compl.png", "Fundamental completo."),
+        ("escolaridade_por_raca_genero_medio_incompl.png", "Médio incompleto."),
+        ("escolaridade_por_raca_genero_medio_compl.png", "Médio completo."),
+        ("escolaridade_por_raca_genero_superior_incompl.png", "Superior incompleto."),
+    ]),
+    ("Todas as dimensões de uma vez", "Raça × Gênero × Faixa etária × Escolaridade", [
+        ("renda_completa_heatmap.png", "Seis painéis (raça×gênero), faixa etária × nível de instrução em cada um — o padrão racial se mantém (snapshot)."),
+        *_SERIE_GENERO_TODAS, *_SERIE_FAIXA_TODAS, *_SERIE_ESCOLARIDADE_TODAS,
+    ]),
+]
+
+
+def _slide_em_branco(prs: Presentation):
+    layout_em_branco = prs.slide_layouts[6]
+    return prs.slides.add_slide(layout_em_branco)
+
+
+def _fundo(slide):
+    slide.background.fill.solid()
+    slide.background.fill.fore_color.rgb = SUPERFICIE
+
+
+def slide_titulo(prs: Presentation) -> None:
+    slide = _slide_em_branco(prs)
+    _fundo(slide)
+    caixa = slide.shapes.add_textbox(Inches(0.8), Inches(2.6), Inches(11.7), Inches(2))
+    tf = caixa.text_frame
+    tf.word_wrap = True
+    p = tf.paragraphs[0]
+    p.text = "Datahub de Análise Racial no Brasil"
+    p.font.size = Pt(40)
+    p.font.bold = True
+    p.font.color.rgb = TINTA_PRIMARIA
+
+    p2 = tf.add_paragraph()
+    p2.text = "Fase 1 — PNAD Contínua (2012–2026) · Análise exploratória"
+    p2.font.size = Pt(20)
+    p2.font.color.rgb = TINTA_SECUNDARIA
+    p2.space_before = Pt(12)
+
+    p3 = tf.add_paragraph()
+    p3.text = "Fonte: IBGE, PNAD Contínua Trimestral (microdados). Elaboração própria."
+    p3.font.size = Pt(13)
+    p3.font.color.rgb = TINTA_SECUNDARIA
+    p3.space_before = Pt(24)
+
+
+def slide_secao(prs: Presentation, titulo: str, nota: str | None) -> None:
+    slide = _slide_em_branco(prs)
+    _fundo(slide)
+    caixa = slide.shapes.add_textbox(Inches(0.8), Inches(3.1), Inches(11.7), Inches(1.5))
+    tf = caixa.text_frame
+    tf.word_wrap = True
+    p = tf.paragraphs[0]
+    p.text = titulo
+    p.font.size = Pt(32)
+    p.font.bold = True
+    p.font.color.rgb = COR_BRANCA
+    if nota:
+        p2 = tf.add_paragraph()
+        p2.text = nota
+        p2.font.size = Pt(16)
+        p2.font.color.rgb = TINTA_SECUNDARIA
+        p2.space_before = Pt(10)
+
+
+def slide_indice(prs: Presentation, titulo: str, itens: list[str]) -> None:
+    """Slide de índice/sumário — lista os títulos das subseções em 2 colunas, pra
+    conferência."""
+    slide = _slide_em_branco(prs)
+    _fundo(slide)
+
+    caixa_titulo = slide.shapes.add_textbox(Inches(0.6), Inches(0.35), Inches(12.1), Inches(0.7))
+    p = caixa_titulo.text_frame.paragraphs[0]
+    p.text = titulo
+    p.font.size = Pt(22)
+    p.font.bold = True
+    p.font.color.rgb = COR_BRANCA
+
+    meio = (len(itens) + 1) // 2
+    colunas = [itens[:meio], itens[meio:]]
+    largura_coluna = Inches(6.0)
+    for i, coluna in enumerate(colunas):
+        caixa = slide.shapes.add_textbox(Inches(0.6) + i * Inches(6.3), Inches(1.15), largura_coluna, Inches(6.1))
+        tf = caixa.text_frame
+        tf.word_wrap = True
+        for j, item in enumerate(coluna):
+            p = tf.paragraphs[0] if j == 0 else tf.add_paragraph()
+            p.text = item
+            p.font.size = Pt(12.5)
+            p.font.color.rgb = TINTA_PRIMARIA
+            p.space_after = Pt(5)
+
+
+def slide_grafico(prs: Presentation, arquivo: str, legenda: str) -> None:
+    caminho = IMG_DIR / arquivo
+    if not caminho.exists():
+        print(f"  aviso: {arquivo} não encontrado, pulando slide")
+        return
+    slide = _slide_em_branco(prs)
+    _fundo(slide)
+
+    # imagem ocupa a maior parte do slide, centralizada, com margem pra legenda embaixo
+    from PIL import Image
+    with Image.open(caminho) as im:
+        largura_px, altura_px = im.size
+    proporcao = largura_px / altura_px
+
+    max_largura = Inches(12.3)
+    max_altura = Inches(6.1)
+    if max_largura / proporcao <= max_altura:
+        largura = max_largura
+        altura = Emu(int(max_largura / proporcao))
+    else:
+        altura = max_altura
+        largura = Emu(int(max_altura * proporcao))
+
+    left = Emu(int((LARGURA_SLIDE - largura) / 2))
+    top = Inches(0.35)
+    slide.shapes.add_picture(str(caminho), left, top, width=largura, height=altura)
+
+    caixa = slide.shapes.add_textbox(Inches(0.6), Inches(6.65), Inches(12.1), Inches(0.7))
+    tf = caixa.text_frame
+    tf.word_wrap = True
+    p = tf.paragraphs[0]
+    p.text = legenda
+    p.font.size = Pt(14)
+    p.font.color.rgb = TINTA_SECUNDARIA
+    p.alignment = PP_ALIGN.CENTER
+
+
+def main() -> None:
+    prs = Presentation()
+    prs.slide_width = LARGURA_SLIDE
+    prs.slide_height = ALTURA_SLIDE
+
+    slide_titulo(prs)
+
+    secoes_renda_media, indice = _construir_secoes_renda_media()
+    meio_indice = len(indice) // 2
+    slide_indice(prs, "Índice — Renda média (1/2): Todas as raças", indice[:meio_indice])
+    slide_indice(prs, "Índice — Renda média (2/2): Apenas negros (Preta vs. Parda)", indice[meio_indice:])
+
+    # "Renda média": as 48 subseções vêm primeiro; as 21 seções de aprofundamento
+    # vão pro final.
+    todas_secoes = secoes_renda_media + SECOES
+
+    total_graficos = 0
+    for titulo_secao, nota, graficos in todas_secoes:
+        slide_secao(prs, titulo_secao, nota)
+        for arquivo, legenda in graficos:
+            slide_grafico(prs, arquivo, legenda)
+            total_graficos += 1
+
+    prs.save(DESTINO)
+    total_slides = 3 + len(todas_secoes) + total_graficos
+    print(f"Apresentação salva em: {DESTINO.relative_to(REPO_ROOT)}")
+    print(
+        f"Slides: {total_slides} ({total_graficos} gráficos + {len(todas_secoes)} divisores + "
+        "1 título + 2 índice)"
+    )
+
+
+if __name__ == "__main__":
+    main()
