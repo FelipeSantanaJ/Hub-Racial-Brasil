@@ -6,7 +6,7 @@
 | Onda | 1 |
 | Responsável | Felipe Santana (execução: Claude Code) |
 | Criada em / atualizada em | 2026-10-13 / 2026-10-13 |
-| Estado de publicação | **Aprovado com ressalvas** (proposto; aguarda o Ponto de parada da Onda 1) |
+| Estado de publicação | **Aprovado com ressalvas** (aprovado pelo Felipe em 13/10/2026) |
 | PR | Onda 1 (`onda1/regeneracao`) |
 
 ## 1. Pergunta

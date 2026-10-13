@@ -6,7 +6,7 @@
 | Onda | 1 |
 | Responsável | Felipe Santana (execução: Claude Code) |
 | Criada em / atualizada em | 2026-10-13 / 2026-10-13 |
-| Estado de publicação | **Aprovado com ressalvas** (proposto; F4 e F6 parciais) |
+| Estado de publicação | **Aprovado com ressalvas** (aprovado pelo Felipe em 13/10/2026; F4 e F6 parciais) |
 | PR | Onda 1 (`onda1/regeneracao`) |
 
 Esta ficha é o **documento de definições** do critério de saída da Onda 1. Cada conceito tem uma definição, a

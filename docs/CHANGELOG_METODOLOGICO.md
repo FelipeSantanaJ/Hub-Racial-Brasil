@@ -5,6 +5,13 @@ calculá-lo: data, o quê, por quê, impacto. Mais recente primeiro.
 
 ---
 
+## 13/10/2026 — Decisões do Felipe sobre a Onda 1 (branch `onda1/pendencias`)
+
+- Fichas F, S0, S1, T e A **aprovadas com ressalvas** (deixam de ser "proposto").
+- Salário mínimo de 2026 = **R$ 1.621** confirmado pelo Felipe. Nenhum número muda.
+
+---
+
 ## 13/10/2026 — Onda 1, parte 2 (branch `onda1/parte2`)
 
 - **Faixa 14–17 de volta às tabelas (correção pedida pelo Felipe).** A parte 1 tinha tirado a renda de 14–17 das
