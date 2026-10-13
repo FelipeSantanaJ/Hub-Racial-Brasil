@@ -14,9 +14,10 @@ Decisões importantes (ver docs/PLANO.md para o histórico completo):
 - V2009 (idade) filtrado para >= 14 anos: as variáveis de mercado de trabalho
   (VD4001/VD4002) só existem para essa população, e as faixas etárias do escopo
   também começam em 14.
-- Renda usa VD4019 (habitual) e VD4020 (efetivo), ambos "qualquer trabalho" (soma de
-  todos os trabalhos da pessoa) — mais completo que só o trabalho principal
-  (VD4016/VD4017). Saem tanto em valores NOMINAIS (R$ correntes do próprio
+- Renda (desde a Onda 1, 13/10/2026): VD4016 (habitual) e VD4017 (efetivo) do TRABALHO
+  PRINCIPAL, só na população de referência — ocupados de 18+ com VD4016 > 0
+  (`src/utils/populacao.py`). Antes era VD4019/VD4020 (todos os trabalhos) para 14+; esse
+  recorte segue disponível como `renda_todos_trabalhos_*`. Saem tanto em valores NOMINAIS (R$ correntes do próprio
   trimestre) quanto REAIS (deflacionados pelo deflator oficial do IBGE — ver
   `src/ingestion/baixar_deflator.py` — a preços do trimestre de referência mais
   recente, hoje 2026 T2). Use as colunas `_real` para qualquer comparação entre
@@ -44,7 +45,8 @@ SE_METODO_WLS_CLUSTER = "wls_statsmodels_cluster_upa"  # Oaxaca-Blinder (coefici
 SE_METODO_OLS_SERIE = "ols_iid_sobre_serie_trimestral"  # sem HAC (R6; Onda 2)
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-PARQUET_GLOB = str(REPO_ROOT / "data" / "raw" / "pnadc_extraido" / "parquet" / "ano=*" / "trimestre=*" / "*.parquet")
+# Extrato v2 desde a Onda 1 (13/10/2026): mesmas linhas do v1 e colunas a mais (V4039, V3002…).
+PARQUET_GLOB = str(REPO_ROOT / "data" / "raw" / "pnadc_extraido_v2" / "parquet" / "ano=*" / "trimestre=*" / "*.parquet")
 DEFLATOR_PATH = str(REPO_ROOT / "data" / "processed" / "deflator_ibge.parquet")
 OUTPUT_DIR = REPO_ROOT / "data" / "processed"
 
@@ -132,12 +134,9 @@ CREATE TEMP TABLE base AS
             WHEN '10' THEN 'Forças armadas, policiais e bombeiros militares'
             WHEN '11' THEN 'Ocupações maldefinidas'
         END AS grupamento_ocupacional,
-        m.VD4019 AS renda_habitual_nominal,
-        m.VD4020 AS renda_efetiva_nominal,
         -- deflator do IBGE: MULTIPLICA o nominal para trazer a preços do trimestre
         -- de referência (ver src/ingestion/baixar_deflator.py) — não divide.
-        m.VD4019 * d.deflator_habitual AS renda_habitual_real,
-        m.VD4020 * d.deflator_efetivo AS renda_efetiva_real,
+{pop.sql_colunas_renda_tabelas()}
 {pop.sql_colunas_criar_base()}
         -- carteira assinada (CLT): só definida p/ empregados privados, domésticos e
         -- públicos (VD4009 01–06); NULL p/ militar/estatutário (07: vínculo protegido, mas
@@ -190,6 +189,9 @@ CREATE TEMP TABLE base AS
         CASE m.VD4005 WHEN '1' THEN TRUE END AS desalentado,
         m.VD4031 AS horas_habituais_todos_trabalhos,
         m.VD4035 AS horas_efetivas_todos_trabalhos,
+        -- horas habituais do trabalho principal (V4039, extrato v2), só na população de
+        -- referência: denominador da renda por hora desde a Onda 1 (renda e horas do MESMO trabalho)
+        CASE WHEN {pop.REFERENCIA.sql("m")} THEN m.V4039 END AS horas_trabalho_principal,
         m.V1028 AS peso,
         -- UPA (Unidade Primária de Amostragem, conglomerado do desenho amostral da PNAD
         -- Contínua) — usada só como cluster de erro-padrão robusto (ver
@@ -1978,8 +1980,10 @@ def gerar_informalidade(con: duckdb.DuckDBPyConnection) -> None:
 
 
 def gerar_horas_trabalhadas(con: duckdb.DuckDBPyConnection) -> None:
-    """Horas habitualmente trabalhadas (todos os trabalhos, VD4031) e uma renda-por-
-    hora aproximada (renda habitual mensal / (horas semanais x 4,345 semanas/mês)) por
+    """Horas habitualmente trabalhadas no trabalho principal (V4039) e uma renda-por-hora
+    aproximada (renda habitual mensal do trabalho principal / (horas semanais x 4,345
+    semanas/mês)), na população de referência (desde a Onda 1; antes: VD4031 e VD4019,
+    todos os trabalhos, 14+) por
     raça x gênero x faixa etária — testa se o hiato de renda diminui quando controlado
     por jornada (relevante sobretudo pro hiato de GÊNERO, historicamente ligado a
     jornada menor por trabalho de cuidado não-remunerado)."""
@@ -1987,17 +1991,17 @@ def gerar_horas_trabalhadas(con: duckdb.DuckDBPyConnection) -> None:
            ano, trimestre, raca_cor, sexo, faixa_etaria,
            COUNT(*) AS n_amostra,
            SUM(peso) AS populacao_estimada,
-           SUM(horas_habituais_todos_trabalhos * peso)
-               / NULLIF(SUM(peso) FILTER (WHERE horas_habituais_todos_trabalhos IS NOT NULL), 0)
+           SUM(horas_trabalho_principal * peso)
+               / NULLIF(SUM(peso) FILTER (WHERE horas_trabalho_principal IS NOT NULL), 0)
                AS horas_semanais_media,
-           SUM((renda_habitual_real / NULLIF(horas_habituais_todos_trabalhos * 4.345, 0)) * peso)
+           SUM((renda_habitual_real / NULLIF(horas_trabalho_principal * 4.345, 0)) * peso)
                / NULLIF(SUM(peso) FILTER (WHERE renda_habitual_real IS NOT NULL
-                                            AND horas_habituais_todos_trabalhos > 0), 0)
+                                            AND horas_trabalho_principal > 0), 0)
                AS renda_por_hora_real_media"""
     df = _agregar_por_geografia(con, select_agregado)
-    inds = [IndicadorPrecisao("horas", "horas_habituais_todos_trabalhos", "horas_habituais_todos_trabalhos IS NOT NULL"),
-            IndicadorPrecisao("renda_hora", "renda_habitual_real / (horas_habituais_todos_trabalhos * 4.345)",
-                              "renda_habitual_real IS NOT NULL AND horas_habituais_todos_trabalhos > 0")]
+    inds = [IndicadorPrecisao("horas", "horas_trabalho_principal", "horas_trabalho_principal IS NOT NULL"),
+            IndicadorPrecisao("renda_hora", "renda_habitual_real / (horas_trabalho_principal * 4.345)",
+                              "renda_habitual_real IS NOT NULL AND horas_trabalho_principal > 0")]
     df = _anexar_precisao(df, _precisao_celulas(con, inds, _chaves("raca_cor", "sexo", "faixa_etaria")), inds)
     destino = OUTPUT_DIR / "horas_trabalhadas.parquet"
     salvar_tabela(df, destino, regra_supressao=precisao.REGRA_SUPRESSAO)
@@ -2474,11 +2478,12 @@ def gerar_gini_por_raca(con: duckdb.DuckDBPyConnection) -> None:
             SELECT raca_cor, renda_referencia_real, peso, upa, estrato
             FROM base
             WHERE ano = {ano} AND trimestre = {trimestre}
-              AND raca_cor IN ('Branca', 'Preta', 'Parda', 'Indígena')
+              AND raca_cor IN ('Branca', 'Preta', 'Parda', 'Indígena', 'Amarela')
               AND {pop.filtro_sql()}
         """).df()
         if micro.empty:
             continue
+        # Amarela entra desde a Onda 1 (A4; decisão do Ponto de parada 2); Ignorado fica fora
         micro["raca_cor"] = micro["raca_cor"].replace({"Preta": "Negra", "Parda": "Negra"})
         gini = pnadc_core.gini_ponderado_por_grupo(micro, "renda_referencia_real", by=["raca_cor"], peso="peso")
         gini["ano"] = ano
@@ -2493,7 +2498,7 @@ def gerar_gini_por_raca(con: duckdb.DuckDBPyConnection) -> None:
 
 def gerar_theil_racial(con: duckdb.DuckDBPyConnection, n_trimestres: int | None = None) -> None:
     """Decompõe a desigualdade TOTAL de renda (índice de Theil T) em quanto vem de
-    diferença ENTRE raças (Branca/Negra/Indígena) vs. quanto vem de desigualdade DENTRO
+    diferença ENTRE raças (Branca/Negra/Indígena/Amarela; Amarela desde a Onda 1) vs. quanto vem de desigualdade DENTRO
     de cada raça — usa `pnadc_core.decomposicao_theil_entre_dentro` (nova, validada com
     dado sintético antes de rodar aqui). Complementa o Gini por raça acima: aquele mede
     desigualdade dentro de cada grupo isoladamente; este mede que FATIA da desigualdade
@@ -2511,11 +2516,12 @@ def gerar_theil_racial(con: duckdb.DuckDBPyConnection, n_trimestres: int | None 
             SELECT raca_cor, renda_referencia_real, peso, upa, estrato
             FROM base
             WHERE ano = {ano} AND trimestre = {trimestre}
-              AND raca_cor IN ('Branca', 'Preta', 'Parda', 'Indígena')
+              AND raca_cor IN ('Branca', 'Preta', 'Parda', 'Indígena', 'Amarela')
               AND {pop.filtro_sql()}
         """).df()
         if micro.empty:
             continue
+        # Amarela entra desde a Onda 1 (A4; decisão do Ponto de parada 2); Ignorado fica fora
         micro["raca_cor"] = micro["raca_cor"].replace({"Preta": "Negra", "Parda": "Negra"})
         resumo, _ = pnadc_core.decomposicao_theil_entre_dentro(micro, "renda_referencia_real", "raca_cor", "peso")
         resumo["ano"] = ano

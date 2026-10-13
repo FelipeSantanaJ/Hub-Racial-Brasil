@@ -84,6 +84,28 @@ def sql_colunas_criar_base(alias: str = "m", alias_deflator: str = "d") -> str:
         COALESCE({REFERENCIA_14MAIS.sql(a)}, FALSE) AS {COLUNA_FLAG_14},"""
 
 
+def sql_colunas_renda_tabelas(alias: str = "m", alias_deflator: str = "d") -> str:
+    """Colunas de renda que TODAS as tabelas de renda da `agregacoes_pnadc` usam, desde a
+    regeneração da Onda 1 (13/10/2026; decisão do Ponto de parada 2: o Hub não fica com duas
+    populações): `renda_habitual_*` = `VD4016` (trabalho principal) e `renda_efetiva_*` =
+    `VD4017`, **só para quem está na população de referência** (NULL fora dela). Assim todo
+    gerador que filtra "renda IS NOT NULL" passa a usar P1 sem mudar código. O recorte
+    histórico (todos os trabalhos, 14+) fica em `renda_todos_trabalhos_*`, para sensibilidade
+    (P3 do Bloco S). Terminam com vírgula."""
+    a, d = alias, alias_deflator
+    p1 = REFERENCIA.sql(a)
+    return f"""
+        -- Renda das tabelas = renda de referência restrita à população de referência (Onda 1)
+        CASE WHEN {p1} THEN {a}.VD4016 END AS renda_habitual_nominal,
+        CASE WHEN {p1} THEN {a}.VD4017 END AS renda_efetiva_nominal,
+        CASE WHEN {p1} THEN {a}.VD4016 * {d}.deflator_habitual END AS renda_habitual_real,
+        CASE WHEN {p1} THEN {a}.VD4017 * {d}.deflator_efetivo END AS renda_efetiva_real,
+        -- Recorte histórico (até a Onda 1): todos os trabalhos, 14+, só para sensibilidade
+        {a}.{VARIAVEL_RENDA_TODOS_TRABALHOS} AS renda_todos_trabalhos_nominal,
+        {a}.{VARIAVEL_RENDA_TODOS_TRABALHOS} * {d}.deflator_habitual AS renda_todos_trabalhos_real,
+        {a}.VD4020 * {d}.deflator_efetivo AS renda_todos_trabalhos_efetiva_real,"""
+
+
 def filtro_sql(idade_minima: int = IDADE_MINIMA_REFERENCIA) -> str:
     """Predicado SQL sobre a tabela `base` (já com as colunas de `sql_colunas_criar_base`)."""
     if idade_minima == IDADE_MINIMA_REFERENCIA:

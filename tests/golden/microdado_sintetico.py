@@ -60,6 +60,7 @@ def gerar_microdado(n_por_trimestre: int = 2500) -> pd.DataFrame:
             "VD4012": np.where(ocup == "1", rng.choice(["1", "2"], size=n_por_trimestre), None),
             "VD4016": renda, "VD4017": renda, "VD4019": renda, "VD4020": renda,
             "VD4031": np.where(ocup == "1", 40.0, np.nan), "VD4035": np.where(ocup == "1", 40.0, np.nan),
+            "V4039": np.where(ocup == "1", 40.0, np.nan),
             "ano": ano, "trimestre": tri,
         }))
     return pd.concat(partes, ignore_index=True)
