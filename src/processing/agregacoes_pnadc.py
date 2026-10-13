@@ -26,6 +26,7 @@ Decisões importantes (ver docs/PLANO.md para o histórico completo):
 Uso:
     python -m src.processing.agregacoes_pnadc
 """
+from dataclasses import dataclass
 from pathlib import Path
 
 import duckdb
@@ -33,6 +34,7 @@ import numpy as np
 import pandas as pd
 import statsmodels.formula.api as smf
 
+from src.inference import precisao
 from src.inference.saida import salvar_com_inferencia, salvar_tabela
 from src.utils import pnadc_core
 from src.utils import populacao as pop
@@ -257,6 +259,101 @@ def _agregar_por_geografia(
     return pd.concat(partes, ignore_index=True)
 
 
+# --------------------------------------------------------------------------------------- #
+# Precisão e regra de supressão das tabelas de nível (R8; Ponto de parada 3, 13/10/2026)
+# --------------------------------------------------------------------------------------- #
+@dataclass(frozen=True)
+class IndicadorPrecisao:
+    """Um indicador publicado numa tabela de nível. `y_sql` é a variável da média/proporção
+    (None ⇒ total ponderado, ex.: população); `dominio_sql` é o DENOMINADOR (quem entra no
+    cálculo). Gera as colunas `n_<nome>`, `cv_<nome>` e `publicavel_<nome>`."""
+    nome: str
+    y_sql: str | None
+    dominio_sql: str
+
+
+def _bool_sql(expr: str) -> str:
+    return f"CASE WHEN {expr} THEN 1.0 ELSE 0.0 END"
+
+
+IND_RENDA = IndicadorPrecisao("renda", "renda_habitual_real", "renda_habitual_real IS NOT NULL")
+NIVEL_BRASIL = [NIVEIS_GEOGRAFICOS[0]]
+RACA_NEGRA_SQL = "CASE WHEN raca_cor IN ('Preta','Parda') THEN 'Negra' ELSE raca_cor END"
+
+
+def _precisao_celulas(con: duckdb.DuckDBPyConnection, indicadores: list[IndicadorPrecisao],
+                      chaves: dict[str, str], niveis=None, por_trimestre: bool = True,
+                      filtro: str = "TRUE", trimestres_sql: str | None = None) -> pd.DataFrame:
+    """n e CV design-based de cada indicador por célula, sem trazer o microdado ao pandas:
+    o DuckDB soma Σw·y, Σw e n por (célula, estrato, UPA) e `precisao.cv_de_totais_upa`
+    combina pela fórmula de `variancia_linearizada` (domínio = célula; universo = todas as
+    pessoas da base no trimestre, ou nos trimestres agrupados quando `por_trimestre=False`).
+
+    chaves: {nome da coluna na saída: expressão SQL} (além de geografia e ano/trimestre).
+    niveis: subconjunto de NIVEIS_GEOGRAFICOS (padrão: todos). trimestres_sql: predicado que
+    restringe os trimestres (tabelas agrupadas). Devolve nivel_geografico, geografia,
+    [ano, trimestre], chaves, n_<ind>, cv_<ind>."""
+    niveis = NIVEIS_GEOGRAFICOS if niveis is None else niveis
+    periodo = trimestres_sql or "TRUE"
+    if por_trimestre:
+        periodos = [(int(a), int(t)) for a, t in con.execute(
+            f"SELECT DISTINCT ano, trimestre FROM base WHERE {periodo} ORDER BY 1, 2").fetchall()]
+    else:
+        periodos = [None]
+    sel_chaves = ", ".join(f"{expr} AS {nome}" for nome, expr in chaves.items())
+    agregados = ", ".join(
+        (f"SUM(peso * ({ind.y_sql})) FILTER (WHERE {ind.dominio_sql}) AS A_{i}, " if ind.y_sql else "")
+        + f"SUM(peso) FILTER (WHERE {ind.dominio_sql}) AS B_{i}, "
+        + f"COUNT(*) FILTER (WHERE {ind.dominio_sql}) AS n_{i}"
+        for i, ind in enumerate(indicadores))
+    partes = []
+    for per in periodos:
+        cond_per = f"ano = {per[0]} AND trimestre = {per[1]}" if per else periodo
+        n_h = con.execute(f"""SELECT estrato, COUNT(DISTINCT upa) AS n_h FROM base
+                              WHERE {cond_per} GROUP BY estrato""").df()
+        for nivel, geo_expr, filtro_geo, _ in niveis:
+            tot = con.execute(f"""
+                SELECT {geo_expr} AS geografia, {sel_chaves}, estrato, upa, {agregados}
+                FROM base WHERE {cond_per} AND {filtro_geo} AND {filtro}
+                GROUP BY ALL""").df()
+            if tot.empty:
+                continue
+            cel_chaves = ["geografia", *chaves]
+            res = None
+            for i, ind in enumerate(indicadores):
+                t = tot[tot[f"n_{i}"] > 0].rename(columns={f"B_{i}": "B", f"n_{i}": "n"})
+                if ind.y_sql:
+                    t = t.rename(columns={f"A_{i}": "A"})
+                r = precisao.cv_de_totais_upa(t, cel_chaves, n_h, tipo="media" if ind.y_sql else "total")
+                r = r[[*cel_chaves, "n", "cv"]].rename(columns={"n": f"n_{ind.nome}", "cv": f"cv_{ind.nome}"})
+                res = r if res is None else res.merge(r, on=cel_chaves, how="outer")
+            res.insert(0, "nivel_geografico", nivel)
+            if per:
+                res["ano"], res["trimestre"] = per
+            partes.append(res)
+    return pd.concat(partes, ignore_index=True)
+
+
+def _anexar_precisao(df: pd.DataFrame, prec: pd.DataFrame, indicadores: list[IndicadorPrecisao]) -> pd.DataFrame:
+    """Junta n/cv à tabela e aplica a regra (`precisao.publicavel`). `publicavel` (sem
+    sufixo) é o do PRIMEIRO indicador da lista, o principal da tabela. Célula sem ninguém
+    no denominador: n = 0, CV indefinido, não publicável. Nenhum valor é apagado."""
+    chaves = [c for c in prec.columns if c in df.columns and not c.startswith(("n_", "cv_"))]
+    for c in ("ano", "trimestre"):
+        if c in chaves:
+            prec[c] = prec[c].astype(df[c].dtype)
+    out = df.merge(prec, on=chaves, how="left", validate="one_to_one")
+    for ind in indicadores:
+        out[f"n_{ind.nome}"] = out[f"n_{ind.nome}"].fillna(0).astype("int64")
+        out[f"publicavel_{ind.nome}"] = precisao.publicavel(out[f"n_{ind.nome}"], out[f"cv_{ind.nome}"])
+    out["publicavel"] = out[f"publicavel_{indicadores[0].nome}"]
+    return out
+
+
+def _chaves(*nomes: str, **exprs: str) -> dict[str, str]:
+    return {**{n: n for n in nomes}, **exprs}
+
+
 def gerar_renda(con: duckdb.DuckDBPyConnection) -> None:
     select_agregado = """
            ano, trimestre, raca_cor, sexo, faixa_etaria,
@@ -275,8 +372,10 @@ def gerar_renda(con: duckdb.DuckDBPyConnection) -> None:
                / NULLIF(SUM(peso) FILTER (WHERE renda_efetiva_real IS NOT NULL), 0)
                AS renda_efetiva_real_media"""
     df = _agregar_por_geografia(con, select_agregado)
+    inds = [IND_RENDA]
+    df = _anexar_precisao(df, _precisao_celulas(con, inds, _chaves("raca_cor", "sexo", "faixa_etaria")), inds)
     destino = OUTPUT_DIR / "renda.parquet"
-    salvar_tabela(df, destino)
+    salvar_tabela(df, destino, regra_supressao=precisao.REGRA_SUPRESSAO)
     print(f"renda.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -297,8 +396,10 @@ def gerar_renda_por_escolaridade(con: duckdb.DuckDBPyConnection) -> None:
         con, select_agregado, group_by_extra="nivel_instrucao", incluir_faixa_etaria=False
     )
     df = df[df["nivel_instrucao"].notna()]
+    inds = [IND_RENDA]
+    df = _anexar_precisao(df, _precisao_celulas(con, inds, _chaves("raca_cor", "sexo", "nivel_instrucao")), inds)
     destino = OUTPUT_DIR / "renda_por_escolaridade.parquet"
-    salvar_tabela(df, destino)
+    salvar_tabela(df, destino, regra_supressao=precisao.REGRA_SUPRESSAO)
     print(f"renda_por_escolaridade.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -317,8 +418,10 @@ def gerar_renda_por_geracao(con: duckdb.DuckDBPyConnection) -> None:
     df = _agregar_por_geografia(
         con, select_agregado, group_by_extra="geracao", incluir_faixa_etaria=False
     )
+    inds = [IND_RENDA]
+    df = _anexar_precisao(df, _precisao_celulas(con, inds, _chaves("raca_cor", "sexo", "geracao")), inds)
     destino = OUTPUT_DIR / "renda_por_geracao.parquet"
-    salvar_tabela(df, destino)
+    salvar_tabela(df, destino, regra_supressao=precisao.REGRA_SUPRESSAO)
     print(f"renda_por_geracao.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -1862,8 +1965,11 @@ def gerar_informalidade(con: duckdb.DuckDBPyConnection) -> None:
                / NULLIF(SUM(peso) FILTER (WHERE contribui_previdencia IS NOT NULL), 0)
                AS pct_contribui_previdencia"""
     df = _agregar_por_geografia(con, select_agregado)
+    inds = [IndicadorPrecisao("carteira", _bool_sql("tem_carteira_assinada"), "tem_carteira_assinada IS NOT NULL"),
+            IndicadorPrecisao("previdencia", _bool_sql("contribui_previdencia"), "contribui_previdencia IS NOT NULL")]
+    df = _anexar_precisao(df, _precisao_celulas(con, inds, _chaves("raca_cor", "sexo", "faixa_etaria")), inds)
     destino = OUTPUT_DIR / "informalidade.parquet"
-    salvar_tabela(df, destino)
+    salvar_tabela(df, destino, regra_supressao=precisao.REGRA_SUPRESSAO)
     print(f"informalidade.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -1885,8 +1991,12 @@ def gerar_horas_trabalhadas(con: duckdb.DuckDBPyConnection) -> None:
                                             AND horas_habituais_todos_trabalhos > 0), 0)
                AS renda_por_hora_real_media"""
     df = _agregar_por_geografia(con, select_agregado)
+    inds = [IndicadorPrecisao("horas", "horas_habituais_todos_trabalhos", "horas_habituais_todos_trabalhos IS NOT NULL"),
+            IndicadorPrecisao("renda_hora", "renda_habitual_real / (horas_habituais_todos_trabalhos * 4.345)",
+                              "renda_habitual_real IS NOT NULL AND horas_habituais_todos_trabalhos > 0")]
+    df = _anexar_precisao(df, _precisao_celulas(con, inds, _chaves("raca_cor", "sexo", "faixa_etaria")), inds)
     destino = OUTPUT_DIR / "horas_trabalhadas.parquet"
-    salvar_tabela(df, destino)
+    salvar_tabela(df, destino, regra_supressao=precisao.REGRA_SUPRESSAO)
     print(f"horas_trabalhadas.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -1916,8 +2026,11 @@ def gerar_alfabetizacao(con: duckdb.DuckDBPyConnection) -> None:
         GROUP BY ano, trimestre, raca_cor, sexo, faixa_etaria
     """
     df = con.execute(query).df()
+    inds = [IndicadorPrecisao("alfabetizado", _bool_sql("alfabetizado"), "alfabetizado IS NOT NULL")]
+    prec = _precisao_celulas(con, inds, _chaves("raca_cor", "sexo", "faixa_etaria"), niveis=NIVEL_BRASIL)
+    df = _anexar_precisao(df, prec, inds)
     destino = OUTPUT_DIR / "alfabetizacao.parquet"
-    salvar_tabela(df, destino)
+    salvar_tabela(df, destino, regra_supressao=precisao.REGRA_SUPRESSAO)
     print(f"alfabetizacao.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -1938,8 +2051,12 @@ def gerar_desalento_subutilizacao(con: duckdb.DuckDBPyConnection) -> None:
                / NULLIF(SUM(peso) FILTER (WHERE forca_trabalho = '2'), 0)
                AS pct_desalento"""
     df = _agregar_por_geografia(con, select_agregado)
+    inds = [IndicadorPrecisao("desalento", _bool_sql("COALESCE(desalentado, FALSE)"), "forca_trabalho = '2'"),
+            IndicadorPrecisao("forca_potencial", _bool_sql("forca_trabalho_potencial"),
+                              "forca_trabalho_potencial IS NOT NULL")]
+    df = _anexar_precisao(df, _precisao_celulas(con, inds, _chaves("raca_cor", "sexo", "faixa_etaria")), inds)
     destino = OUTPUT_DIR / "desalento_subutilizacao.parquet"
-    salvar_tabela(df, destino)
+    salvar_tabela(df, destino, regra_supressao=precisao.REGRA_SUPRESSAO)
     print(f"desalento_subutilizacao.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -1961,8 +2078,11 @@ def gerar_sobrequalificacao(con: duckdb.DuckDBPyConnection) -> None:
                                              AND grupamento_ocupacional IS NOT NULL), 0)
                AS pct_sobrequalificado"""
     df = _agregar_por_geografia(con, select_agregado, incluir_faixa_etaria=False)
+    inds = [IndicadorPrecisao("sobrequalificado", _bool_sql("grupamento_ocupacional = 'Ocupações elementares'"),
+                              "nivel_instrucao = 'Superior completo' AND grupamento_ocupacional IS NOT NULL")]
+    df = _anexar_precisao(df, _precisao_celulas(con, inds, _chaves("raca_cor", "sexo")), inds)
     destino = OUTPUT_DIR / "sobrequalificacao.parquet"
-    salvar_tabela(df, destino)
+    salvar_tabela(df, destino, regra_supressao=precisao.REGRA_SUPRESSAO)
     print(f"sobrequalificacao.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -2437,8 +2557,15 @@ def gerar_renda_multidimensional_faixa(con: duckdb.DuckDBPyConnection, n_trimest
         GROUP BY raca_cor, sexo, faixa_etaria, nivel_instrucao, grupamento_ocupacional"""
     df = con.execute(query).df()
     df = df[df["nivel_instrucao"].notna()]
+    inds = [IND_RENDA]
+    ultimos = ("(ano, trimestre) IN (SELECT ano, trimestre FROM (SELECT DISTINCT ano, trimestre FROM base "
+               f"ORDER BY ano DESC, trimestre DESC LIMIT {n_trimestres}))")
+    prec = _precisao_celulas(con, inds, _chaves("raca_cor", "sexo", "faixa_etaria", "nivel_instrucao", "grupamento_ocupacional"),
+                             niveis=NIVEL_BRASIL, por_trimestre=False,
+                             filtro="grupamento_ocupacional IS NOT NULL", trimestres_sql=ultimos)
+    df = _anexar_precisao(df, prec.drop(columns=["nivel_geografico", "geografia"]), inds)
     destino = OUTPUT_DIR / "renda_multidimensional_faixa.parquet"
-    salvar_tabela(df, destino)
+    salvar_tabela(df, destino, regra_supressao=precisao.REGRA_SUPRESSAO)
     print(f"renda_multidimensional_faixa.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -2464,8 +2591,15 @@ def gerar_renda_multidimensional_geracao(con: duckdb.DuckDBPyConnection, n_trime
         GROUP BY raca_cor, sexo, geracao, nivel_instrucao, grupamento_ocupacional"""
     df = con.execute(query).df()
     df = df[df["nivel_instrucao"].notna()]
+    inds = [IND_RENDA]
+    ultimos = ("(ano, trimestre) IN (SELECT ano, trimestre FROM (SELECT DISTINCT ano, trimestre FROM base "
+               f"ORDER BY ano DESC, trimestre DESC LIMIT {n_trimestres}))")
+    prec = _precisao_celulas(con, inds, _chaves("raca_cor", "sexo", "geracao", "nivel_instrucao", "grupamento_ocupacional"),
+                             niveis=NIVEL_BRASIL, por_trimestre=False,
+                             filtro="grupamento_ocupacional IS NOT NULL", trimestres_sql=ultimos)
+    df = _anexar_precisao(df, prec.drop(columns=["nivel_geografico", "geografia"]), inds)
     destino = OUTPUT_DIR / "renda_multidimensional_geracao.parquet"
-    salvar_tabela(df, destino)
+    salvar_tabela(df, destino, regra_supressao=precisao.REGRA_SUPRESSAO)
     print(f"renda_multidimensional_geracao.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -2487,8 +2621,10 @@ def gerar_renda_completa(con: duckdb.DuckDBPyConnection) -> None:
         GROUP BY ano, trimestre, raca_cor, sexo, faixa_etaria, nivel_instrucao"""
     df = con.execute(query).df()
     df = df[df["nivel_instrucao"].notna()]
+    inds = [IND_RENDA]
+    df = _anexar_precisao(df, _precisao_celulas(con, inds, _chaves("raca_cor", "sexo", "faixa_etaria", "nivel_instrucao"), niveis=NIVEL_BRASIL), inds)
     destino = OUTPUT_DIR / "renda_completa.parquet"
-    salvar_tabela(df, destino)
+    salvar_tabela(df, destino, regra_supressao=precisao.REGRA_SUPRESSAO)
     print(f"renda_completa.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -2511,8 +2647,10 @@ def gerar_renda_completa_geracao(con: duckdb.DuckDBPyConnection) -> None:
         GROUP BY ano, trimestre, raca_cor, sexo, geracao, nivel_instrucao"""
     df = con.execute(query).df()
     df = df[df["nivel_instrucao"].notna()]
+    inds = [IND_RENDA]
+    df = _anexar_precisao(df, _precisao_celulas(con, inds, _chaves("raca_cor", "sexo", "geracao", "nivel_instrucao"), niveis=NIVEL_BRASIL), inds)
     destino = OUTPUT_DIR / "renda_completa_geracao.parquet"
-    salvar_tabela(df, destino)
+    salvar_tabela(df, destino, regra_supressao=precisao.REGRA_SUPRESSAO)
     print(f"renda_completa_geracao.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -2523,8 +2661,11 @@ def gerar_escolaridade(con: duckdb.DuckDBPyConnection) -> None:
            SUM(peso) AS populacao_estimada"""
     df = _agregar_por_geografia(con, select_agregado, group_by_extra="nivel_instrucao")
     df = df[df["nivel_instrucao"].notna()]
+    inds = [IndicadorPrecisao("populacao", None, "TRUE")]
+    prec = _precisao_celulas(con, inds, _chaves("raca_cor", "sexo", "faixa_etaria", "nivel_instrucao"))
+    df = _anexar_precisao(df, prec, inds)
     destino = OUTPUT_DIR / "escolaridade.parquet"
-    salvar_tabela(df, destino)
+    salvar_tabela(df, destino, regra_supressao=precisao.REGRA_SUPRESSAO)
     print(f"escolaridade.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -2539,8 +2680,10 @@ def gerar_ocupacao(con: duckdb.DuckDBPyConnection) -> None:
                / NULLIF(SUM(peso) FILTER (WHERE forca_trabalho = '1'), 0)
                AS taxa_desocupacao_pct"""
     df = _agregar_por_geografia(con, select_agregado)
+    inds = [IndicadorPrecisao("desocupacao", _bool_sql("condicao_ocupacao = '2'"), "forca_trabalho = '1'")]
+    df = _anexar_precisao(df, _precisao_celulas(con, inds, _chaves("raca_cor", "sexo", "faixa_etaria")), inds)
     destino = OUTPUT_DIR / "ocupacao.parquet"
-    salvar_tabela(df, destino)
+    salvar_tabela(df, destino, regra_supressao=precisao.REGRA_SUPRESSAO)
     print(f"ocupacao.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -2606,7 +2749,12 @@ def gerar_desocupacao_por_escolaridade(con: duckdb.DuckDBPyConnection) -> None:
         GROUP BY 1,2,3,4
     """).df()
     df["taxa_desocupacao_pct"] = 100 * df["pop_desocupados"] / df["pop_forca"]
-    salvar_tabela(df, OUTPUT_DIR / "desocupacao_por_escolaridade.parquet")
+    inds = [IndicadorPrecisao("desocupacao", _bool_sql("condicao_ocupacao = '2'"), "forca_trabalho = '1'")]
+    prec = _precisao_celulas(
+        con, inds, _chaves("nivel_instrucao", raca_cor=RACA_NEGRA_SQL), niveis=NIVEL_BRASIL,
+        filtro="nivel_instrucao IS NOT NULL AND raca_cor IN ('Branca','Preta','Parda','Indígena')")
+    df = _anexar_precisao(df, prec.drop(columns=["nivel_geografico", "geografia"]), inds)
+    salvar_tabela(df, OUTPUT_DIR / "desocupacao_por_escolaridade.parquet", regra_supressao=precisao.REGRA_SUPRESSAO)
     print(f"desocupacao_por_escolaridade.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -2672,7 +2820,17 @@ def gerar_faixas_salario_minimo(con: duckdb.DuckDBPyConnection) -> None:
     df = pd.concat(linhas, ignore_index=True)
     for c in ("ate_1sm", "ate_2sm", "acima_3sm"):
         df[f"pct_{c}"] = 100 * df[c] / df["pop"]
-    salvar_tabela(df, OUTPUT_DIR / "faixas_salario_minimo.parquet")
+    sm = "CASE ano " + " ".join(f"WHEN {a} THEN {v}" for a, v in SALARIO_MINIMO_NOMINAL.items()) + " END"
+    dom = "renda_habitual_nominal IS NOT NULL AND renda_habitual_nominal > 0"
+    inds = [IndicadorPrecisao("ate_1sm", _bool_sql(f"renda_habitual_nominal <= {sm}"), dom),
+            IndicadorPrecisao("ate_2sm", _bool_sql(f"renda_habitual_nominal <= 2 * {sm}"), dom),
+            IndicadorPrecisao("acima_3sm", _bool_sql(f"renda_habitual_nominal > 3 * {sm}"), dom)]
+    prec = _precisao_celulas(
+        con, inds, _chaves(raca_cor=RACA_NEGRA_SQL), niveis=NIVEL_BRASIL,
+        filtro="raca_cor IN ('Branca','Preta','Parda','Indígena')",
+        trimestres_sql=f"ano IN ({', '.join(str(a) for a in SALARIO_MINIMO_NOMINAL)})")
+    df = _anexar_precisao(df, prec.drop(columns=["nivel_geografico", "geografia"]), inds)
+    salvar_tabela(df, OUTPUT_DIR / "faixas_salario_minimo.parquet", regra_supressao=precisao.REGRA_SUPRESSAO)
     print(f"faixas_salario_minimo.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 

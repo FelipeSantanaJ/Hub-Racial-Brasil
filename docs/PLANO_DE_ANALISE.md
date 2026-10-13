@@ -40,6 +40,13 @@
    fica com duas populações).
 4. Theil e Gini passam a incluir **Amarela** no total (A4).
 
+**Decisões do Ponto de parada 3 (13/10/2026; "sim" para as quatro recomendações da Rodada 2):**
+1. Corrigir o E6 e regenerar **só** `decomposicao_raca_genero` (feito na Fase 3b).
+2. Regra de supressão: n < 30 **ou** CV > 30% ⇒ não publica (fecha o ponto aberto 4).
+3. Heaping nos limiares de quantil: repartir o peso dos empatados para cada fatia somar exatamente 10%/25%.
+4. Carteira assinada = só CLT, com categoria própria para estatutário/militar.
+Os itens 2–4 entram no código já, mas só valem na regeneração única da Onda 1.
+
 ---
 
 ## 0. Como ler este plano
@@ -410,4 +417,4 @@ Dentro da Onda 4, **H1 e E5 compartilham a mesma base** (ligação filhos–pais
 1. Qual variável o Hub usa hoje como renda (`VD4019` = todos os trabalhos? `VD4016` = trabalho principal?) e qual faixa etária. Se divergir da decisão, regenerar com a decisão e reportar a diferença.
 2. Acesso a RAIS identificada, Painel de Pessoal e microdados INEP; custo de obtenção.
 3. Existência de módulo de mobilidade social na PNAD/PNADC (para H).
-4. Limite mínimo de amostra por célula para raça × gênero × Indígena/Amarela (definir regra de supressão).
+4. ~~Limite mínimo de amostra por célula para raça × gênero × Indígena/Amarela (definir regra de supressão).~~ **Fechado em 13/10/2026 (Ponto de parada 3):** n < 30 no denominador do indicador **ou** CV design-based > 30% ⇒ não publica; valores mantidos com a coluna `publicavel` (`src/inference/precisao.py`; `docs/LIMITACOES_E_METODOLOGIA.md`). Revisar no Bloco F.

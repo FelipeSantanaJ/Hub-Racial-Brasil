@@ -27,6 +27,27 @@ regeneração única da Onda 1**.
   materializa a `CRIAR_BASE` e chama só esse gerador (a função usa `renda_habitual_real`, que a
   troca de população não afeta).
 
+### 2. Regra de supressão (R8) — **no código; vale na regeneração da Onda 1**
+
+- **O quê.** As tabelas de nível ganham, para cada indicador, `n_<ind>` (n do DENOMINADOR),
+  `cv_<ind>` (CV design-based) e `publicavel_<ind>`, mais `publicavel` (indicador principal).
+  Regra: **n ≥ 30 e CV ≤ 30%**; estimativa zero ou CV indefinido ⇒ não publicável. Nenhum valor é
+  apagado. A regra vai no `_meta.json` (`regra_supressao`). Tabelas: `renda`, `renda_por_*`,
+  `renda_completa*`, `renda_multidimensional_*`, `escolaridade`, `ocupacao`,
+  `desocupacao_por_escolaridade`, `informalidade`, `horas_trabalhadas`, `alfabetizacao`,
+  `desalento_subutilizacao`, `sobrequalificacao`, `faixas_salario_minimo`.
+- **Como.** `src/inference/precisao.py` combina totais por (célula, estrato, UPA) somados no
+  DuckDB pela fórmula de `variancia_linearizada` (domínio = célula). Validação em 2026T2
+  (`python -m src.auditoria.validacao_cv`; `docs/auditoria/validacao_cv.json`): diferença relativa
+  máxima **2×10⁻¹⁵** contra `erro_padrao_media_design` sobre o microdado, em 120 células (renda
+  média, proporção com carteira e total ponderado).
+- **Por quê.** `n_amostra = COUNT(*)` conta quem não entra no indicador e não havia regra: 12%
+  das células nacionais e 40% das de UF de `renda.parquet` tinham n < 30.
+- **Impacto previsto.** Só colunas novas; nenhum número muda. Em `renda` 2026T2, passam na regra
+  78,9% das células do Brasil, 64,6% das regionais, 53,2% das de UF e 46,6% das da RM de SP. O
+  golden-file de `renda` foi regerado (intencional): as 13 colunas antigas ficam idênticas e
+  entram 4 colunas novas.
+
 ---
 
 ## 13/10/2026 — Etapa 2, Fase 2 (branch `auditoria/fase2-infra`)

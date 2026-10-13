@@ -20,6 +20,13 @@ Desde a Fase 2, `hiato_racial`, `gini_por_raca`, `theil_racial` e `decomposicao_
 usam a população de referência no código**, mas os parquets ainda não foram regenerados: contam como
 "precisa refazer" até a próxima regeneração.
 
+Desde a Fase 3b (13/10/2026), também já estão no código, valendo a partir da regeneração da Onda 1:
+- regra de supressão (`n_*`, `cv_*`, `publicavel` nas tabelas de nível);
+- repartição do peso empatado nos limiares de quantil (A3/A5: `perfil_*`, `extremos_*`, `quartis_multi_racial`);
+- carteira só CLT + estatutário/militar à parte (`informalidade`).
+
+A `decomposicao_raca_genero` (C1–C3) já foi regenerada com a correção do E6.
+
 ## Bloco F — Fundações
 
 | ID | Estado | Onde / o que falta | Por quê |

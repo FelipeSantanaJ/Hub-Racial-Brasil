@@ -1,0 +1,53 @@
+{
+  "trimestre": "2026T2",
+  "casos": {
+    "renda": {
+      "celulas": 1673,
+      "celulas_validadas": 40,
+      "celulas_ep_zero_nos_dois": 0,
+      "dif_relativa_max": 1.5501457390582296e-15,
+      "dif_relativa_mediana": 1.9050150916021498e-16,
+      "segundos_trimestre_5_niveis": 1.4,
+      "pct_publicavel_por_nivel": {
+        "brasil": 78.9,
+        "regiao": 64.6,
+        "rm_sp": 46.6,
+        "sp_capital_interior": 55.4,
+        "uf": 53.2
+      },
+      "pct_publicavel_total": 55.6
+    },
+    "carteira (VD4009 atual)": {
+      "celulas": 1631,
+      "celulas_validadas": 40,
+      "celulas_ep_zero_nos_dois": 1,
+      "dif_relativa_max": 6.188486561018209e-16,
+      "dif_relativa_mediana": 1.3287326617995717e-16,
+      "segundos_trimestre_5_niveis": 1.3,
+      "pct_publicavel_por_nivel": {
+        "brasil": 76.8,
+        "regiao": 56.5,
+        "rm_sp": 47.1,
+        "sp_capital_interior": 51.6,
+        "uf": 50.3
+      },
+      "pct_publicavel_total": 52.1
+    },
+    "populacao (escolaridade)": {
+      "celulas": 2516,
+      "celulas_validadas": 40,
+      "celulas_ep_zero_nos_dois": 0,
+      "dif_relativa_max": 3.8795538717082613e-16,
+      "dif_relativa_mediana": 6.112044001238308e-17,
+      "segundos_trimestre_5_niveis": 1.5,
+      "pct_publicavel_por_nivel": {
+        "brasil": 83.1,
+        "regiao": 68.9,
+        "rm_sp": 56.5,
+        "sp_capital_interior": 60.4,
+        "uf": 59.9
+      },
+      "pct_publicavel_total": 61.9
+    }
+  }
+}

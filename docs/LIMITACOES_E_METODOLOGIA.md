@@ -28,10 +28,43 @@ Autodeclaração indígena é ~0,6% da amostra da PNAD Contínua (ex.: ~2.900 re
 no trimestre mais recente, antes de qualquer segmentação por UF, gênero ou faixa etária).
 Cruzamentos mais finos (ex.: mulheres indígenas de 60+ anos numa UF específica) podem ter
 poucas dezenas de observações — a estimativa ainda é calculada, mas o intervalo de confiança
-é largo. Quando isso importar para uma conclusão, checar `n_amostra` antes de destacar o
-número. O Censo Demográfico (Etapa 2) tem quesito e cobertura dedicados à população indígena
+é largo. Quando isso importar para uma conclusão, checar `publicavel` (regra de supressão,
+seção seguinte) antes de destacar o número; `n_amostra` conta todas as pessoas da célula, não
+só o denominador do indicador. O Censo Demográfico (Etapa 2) tem quesito e cobertura dedicados à população indígena
 (incl. terras indígenas) e deve ser tratado como fonte mais robusta para esse recorte
 especificamente.
+
+## Regra de supressão: n < 30 ou CV > 30% não se publica
+
+Decisão do Ponto de parada 3 (13/10/2026; R8 da auditoria Rodada 2). Está no código desde
+13/10/2026 e **vale a partir da regeneração da Onda 1**: os parquets atuais ainda não têm as
+colunas.
+
+- **Regra.** Uma estimativa de célula é publicável só se tiver **n ≥ 30 observações no
+  denominador do indicador** e **CV ≤ 30%**. Estimativa zero, ou CV indefinido (n < 2), não é
+  publicável.
+- **n do denominador.** `n_amostra = COUNT(*)` conta todas as pessoas da célula, inclusive quem
+  não entra no cálculo (ex.: na renda média, quem não tem renda). Por isso cada indicador ganha
+  o seu `n_<ind>`: `n_renda` (quem tem renda), `n_carteira` (empregados), `n_desocupacao` (força
+  de trabalho), `n_desalento` (fora da força) etc.
+- **CV.** Erro-padrão design-based (linearização de Taylor com Estrato e UPA,
+  `src/inference/variancia.py`) dividido pela estimativa. Nas agregações em SQL, o DuckDB soma
+  Σw·y e Σw por (célula, estrato, UPA) e `src/inference/precisao.py` combina pela mesma fórmula,
+  com a célula como domínio: as UPAs do estrato sem ninguém da célula entram com zero. Em
+  2026T2, a validação contra o cálculo sobre o microdado deu diferença relativa máxima de
+  2×10⁻¹⁵ em 120 células (`docs/auditoria/validacao_cv.json`).
+- **Colunas.** Cada tabela de nível ganha `n_<ind>`, `cv_<ind>` e `publicavel_<ind>` para cada
+  indicador, e `publicavel` (o do indicador principal). **Nenhum valor é apagado**: gráficos e
+  textos filtram por `publicavel`. A regra também fica no `_meta.json` (campo
+  `regra_supressao`).
+- **Tabelas cobertas:** `renda`, `renda_por_escolaridade`, `renda_por_geracao`,
+  `renda_completa`, `renda_completa_geracao`, `renda_multidimensional_faixa`/`_geracao`,
+  `escolaridade` (CV do total ponderado), `ocupacao`, `desocupacao_por_escolaridade`,
+  `informalidade`, `horas_trabalhadas`, `alfabetizacao`, `desalento_subutilizacao`,
+  `sobrequalificacao` e `faixas_salario_minimo`. As tabelas de hiato já trazem IC e p-valor;
+  `hiato_arvore` tem corte próprio de n ≥ 30.
+- **Ordem de grandeza** (`renda`, 2026T2, renda habitual real): passam na regra 78,9% das
+  células do nível Brasil, 64,6% das regionais, 53,2% das de UF e 46,6% das da RM de SP.
 
 ## Geografia: São Paulo sim, ABC Paulista não
 
