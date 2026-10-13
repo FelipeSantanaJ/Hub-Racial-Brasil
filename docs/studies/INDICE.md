@@ -15,6 +15,7 @@ de publicação. Estudos entram aqui quando a ficha é criada, não quando o res
 | T | População inteira: renda domiciliar per capita, pobreza, fontes (T1–T3) | D | 1 | Aprovado com ressalvas | [T/ficha.md](T/ficha.md) | Onda 1, parte 2 |
 | A | A diferença existe? De quanto é? (A2–A7) | D | 1 | Aprovado com ressalvas | [A/ficha.md](A/ficha.md) | Onda 1, parte 2 |
 | T4 | Quem está em cada décimo de renda domiciliar per capita | D | 1 | Aprovado com ressalvas (proposto) | [T4/ficha.md](T4/ficha.md) | Onda 1, pendências |
+| S0.3 | Quem está fora de P1 é diferente entre os grupos? (perfis) | D | 1 | Aprovado com ressalvas (proposto) | [S0.3/ficha.md](S0.3/ficha.md) | Onda 1, pendências |
 
 O que já existe no Hub e a qual pergunta corresponde está em
 [`docs/auditoria/mapa_cobertura_plano.md`](../auditoria/mapa_cobertura_plano.md).

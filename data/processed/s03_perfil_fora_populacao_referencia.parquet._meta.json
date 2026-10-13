@@ -1,0 +1,26 @@
+{
+  "esquema": "hub-racial-meta/1",
+  "arquivo": "s03_perfil_fora_populacao_referencia.parquet",
+  "n_linhas": 1260,
+  "gerado_em": "2026-10-13T17:43:56.808770+00:00",
+  "codigo": {
+    "commit": "2219b86ef613f5beb3b9df026d98c7f4da5670d0-modificado",
+    "modulo": "__main__"
+  },
+  "insumos": {
+    "chave": "trimestral_v2",
+    "descricao": "PNAD Contínua trimestral, extrato v2 + deflator IBGE",
+    "hash": "9b64f579fa63981e9237190166d333a9ac546041a4df260d2c67dabf49f1ceda",
+    "n_arquivos": 228
+  },
+  "se_metodo": "linearizacao_taylor_estrato_upa",
+  "populacao": "NÃO DOCUMENTADA (conferir o gerador e acrescentar ao catálogo)",
+  "periodo": null,
+  "regra_supressao": {
+    "n_minimo": 30,
+    "cv_maximo": 0.3,
+    "descricao": "Estimativa publicável só se n ≥ 30 observações no denominador do indicador E CV design-based (linearização Estrato/UPA) ≤ 30%. Estimativa zero ou CV indefinido ⇒ não publicável. Valores não são apagados: filtrar pela coluna publicavel_<ind>.",
+    "decisao": "Ponto de parada 3, 13/10/2026 (R8 da auditoria Rodada 2)"
+  },
+  "nota": "Diferenças (raca com '−'): publicavel = n ≥ 30 nos dois grupos (CV não se aplica a diferenças)"
+}
