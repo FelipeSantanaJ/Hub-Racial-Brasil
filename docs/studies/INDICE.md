@@ -26,6 +26,7 @@ de publicação. Estudos entram aqui quando a ficha é criada, não quando o res
 | B4 | Coortes: mesma idade e idade-período-coorte (Deaton-Paxson) | D/C | 2 | Aprovado com ressalvas (proposto) | [B4/ficha.md](B4/ficha.md) | Onda 2 |
 | B2 | Mudança do hiato no tempo: reclassificação, composição e retornos (JMP) | C | 2 | Aprovado com ressalvas (proposto) | [B2/ficha.md](B2/ficha.md) | Onda 2 |
 | C1 | Células raça × sexo: ranking, hiatos, quantis, Theil (P1, P4, domiciliar) | D | 2 | Aprovado com ressalvas (proposto) | [C1/ficha.md](C1/ficha.md) | Onda 2 |
+| C2 | Interação raça × gênero (DiD e β3 com EP design-based) | D/C | 2 | Aprovado com ressalvas (proposto) | [C2/ficha.md](C2/ficha.md) | Onda 2 |
 
 O que já existe no Hub e a qual pergunta corresponde está em
 [`docs/auditoria/mapa_cobertura_plano.md`](../auditoria/mapa_cobertura_plano.md).
