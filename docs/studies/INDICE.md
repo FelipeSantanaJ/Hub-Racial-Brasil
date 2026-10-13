@@ -23,6 +23,7 @@ de publicação. Estudos entram aqui quando a ficha é criada, não quando o res
 | B5 | Ciclo × tendência do hiato (desocupação) | D | 2 | Aprovado com ressalvas (proposto) | [B5/ficha.md](B5/ficha.md) | Onda 2 |
 | B6 | Projeção condicional do ano de paridade (premissas explícitas) | D | 2 | Aprovado com ressalvas (proposto) | [B6/ficha.md](B6/ficha.md) | Onda 2 |
 | B3 | Convergência por quantil (P10…P90) | D | 2 | Aprovado com ressalvas (proposto) | [B3/ficha.md](B3/ficha.md) | Onda 2 |
+| B4 | Coortes: mesma idade e idade-período-coorte (Deaton-Paxson) | D/C | 2 | Aprovado com ressalvas (proposto) | [B4/ficha.md](B4/ficha.md) | Onda 2 |
 
 O que já existe no Hub e a qual pergunta corresponde está em
 [`docs/auditoria/mapa_cobertura_plano.md`](../auditoria/mapa_cobertura_plano.md).
