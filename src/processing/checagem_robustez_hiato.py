@@ -25,6 +25,7 @@ import pandas as pd
 from scipy import stats
 
 from src.inference import variancia
+from src.inference.saida import escrever_meta
 from src.processing.agregacoes_pnadc import CRIAR_BASE, OUTPUT_DIR
 from src.utils import pnadc_core
 
@@ -93,6 +94,7 @@ def main() -> None:
 
     destino = OUTPUT_DIR / "checagem_robustez_hiato_racial.parquet"
     df.to_parquet(destino, index=False)
+    escrever_meta(destino, n_boot=N_BOOT, bootstrap="rao_wu_estrato_upa")
 
     razao = df["razao_linearizacao_sobre_bootstrap"]
     print(f"checagem_robustez_hiato_racial.parquet: {len(df)} trimestres", flush=True)

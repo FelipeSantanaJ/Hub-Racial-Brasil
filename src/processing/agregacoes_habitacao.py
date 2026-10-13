@@ -15,6 +15,8 @@ import duckdb
 import numpy as np
 import pandas as pd
 
+from src.inference.saida import salvar_com_inferencia
+
 from src.utils import pnadc_core as core
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -132,6 +134,15 @@ def hiato_por_ano(df: pd.DataFrame, col_grupo: str, grupo_referencia: str) -> pd
     return pd.concat(linhas, ignore_index=True)
 
 
+def _salvar(tabela: pd.DataFrame, destino, familia: list[str]) -> None:
+    """Grava com FDR por família e _meta.json (B2/B3 da auditoria). A linha do grupo de
+    referência não é um teste (hiato 0, p = 1 por convenção): o p-valor dela vira NaN para
+    não entrar no tamanho da família do Benjamini-Hochberg."""
+    tabela = tabela.copy()
+    tabela.loc[tabela["hiato_media"] == 0, "p_valor"] = np.nan
+    salvar_com_inferencia(tabela, destino, familia=familia)
+
+
 def main() -> None:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -150,11 +161,11 @@ def main() -> None:
 
     print("Calculando hiato racial (recorte 1: Branca/Preta/Parda/Negra/Indígena)...")
     hiato_racial = hiato_por_ano(df, col_grupo="raca_cor", grupo_referencia="Branca")
-    hiato_racial.to_parquet(OUT_DIR / "habitacao_hiato_racial.parquet", index=False)
+    _salvar(hiato_racial, OUT_DIR / "habitacao_hiato_racial.parquet", familia=["ano", "indicador"])
 
     print("Calculando hiato racial x gênero (recorte 2: 10 grupos)...")
     hiato_genero = hiato_por_ano(df, col_grupo="grupo", grupo_referencia="Homens Brancos")
-    hiato_genero.to_parquet(OUT_DIR / "habitacao_hiato_racial_genero.parquet", index=False)
+    _salvar(hiato_genero, OUT_DIR / "habitacao_hiato_racial_genero.parquet", familia=["ano", "indicador"])
 
     print("Calculando hiato racial por região (pooled, todos os 8 anos)...")
     linhas_regiao = []
@@ -171,7 +182,7 @@ def main() -> None:
             tabela["indicador"] = indicador
             linhas_regiao.append(tabela)
     hiato_regiao = pd.concat(linhas_regiao, ignore_index=True)
-    hiato_regiao.to_parquet(OUT_DIR / "habitacao_hiato_regional.parquet", index=False)
+    _salvar(hiato_regiao, OUT_DIR / "habitacao_hiato_regional.parquet", familia=["regiao", "indicador"])
 
     print("\nResumo 2025, recorte racial (Branca = referência):")
     print(

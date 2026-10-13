@@ -43,6 +43,12 @@ import statsmodels.formula.api as smf
 
 from src.processing.agregacoes_pnadc import CRIAR_BASE, OUTPUT_DIR
 from src.inference import variancia
+from src.inference.saida import escrever_meta, salvar_com_inferencia
+
+SE_METODO_WLS = "wls_statsmodels_iid_celulas_coorte"  # Desenho A (R2: ~38 células, i.i.d.)
+SE_METODO_WLS_CLUSTER = "wls_statsmodels_cluster_upa"
+NOTA_CURVAS = ("se por célula design-based (Estrato/UPA); soma ignora covariância entre células "
+               "(ver _curva_event_study). Bloqueado para publicação até o B4b.")
 from src.utils import pnadc_core
 
 # --------------------------------------------------------------------------------------
@@ -188,7 +194,7 @@ def rodar_desenho_a(con: duckdb.DuckDBPyConnection) -> pd.DataFrame:
 
     df = pd.DataFrame(resultados)
     destino = OUTPUT_DIR / "did_cotas_universitarias.parquet"
-    df.to_parquet(destino, index=False)
+    salvar_com_inferencia(df, destino, familia=None, coluna_p="did_nivel_p_valor", se_metodo=SE_METODO_WLS)
     print(f"did_cotas_universitarias.parquet: {len(df)} linhas", flush=True)
     print(df[["raca_tratado", "tipo", "did_nivel_coef", "did_nivel_p_valor",
               "tendencia_pre_coef", "tendencia_pre_p_valor"]].to_string(index=False), flush=True)
@@ -235,6 +241,7 @@ def rodar_mecanismo_renda_cohortes(con: duckdb.DuckDBPyConnection) -> None:
     df = pd.DataFrame(resultados)
     destino = OUTPUT_DIR / "mecanismo_renda_cohortes_cotas.parquet"
     df.to_parquet(destino, index=False)
+    escrever_meta(destino, se_metodo=SE_METODO_WLS_CLUSTER)
     print(f"mecanismo_renda_cohortes_cotas.parquet: {len(df)} linhas", flush=True)
     print(df[["cohort_era", "n_total", "pct_explicada", "pct_nao_explicada",
               "residuo_restrito_coef", "residuo_restrito_p_valor"]].to_string(index=False), flush=True)
@@ -325,7 +332,7 @@ def rodar_desenho_a_heterogeneidade(con: duckdb.DuckDBPyConnection) -> None:
 
     df = pd.DataFrame(resultados)
     destino = OUTPUT_DIR / "did_cotas_universitarias_heterogeneidade.parquet"
-    df.to_parquet(destino, index=False)
+    salvar_com_inferencia(df, destino, familia=None, coluna_p="did_nivel_p_valor", se_metodo=SE_METODO_WLS)
     print(f"did_cotas_universitarias_heterogeneidade.parquet: {len(df)} linhas", flush=True)
     print(df[["estrato_tipo", "estrato", "raca_tratado", "tipo", "did_nivel_coef", "did_nivel_p_valor",
               "tendencia_pre_coef", "tendencia_pre_p_valor"]].to_string(index=False), flush=True)
@@ -655,7 +662,9 @@ def rodar_desenho_b_heterogeneidade(micro_evento: pd.DataFrame) -> None:
     curvas = pd.concat(resultados_curva, ignore_index=True)
     resumo = pd.concat(resultados_resumo, ignore_index=True)
     curvas.to_parquet(OUTPUT_DIR / "did_cotas_servico_publico_heterogeneidade_curvas.parquet", index=False)
-    resumo.to_parquet(OUTPUT_DIR / "did_cotas_servico_publico_heterogeneidade.parquet", index=False)
+    escrever_meta(OUTPUT_DIR / "did_cotas_servico_publico_heterogeneidade_curvas.parquet", nota=NOTA_CURVAS)
+    salvar_com_inferencia(resumo, OUTPUT_DIR / "did_cotas_servico_publico_heterogeneidade.parquet",
+                          familia=None, coluna_p="did_p_valor", se_metodo=SE_METODO_WLS_CLUSTER)
     print(f"did_cotas_servico_publico_heterogeneidade.parquet: {len(resumo)} linhas", flush=True)
     print(resumo[["estrato_tipo", "estrato", "raca_cor", "outcome", "tendencia_pre_p_valor",
                   "tendencias_paralelas_sustentadas", "did_coef", "did_p_valor"]].to_string(index=False), flush=True)
@@ -681,7 +690,9 @@ def main() -> None:
     curvas = pd.concat([curvas_participacao, curva_renda], ignore_index=True)
     resumo = pd.concat([resumo_participacao, resumo_renda], ignore_index=True)
     curvas.to_parquet(OUTPUT_DIR / "did_cotas_servico_publico_curvas.parquet", index=False)
-    resumo.to_parquet(OUTPUT_DIR / "did_cotas_servico_publico.parquet", index=False)
+    escrever_meta(OUTPUT_DIR / "did_cotas_servico_publico_curvas.parquet", nota=NOTA_CURVAS)
+    salvar_com_inferencia(resumo, OUTPUT_DIR / "did_cotas_servico_publico.parquet",
+                          familia=None, coluna_p="did_p_valor", se_metodo=SE_METODO_WLS_CLUSTER)
     print(f"\ndid_cotas_servico_publico.parquet: {len(resumo)} linhas", flush=True)
 
     print("\n--- Heterogeneidade geográfica, Desenho B ---", flush=True)

@@ -33,7 +33,12 @@ import numpy as np
 import pandas as pd
 import statsmodels.formula.api as smf
 
+from src.inference.saida import escrever_meta, salvar_com_inferencia
 from src.utils import pnadc_core
+
+# Inferência que NÃO passa pelo EP corrigido no B1 (12/10/2026) — registrada no _meta.json.
+SE_METODO_WLS_CLUSTER = "wls_statsmodels_cluster_upa"  # Oaxaca-Blinder (coeficiente restrito)
+SE_METODO_OLS_SERIE = "ols_iid_sobre_serie_trimestral"  # sem HAC (R6; Onda 2)
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 PARQUET_GLOB = str(REPO_ROOT / "data" / "raw" / "pnadc_extraido" / "parquet" / "ano=*" / "trimestre=*" / "*.parquet")
@@ -363,7 +368,7 @@ def gerar_hiato_por_geracao(con: duckdb.DuckDBPyConnection) -> None:
 
     df = pd.DataFrame(resultados)
     destino = OUTPUT_DIR / "hiato_por_geracao.parquet"
-    df.to_parquet(destino, index=False)
+    df = salvar_com_inferencia(df, destino, familia=["ano", "trimestre"])
     print(f"hiato_por_geracao.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -517,6 +522,7 @@ def gerar_decomposicao_oaxaca_blinder(con: duckdb.DuckDBPyConnection, n_trimestr
     df = pd.DataFrame(resultados)
     destino = OUTPUT_DIR / "decomposicao_oaxaca_blinder.parquet"
     df.to_parquet(destino, index=False)
+    escrever_meta(destino, se_metodo=SE_METODO_WLS_CLUSTER)
     print(f"decomposicao_oaxaca_blinder.parquet: {len(df)} linhas", flush=True)
     print(df[["ponto", "controles", "pct_explicada", "pct_nao_explicada",
               "residuo_restrito_coef", "residuo_restrito_p_valor",
@@ -574,6 +580,7 @@ def gerar_decomposicao_oaxaca_blinder_indigena(con: duckdb.DuckDBPyConnection, n
     df = pd.DataFrame(resultados)
     destino = OUTPUT_DIR / "decomposicao_oaxaca_blinder_indigena.parquet"
     df.to_parquet(destino, index=False)
+    escrever_meta(destino, se_metodo=SE_METODO_WLS_CLUSTER)
     print(f"decomposicao_oaxaca_blinder_indigena.parquet: {len(df)} linhas", flush=True)
     print(df[["ponto", "controles", "pct_explicada", "pct_nao_explicada",
               "residuo_restrito_coef", "residuo_restrito_p_valor",
@@ -630,6 +637,7 @@ def gerar_decomposicao_oaxaca_blinder_preta_parda(con: duckdb.DuckDBPyConnection
     df = pd.DataFrame(resultados)
     destino = OUTPUT_DIR / "decomposicao_oaxaca_blinder_pretaparda.parquet"
     df.to_parquet(destino, index=False)
+    escrever_meta(destino, se_metodo=SE_METODO_WLS_CLUSTER)
     print(f"decomposicao_oaxaca_blinder_pretaparda.parquet: {len(df)} linhas", flush=True)
     print(df[["ponto", "controles", "pct_explicada", "pct_nao_explicada",
               "residuo_restrito_coef", "residuo_restrito_p_valor",
@@ -1300,7 +1308,7 @@ def gerar_hiatos_arvore(con: duckdb.DuckDBPyConnection) -> None:
     for c in ("sexo", "faixa_etaria", "geracao", "nivel_instrucao"):
         if c not in df.columns:
             df[c] = pd.NA
-    df.to_parquet(OUTPUT_DIR / "hiato_arvore.parquet", index=False)
+    df = salvar_com_inferencia(df, OUTPUT_DIR / "hiato_arvore.parquet", familia=["combo", "ano", "trimestre"])
     n_ns = int((~df["significativo"]).sum()) if not df.empty else 0
     print(f"hiato_arvore.parquet: {len(df):,} linhas ({n_ns} não-significativas)".replace(",", "."), flush=True)
 
@@ -1345,7 +1353,7 @@ def gerar_hiato_regional(con: duckdb.DuckDBPyConnection) -> None:
 
     df = pd.DataFrame(resultados)
     destino = OUTPUT_DIR / "hiato_regional.parquet"
-    df.to_parquet(destino, index=False)
+    df = salvar_com_inferencia(df, destino, familia=["ano", "trimestre"])
     print(f"hiato_regional.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -1391,7 +1399,7 @@ def gerar_hiato_regional_indigena(con: duckdb.DuckDBPyConnection) -> None:
 
     df = pd.DataFrame(resultados)
     destino = OUTPUT_DIR / "hiato_regional_indigena.parquet"
-    df.to_parquet(destino, index=False)
+    df = salvar_com_inferencia(df, destino, familia=["ano", "trimestre"])
     print(f"hiato_regional_indigena.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -1433,7 +1441,7 @@ def gerar_hiato_regional_preta_parda(con: duckdb.DuckDBPyConnection) -> None:
 
     df = pd.DataFrame(resultados)
     destino = OUTPUT_DIR / "hiato_regional_pretaparda.parquet"
-    df.to_parquet(destino, index=False)
+    df = salvar_com_inferencia(df, destino, familia=["ano", "trimestre"])
     print(f"hiato_regional_pretaparda.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -1480,7 +1488,7 @@ def gerar_hiato_setor_publico_privado(con: duckdb.DuckDBPyConnection) -> None:
 
     df = pd.DataFrame(resultados)
     destino = OUTPUT_DIR / "hiato_setor_publico_privado.parquet"
-    df.to_parquet(destino, index=False)
+    df = salvar_com_inferencia(df, destino, familia=["ano", "trimestre"])
     print(f"hiato_setor_publico_privado.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -1713,6 +1721,7 @@ def gerar_quebra_estrutural() -> None:
     df = pd.DataFrame(resultados)
     destino = OUTPUT_DIR / "quebra_estrutural.parquet"
     df.to_parquet(destino, index=False)
+    escrever_meta(destino, se_metodo=SE_METODO_OLS_SERIE)
     print(f"quebra_estrutural.parquet: {len(df)} linhas", flush=True)
     print(df.to_string(index=False), flush=True)
 
@@ -1833,6 +1842,7 @@ def gerar_ritmo_convergencia() -> None:
     df = pd.DataFrame(resultados)
     destino = OUTPUT_DIR / "ritmo_convergencia_hiatos.parquet"
     df.to_parquet(destino, index=False)
+    escrever_meta(destino, se_metodo=SE_METODO_OLS_SERIE)
     print(f"ritmo_convergencia_hiatos.parquet: {len(df)} linhas", flush=True)
     print(df[["par", "hiato_percentual_atual", "inclinacao_pp_por_ano", "r2",
               "tendencia_confiavel", "anos_para_zerar_extrapolacao_ingenua"]].to_string(index=False), flush=True)
@@ -2003,7 +2013,7 @@ def gerar_hiato_racial(con: duckdb.DuckDBPyConnection) -> None:
 
     df = pd.DataFrame(resultados)
     destino = OUTPUT_DIR / "hiato_racial.parquet"
-    df.to_parquet(destino, index=False)
+    df = salvar_com_inferencia(df, destino, familia=["ano", "trimestre"])
     n_nao_significativo = (~df["significativo"]).sum()
     print(f"hiato_racial.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
     if n_nao_significativo:
@@ -2055,7 +2065,7 @@ def gerar_hiato_preta_parda(con: duckdb.DuckDBPyConnection) -> None:
 
     df = pd.DataFrame(resultados)
     destino = OUTPUT_DIR / "hiato_preta_parda.parquet"
-    df.to_parquet(destino, index=False)
+    df = salvar_com_inferencia(df, destino, familia=["ano", "trimestre"])
     n_nao_significativo = (~df["significativo"]).sum()
     print(f"hiato_preta_parda.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
     if n_nao_significativo:
@@ -2108,7 +2118,7 @@ def gerar_hiato_branca_indigena(con: duckdb.DuckDBPyConnection) -> None:
 
     df = pd.DataFrame(resultados)
     destino = OUTPUT_DIR / "hiato_branca_indigena.parquet"
-    df.to_parquet(destino, index=False)
+    df = salvar_com_inferencia(df, destino, familia=["ano", "trimestre"])
     n_nao_significativo = (~df["significativo"]).sum()
     print(f"hiato_branca_indigena.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
     if n_nao_significativo:
@@ -2200,7 +2210,7 @@ def _gerar_hiato_multidimensional_para_escopo(
 
         df = pd.DataFrame(resultados)
         nome_arquivo = _nome_hiato_multidimensional(dims, sufixo)
-        df.to_parquet(OUTPUT_DIR / nome_arquivo, index=False)
+        df = salvar_com_inferencia(df, OUTPUT_DIR / nome_arquivo, familia=None)
         n_nao_significativo = int((~df["significativo"]).sum()) if not df.empty else 0
         aviso = f" ({n_nao_significativo} célula(s) não-significativa(s))" if n_nao_significativo else ""
         print(f"{nome_arquivo}: {len(df):,} linhas".replace(",", ".") + aviso, flush=True)
@@ -2290,7 +2300,7 @@ def gerar_hiato_historico_por_categoria(
 
     df = pd.DataFrame(resultados)
     destino = OUTPUT_DIR / nome_saida
-    df.to_parquet(destino, index=False)
+    df = salvar_com_inferencia(df, destino, familia=["ano", "trimestre"])
     print(f"{nome_saida}: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -2577,7 +2587,7 @@ def gerar_hiato_capital_interior(con: duckdb.DuckDBPyConnection) -> None:
                     "hiato_percentual": 100 * lb["hiato_media"] / mn if mn else None,
                     "p_valor": lb["p_valor"], "significativo": lb["significativo"]})
     df = pd.DataFrame(res)
-    df.to_parquet(OUTPUT_DIR / "hiato_capital_interior.parquet", index=False)
+    df = salvar_com_inferencia(df, OUTPUT_DIR / "hiato_capital_interior.parquet", familia=["ano", "trimestre"])
     print(f"hiato_capital_interior.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -2637,7 +2647,7 @@ def gerar_hiato_formal_informal(con: duckdb.DuckDBPyConnection) -> None:
                     "hiato_percentual": 100 * lb["hiato_media"] / mn if mn else None,
                     "p_valor": lb["p_valor"], "significativo": lb["significativo"]})
     df = pd.DataFrame(res)
-    df.to_parquet(OUTPUT_DIR / "hiato_formal_informal.parquet", index=False)
+    df = salvar_com_inferencia(df, OUTPUT_DIR / "hiato_formal_informal.parquet", familia=["ano", "trimestre"])
     print(f"hiato_formal_informal.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -2706,6 +2716,7 @@ def gerar_oaxaca_blinder_temporal(con: duckdb.DuckDBPyConnection) -> None:
             res.append(r2)
     df = pd.DataFrame(res)
     df.to_parquet(OUTPUT_DIR / "oaxaca_blinder_temporal.parquet", index=False)
+    escrever_meta(OUTPUT_DIR / "oaxaca_blinder_temporal.parquet", se_metodo=SE_METODO_WLS_CLUSTER)
     print(f"oaxaca_blinder_temporal.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -2752,7 +2763,8 @@ def gerar_dupla_desvantagem(con: duckdb.DuckDBPyConnection) -> None:
             "interacao": -(hb - hn - mb + mn), "p_valor_gap_total": p_val,
         })
     df = pd.DataFrame(res)
-    df.to_parquet(OUTPUT_DIR / "dupla_desvantagem.parquet", index=False)
+    df = salvar_com_inferencia(df, OUTPUT_DIR / "dupla_desvantagem.parquet", familia=["ano", "trimestre"],
+                               coluna_p="p_valor_gap_total")
     print(f"dupla_desvantagem.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -2848,7 +2860,7 @@ def gerar_decomposicao_raca_genero(con: duckdb.DuckDBPyConnection) -> None:
 
     df = pd.DataFrame(res)
     destino = OUTPUT_DIR / "decomposicao_raca_genero.parquet"
-    df.to_parquet(destino, index=False)
+    df = salvar_com_inferencia(df, destino, familia=["ano", "trimestre"], coluna_p="p_valor_gap_total")
     print(f"decomposicao_raca_genero.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -2915,7 +2927,7 @@ def _tabela_transicao(con, condicao_t0: str, coluna_evento_t1: str, nome_saida: 
 
     df = pd.DataFrame(resultados)
     destino = OUTPUT_DIR / nome_saida
-    df.to_parquet(destino, index=False)
+    df = salvar_com_inferencia(df, destino, familia=None)
     n_vazio = df["taxa"].isna().sum()
     print(f"{nome_saida}: {len(df)} linhas ({len(pareado):,} pessoas pareadas na população de base)"
           .replace(",", "."), flush=True)
