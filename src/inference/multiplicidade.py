@@ -8,6 +8,13 @@ Uma tabela com uma comparação por período (ex.: `hiato_racial`) tem famílias
 e o FDR coincide com o nominal — o problema de "58 trimestres ≠ 58 evidências
 independentes" é outro (R6, tendência com HAC na Onda 2), não de multiplicidade.
 
+Regra de uso (aprovada pelo Felipe em 13/10/2026):
+- esta família por tabela é o PADRÃO (piso) das tabelas descritivas;
+- todo estudo da Fase 4 declara a SUA família na ficha (`docs/studies/<id>/ficha.md`),
+  ligada à pergunta (ex.: "as 27 UFs em 2026T2", "os 40 DiD do Desenho B"); a ficha manda;
+- tendência no tempo não se testa com FDR sobre trimestres: usa regressão com EP robusto
+  a autocorrelação (HAC; R6, Onda 2).
+
 Método: Benjamini-Hochberg (controle da taxa de falsas descobertas, FDR), via
 `statsmodels.stats.multitest.multipletests(method="fdr_bh")`.
 """

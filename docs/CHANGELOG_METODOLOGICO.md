@@ -41,7 +41,7 @@ Origem: `docs/auditoria/rodada1.md` (E1–E5, R3, R7) e decisões do Ponto de pa
   normal é desprezível; pesa em células finas (Indígena).
 - **Multiplicidade.** Toda tabela com `p_valor` ganha `significativo_nominal`, `p_valor_bh` e
   `significativo_fdr` (Benjamini-Hochberg). **Família = comparações de uma mesma tabela que
-  dividem o mesmo período e a mesma abertura** (`src/inference/multiplicidade.py`; a família de
+  dividem o mesmo período e a mesma abertura** (padrão aprovado em 13/10/2026; fichas de estudo podem declarar família própria) (`src/inference/multiplicidade.py`; a família de
   cada parquet está no `_meta.json`). `significativo` é mantido como alias de
   `significativo_nominal` até os gráficos serem regenerados.
 - **Theil/Gini (E3).** Docstring do Theil corrigida: a função de Gini **não** exclui zeros. Em

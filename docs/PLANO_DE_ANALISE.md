@@ -25,6 +25,13 @@
 6. Módulo de habitação versionado: o extrator anual é base de P5/Bloco T e `S01017` alimenta o H3.1.
 7. CI em **Python 3.12**.
 
+**Decisões do Ponto de parada 1 (13/10/2026):**
+1. PRs das Fases 0 e 1 aprovados.
+2. Gráficos: regenerar **uma vez só**, depois da troca de população/renda de referência (Fase 2).
+3. Família do FDR: **padrão = comparações de uma tabela no mesmo período e na mesma abertura**
+   (piso das tabelas descritivas); cada ficha de estudo declara a sua família conforme a pergunta;
+   tendências usam HAC, não FDR sobre trimestres (`src/inference/multiplicidade.py`).
+
 ---
 
 ## 0. Como ler este plano
