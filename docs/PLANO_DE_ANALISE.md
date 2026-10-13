@@ -52,6 +52,12 @@ Amarela entra também no escopo `genero` de `extremos`; denominador de `pct_esta
 empregados 01–07 (aceito). **As análises principais do Hub são sempre Branca × Negra e Indígena**;
 Amarela aparece quando entra no universo, sem ser foco.
 
+**Decisões da Onda 1 (13/10/2026):**
+1. A faixa 14–17 continua com renda nas tabelas com dimensão de faixa etária, **fora das análises** (que usam 18+).
+2. Pelo critério do S1 (P4/P5 mudam o hiato de forma "grande", sobretudo para mulheres), **o Bloco T passa a eixo
+   principal** (decisão delegada pelo Felipe a Claude): todo hiato de renda do trabalho (P1) é publicado ao lado do
+   hiato de todos os adultos (P4) e/ou da renda domiciliar per capita (T1).
+
 ---
 
 ## 0. Como ler este plano

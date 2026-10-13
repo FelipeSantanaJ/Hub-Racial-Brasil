@@ -5,6 +5,29 @@ calculá-lo: data, o quê, por quê, impacto. Mais recente primeiro.
 
 ---
 
+## 13/10/2026 — Onda 1, parte 2 (branch `onda1/parte2`)
+
+- **Faixa 14–17 de volta às tabelas (correção pedida pelo Felipe).** A parte 1 tinha tirado a renda de 14–17 das
+  tabelas; o pedido era só não usá-la nas análises. `renda`, `renda_completa`, `renda_multidimensional_faixa` e
+  `horas_trabalhadas` voltam a ter 14–17 (ocupados 14+ com `VD4016` > 0; colunas `renda_14mais_*` da `CRIAR_BASE`).
+  Valores de 18+ **idênticos** nas quatro tabelas. Gráficos e `tabela_crescimento` ignoram 14–17 ao combinar células
+  (`graficos_fase1.FAIXAS_FORA_DAS_ANALISES`); 677 das 682 imagens ficaram idênticas e 5 heatmaps perderam a coluna
+  14–17 vazia. Tabelas sem faixa etária (por escolaridade, geração, faixas de SM) seguem 18+.
+- **`openpyxl`** nos requirements; `docs/tabela_crescimento_renda.xlsx` regenerado (coerente com o CSV).
+- **Rodapé dos gráficos encurtado**: o texto da parte 1 ficava cortado nas figuras de 10 polegadas.
+- **Salário mínimo de 2026 = R$ 1.621** (era R$ 1.630, não verificado; ver `LIMITACOES…`). `faixas_salario_minimo`
+  regenerada: só 2026 muda (até −0,4 p.p.).
+- **Bloco T (T1–T3)** — `src/processing/bloco_t.py`, ficha `docs/studies/T`. Hiato da renda domiciliar per capita
+  Branca × Negra 98,7% (2012) → 81,7% (2025); pobreza (½ SM) 39,3% → 29,3% entre pessoas negras, 18,5% → 14,8% entre
+  brancas; domicílios chefiados por mulheres negras: hiato de 145% em relação aos chefiados por homens brancos.
+- **Bloco A (A2–A7)** — `src/processing/bloco_a.py`, ficha `docs/studies/A`. Quatro métricas do hiato com IC; hiato
+  por quantil com bootstrap Rao-Wu; Theil L; representação por décimo e razão de chances (topo 10%: 0,32); dominância
+  estocástica (Branca domina Negra em todos os anos).
+- **Decisão (delegada):** Bloco T vira eixo principal (`PLANO_DE_ANALISE.md`).
+- Gráficos novos: `docs/img/onda1_*.png` (`src/processing/graficos_onda1.py`).
+
+---
+
 ## 13/10/2026 — Onda 1: regeneração única com a população de referência (branch `onda1/regeneracao`)
 
 Decisões dos Pontos de parada 2 e 3. **Tudo abaixo já vale nos parquets, gráficos e decks.**

@@ -41,7 +41,7 @@ OUTPUT_DIR = g.OUTPUT_DIR
 PROCESSED = REPO_ROOT / "data" / "processed"
 MANIFESTO = REPO_ROOT / "docs" / "arvore_manifest.json"
 
-FONTE = "Fonte: IBGE, PNAD Contínua Trimestral (microdados). Renda (quando houver): habitual do trabalho principal, ocupados 18+ com renda > 0, a preços do último trimestre. Elaboração própria."
+FONTE = "Fonte: IBGE, PNAD Contínua Trimestral. Renda: trabalho principal, ocupados 18+ com renda > 0, R$ do último trimestre. Elaboração própria."
 RACAS_VALOR = ["Branca", "Negra", "Indígena"]
 CMP = [("Negra", "ne", g.COR_NEGRA), ("Indígena", "in", g.COR_INDIGENA)]
 NOTA_SERIE = "R$ reais, a preços do trimestre mais recente (deflator IBGE) · série 2012–2026"

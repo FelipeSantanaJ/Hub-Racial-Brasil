@@ -68,7 +68,7 @@ def _titulo(ax, titulo: str, subtitulo: str) -> None:
     ax.text(0, 1.03, subtitulo, transform=ax.transAxes, fontsize=9.5, color=TINTA_SECUNDARIA, ha="left")
 
 
-def _rodape(fig, nota: str = "Fonte: IBGE, PNAD Contínua Trimestral (microdados). Renda (quando houver): habitual do trabalho principal, ocupados 18+ com renda > 0, a preços do último trimestre. Elaboração própria.") -> None:
+def _rodape(fig, nota: str = "Fonte: IBGE, PNAD Contínua Trimestral. Renda: trabalho principal, ocupados 18+ com renda > 0, R$ do último trimestre. Elaboração própria.") -> None:
     fig.text(0.01, 0.01, nota, fontsize=8, color=TINTA_MUTED)
 
 
@@ -259,7 +259,7 @@ def grafico_renda_por_raca(renda: pd.DataFrame) -> Path:
     ax.tick_params(axis="both", colors=TINTA_MUTED, labelsize=9.5, length=0)
     ax.set_xlim(serie.index.min(), serie.index.max() + pd.Timedelta(days=270))
 
-    fonte = "Fonte: IBGE, PNAD Contínua Trimestral (microdados). Renda (quando houver): habitual do trabalho principal, ocupados 18+ com renda > 0, a preços do último trimestre. Elaboração própria."
+    fonte = "Fonte: IBGE, PNAD Contínua Trimestral. Renda: trabalho principal, ocupados 18+ com renda > 0, R$ do último trimestre. Elaboração própria."
     fig.text(0.01, 0.01, fonte, fontsize=8, color=TINTA_MUTED)
 
     fig.tight_layout(rect=(0, 0.03, 1, 1))
