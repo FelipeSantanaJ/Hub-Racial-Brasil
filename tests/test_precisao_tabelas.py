@@ -20,7 +20,7 @@ TABELAS = {
     "gerar_renda_multidimensional_geracao": ("renda_multidimensional_geracao", ["renda"], "renda_habitual_real_media"),
     "gerar_escolaridade": ("escolaridade", ["populacao"], "populacao_estimada"),
     "gerar_ocupacao": ("ocupacao", ["desocupacao"], "taxa_desocupacao_pct"),
-    "gerar_informalidade": ("informalidade", ["carteira", "previdencia"], "pct_com_carteira"),
+    "gerar_informalidade": ("informalidade", ["carteira", "estatutario_militar", "previdencia"], "pct_com_carteira"),
     "gerar_horas_trabalhadas": ("horas_trabalhadas", ["horas", "renda_hora"], "horas_semanais_media"),
     "gerar_alfabetizacao": ("alfabetizacao", ["alfabetizado"], "pct_alfabetizado"),
     "gerar_desalento_subutilizacao": ("desalento_subutilizacao", ["desalento", "forca_potencial"], "pct_desalento"),

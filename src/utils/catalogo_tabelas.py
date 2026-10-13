@@ -74,7 +74,9 @@ CATALOGO: list[tuple[str, str, str]] = [
     (r"^(escolaridade|alfabetizacao)$", PESSOAS_14, INSUMO_TRIMESTRAL_V1),
     (r"^(ocupacao|desocupacao_por_escolaridade)$", FORCA_14, INSUMO_TRIMESTRAL_V1),
     (r"^desalento_subutilizacao$", "Pessoas de 14+ anos fora da força de trabalho", INSUMO_TRIMESTRAL_V1),
-    (r"^informalidade$", "Ocupados de 14+ anos (carteira: só empregados e militares/estatutários; previdência: todos)",
+    (r"^informalidade$", "Ocupados de 14+ anos. Carteira: só CLT entre empregados privados/domésticos/públicos "
+     "(VD4009 01–06); estatutário/militar entre empregados 01–07; previdência: todos (definição de 13/10/2026, "
+     "R19; vale na regeneração da Onda 1)",
      INSUMO_TRIMESTRAL_V1),
     (r"^horas_trabalhadas$", "Ocupados de 14+ anos com horas habituais (VD4031, todos os trabalhos) informadas",
      INSUMO_TRIMESTRAL_V1),

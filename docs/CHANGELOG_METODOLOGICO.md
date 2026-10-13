@@ -70,6 +70,25 @@ regeneração única da Onda 1**.
   que contém o limiar; massa empatada ⇒ fatias exatas) e `tests/test_heaping_tabelas.py`
   (geradores sobre sintético com 20% em R$ 3.000: captura = 10/25 exatos; composições somam 100).
 
+### 4. Carteira assinada = só CLT (R19/E8) — **no código; vale na regeneração da Onda 1**
+
+- **O quê.** Na `CRIAR_BASE`, `tem_carteira_assinada` = TRUE só para VD4009 01/03/05, FALSE para
+  02/04/06 e NULL para o resto. Até aqui o 07 (militar/estatutário) era TRUE. Nova coluna
+  `vinculo_trabalho` (CLT, Sem carteira, Estatutário/militar, Empregador, Conta própria, Familiar
+  auxiliar; códigos conferidos no dicionário do IBGE). `gerar_informalidade` mantém
+  `pct_com_carteira`, agora CLT ÷ empregados 01–06, e ganha `pop_estatutario_militar` e
+  `pct_estatutario_militar` (07 ÷ empregados 01–07). `transicao_informal_formal` passa a usar
+  `vinculo_trabalho IN ('CLT', 'Estatutário/militar')` no evento de t1, o que mantém o resultado
+  idêntico ao atual.
+- **Por quê.** "Com carteira" incluía quem não tem carteira (estatutário), e o número publicado
+  (75,4/66,5/53,2) não era o da CLT.
+- **Impacto previsto** (prévia sem gravar parquet, Brasil, 14+): em 2026T2, Branca/Negra/Indígena
+  passam de **75,4/66,5/53,1%** para **71,7/63,0/48,3%** (estatutário/militar: 13,0/9,7/9,3% dos
+  empregados). Na série 2012–2026 a queda média é de −3,56 p.p. (Branca; −2,98 a −4,08), −3,92 p.p.
+  (Negra; −3,52 a −4,93) e −5,04 p.p. (Indígena; −3,21 a −8,57). A diferença Branca–Negra em
+  2026T2 vai de 8,9 para 8,7 p.p. A definição antiga recalculada reproduz o parquet publicado.
+- Teste: `tests/test_carteira.py`.
+
 ---
 
 ## 13/10/2026 — Etapa 2, Fase 2 (branch `auditoria/fase2-infra`)

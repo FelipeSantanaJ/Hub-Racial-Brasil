@@ -219,12 +219,20 @@ trimestres) para trazer essa coluna — usada na decomposição do hiato racial 
 Decodificação (ver `data/raw/pnadc_extraido/_tmp/dicionario/` pro dicionário completo do
 IBGE):
 
-- **VD4009** (posição na ocupação, detalhada) → `tem_carteira_assinada`: `TRUE` p/
-  empregado privado/doméstico/público COM carteira e militar/servidor estatutário (sempre
-  "protegido"); `FALSE` p/ empregado privado/doméstico/público SEM carteira; `NULL`
-  (não aplicável) p/ empregador, conta-própria e trabalhador familiar auxiliar — o conceito
-  de "carteira assinada" não existe pra essas posições. `pct_com_carteira` em
-  `informalidade.parquet` é calculado só sobre quem tem o conceito aplicável (empregados).
+- **VD4009** (posição na ocupação, detalhada) → `tem_carteira_assinada` e `vinculo_trabalho`.
+  **Mudança de definição em 13/10/2026 (R19; vale na regeneração da Onda 1):**
+  `tem_carteira_assinada` = `TRUE` só para CLT (empregado privado, doméstico ou público COM
+  carteira: 01, 03, 05); `FALSE` para os mesmos SEM carteira (02, 04, 06); `NULL` para
+  militar/servidor estatutário (07), empregador, conta-própria e familiar auxiliar. Antes, 07
+  contava como `TRUE`, no numerador e no denominador. `vinculo_trabalho` traz as seis categorias:
+  CLT, Sem carteira, Estatutário/militar, Empregador, Conta própria, Familiar auxiliar.
+  Em `informalidade.parquet`:
+  - `pct_com_carteira` = CLT ÷ empregados 01–06;
+  - `pct_estatutario_militar` = 07 ÷ empregados 01–07.
+  **Os números publicados caem:** em 2026T2, Branca/Negra/Indígena passam de 75,4/66,5/53,1% para
+  71,7/63,0/48,3%, e a queda média na série é de 3,6 p.p. (Branca), 3,9 p.p. (Negra) e 5,0 p.p.
+  (Indígena). `transicao_informal_formal` mantém o sentido: "formal" em t1 = CLT ou
+  estatutário/militar.
 - **VD4012** (contribuição previdenciária) → `contribui_previdencia`: cobre TODOS os
   ocupados, inclusive conta-própria/empregador — é o indicador mais amplo de proteção
   social, complementar a `tem_carteira_assinada`.

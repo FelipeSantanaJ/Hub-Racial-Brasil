@@ -139,16 +139,24 @@ CREATE TEMP TABLE base AS
         m.VD4019 * d.deflator_habitual AS renda_habitual_real,
         m.VD4020 * d.deflator_efetivo AS renda_efetiva_real,
 {pop.sql_colunas_criar_base()}
-        -- posição na ocupação com carteira assinada: só definida p/ empregados
-        -- (privado/doméstico/público) e militar/estatutário (sempre "protegido"); NULL
-        -- p/ empregador, conta-própria e familiar auxiliar (o conceito não se aplica).
+        -- carteira assinada (CLT): só definida p/ empregados privados, domésticos e
+        -- públicos (VD4009 01–06); NULL p/ militar/estatutário (07: vínculo protegido, mas
+        -- não é CLT — até 13/10/2026 contava como TRUE; R19/decisão do Ponto de parada 3),
+        -- empregador, conta-própria e familiar auxiliar (o conceito não se aplica).
         -- VD4009 tem 10 categorias e vem ZERO-PADDED ('01'..'10' — mesmo padrão de
         -- VD4011) — checado direto no parquet bruto (values_counts) depois de um bug
         -- em que '1'/'2' sem padding não batia com nada e dava NULL silencioso.
         CASE m.VD4009
-            WHEN '01' THEN TRUE WHEN '03' THEN TRUE WHEN '05' THEN TRUE WHEN '07' THEN TRUE
+            WHEN '01' THEN TRUE WHEN '03' THEN TRUE WHEN '05' THEN TRUE
             WHEN '02' THEN FALSE WHEN '04' THEN FALSE WHEN '06' THEN FALSE
         END AS tem_carteira_assinada,
+        -- vínculo do trabalho principal (VD4009; códigos conferidos no dicionário do IBGE)
+        CASE m.VD4009
+            WHEN '01' THEN 'CLT' WHEN '03' THEN 'CLT' WHEN '05' THEN 'CLT'
+            WHEN '02' THEN 'Sem carteira' WHEN '04' THEN 'Sem carteira' WHEN '06' THEN 'Sem carteira'
+            WHEN '07' THEN 'Estatutário/militar' WHEN '08' THEN 'Empregador'
+            WHEN '09' THEN 'Conta própria' WHEN '10' THEN 'Familiar auxiliar'
+        END AS vinculo_trabalho,
         -- setor de trabalho: Público = empregado público (c/ ou s/ carteira) + militar/
         -- estatutário; Privado = empregado privado/doméstico (c/ ou s/ carteira); NULL
         -- p/ empregador, conta-própria e familiar auxiliar (não é "público" nem
@@ -1932,23 +1940,35 @@ def gerar_ritmo_convergencia() -> None:
 
 
 def gerar_informalidade(con: duckdb.DuckDBPyConnection) -> None:
-    """% com carteira assinada (entre empregados) e % contribuinte de previdência
-    (entre TODOS os ocupados, cobre também conta-própria/empregador) por raça x gênero
-    x faixa etária — ver decodificação de VD4009/VD4012 em
-    docs/LIMITACOES_E_METODOLOGIA.md."""
+    """% com carteira assinada, % estatutário/militar e % contribuinte de previdência por
+    raça x gênero x faixa etária — ver decodificação de VD4009/VD4012 em
+    docs/LIMITACOES_E_METODOLOGIA.md.
+
+    - `pct_com_carteira`: só CLT (VD4009 01, 03, 05) entre os empregados privados, domésticos
+      e públicos (01–06). Até 13/10/2026 militar/estatutário (07) contava como "com carteira",
+      no numerador e no denominador (R19; decisão do Ponto de parada 3).
+    - `pct_estatutario_militar`: militar/estatutário (07) entre todos os empregados (01–07).
+    - `pct_contribui_previdencia`: entre TODOS os ocupados (cobre também conta-própria e
+      empregador)."""
     select_agregado = """
            ano, trimestre, raca_cor, sexo, faixa_etaria,
            COUNT(*) AS n_amostra,
            SUM(peso) AS populacao_estimada,
            SUM(peso) FILTER (WHERE tem_carteira_assinada IS NOT NULL) AS pop_empregados,
+           SUM(peso) FILTER (WHERE vinculo_trabalho = 'Estatutário/militar') AS pop_estatutario_militar,
            100.0 * SUM(peso) FILTER (WHERE tem_carteira_assinada)
                / NULLIF(SUM(peso) FILTER (WHERE tem_carteira_assinada IS NOT NULL), 0)
                AS pct_com_carteira,
+           100.0 * SUM(peso) FILTER (WHERE vinculo_trabalho = 'Estatutário/militar')
+               / NULLIF(SUM(peso) FILTER (WHERE vinculo_trabalho IN ('CLT', 'Sem carteira', 'Estatutário/militar')), 0)
+               AS pct_estatutario_militar,
            100.0 * SUM(peso) FILTER (WHERE contribui_previdencia)
                / NULLIF(SUM(peso) FILTER (WHERE contribui_previdencia IS NOT NULL), 0)
                AS pct_contribui_previdencia"""
     df = _agregar_por_geografia(con, select_agregado)
     inds = [IndicadorPrecisao("carteira", _bool_sql("tem_carteira_assinada"), "tem_carteira_assinada IS NOT NULL"),
+            IndicadorPrecisao("estatutario_militar", _bool_sql("vinculo_trabalho = 'Estatutário/militar'"),
+                              "vinculo_trabalho IN ('CLT', 'Sem carteira', 'Estatutário/militar')"),
             IndicadorPrecisao("previdencia", _bool_sql("contribui_previdencia"), "contribui_previdencia IS NOT NULL")]
     df = _anexar_precisao(df, _precisao_celulas(con, inds, _chaves("raca_cor", "sexo", "faixa_etaria")), inds)
     destino = OUTPUT_DIR / "informalidade.parquet"
@@ -3121,7 +3141,9 @@ def gerar_transicoes_painel(con: duckdb.DuckDBPyConnection) -> None:
     _tabela_transicao(
         con,
         condicao_t0="b0.tem_carteira_assinada = FALSE",
-        coluna_evento_t1="CASE WHEN b1.tem_carteira_assinada THEN 1 ELSE 0 END",
+        # "formal" em t1 = CLT ou estatutário/militar (mesmo sentido de antes de 13/10/2026,
+        # quando tem_carteira_assinada ainda contava o código 07 como TRUE)
+        coluna_evento_t1="CASE WHEN b1.vinculo_trabalho IN ('CLT', 'Estatutário/militar') THEN 1 ELSE 0 END",
         nome_saida="transicao_informal_formal.parquet",
     )
 
