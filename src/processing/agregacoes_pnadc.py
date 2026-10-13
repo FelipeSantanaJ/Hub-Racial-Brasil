@@ -2712,7 +2712,9 @@ def gerar_ocupacao(con: duckdb.DuckDBPyConnection) -> None:
 SALARIO_MINIMO_NOMINAL = {
     2012: 622, 2013: 678, 2014: 724, 2015: 788, 2016: 880, 2017: 937, 2018: 954,
     2019: 998, 2020: 1045, 2021: 1100, 2022: 1212, 2023: 1320, 2024: 1412,
-    2025: 1518, 2026: 1630,  # 2026: valor anunciado
+    # 2026: R$ 1.621 — no microdado, 12,7% de quem tem renda declara exatamente R$ 1.621 em 2026T2
+    # (0,06% em R$ 1.630, o valor "anunciado" usado até 13/10/2026). Fonte oficial: a confirmar.
+    2025: 1518, 2026: 1621,
 }
 
 
