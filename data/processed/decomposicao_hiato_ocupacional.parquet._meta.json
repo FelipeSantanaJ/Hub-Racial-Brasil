@@ -2,20 +2,18 @@
   "esquema": "hub-racial-meta/1",
   "arquivo": "decomposicao_hiato_ocupacional.parquet",
   "n_linhas": 5,
-  "gerado_em": "2026-10-13T04:51:07.514148+00:00",
+  "gerado_em": "2026-10-13T13:11:11.314661+00:00",
   "codigo": {
-    "commit": "da7b04b",
-    "modulo": "(retroativo)"
+    "commit": "c1202a10fd9cedb6ee7d78647d0188dfd6dea81e",
+    "modulo": "__main__"
   },
   "insumos": {
-    "chave": "trimestral_v1",
-    "descricao": "PNAD Contínua trimestral, extrato v1 + deflator IBGE",
-    "hash": "524457dd7482fc957d4a0f46ac8810fd4402a35d2c1dd703acec80ba40cbee01",
+    "chave": "trimestral_v2",
+    "descricao": "PNAD Contínua trimestral, extrato v2 + deflator IBGE",
+    "hash": "9b64f579fa63981e9237190166d333a9ac546041a4df260d2c67dabf49f1ceda",
     "n_arquivos": 228
   },
   "se_metodo": "sem_inferencia",
-  "populacao": "Ocupados de 14+ anos com rendimento habitual de qualquer trabalho (VD4019) informado; no extrato não há VD4019 = 0, então equivale a renda > 0; Branca × Negra; padronização direta, últimos 8 trimestres",
-  "periodo": null,
-  "meta_retroativo": true,
-  "meta_preenchido_em": "2026-10-13T04:59:21.354478+00:00"
+  "populacao": "Ocupados (VD4002=1) de 18+ anos com rendimento habitual do trabalho principal (VD4016) > 0; renda: Rendimento mensal habitual do trabalho principal (VD4016), deflacionado pelo deflator habitual do IBGE; Branca × Negra; padronização direta, últimos 8 trimestres",
+  "periodo": null
 }

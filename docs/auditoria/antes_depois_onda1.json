@@ -1,0 +1,1595 @@
+[
+  {
+    "arquivo": "alfabetizacao.parquet",
+    "linhas_antes": 3344,
+    "linhas_depois": 3344,
+    "colunas_novas": [
+      "cv_alfabetizado",
+      "n_alfabetizado",
+      "publicavel",
+      "publicavel_alfabetizado"
+    ],
+    "colunas_removidas": [],
+    "pontos_identicos": true,
+    "colunas_ponto_diferentes": [],
+    "dif_max_abs": 8.940696716308594e-08,
+    "dif_max_rel": 8.096071312832002e-15
+  },
+  {
+    "arquivo": "checagem_robustez_hiato_racial.parquet",
+    "linhas_antes": 58,
+    "linhas_depois": 58,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": null,
+    "nota": "ordem/chave 'n_branca' diverge"
+  },
+  {
+    "arquivo": "decomposicao_hiato_ocupacional.parquet",
+    "linhas_antes": 5,
+    "linhas_depois": 5,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": null,
+    "nota": "ordem/chave 'n_branca' diverge"
+  },
+  {
+    "arquivo": "decomposicao_oaxaca_blinder.parquet",
+    "linhas_antes": 7,
+    "linhas_depois": 7,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": null,
+    "nota": "ordem/chave 'n_favorecido' diverge"
+  },
+  {
+    "arquivo": "decomposicao_oaxaca_blinder_indigena.parquet",
+    "linhas_antes": 7,
+    "linhas_depois": 7,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": null,
+    "nota": "ordem/chave 'n_favorecido' diverge"
+  },
+  {
+    "arquivo": "decomposicao_oaxaca_blinder_pretaparda.parquet",
+    "linhas_antes": 7,
+    "linhas_depois": 7,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": null,
+    "nota": "ordem/chave 'n_favorecido' diverge"
+  },
+  {
+    "arquivo": "decomposicao_raca_genero.parquet",
+    "linhas_antes": 522,
+    "linhas_depois": 522,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": false,
+    "colunas_ponto_diferentes": [
+      "renda_homem_branco",
+      "renda_alvo",
+      "gap_total",
+      "efeito_raca",
+      "efeito_genero",
+      "interacao"
+    ],
+    "dif_max_abs": 395.3965171184973,
+    "dif_max_rel": 0.31950432772936516,
+    "gap_total_significativo_fdr_total_sim": 521,
+    "gap_total_significativo_nominal_total_sim": 521
+  },
+  {
+    "arquivo": "deflator_ibge.parquet",
+    "linhas_antes": 1566,
+    "linhas_depois": 1566,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": true,
+    "colunas_ponto_diferentes": [],
+    "dif_max_abs": 0.0,
+    "dif_max_rel": 0.0
+  },
+  {
+    "arquivo": "desalento_subutilizacao.parquet",
+    "linhas_antes": 105969,
+    "linhas_depois": 105969,
+    "colunas_novas": [
+      "cv_desalento",
+      "cv_forca_potencial",
+      "n_desalento",
+      "n_forca_potencial",
+      "publicavel",
+      "publicavel_desalento",
+      "publicavel_forca_potencial"
+    ],
+    "colunas_removidas": [],
+    "pontos_identicos": null,
+    "nota": "ordem/chave 'geografia' diverge"
+  },
+  {
+    "arquivo": "desocupacao_por_escolaridade.parquet",
+    "linhas_antes": 1218,
+    "linhas_depois": 1218,
+    "colunas_novas": [
+      "cv_desocupacao",
+      "n_desocupacao",
+      "publicavel",
+      "publicavel_desocupacao"
+    ],
+    "colunas_removidas": [],
+    "pontos_identicos": true,
+    "colunas_ponto_diferentes": [],
+    "dif_max_abs": 1.7881393432617188e-07,
+    "dif_max_rel": 9.805928797370385e-15
+  },
+  {
+    "arquivo": "did_cotas_servico_publico.parquet",
+    "linhas_antes": 5,
+    "linhas_depois": 5,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": false,
+    "colunas_ponto_diferentes": [
+      "tendencia_pre_coef",
+      "did_coef"
+    ],
+    "dif_max_abs": 0.0034589837941773477,
+    "dif_max_rel": 0.1711770532059001,
+    "did_significativo_fdr_total_sim": 0,
+    "did_significativo_nominal_total_sim": 1
+  },
+  {
+    "arquivo": "did_cotas_servico_publico_curvas.parquet",
+    "linhas_antes": 115,
+    "linhas_depois": 115,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": null,
+    "nota": "ordem/chave 'n_publico' diverge"
+  },
+  {
+    "arquivo": "did_cotas_servico_publico_heterogeneidade.parquet",
+    "linhas_antes": 35,
+    "linhas_depois": 35,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": false,
+    "colunas_ponto_diferentes": [
+      "tendencia_pre_coef",
+      "did_coef"
+    ],
+    "dif_max_abs": 0.007149853932228362,
+    "dif_max_rel": 2.8040353186225944,
+    "did_significativo_fdr_total_sim": 0,
+    "did_significativo_nominal_total_sim": 6
+  },
+  {
+    "arquivo": "did_cotas_servico_publico_heterogeneidade_curvas.parquet",
+    "linhas_antes": 805,
+    "linhas_depois": 805,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": null,
+    "nota": "ordem/chave 'n_publico' diverge"
+  },
+  {
+    "arquivo": "did_cotas_universitarias.parquet",
+    "linhas_antes": 8,
+    "linhas_depois": 8,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": true,
+    "colunas_ponto_diferentes": [],
+    "dif_max_abs": 8.43769498715119e-15,
+    "dif_max_rel": 6.69193450646558e-14,
+    "did_nivel_significativo_fdr_total_sim": 0,
+    "did_nivel_significativo_nominal_total_sim": 0
+  },
+  {
+    "arquivo": "did_cotas_universitarias_heterogeneidade.parquet",
+    "linhas_antes": 40,
+    "linhas_depois": 40,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": true,
+    "colunas_ponto_diferentes": [],
+    "dif_max_abs": 2.4980018054066022e-14,
+    "dif_max_rel": 9.215559724975798e-14,
+    "did_nivel_significativo_fdr_total_sim": 0,
+    "did_nivel_significativo_nominal_total_sim": 0
+  },
+  {
+    "arquivo": "dupla_desvantagem.parquet",
+    "linhas_antes": 58,
+    "linhas_depois": 58,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": false,
+    "colunas_ponto_diferentes": [
+      "renda_hb",
+      "renda_hn",
+      "renda_mb",
+      "renda_mn",
+      "gap_total",
+      "efeito_raca",
+      "efeito_genero",
+      "interacao"
+    ],
+    "dif_max_abs": 152.86160636058867,
+    "dif_max_rel": 0.09919350829972728,
+    "gap_total_significativo_fdr_total_sim": 58,
+    "gap_total_significativo_nominal_total_sim": 58
+  },
+  {
+    "arquivo": "escolaridade.parquet",
+    "linhas_antes": 544540,
+    "linhas_depois": 544540,
+    "colunas_novas": [
+      "cv_populacao",
+      "n_populacao",
+      "publicavel",
+      "publicavel_populacao"
+    ],
+    "colunas_removidas": [],
+    "pontos_identicos": null,
+    "nota": "ordem/chave 'geografia' diverge"
+  },
+  {
+    "arquivo": "extremos_composicao_racial.parquet",
+    "linhas_antes": 10959,
+    "linhas_depois": 10285,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": null,
+    "nota": "número de linhas mudou: comparação por posição impossível"
+  },
+  {
+    "arquivo": "extremos_distribuicao_racial.parquet",
+    "linhas_antes": 1044,
+    "linhas_depois": 1392,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": null,
+    "nota": "número de linhas mudou: comparação por posição impossível"
+  },
+  {
+    "arquivo": "extremos_renda_racial.parquet",
+    "linhas_antes": 696,
+    "linhas_depois": 696,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": null,
+    "nota": "ordem/chave 'n_extremo' diverge"
+  },
+  {
+    "arquivo": "faixas_salario_minimo.parquet",
+    "linhas_antes": 174,
+    "linhas_depois": 174,
+    "colunas_novas": [
+      "cv_acima_3sm",
+      "cv_ate_1sm",
+      "cv_ate_2sm",
+      "n_acima_3sm",
+      "n_ate_1sm",
+      "n_ate_2sm",
+      "publicavel",
+      "publicavel_acima_3sm",
+      "publicavel_ate_1sm",
+      "publicavel_ate_2sm"
+    ],
+    "colunas_removidas": [],
+    "pontos_identicos": false,
+    "colunas_ponto_diferentes": [
+      "pop",
+      "ate_1sm",
+      "ate_2sm",
+      "acima_3sm",
+      "pct_ate_1sm",
+      "pct_ate_2sm",
+      "pct_acima_3sm"
+    ],
+    "dif_max_abs": 1263921.1706915721,
+    "dif_max_rel": 0.251769904852506
+  },
+  {
+    "arquivo": "funcao_quantil_racial.parquet",
+    "linhas_antes": 1044,
+    "linhas_depois": 1044,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": false,
+    "colunas_ponto_diferentes": [
+      "renda_no_percentil"
+    ],
+    "dif_max_abs": 1023.0136761004314,
+    "dif_max_rel": 0.1544459292498592
+  },
+  {
+    "arquivo": "gini_por_raca.parquet",
+    "linhas_antes": 174,
+    "linhas_depois": 232,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": null,
+    "nota": "número de linhas mudou: comparação por posição impossível"
+  },
+  {
+    "arquivo": "habitacao_hiato_racial.parquet",
+    "linhas_antes": 144,
+    "linhas_depois": 144,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": true,
+    "colunas_ponto_diferentes": [],
+    "dif_max_abs": 0.0,
+    "dif_max_rel": 0.0,
+    "razao_ep_novo_sobre_antigo": {
+      "mediana": 1.0,
+      "min": 1.0,
+      "max": 1.0,
+      "n": 96
+    },
+    "significativo_nominal_sim_para_nao": 0,
+    "significativo_nominal_nao_para_sim": 0,
+    "significativo_nominal_total_sim": 94,
+    "significativo_fdr_sim_para_nao": 0,
+    "significativo_fdr_nao_para_sim": 0,
+    "significativo_fdr_total_sim": 94,
+    "antigo_total_sim": 94
+  },
+  {
+    "arquivo": "habitacao_hiato_racial_genero.parquet",
+    "linhas_antes": 288,
+    "linhas_depois": 288,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": true,
+    "colunas_ponto_diferentes": [],
+    "dif_max_abs": 0.0,
+    "dif_max_rel": 0.0,
+    "razao_ep_novo_sobre_antigo": {
+      "mediana": 1.0,
+      "min": 1.0,
+      "max": 1.0,
+      "n": 240
+    },
+    "significativo_nominal_sim_para_nao": 0,
+    "significativo_nominal_nao_para_sim": 0,
+    "significativo_nominal_total_sim": 212,
+    "significativo_fdr_sim_para_nao": 1,
+    "significativo_fdr_nao_para_sim": 0,
+    "significativo_fdr_total_sim": 211,
+    "antigo_total_sim": 212
+  },
+  {
+    "arquivo": "habitacao_hiato_regional.parquet",
+    "linhas_antes": 90,
+    "linhas_depois": 90,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": true,
+    "colunas_ponto_diferentes": [],
+    "dif_max_abs": 0.0,
+    "dif_max_rel": 0.0,
+    "razao_ep_novo_sobre_antigo": {
+      "mediana": 1.0,
+      "min": 1.0,
+      "max": 1.0,
+      "n": 60
+    },
+    "significativo_nominal_sim_para_nao": 0,
+    "significativo_nominal_nao_para_sim": 0,
+    "significativo_nominal_total_sim": 49,
+    "significativo_fdr_sim_para_nao": 0,
+    "significativo_fdr_nao_para_sim": 0,
+    "significativo_fdr_total_sim": 49,
+    "antigo_total_sim": 49
+  },
+  {
+    "arquivo": "hiato_arvore.parquet",
+    "linhas_antes": 14598,
+    "linhas_depois": 13811,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": null,
+    "nota": "número de linhas mudou: comparação por posição impossível"
+  },
+  {
+    "arquivo": "hiato_branca_indigena.parquet",
+    "linhas_antes": 58,
+    "linhas_depois": 58,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": false,
+    "colunas_ponto_diferentes": [
+      "renda_media_branca",
+      "renda_media_indigena",
+      "hiato_absoluto",
+      "hiato_percentual"
+    ],
+    "dif_max_abs": 228.93245130572222,
+    "dif_max_rel": 0.18174108554315996,
+    "razao_ep_novo_sobre_antigo": {
+      "mediana": 0.9740323538534907,
+      "min": 0.7761759424840318,
+      "max": 1.032237746300384,
+      "n": 58
+    },
+    "significativo_nominal_sim_para_nao": 0,
+    "significativo_nominal_nao_para_sim": 0,
+    "significativo_nominal_total_sim": 58,
+    "significativo_fdr_sim_para_nao": 0,
+    "significativo_fdr_nao_para_sim": 0,
+    "significativo_fdr_total_sim": 58,
+    "antigo_total_sim": 58
+  },
+  {
+    "arquivo": "hiato_capital_interior.parquet",
+    "linhas_antes": 116,
+    "linhas_depois": 116,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": false,
+    "colunas_ponto_diferentes": [
+      "renda_media_branca",
+      "renda_media_negra",
+      "hiato_absoluto",
+      "hiato_percentual"
+    ],
+    "dif_max_abs": 310.59086830029446,
+    "dif_max_rel": 0.06808193525704269,
+    "significativo_nominal_sim_para_nao": 0,
+    "significativo_nominal_nao_para_sim": 0,
+    "significativo_nominal_total_sim": 116,
+    "significativo_fdr_sim_para_nao": 0,
+    "significativo_fdr_nao_para_sim": 0,
+    "significativo_fdr_total_sim": 116,
+    "antigo_total_sim": 116
+  },
+  {
+    "arquivo": "hiato_escolaridade_historico_pretaparda.parquet",
+    "linhas_antes": 406,
+    "linhas_depois": 406,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": false,
+    "colunas_ponto_diferentes": [
+      "renda_media_preta",
+      "renda_media_parda",
+      "hiato_absoluto",
+      "hiato_percentual"
+    ],
+    "dif_max_abs": 443.98156869455397,
+    "dif_max_rel": 39.285802781942365,
+    "significativo_nominal_sim_para_nao": 8,
+    "significativo_nominal_nao_para_sim": 6,
+    "significativo_nominal_total_sim": 44,
+    "significativo_fdr_sim_para_nao": 32,
+    "significativo_fdr_nao_para_sim": 0,
+    "significativo_fdr_total_sim": 14,
+    "antigo_total_sim": 46
+  },
+  {
+    "arquivo": "hiato_escolaridade_historico_todas.parquet",
+    "linhas_antes": 406,
+    "linhas_depois": 406,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": false,
+    "colunas_ponto_diferentes": [
+      "renda_media_branca",
+      "renda_media_negra",
+      "hiato_absoluto",
+      "hiato_percentual"
+    ],
+    "dif_max_abs": 478.3910691285182,
+    "dif_max_rel": 0.27886526110324383,
+    "significativo_nominal_sim_para_nao": 0,
+    "significativo_nominal_nao_para_sim": 0,
+    "significativo_nominal_total_sim": 406,
+    "significativo_fdr_sim_para_nao": 0,
+    "significativo_fdr_nao_para_sim": 0,
+    "significativo_fdr_total_sim": 406,
+    "antigo_total_sim": 406
+  },
+  {
+    "arquivo": "hiato_escolaridade_pretaparda.parquet",
+    "linhas_antes": 7,
+    "linhas_depois": 7,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": false,
+    "colunas_ponto_diferentes": [
+      "renda_media_preta",
+      "renda_media_parda",
+      "hiato_absoluto",
+      "hiato_percentual"
+    ],
+    "dif_max_abs": 292.67627620041094,
+    "dif_max_rel": 0.7472406468072407,
+    "significativo_nominal_sim_para_nao": 1,
+    "significativo_nominal_nao_para_sim": 0,
+    "significativo_nominal_total_sim": 1,
+    "significativo_fdr_sim_para_nao": 1,
+    "significativo_fdr_nao_para_sim": 0,
+    "significativo_fdr_total_sim": 1,
+    "antigo_total_sim": 2
+  },
+  {
+    "arquivo": "hiato_escolaridade_todas.parquet",
+    "linhas_antes": 7,
+    "linhas_depois": 7,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": false,
+    "colunas_ponto_diferentes": [
+      "renda_media_branca",
+      "renda_media_negra",
+      "hiato_absoluto",
+      "hiato_percentual"
+    ],
+    "dif_max_abs": 350.443021187054,
+    "dif_max_rel": 0.27886526110324383,
+    "significativo_nominal_sim_para_nao": 0,
+    "significativo_nominal_nao_para_sim": 0,
+    "significativo_nominal_total_sim": 7,
+    "significativo_fdr_sim_para_nao": 0,
+    "significativo_fdr_nao_para_sim": 0,
+    "significativo_fdr_total_sim": 7,
+    "antigo_total_sim": 7
+  },
+  {
+    "arquivo": "hiato_faixa_etaria_escolaridade_pretaparda.parquet",
+    "linhas_antes": 33,
+    "linhas_depois": 28,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": null,
+    "nota": "número de linhas mudou: comparação por posição impossível"
+  },
+  {
+    "arquivo": "hiato_faixa_etaria_escolaridade_todas.parquet",
+    "linhas_antes": 34,
+    "linhas_depois": 28,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": null,
+    "nota": "número de linhas mudou: comparação por posição impossível"
+  },
+  {
+    "arquivo": "hiato_faixa_etaria_historico_pretaparda.parquet",
+    "linhas_antes": 290,
+    "linhas_depois": 232,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": null,
+    "nota": "número de linhas mudou: comparação por posição impossível"
+  },
+  {
+    "arquivo": "hiato_faixa_etaria_historico_todas.parquet",
+    "linhas_antes": 290,
+    "linhas_depois": 232,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": null,
+    "nota": "número de linhas mudou: comparação por posição impossível"
+  },
+  {
+    "arquivo": "hiato_faixa_etaria_pretaparda.parquet",
+    "linhas_antes": 5,
+    "linhas_depois": 4,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": null,
+    "nota": "número de linhas mudou: comparação por posição impossível"
+  },
+  {
+    "arquivo": "hiato_faixa_etaria_todas.parquet",
+    "linhas_antes": 5,
+    "linhas_depois": 4,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": null,
+    "nota": "número de linhas mudou: comparação por posição impossível"
+  },
+  {
+    "arquivo": "hiato_formal_informal.parquet",
+    "linhas_antes": 116,
+    "linhas_depois": 116,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": false,
+    "colunas_ponto_diferentes": [
+      "renda_media_branca",
+      "renda_media_negra",
+      "hiato_absoluto",
+      "hiato_percentual"
+    ],
+    "dif_max_abs": 199.36746511668025,
+    "dif_max_rel": 0.05892456202693051,
+    "significativo_nominal_sim_para_nao": 0,
+    "significativo_nominal_nao_para_sim": 0,
+    "significativo_nominal_total_sim": 116,
+    "significativo_fdr_sim_para_nao": 0,
+    "significativo_fdr_nao_para_sim": 0,
+    "significativo_fdr_total_sim": 116,
+    "antigo_total_sim": 116
+  },
+  {
+    "arquivo": "hiato_genero_escolaridade_pretaparda.parquet",
+    "linhas_antes": 14,
+    "linhas_depois": 14,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": false,
+    "colunas_ponto_diferentes": [
+      "renda_media_preta",
+      "renda_media_parda",
+      "hiato_absoluto",
+      "hiato_percentual"
+    ],
+    "dif_max_abs": 349.02644534675983,
+    "dif_max_rel": 1.6887667540597107,
+    "significativo_nominal_sim_para_nao": 1,
+    "significativo_nominal_nao_para_sim": 0,
+    "significativo_nominal_total_sim": 3,
+    "significativo_fdr_sim_para_nao": 2,
+    "significativo_fdr_nao_para_sim": 0,
+    "significativo_fdr_total_sim": 2,
+    "antigo_total_sim": 4
+  },
+  {
+    "arquivo": "hiato_genero_escolaridade_todas.parquet",
+    "linhas_antes": 14,
+    "linhas_depois": 14,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": false,
+    "colunas_ponto_diferentes": [
+      "renda_media_branca",
+      "renda_media_negra",
+      "hiato_absoluto",
+      "hiato_percentual"
+    ],
+    "dif_max_abs": 452.45139147936607,
+    "dif_max_rel": 0.47438232344807557,
+    "significativo_nominal_sim_para_nao": 0,
+    "significativo_nominal_nao_para_sim": 0,
+    "significativo_nominal_total_sim": 14,
+    "significativo_fdr_sim_para_nao": 0,
+    "significativo_fdr_nao_para_sim": 0,
+    "significativo_fdr_total_sim": 14,
+    "antigo_total_sim": 14
+  },
+  {
+    "arquivo": "hiato_genero_faixa_etaria_escolaridade_pretaparda.parquet",
+    "linhas_antes": 64,
+    "linhas_depois": 56,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": null,
+    "nota": "número de linhas mudou: comparação por posição impossível"
+  },
+  {
+    "arquivo": "hiato_genero_faixa_etaria_escolaridade_todas.parquet",
+    "linhas_antes": 66,
+    "linhas_depois": 56,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": null,
+    "nota": "número de linhas mudou: comparação por posição impossível"
+  },
+  {
+    "arquivo": "hiato_genero_faixa_etaria_pretaparda.parquet",
+    "linhas_antes": 10,
+    "linhas_depois": 8,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": null,
+    "nota": "número de linhas mudou: comparação por posição impossível"
+  },
+  {
+    "arquivo": "hiato_genero_faixa_etaria_todas.parquet",
+    "linhas_antes": 10,
+    "linhas_depois": 8,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": null,
+    "nota": "número de linhas mudou: comparação por posição impossível"
+  },
+  {
+    "arquivo": "hiato_genero_geracao_escolaridade_pretaparda.parquet",
+    "linhas_antes": 65,
+    "linhas_depois": 65,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": false,
+    "colunas_ponto_diferentes": [
+      "renda_media_preta",
+      "renda_media_parda",
+      "hiato_absoluto",
+      "hiato_percentual"
+    ],
+    "dif_max_abs": 1338.294458007149,
+    "dif_max_rel": 12.1539775845978,
+    "significativo_nominal_sim_para_nao": 0,
+    "significativo_nominal_nao_para_sim": 0,
+    "significativo_nominal_total_sim": 10,
+    "significativo_fdr_sim_para_nao": 6,
+    "significativo_fdr_nao_para_sim": 0,
+    "significativo_fdr_total_sim": 4,
+    "antigo_total_sim": 10
+  },
+  {
+    "arquivo": "hiato_genero_geracao_escolaridade_todas.parquet",
+    "linhas_antes": 67,
+    "linhas_depois": 67,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": false,
+    "colunas_ponto_diferentes": [
+      "renda_media_branca",
+      "renda_media_negra",
+      "hiato_absoluto",
+      "hiato_percentual"
+    ],
+    "dif_max_abs": 1477.1791096041884,
+    "dif_max_rel": 3.1335036198582578,
+    "significativo_nominal_sim_para_nao": 0,
+    "significativo_nominal_nao_para_sim": 2,
+    "significativo_nominal_total_sim": 49,
+    "significativo_fdr_sim_para_nao": 0,
+    "significativo_fdr_nao_para_sim": 2,
+    "significativo_fdr_total_sim": 49,
+    "antigo_total_sim": 47
+  },
+  {
+    "arquivo": "hiato_genero_geracao_pretaparda.parquet",
+    "linhas_antes": 10,
+    "linhas_depois": 10,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": false,
+    "colunas_ponto_diferentes": [
+      "renda_media_preta",
+      "renda_media_parda",
+      "hiato_absoluto",
+      "hiato_percentual"
+    ],
+    "dif_max_abs": 217.03855031180774,
+    "dif_max_rel": 5.900492000172301,
+    "significativo_nominal_sim_para_nao": 0,
+    "significativo_nominal_nao_para_sim": 1,
+    "significativo_nominal_total_sim": 6,
+    "significativo_fdr_sim_para_nao": 1,
+    "significativo_fdr_nao_para_sim": 0,
+    "significativo_fdr_total_sim": 4,
+    "antigo_total_sim": 5
+  },
+  {
+    "arquivo": "hiato_genero_geracao_todas.parquet",
+    "linhas_antes": 10,
+    "linhas_depois": 10,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": false,
+    "colunas_ponto_diferentes": [
+      "renda_media_branca",
+      "renda_media_negra",
+      "hiato_absoluto",
+      "hiato_percentual"
+    ],
+    "dif_max_abs": 220.65182921187443,
+    "dif_max_rel": 0.39227748559021147,
+    "significativo_nominal_sim_para_nao": 0,
+    "significativo_nominal_nao_para_sim": 1,
+    "significativo_nominal_total_sim": 10,
+    "significativo_fdr_sim_para_nao": 0,
+    "significativo_fdr_nao_para_sim": 1,
+    "significativo_fdr_total_sim": 10,
+    "antigo_total_sim": 9
+  },
+  {
+    "arquivo": "hiato_genero_historico_pretaparda.parquet",
+    "linhas_antes": 116,
+    "linhas_depois": 116,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": false,
+    "colunas_ponto_diferentes": [
+      "renda_media_preta",
+      "renda_media_parda",
+      "hiato_absoluto",
+      "hiato_percentual"
+    ],
+    "dif_max_abs": 67.40252114269788,
+    "dif_max_rel": 13.99180031068154,
+    "significativo_nominal_sim_para_nao": 3,
+    "significativo_nominal_nao_para_sim": 4,
+    "significativo_nominal_total_sim": 21,
+    "significativo_fdr_sim_para_nao": 7,
+    "significativo_fdr_nao_para_sim": 2,
+    "significativo_fdr_total_sim": 15,
+    "antigo_total_sim": 20
+  },
+  {
+    "arquivo": "hiato_genero_historico_todas.parquet",
+    "linhas_antes": 116,
+    "linhas_depois": 116,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": false,
+    "colunas_ponto_diferentes": [
+      "renda_media_branca",
+      "renda_media_negra",
+      "hiato_absoluto",
+      "hiato_percentual"
+    ],
+    "dif_max_abs": 152.86160636058867,
+    "dif_max_rel": 0.0538132333372639,
+    "significativo_nominal_sim_para_nao": 0,
+    "significativo_nominal_nao_para_sim": 0,
+    "significativo_nominal_total_sim": 116,
+    "significativo_fdr_sim_para_nao": 0,
+    "significativo_fdr_nao_para_sim": 0,
+    "significativo_fdr_total_sim": 116,
+    "antigo_total_sim": 116
+  },
+  {
+    "arquivo": "hiato_genero_pretaparda.parquet",
+    "linhas_antes": 2,
+    "linhas_depois": 2,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": false,
+    "colunas_ponto_diferentes": [
+      "renda_media_preta",
+      "renda_media_parda",
+      "hiato_absoluto",
+      "hiato_percentual"
+    ],
+    "dif_max_abs": 66.98831395691741,
+    "dif_max_rel": 0.06787603813645657,
+    "significativo_nominal_sim_para_nao": 0,
+    "significativo_nominal_nao_para_sim": 0,
+    "significativo_nominal_total_sim": 2,
+    "significativo_fdr_sim_para_nao": 0,
+    "significativo_fdr_nao_para_sim": 0,
+    "significativo_fdr_total_sim": 2,
+    "antigo_total_sim": 2
+  },
+  {
+    "arquivo": "hiato_genero_todas.parquet",
+    "linhas_antes": 2,
+    "linhas_depois": 2,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": false,
+    "colunas_ponto_diferentes": [
+      "renda_media_branca",
+      "renda_media_negra",
+      "hiato_absoluto",
+      "hiato_percentual"
+    ],
+    "dif_max_abs": 132.01099213539692,
+    "dif_max_rel": 0.031552976710508926,
+    "significativo_nominal_sim_para_nao": 0,
+    "significativo_nominal_nao_para_sim": 0,
+    "significativo_nominal_total_sim": 2,
+    "significativo_fdr_sim_para_nao": 0,
+    "significativo_fdr_nao_para_sim": 0,
+    "significativo_fdr_total_sim": 2,
+    "antigo_total_sim": 2
+  },
+  {
+    "arquivo": "hiato_geracao_escolaridade_pretaparda.parquet",
+    "linhas_antes": 33,
+    "linhas_depois": 33,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": false,
+    "colunas_ponto_diferentes": [
+      "renda_media_preta",
+      "renda_media_parda",
+      "hiato_absoluto",
+      "hiato_percentual"
+    ],
+    "dif_max_abs": 1117.6516562618144,
+    "dif_max_rel": 16.573848588307886,
+    "significativo_nominal_sim_para_nao": 0,
+    "significativo_nominal_nao_para_sim": 0,
+    "significativo_nominal_total_sim": 5,
+    "significativo_fdr_sim_para_nao": 2,
+    "significativo_fdr_nao_para_sim": 0,
+    "significativo_fdr_total_sim": 3,
+    "antigo_total_sim": 5
+  },
+  {
+    "arquivo": "hiato_geracao_escolaridade_todas.parquet",
+    "linhas_antes": 34,
+    "linhas_depois": 34,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": false,
+    "colunas_ponto_diferentes": [
+      "renda_media_branca",
+      "renda_media_negra",
+      "hiato_absoluto",
+      "hiato_percentual"
+    ],
+    "dif_max_abs": 1065.1741529642868,
+    "dif_max_rel": 1.1804547360259847,
+    "significativo_nominal_sim_para_nao": 0,
+    "significativo_nominal_nao_para_sim": 0,
+    "significativo_nominal_total_sim": 27,
+    "significativo_fdr_sim_para_nao": 0,
+    "significativo_fdr_nao_para_sim": 0,
+    "significativo_fdr_total_sim": 27,
+    "antigo_total_sim": 27
+  },
+  {
+    "arquivo": "hiato_geracao_historico_pretaparda.parquet",
+    "linhas_antes": 232,
+    "linhas_depois": 220,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": null,
+    "nota": "número de linhas mudou: comparação por posição impossível"
+  },
+  {
+    "arquivo": "hiato_geracao_pretaparda.parquet",
+    "linhas_antes": 5,
+    "linhas_depois": 5,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": false,
+    "colunas_ponto_diferentes": [
+      "renda_media_preta",
+      "renda_media_parda",
+      "hiato_absoluto",
+      "hiato_percentual"
+    ],
+    "dif_max_abs": 106.69342988523749,
+    "dif_max_rel": 0.3503659795441777,
+    "significativo_nominal_sim_para_nao": 0,
+    "significativo_nominal_nao_para_sim": 1,
+    "significativo_nominal_total_sim": 3,
+    "significativo_fdr_sim_para_nao": 0,
+    "significativo_fdr_nao_para_sim": 1,
+    "significativo_fdr_total_sim": 3,
+    "antigo_total_sim": 2
+  },
+  {
+    "arquivo": "hiato_geracao_todas.parquet",
+    "linhas_antes": 5,
+    "linhas_depois": 5,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": false,
+    "colunas_ponto_diferentes": [
+      "renda_media_branca",
+      "renda_media_negra",
+      "hiato_absoluto",
+      "hiato_percentual"
+    ],
+    "dif_max_abs": 188.78170248195966,
+    "dif_max_rel": 0.06515631923587686,
+    "significativo_nominal_sim_para_nao": 0,
+    "significativo_nominal_nao_para_sim": 0,
+    "significativo_nominal_total_sim": 5,
+    "significativo_fdr_sim_para_nao": 0,
+    "significativo_fdr_nao_para_sim": 0,
+    "significativo_fdr_total_sim": 5,
+    "antigo_total_sim": 5
+  },
+  {
+    "arquivo": "hiato_por_geracao.parquet",
+    "linhas_antes": 232,
+    "linhas_depois": 220,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": null,
+    "nota": "número de linhas mudou: comparação por posição impossível"
+  },
+  {
+    "arquivo": "hiato_preta_parda.parquet",
+    "linhas_antes": 58,
+    "linhas_depois": 58,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": false,
+    "colunas_ponto_diferentes": [
+      "renda_media_preta",
+      "renda_media_parda",
+      "hiato_absoluto",
+      "hiato_percentual"
+    ],
+    "dif_max_abs": 65.3857726092906,
+    "dif_max_rel": 7.649249730011096,
+    "razao_ep_novo_sobre_antigo": {
+      "mediana": 0.9638408700314981,
+      "min": 0.9172195399125279,
+      "max": 1.0004747895266513,
+      "n": 58
+    },
+    "significativo_nominal_sim_para_nao": 2,
+    "significativo_nominal_nao_para_sim": 3,
+    "significativo_nominal_total_sim": 13,
+    "significativo_fdr_sim_para_nao": 2,
+    "significativo_fdr_nao_para_sim": 3,
+    "significativo_fdr_total_sim": 13,
+    "antigo_total_sim": 12
+  },
+  {
+    "arquivo": "hiato_racial.parquet",
+    "linhas_antes": 58,
+    "linhas_depois": 58,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": false,
+    "colunas_ponto_diferentes": [
+      "renda_media_branca",
+      "renda_media_negra",
+      "hiato_absoluto",
+      "hiato_percentual"
+    ],
+    "dif_max_abs": 135.0952921053222,
+    "dif_max_rel": 0.049124447795862065,
+    "razao_ep_novo_sobre_antigo": {
+      "mediana": 0.9680228083152969,
+      "min": 0.8605698113784186,
+      "max": 0.9922752464807576,
+      "n": 58
+    },
+    "significativo_nominal_sim_para_nao": 0,
+    "significativo_nominal_nao_para_sim": 0,
+    "significativo_nominal_total_sim": 58,
+    "significativo_fdr_sim_para_nao": 0,
+    "significativo_fdr_nao_para_sim": 0,
+    "significativo_fdr_total_sim": 58,
+    "antigo_total_sim": 58
+  },
+  {
+    "arquivo": "hiato_regional.parquet",
+    "linhas_antes": 290,
+    "linhas_depois": 290,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": false,
+    "colunas_ponto_diferentes": [
+      "renda_media_branca",
+      "renda_media_negra",
+      "hiato_absoluto",
+      "hiato_percentual"
+    ],
+    "dif_max_abs": 213.6821533547436,
+    "dif_max_rel": 0.1252970652937091,
+    "significativo_nominal_sim_para_nao": 0,
+    "significativo_nominal_nao_para_sim": 0,
+    "significativo_nominal_total_sim": 290,
+    "significativo_fdr_sim_para_nao": 0,
+    "significativo_fdr_nao_para_sim": 0,
+    "significativo_fdr_total_sim": 290,
+    "antigo_total_sim": 290
+  },
+  {
+    "arquivo": "hiato_regional_indigena.parquet",
+    "linhas_antes": 290,
+    "linhas_depois": 290,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": false,
+    "colunas_ponto_diferentes": [
+      "renda_media_branca",
+      "renda_media_indigena",
+      "hiato_absoluto",
+      "hiato_percentual"
+    ],
+    "dif_max_abs": 636.2785835249833,
+    "dif_max_rel": 1.7524308830637416,
+    "significativo_nominal_sim_para_nao": 4,
+    "significativo_nominal_nao_para_sim": 2,
+    "significativo_nominal_total_sim": 246,
+    "significativo_fdr_sim_para_nao": 5,
+    "significativo_fdr_nao_para_sim": 2,
+    "significativo_fdr_total_sim": 245,
+    "antigo_total_sim": 248
+  },
+  {
+    "arquivo": "hiato_regional_pretaparda.parquet",
+    "linhas_antes": 1566,
+    "linhas_depois": 1566,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": false,
+    "colunas_ponto_diferentes": [
+      "renda_media_preta",
+      "renda_media_parda",
+      "hiato_absoluto",
+      "hiato_percentual"
+    ],
+    "dif_max_abs": 551.924313795364,
+    "dif_max_rel": 234.43615207204806,
+    "significativo_nominal_sim_para_nao": 24,
+    "significativo_nominal_nao_para_sim": 44,
+    "significativo_nominal_total_sim": 310,
+    "significativo_fdr_sim_para_nao": 151,
+    "significativo_fdr_nao_para_sim": 1,
+    "significativo_fdr_total_sim": 140,
+    "antigo_total_sim": 290
+  },
+  {
+    "arquivo": "hiato_setor_publico_privado.parquet",
+    "linhas_antes": 116,
+    "linhas_depois": 116,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": false,
+    "colunas_ponto_diferentes": [
+      "renda_media_branca",
+      "renda_media_negra",
+      "hiato_absoluto",
+      "hiato_percentual"
+    ],
+    "dif_max_abs": 399.5417799824045,
+    "dif_max_rel": 0.08588711561478725,
+    "significativo_nominal_sim_para_nao": 0,
+    "significativo_nominal_nao_para_sim": 0,
+    "significativo_nominal_total_sim": 116,
+    "significativo_fdr_sim_para_nao": 0,
+    "significativo_fdr_nao_para_sim": 0,
+    "significativo_fdr_total_sim": 116,
+    "antigo_total_sim": 116
+  },
+  {
+    "arquivo": "horas_trabalhadas.parquet",
+    "linhas_antes": 105969,
+    "linhas_depois": 105969,
+    "colunas_novas": [
+      "cv_horas",
+      "cv_renda_hora",
+      "n_horas",
+      "n_renda_hora",
+      "publicavel",
+      "publicavel_horas",
+      "publicavel_renda_hora"
+    ],
+    "colunas_removidas": [],
+    "pontos_identicos": null,
+    "nota": "ordem/chave 'geografia' diverge"
+  },
+  {
+    "arquivo": "informalidade.parquet",
+    "linhas_antes": 105969,
+    "linhas_depois": 105969,
+    "colunas_novas": [
+      "cv_carteira",
+      "cv_estatutario_militar",
+      "cv_previdencia",
+      "n_carteira",
+      "n_estatutario_militar",
+      "n_previdencia",
+      "pct_estatutario_militar",
+      "pop_estatutario_militar",
+      "publicavel",
+      "publicavel_carteira",
+      "publicavel_estatutario_militar",
+      "publicavel_previdencia"
+    ],
+    "colunas_removidas": [],
+    "pontos_identicos": null,
+    "nota": "ordem/chave 'geografia' diverge"
+  },
+  {
+    "arquivo": "mecanismo_renda_cohortes_cotas.parquet",
+    "linhas_antes": 2,
+    "linhas_depois": 2,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": null,
+    "nota": "ordem/chave 'n_favorecido' diverge"
+  },
+  {
+    "arquivo": "oaxaca_blinder_temporal.parquet",
+    "linhas_antes": 60,
+    "linhas_depois": 60,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": null,
+    "nota": "ordem/chave 'n_favorecido' diverge"
+  },
+  {
+    "arquivo": "ocupacao.parquet",
+    "linhas_antes": 105969,
+    "linhas_depois": 105969,
+    "colunas_novas": [
+      "cv_desocupacao",
+      "n_desocupacao",
+      "publicavel",
+      "publicavel_desocupacao"
+    ],
+    "colunas_removidas": [],
+    "pontos_identicos": null,
+    "nota": "ordem/chave 'geografia' diverge"
+  },
+  {
+    "arquivo": "painel_cohortes_superior_completo.parquet",
+    "linhas_antes": 57,
+    "linhas_depois": 57,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": true,
+    "colunas_ponto_diferentes": [],
+    "dif_max_abs": 7.105427357601002e-15,
+    "dif_max_rel": 4.1598120988868333e-16
+  },
+  {
+    "arquivo": "painel_cohortes_superior_completo_area.parquet",
+    "linhas_antes": 114,
+    "linhas_depois": 114,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": true,
+    "colunas_ponto_diferentes": [],
+    "dif_max_abs": 1.4210854715202004e-14,
+    "dif_max_rel": 5.331974607058592e-16
+  },
+  {
+    "arquivo": "painel_cohortes_superior_completo_regiao.parquet",
+    "linhas_antes": 285,
+    "linhas_depois": 285,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": true,
+    "colunas_ponto_diferentes": [],
+    "dif_max_abs": 1.7763568394002505e-14,
+    "dif_max_rel": 6.551202095130809e-16
+  },
+  {
+    "arquivo": "percentil_de_valor_racial.parquet",
+    "linhas_antes": 1044,
+    "linhas_depois": 1044,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": false,
+    "colunas_ponto_diferentes": [
+      "percentil_correspondente"
+    ],
+    "dif_max_abs": 1.0096066714303689,
+    "dif_max_rel": 0.08776349278077339
+  },
+  {
+    "arquivo": "perfil_quartis_racial.parquet",
+    "linhas_antes": 8814,
+    "linhas_depois": 8256,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": null,
+    "nota": "número de linhas mudou: comparação por posição impossível"
+  },
+  {
+    "arquivo": "perfil_quartis_racial_indigena.parquet",
+    "linhas_antes": 75,
+    "linhas_depois": 71,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": null,
+    "nota": "número de linhas mudou: comparação por posição impossível"
+  },
+  {
+    "arquivo": "perfil_quartis_racial_pretaparda.parquet",
+    "linhas_antes": 8802,
+    "linhas_depois": 8255,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": null,
+    "nota": "número de linhas mudou: comparação por posição impossível"
+  },
+  {
+    "arquivo": "perfil_topo10_racial.parquet",
+    "linhas_antes": 2169,
+    "linhas_depois": 2063,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": null,
+    "nota": "número de linhas mudou: comparação por posição impossível"
+  },
+  {
+    "arquivo": "perfil_topo10_racial_indigena.parquet",
+    "linhas_antes": 17,
+    "linhas_depois": 17,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": null,
+    "nota": "ordem/chave 'n_topo10' diverge"
+  },
+  {
+    "arquivo": "perfil_topo10_racial_pretaparda.parquet",
+    "linhas_antes": 2144,
+    "linhas_depois": 2056,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": null,
+    "nota": "número de linhas mudou: comparação por posição impossível"
+  },
+  {
+    "arquivo": "quartis_multi_racial.parquet",
+    "linhas_antes": 23171,
+    "linhas_depois": 21520,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": null,
+    "nota": "número de linhas mudou: comparação por posição impossível"
+  },
+  {
+    "arquivo": "quebra_estrutural.parquet",
+    "linhas_antes": 3,
+    "linhas_depois": 3,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": false,
+    "colunas_ponto_diferentes": [
+      "coef_mudanca_patamar",
+      "coef_mudanca_inclinacao"
+    ],
+    "dif_max_abs": 2.351384048033239,
+    "dif_max_rel": 0.2650401471892771
+  },
+  {
+    "arquivo": "renda.parquet",
+    "linhas_antes": 105969,
+    "linhas_depois": 105969,
+    "colunas_novas": [
+      "cv_renda",
+      "n_renda",
+      "publicavel",
+      "publicavel_renda"
+    ],
+    "colunas_removidas": [],
+    "pontos_identicos": null,
+    "nota": "ordem/chave 'geografia' diverge"
+  },
+  {
+    "arquivo": "renda_completa.parquet",
+    "linhas_antes": 20377,
+    "linhas_depois": 20377,
+    "colunas_novas": [
+      "cv_renda",
+      "n_renda",
+      "publicavel",
+      "publicavel_renda"
+    ],
+    "colunas_removidas": [],
+    "pontos_identicos": false,
+    "colunas_ponto_diferentes": [
+      "renda_habitual_real_media"
+    ],
+    "dif_max_abs": 15691.337150824093,
+    "dif_max_rel": 0.8600000000000001
+  },
+  {
+    "arquivo": "renda_completa_geracao.parquet",
+    "linhas_antes": 20735,
+    "linhas_depois": 20735,
+    "colunas_novas": [
+      "cv_renda",
+      "n_renda",
+      "publicavel",
+      "publicavel_renda"
+    ],
+    "colunas_removidas": [],
+    "pontos_identicos": false,
+    "colunas_ponto_diferentes": [
+      "renda_habitual_real_media"
+    ],
+    "dif_max_abs": 11368.18523586249,
+    "dif_max_rel": 3.1700478190389347
+  },
+  {
+    "arquivo": "renda_multidimensional_faixa.parquet",
+    "linhas_antes": 2869,
+    "linhas_depois": 2869,
+    "colunas_novas": [
+      "cv_renda",
+      "n_renda",
+      "publicavel",
+      "publicavel_renda"
+    ],
+    "colunas_removidas": [],
+    "pontos_identicos": false,
+    "colunas_ponto_diferentes": [
+      "renda_habitual_real_media"
+    ],
+    "dif_max_abs": 9219.890428856548,
+    "dif_max_rel": 0.5513136839590325
+  },
+  {
+    "arquivo": "renda_multidimensional_geracao.parquet",
+    "linhas_antes": 2830,
+    "linhas_depois": 2830,
+    "colunas_novas": [
+      "cv_renda",
+      "n_renda",
+      "publicavel",
+      "publicavel_renda"
+    ],
+    "colunas_removidas": [],
+    "pontos_identicos": false,
+    "colunas_ponto_diferentes": [
+      "renda_habitual_real_media"
+    ],
+    "dif_max_abs": 22438.57514023487,
+    "dif_max_rel": 0.9506101276943156
+  },
+  {
+    "arquivo": "renda_por_escolaridade.parquet",
+    "linhas_antes": 143157,
+    "linhas_depois": 143157,
+    "colunas_novas": [
+      "cv_renda",
+      "n_renda",
+      "publicavel",
+      "publicavel_renda"
+    ],
+    "colunas_removidas": [],
+    "pontos_identicos": null,
+    "nota": "ordem/chave 'geografia' diverge"
+  },
+  {
+    "arquivo": "renda_por_geracao.parquet",
+    "linhas_antes": 105569,
+    "linhas_depois": 105569,
+    "colunas_novas": [
+      "cv_renda",
+      "n_renda",
+      "publicavel",
+      "publicavel_renda"
+    ],
+    "colunas_removidas": [],
+    "pontos_identicos": null,
+    "nota": "ordem/chave 'geografia' diverge"
+  },
+  {
+    "arquivo": "ritmo_convergencia_hiatos.parquet",
+    "linhas_antes": 3,
+    "linhas_depois": 3,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": false,
+    "colunas_ponto_diferentes": [
+      "hiato_percentual_atual",
+      "inclinacao_pp_por_trimestre",
+      "inclinacao_pp_por_ano",
+      "r2",
+      "inclinacao_pct_por_trimestre_log",
+      "r2_log",
+      "anos_para_zerar_extrapolacao_ingenua",
+      "inclinacao_pp_por_trimestre_suavizada",
+      "r2_suavizada"
+    ],
+    "dif_max_abs": 5.432437189599597,
+    "dif_max_rel": 0.3656393423632275
+  },
+  {
+    "arquivo": "segregacao_ocupacional.parquet",
+    "linhas_antes": 58,
+    "linhas_depois": 58,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": true,
+    "colunas_ponto_diferentes": [],
+    "dif_max_abs": 5.828670879282072e-16,
+    "dif_max_rel": 3.5486541907251657e-15
+  },
+  {
+    "arquivo": "segregacao_ocupacional_indigena.parquet",
+    "linhas_antes": 1,
+    "linhas_depois": 1,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": true,
+    "colunas_ponto_diferentes": [],
+    "dif_max_abs": 2.7755575615628914e-17,
+    "dif_max_rel": 1.6514196015771856e-16
+  },
+  {
+    "arquivo": "segregacao_ocupacional_pretaparda.parquet",
+    "linhas_antes": 58,
+    "linhas_depois": 58,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": true,
+    "colunas_ponto_diferentes": [],
+    "dif_max_abs": 9.71445146547012e-16,
+    "dif_max_rel": 2.7827820549319742e-14
+  },
+  {
+    "arquivo": "segregacao_setorial.parquet",
+    "linhas_antes": 58,
+    "linhas_depois": 58,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": true,
+    "colunas_ponto_diferentes": [],
+    "dif_max_abs": 5.134781488891349e-16,
+    "dif_max_rel": 5.1796100603195594e-15
+  },
+  {
+    "arquivo": "segregacao_setorial_pretaparda.parquet",
+    "linhas_antes": 58,
+    "linhas_depois": 58,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": true,
+    "colunas_ponto_diferentes": [],
+    "dif_max_abs": 9.08995101411847e-16,
+    "dif_max_rel": 2.1108180867704322e-14
+  },
+  {
+    "arquivo": "sobrequalificacao.parquet",
+    "linhas_antes": 23109,
+    "linhas_depois": 23109,
+    "colunas_novas": [
+      "cv_sobrequalificado",
+      "n_sobrequalificado",
+      "publicavel",
+      "publicavel_sobrequalificado"
+    ],
+    "colunas_removidas": [],
+    "pontos_identicos": null,
+    "nota": "ordem/chave 'geografia' diverge"
+  },
+  {
+    "arquivo": "theil_racial.parquet",
+    "linhas_antes": 58,
+    "linhas_depois": 58,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": false,
+    "colunas_ponto_diferentes": [
+      "theil_total",
+      "theil_entre_grupos",
+      "theil_dentro_grupos",
+      "pct_entre_grupos",
+      "pct_dentro_grupos"
+    ],
+    "dif_max_abs": 0.7360559964560167,
+    "dif_max_rel": 0.09653704082010875
+  },
+  {
+    "arquivo": "transicao_desemprego_emprego.parquet",
+    "linhas_antes": 10,
+    "linhas_depois": 10,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": true,
+    "colunas_ponto_diferentes": [],
+    "dif_max_abs": 7.105427357601002e-15,
+    "dif_max_rel": 2.902242215284256e-16,
+    "razao_ep_novo_sobre_antigo": {
+      "mediana": 1.0,
+      "min": 0.9999999999999951,
+      "max": 1.0000000000000047,
+      "n": 10
+    }
+  },
+  {
+    "arquivo": "transicao_informal_formal.parquet",
+    "linhas_antes": 10,
+    "linhas_depois": 10,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": true,
+    "colunas_ponto_diferentes": [],
+    "dif_max_abs": 3.552713678800501e-15,
+    "dif_max_rel": 3.061418513608575e-16,
+    "razao_ep_novo_sobre_antigo": {
+      "mediana": 1.0,
+      "min": 0.9999999999999941,
+      "max": 1.0,
+      "n": 10
+    }
+  }
+]

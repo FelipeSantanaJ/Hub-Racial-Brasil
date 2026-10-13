@@ -2,10 +2,10 @@
   "esquema": "hub-racial-meta/1",
   "arquivo": "quebra_estrutural.parquet",
   "n_linhas": 3,
-  "gerado_em": "2026-10-13T03:38:22.249385+00:00",
+  "gerado_em": "2026-10-13T13:08:00.159287+00:00",
   "codigo": {
-    "commit": "e27278b4e61e4ede0d809e20e6110fc30a81d643",
-    "modulo": "(retroativo)"
+    "commit": "c1202a10fd9cedb6ee7d78647d0188dfd6dea81e",
+    "modulo": "__main__"
   },
   "insumos": {
     "chave": "derivado",
@@ -15,7 +15,5 @@
   },
   "se_metodo": "ols_iid_sobre_serie_trimestral",
   "populacao": "Série trimestral de hiato_racial / hiato_branca_indigena / hiato_preta_parda",
-  "periodo": null,
-  "meta_retroativo": true,
-  "meta_preenchido_em": "2026-10-13T04:59:23.003742+00:00"
+  "periodo": null
 }

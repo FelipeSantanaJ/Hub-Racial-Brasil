@@ -2,22 +2,20 @@
   "esquema": "hub-racial-meta/1",
   "arquivo": "transicao_desemprego_emprego.parquet",
   "n_linhas": 10,
-  "gerado_em": "2026-10-13T04:16:24.118886+00:00",
+  "gerado_em": "2026-10-13T14:06:29.902066+00:00",
   "codigo": {
-    "commit": "e27278b4e61e4ede0d809e20e6110fc30a81d643",
-    "modulo": "(retroativo)"
+    "commit": "c1202a10fd9cedb6ee7d78647d0188dfd6dea81e",
+    "modulo": "__main__"
   },
   "insumos": {
-    "chave": "trimestral_v1",
-    "descricao": "PNAD Contínua trimestral, extrato v1 + deflator IBGE",
-    "hash": "524457dd7482fc957d4a0f46ac8810fd4402a35d2c1dd703acec80ba40cbee01",
+    "chave": "trimestral_v2",
+    "descricao": "PNAD Contínua trimestral, extrato v2 + deflator IBGE",
+    "hash": "9b64f579fa63981e9237190166d333a9ac546041a4df260d2c67dabf49f1ceda",
     "n_arquivos": 228
   },
   "se_metodo": "linearizacao_taylor_estrato_upa",
   "populacao": "Pessoas pareadas em trimestres consecutivos (painel de 5 visitas), desocupadas em t0",
   "periodo": null,
-  "meta_retroativo": true,
-  "meta_preenchido_em": "2026-10-13T04:59:23.451115+00:00",
   "familia_fdr": null,
   "alfa": 0.05
 }
