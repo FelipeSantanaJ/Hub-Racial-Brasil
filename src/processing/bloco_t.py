@@ -12,7 +12,8 @@ e seus parentes (`V2005` 17–19) ficam fora, como no IBGE (não têm `VD5008`).
 - **T2** — pobreza: FGT(0) (proporção), FGT(1) (hiato de pobreza) e FGT(2) (severidade) com três
   linhas por pessoa e por mês: ¼ salário mínimo (critério de renda do BPC), ½ salário mínimo
   (critério de baixa renda do CadÚnico) e 50% da mediana nacional do ano (linha relativa).
-  Linhas internacionais em PPC ficam pendentes (exigem fator de conversão externo).
+  Desde a Onda 2, também as linhas internacionais do Banco Mundial (US$ 3,00, 4,20 e 8,30 por dia, PPC
+  de 2021) convertidas para R$ nominais do ano por mês (`src/ingestion/linhas_pobreza_ppc.py`).
 - **T3** — de onde vem a renda: % das pessoas em domicílios que recebem cada fonte, e participação
   de cada fonte no total da renda domiciliar das pessoas de cada grupo.
 - **T4** — décimos nacionais de renda domiciliar per capita: participação de cada raça por décimo, índice
@@ -25,6 +26,8 @@ Uso:
     python -m src.processing.bloco_t [--so t1 t2 t3 t4]
 """
 from __future__ import annotations
+
+from functools import lru_cache
 
 import duckdb
 import numpy as np
@@ -115,10 +118,21 @@ def t1(m: pd.DataFrame, ano: int, visita: int) -> pd.DataFrame:
 # ----------------------------------------------------------------------------------------- #
 # T2
 # ----------------------------------------------------------------------------------------- #
+LINHAS_PPC_PATH = OUTPUT_DIR / "linhas_pobreza_ppc.parquet"
+
+
+@lru_cache(maxsize=None)
+def linhas_ppc() -> dict[int, dict[str, float]]:
+    """{ano: {linha: R$ por pessoa por mês}} das linhas internacionais; ano sem IPC fica de fora."""
+    t = pd.read_parquet(LINHAS_PPC_PATH)
+    t = t[t["status"] == "ok"]
+    return {int(a): dict(zip(g["linha"], g["valor_reais_mes"].astype(float))) for a, g in t.groupby("ano")}
+
+
 def linhas_pobreza(ano: int, mediana: float) -> dict[str, float]:
     sm = SALARIO_MINIMO_NOMINAL[ano]
     return {"1/4 salário mínimo (BPC)": sm / 4, "1/2 salário mínimo (CadÚnico)": sm / 2,
-            "50% da mediana": 0.5 * mediana}
+            "50% da mediana": 0.5 * mediana, **linhas_ppc().get(ano, {})}
 
 
 def t2(m: pd.DataFrame, ano: int, visita: int) -> pd.DataFrame:
@@ -246,7 +260,9 @@ def main() -> None:
     if "t1" in fazer:
         salvar_tabela(pd.concat(t1s, ignore_index=True), OUTPUT_DIR / "t1_renda_domiciliar_per_capita.parquet", **meta)
     if "t2" in fazer:
-        salvar_tabela(pd.concat(t2s, ignore_index=True), OUTPUT_DIR / "t2_pobreza.parquet", **meta)
+        salvar_tabela(pd.concat(t2s, ignore_index=True), OUTPUT_DIR / "t2_pobreza.parquet", **meta,
+                      linhas_ppc="data/processed/linhas_pobreza_ppc.parquet (Banco Mundial, PPC 2021; "
+                                 "src/ingestion/linhas_pobreza_ppc.py)")
     if "t3" in fazer:
         salvar_tabela(pd.concat(t3s, ignore_index=True), OUTPUT_DIR / "t3_fontes_de_renda.parquet",
                       insumos="anual_v2", nota_renda=meta["nota_renda"])

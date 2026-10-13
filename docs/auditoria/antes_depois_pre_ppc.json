@@ -1,0 +1,14 @@
+[
+  {
+    "arquivo": "t2_pobreza.parquet",
+    "linhas_antes": 462,
+    "linhas_depois": 924,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "linhas_novas_fora_da_comparacao": 462,
+    "pontos_identicos": true,
+    "colunas_ponto_diferentes": [],
+    "dif_max_abs": 2.842170943040401e-14,
+    "dif_max_rel": 6.503426182291691e-16
+  }
+]

@@ -87,7 +87,7 @@ técnicas (R11, F4, F6, imagens vazias da árvore) nas pendências da Onda 1 (`o
 | ID | Estado | Onde | Por quê |
 |---|---|---|---|
 | T1 | Já existe | `t1_renda_domiciliar_per_capita` (por raça da pessoa e raça × sexo do responsável) | — |
-| T2 | Já existe | `t2_pobreza` (FGT 0/1/2; ¼ SM, ½ SM, 50% da mediana). Linhas em PPC pendentes | `met` (PPC) |
+| T2 | Já existe | `t2_pobreza` (FGT 0/1/2; ¼ SM, ½ SM, 50% da mediana; US$ 3,00, 4,20 e 8,30/dia em PPC 2021 desde a Onda 2, insumo `linhas_pobreza_ppc`) | — |
 | T3 | Já existe | `t3_fontes_de_renda` (2016+) | — |
 | T4 | Já existe | `t4_decimos_renda_domiciliar` | — |
 | T5 | Já existe | S1 (P1 × P5) e ficha T | — |

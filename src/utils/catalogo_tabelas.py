@@ -129,6 +129,8 @@ CATALOGO: list[tuple[str, str, str]] = [
     (r"^habitacao_.*$", "Moradores (pessoas) da PNAD Contínua anual, Visita 1, tema Habitação: 2016–2019 e 2022–2025",
      INSUMO_ANUAL_VISITA1_V1),
     (r"^deflator_ibge$", "Não se aplica (deflatores oficiais do IBGE por UF × trimestre)", "ibge_deflator"),
+    (r"^linhas_pobreza_ppc$", "Não se aplica (linhas internacionais de pobreza do Banco Mundial, PPC 2021, convertidas "
+     "para R$ nominais por pessoa por mês, por ano)", "wb_ppc_ipc"),
 ]
 
 NAO_DOCUMENTADA = "NÃO DOCUMENTADA (conferir o gerador e acrescentar ao catálogo)"

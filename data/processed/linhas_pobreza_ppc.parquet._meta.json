@@ -1,0 +1,25 @@
+{
+  "esquema": "hub-racial-meta/1",
+  "arquivo": "linhas_pobreza_ppc.parquet",
+  "n_linhas": 42,
+  "gerado_em": "2026-10-13T19:55:39.615278+00:00",
+  "codigo": {
+    "commit": "e22733d51f7b66c816c622db8233e7dd0aa83599-modificado",
+    "modulo": "__main__"
+  },
+  "insumos": {
+    "chave": "wb_ppc_ipc",
+    "descricao": "Banco Mundial (WDI, API v2): fator de PPC do consumo privado (PA.NUS.PRVT.PP) e IPC (FP.CPI.TOTL), Brasil",
+    "hash": "a2d48e03d29491f537cafd70e0689e5f64ca2b5696c03008ca429b1bc74e6c46",
+    "n_arquivos": 2
+  },
+  "se_metodo": "sem_inferencia",
+  "populacao": "Não se aplica (linhas internacionais de pobreza do Banco Mundial, PPC 2021, convertidas para R$ nominais por pessoa por mês, por ano)",
+  "periodo": {
+    "inicio": "2012",
+    "fim": "2025"
+  },
+  "formula": "US$/dia × PPC_2021 (PA.NUS.PRVT.PP) × IPC(ano)/IPC(2021) (FP.CPI.TOTL) × 365/12",
+  "fonte": "Banco Mundial, WDI (API v2); linhas da nota de 05/06/2025 (PPC de 2021)",
+  "data_acesso": "2026-10-13"
+}

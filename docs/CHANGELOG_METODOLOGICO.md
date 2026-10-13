@@ -13,8 +13,18 @@ calculá-lo: data, o quê, por quê, impacto. Mais recente primeiro.
 - **Aprofundamentos:** saiu `apr_convergencia.png` (extrapolação linear até "fecharia por volta de 2078", sem IC nem
   premissa na tela), substituída pela projeção condicional do B6; legenda da quebra estrutural no deck corrigida
   ("2 dos 3 eventos").
-- **Linhas internacionais de pobreza em PPC (T2):** autorizadas pelo Felipe, mas **não feitas**: a leitura dos dados
-  externos baixados (fator de PPC e IPC do Banco Mundial) foi bloqueada pela política de permissões da sessão.
+- **Linhas internacionais de pobreza em PPC (T2, feitas depois de o Felipe liberar a leitura dos dados externos):**
+  US$ 3,00, 4,20 e 8,30 por pessoa por dia (PPC de 2021; nota do Banco Mundial de 05/06/2025), convertidas para R$
+  nominais do ano por mês: linha_R$(ano) = US$/dia × PPC_2021 × IPC(ano)/IPC(2021) × 365/12, com PPC_2021 =
+  `PA.NUS.PRVT.PP` (2,4499 R$/dólar internacional) e IPC = `FP.CPI.TOTL` (API v2 do Banco Mundial, acesso em
+  13/10/2026). Em 2025: R$ 280,06, 392,08 e 774,82. Insumo `data/processed/linhas_pobreza_ppc.parquet`
+  (`src/ingestion/linhas_pobreza_ppc.py`; IPC disponível para 2012–2025, nenhum ano sem linha). O `t2_pobreza` passa
+  de 462 para 924 linhas; as 462 antigas saíram **idênticas** (dif. máx. rel. 6,5e-16;
+  `docs/auditoria/antes_depois_pre_ppc.json`; legado em `data/processed/_legado/pre_ppc/`). O `antes_depois` passou a
+  comparar só as linhas que já existiam quando uma tabela ganha linhas. Resultado: em 2025, 31,9% (31,4–32,5) das
+  pessoas negras abaixo de US$ 8,30 × 16,4% (15,9–17,0) das brancas; razão ~2× nas três linhas, como nas linhas em
+  salário mínimo. Ressalva na ficha T: não são as taxas oficiais do Banco Mundial para o Brasil (renda habitual
+  nominal da PNADC, IPC nacional, sem deflação espacial). Nenhum número publicado antes muda.
 
 - **Estudos novos** (fichas B1–B6 e C1–C5 com hipóteses escritas antes de rodar; `src/processing/bloco_b.py`,
   `bloco_c.py`, `graficos_onda2.py`). Sempre com a versão do Bloco T ao lado (P4 e/ou renda domiciliar per capita).

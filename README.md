@@ -70,7 +70,9 @@ Entre quem trabalha e tem renda, o hiato Branca × Negra é de 65,7% (2026 T2): 
 ganham pessoas brancas. Contando **todos os adultos** (quem não está ocupado entra com zero), o hiato sobe, e muito
 mais entre mulheres (+17,5 p.p. em média). Pela **renda do domicílio por pessoa**, todas as idades, o hiato era de
 99% em 2012 e de 82% em 2025, e 29% das pessoas negras viviam abaixo de meio salário mínimo por pessoa (15% das
-brancas). Uma pessoa negra ocupada tem um terço da chance de uma pessoa branca de estar entre os 10% que mais
+brancas). Com a linha internacional de US$ 8,30 por dia (PPC de 2021, convertida para reais), são 32% das pessoas
+negras e 16% das brancas: o mesmo ~2× ([T](docs/studies/T/ficha.md); cálculo do Hub com a renda da PNAD Contínua, não
+a taxa oficial do Banco Mundial). Uma pessoa negra ocupada tem um terço da chance de uma pessoa branca de estar entre os 10% que mais
 ganham. Fichas: [`docs/studies`](docs/studies/INDICE.md) (F, S0, S1, T, A, e S0.3, S1.3–S1.5, T4).
 
 Quase 9 de cada 10 partes do hiato de renda do trabalho por adulto vêm da **renda por hora**; entre mulheres, 15%
