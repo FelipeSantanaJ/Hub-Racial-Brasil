@@ -1,0 +1,19 @@
+{
+  "esquema": "hub-racial-meta/1",
+  "arquivo": "c5_tendencia.parquet",
+  "n_linhas": 8,
+  "gerado_em": "2026-10-13T18:42:32.604109+00:00",
+  "codigo": {
+    "commit": "8a4429c2b16d9caf53d31abb06aee33896d4515e",
+    "modulo": "__main__"
+  },
+  "insumos": {
+    "chave": "trimestral_v2",
+    "descricao": "PNAD Contínua trimestral, extrato v2 + deflator IBGE",
+    "hash": "9b64f579fa63981e9237190166d333a9ac546041a4df260d2c67dabf49f1ceda",
+    "n_arquivos": 228
+  },
+  "se_metodo": "ewc_lazarus_lewis_stock_watson; sensibilidades newey_west e gls_ar1",
+  "populacao": "Mulheres 18+ (P1 e todas); trabalho doméstico = VD4009 03/04",
+  "periodo": null
+}
