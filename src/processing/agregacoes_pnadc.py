@@ -2771,6 +2771,36 @@ COMBOS_RACA_GENERO = [
 ]
 
 
+def decompor_raca_genero(micro: pd.DataFrame, sexo_t: str, raca_t: str, coluna_renda: str,
+                         peso: str = "peso", n_minimo: int = 30) -> dict | None:
+    """Decomposição ANOVA de 2 fatores do hiato entre Homem Branco (HB) e o grupo-alvo
+    (sexo_t, raca_t), sobre um microdado com colunas `raca_cor`, `sexo`, renda e peso:
+
+        gap_total     = HB − Y(sexo_t, raca_t)
+        efeito_raca   = HB − Y(Homem, raca_t)
+        efeito_genero = HB − Y(sexo_t, Branca)      ← Branca do MESMO sexo do alvo (E6)
+        interacao     = gap_total − efeito_raca − efeito_genero
+
+    Logo gap_total = efeito_raca + efeito_genero + interacao. Devolve None se alguma das
+    células usadas tiver menos de `n_minimo` observações."""
+    def media(raca, sx):
+        g = micro[(micro["raca_cor"] == raca) & (micro["sexo"] == sx)]
+        return pnadc_core.media_ponderada(g[coluna_renda], g[peso]) if len(g) >= n_minimo else np.nan
+
+    hb = media("Branca", "Homem")
+    h_t = media(raca_t, "Homem")
+    b_t = media("Branca", sexo_t)
+    y_t = media(raca_t, sexo_t)
+    if any(pd.isna(x) for x in (hb, h_t, b_t, y_t)):
+        return None
+    gap_total = hb - y_t
+    efeito_raca = hb - h_t
+    efeito_genero = hb - b_t
+    return {"renda_homem_branco": hb, "renda_alvo": y_t, "gap_total": gap_total,
+            "efeito_raca": efeito_raca, "efeito_genero": efeito_genero,
+            "interacao": gap_total - efeito_raca - efeito_genero}
+
+
 def gerar_decomposicao_raca_genero(con: duckdb.DuckDBPyConnection) -> None:
     """Generaliza `gerar_dupla_desvantagem` (que só cobria Homem Branco vs. Mulher
     Negra) pras NOVE combinações, todas vs. Homem Branco (referência): as cinco
@@ -2786,8 +2816,10 @@ def gerar_decomposicao_raca_genero(con: duckdb.DuckDBPyConnection) -> None:
         interacao     = gap_total − efeito_raca − efeito_genero
 
     Quando sexo_t=Homem (Homem Negro/Preto/Pardo/Indígena), efeito_genero e interação
-    saem 0 por construção — é só o efeito de raça puro contra a referência, comportamento
-    esperado, não um bug.
+    saem 0 por construção — é só o efeito de raça puro contra a referência. Até 13/10/2026
+    o código usava sempre Mulher Branca no termo de gênero e dava efeito_genero = R$ 1.258 e
+    interacao = −R$ 1.258 nessas linhas (E6 da auditoria Rodada 2); o cálculo agora está em
+    `decompor_raca_genero`, coberto por teste.
 
     Amostra checada antes de escrever esta função: mesmo Indígena x sexo, Brasil,
     trimestre a trimestre, tem n mínimo de 136 (min histórico, 2012-2026) — série
@@ -2812,29 +2844,14 @@ def gerar_decomposicao_raca_genero(con: duckdb.DuckDBPyConnection) -> None:
         micro_negra = micro.copy()
         micro_negra["raca_cor"] = micro_negra["raca_cor"].replace({"Preta": "Negra", "Parda": "Negra"})
 
-        def celula(base_df, raca, sx):
-            return base_df[(base_df["raca_cor"] == raca) & (base_df["sexo"] == sx)]
-
-        def media(base_df, raca, sx):
-            g = celula(base_df, raca, sx)
-            return pnadc_core.media_ponderada(g["renda_habitual_real"], g["peso"]) if len(g) >= n_minimo else np.nan
-
-        hb = media(micro, "Branca", "Homem")
-        if pd.isna(hb):
-            continue
-
         for sexo_t, raca_t in COMBOS_RACA_GENERO:
             base_df = micro_negra if raca_t == "Negra" else micro
-            h_t = media(base_df, raca_t, "Homem")
-            mb = media(base_df, "Branca", "Mulher")
-            y_t = media(base_df, raca_t, sexo_t)
-            if any(pd.isna(x) for x in (h_t, mb, y_t)):
+            dec = decompor_raca_genero(base_df, sexo_t, raca_t, "renda_habitual_real", n_minimo=n_minimo)
+            if dec is None:
                 continue
-
-            gap_total = hb - y_t
-            efeito_raca = hb - h_t
-            efeito_genero = hb - mb
-            interacao = gap_total - efeito_raca - efeito_genero
+            hb, y_t = dec["renda_homem_branco"], dec["renda_alvo"]
+            gap_total, efeito_raca = dec["gap_total"], dec["efeito_raca"]
+            efeito_genero, interacao = dec["efeito_genero"], dec["interacao"]
 
             base_df = base_df.copy()
             base_df["grp"] = base_df["raca_cor"] + " · " + base_df["sexo"]
