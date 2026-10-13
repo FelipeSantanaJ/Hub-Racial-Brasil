@@ -180,3 +180,59 @@ class TestGiniPonderado:
         gini = pnadc_core.gini_ponderado(valores, pesos)
 
         assert gini > 0.99
+
+
+class TestZerosGiniTheil:
+    """E3: a função de Gini mantém zeros; Theil os exclui. A população tem de ser
+    definida antes (renda > 0) para que os dois índices falem da mesma população."""
+
+    def test_theil_ignora_zeros_e_gini_nao(self):
+        positivos = np.array([10.0, 20.0, 30.0, 40.0])
+        com_zeros = np.r_[positivos, [0.0, 0.0]]
+        w4, w6 = np.ones(4), np.ones(6)
+        assert pnadc_core.theil_t(com_zeros, w6) == pytest.approx(pnadc_core.theil_t(positivos, w4))
+        assert pnadc_core.gini_ponderado(com_zeros, w6) > pnadc_core.gini_ponderado(positivos, w4)
+
+    def test_mesma_populacao_quando_filtrada_antes(self):
+        y = np.array([0.0, 5.0, 10.0, 0.0, 50.0])
+        w = np.array([2.0, 1.0, 1.0, 3.0, 1.0])
+        pos = y > 0
+        assert pnadc_core.theil_t(y, w) == pytest.approx(pnadc_core.theil_t(y[pos], w[pos]))
+        assert pnadc_core.gini_ponderado(y[pos], w[pos]) < pnadc_core.gini_ponderado(y, w)
+
+
+class TestOaxacaBlinderSintetico:
+    """Decomposição com resposta conhecida: mesmos coeficientes nos dois grupos (resíduo
+    não explicado = 0) e diferença só de composição em x."""
+
+    def test_decomposicao_conhecida(self):
+        rng = np.random.default_rng(5)
+        n = 4000
+        grupo = np.repeat(["A", "B"], n // 2)
+        # A tem mais x=1 (70%) que B (30%); y = 1 + 0,5·x + ruído pequeno, iguais nos grupos
+        x = np.where(grupo == "A", rng.random(n) < 0.7, rng.random(n) < 0.3).astype(int)
+        y = 1 + 0.5 * x + rng.normal(0, 0.01, n)
+        df = pd.DataFrame({"y": y, "x": x.astype(str), "g": grupo, "w": 1.0, "upa": np.arange(n) // 4})
+        r = pnadc_core.decomposicao_oaxaca_blinder(df, "y", ["x"], "w", "g", "A", "B", cluster="upa")
+        diferenca_x = x[grupo == "A"].mean() - x[grupo == "B"].mean()
+        assert r["hiato_total"] == pytest.approx(0.5 * diferenca_x, abs=2e-3)
+        assert r["parcela_explicada"] == pytest.approx(0.5 * diferenca_x, abs=2e-3)
+        assert r["parcela_nao_explicada"] == pytest.approx(0.0, abs=2e-3)
+        assert r["parcela_explicada"] + r["parcela_nao_explicada"] == pytest.approx(r["hiato_total"])
+
+    def test_residuo_puro(self):
+        rng = np.random.default_rng(6)
+        n = 4000
+        grupo = np.repeat(["A", "B"], n // 2)
+        x = (rng.random(n) < 0.5).astype(int)
+        y = 1 + 0.3 * (grupo == "A") + 0.5 * x + rng.normal(0, 0.01, n)
+        df = pd.DataFrame({"y": y, "x": x.astype(str), "g": grupo, "w": 1.0, "upa": np.arange(n) // 4})
+        r = pnadc_core.decomposicao_oaxaca_blinder(df, "y", ["x"], "w", "g", "A", "B", cluster="upa")
+        assert r["parcela_nao_explicada"] == pytest.approx(0.3, abs=0.01)
+        assert r["residuo_restrito_coef"] == pytest.approx(0.3, abs=0.01)
+
+
+def test_deflator_ipea_removido():
+    """E4: funções de deflator do IPEA (dividiam o nominal) não podem voltar."""
+    assert not hasattr(pnadc_core, "aplicar_deflator")
+    assert not hasattr(pnadc_core, "carregar_deflator")

@@ -1,0 +1,21 @@
+name: CI
+
+on:
+  push:
+    branches: [main, "auditoria/**"]
+  pull_request:
+
+jobs:
+  testes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements.lock
+      - name: Instalar dependências (versões travadas)
+        run: pip install -r requirements.lock
+      - name: Testes (sem microdados: só dados sintéticos)
+        run: python -m pytest -q

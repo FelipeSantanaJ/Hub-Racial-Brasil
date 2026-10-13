@@ -1,3 +1,4 @@
+# Versões mínimas. O ambiente exato testado está em requirements.lock (usado no CI).
 duckdb>=1.0
 pyarrow>=16.0
 pandas>=2.2
