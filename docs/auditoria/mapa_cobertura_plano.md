@@ -51,23 +51,23 @@ técnicas (R11, F4, F6, imagens vazias da árvore) nas pendências da Onda 1 (`o
 
 | ID | Estado | Onde | Por quê |
 |---|---|---|---|
-| B1 | Existe, precisa refazer | `ritmo_convergencia_hiatos` (OLS i.i.d. sobre a série) | `esp` (R6: sem HAC, sem quebras) |
-| B2 | Novo | Decomposição no tempo (Kitagawa/OB/JMP): nada. `oaxaca_blinder_temporal` decompõe por período, não a mudança | — |
-| B3 | Novo | RIF/quantis por ano: nada como tabela (há `oaxaca_blinder_quantis.png`, só foto) | — |
-| B4 | Existe, precisa refazer | `hiato_por_geracao`, `renda_por_geracao`, `painel_cohortes_superior_completo`. Sem tratamento formal de APC | `pop`, `esp` |
-| B5 | Novo | Ciclo × tendência: nada | — |
-| B6 | Existe, precisa refazer | `ritmo_convergencia_hiatos` tem projeção linear. Precisa virar projeção condicional com premissas explícitas | `esp` |
+| B1 | Já existe | `b1_tendencia_hiato`, `b1_degraus_hiato`; `ritmo_convergencia_hiatos` e `quebra_estrutural` refeitos com EP EWC (Onda 2) | — |
+| B2 | Já existe | `b2_decomposicao_tempo` (reclassificação Preta/Parda + JMP de médias), `b2_composicao_racial_coortes`. RIF no tempo fica no D1.3 (Onda 3) | — |
+| B3 | Já existe | `b3_hiato_quantis_serie`, `b3_tendencia_quantis`, `b3_quantis_janelas` | — |
+| B4 | Já existe | `b4_mesma_idade_coortes`, `b4_celulas_idade_ano`, `b4_apc` (restrição de Deaton-Paxson declarada; sensibilidade AC) | — |
+| B5 | Já existe | `b5_ciclo_tendencia`, `b5_taxa_desocupacao` | — |
+| B6 | Já existe | `b6_projecao_condicional` (premissas P-a, P-b, P-c; "sem data finita" quando o ritmo inclui zero) | — |
 
 ## Bloco C — Raça × gênero
 
 | ID | Estado | Onde | Por quê |
 |---|---|---|---|
-| C1 | Existe, precisa refazer | `hiato_genero_*`, `dupla_desvantagem`, `decomposicao_raca_genero`, `renda` (por sexo) | `pop` |
-| C2 | Existe, precisa refazer | `decomposicao_raca_genero` (ANOVA 2 fatores, 9 combinações); sem modelo com interação e IC da interação | `esp` |
-| C3 | Novo | Shapley/Shorrocks de 3 vias: nada (a decomposição atual é sequencial) | — |
-| C4 | Novo | Penalidade da maternidade: nada (falta ligar filhos pequenos no domicílio; `V2005`/`VD2004` extraídos na v2) | — |
-| C5 | Existe, precisa refazer | `ocupacao`, `informalidade` por raça × sexo; trabalho doméstico não destacado (`VD4009` 03/04) | `met` |
-| C6 | Novo | Chefia/estado conjugal: nada | — |
+| C1 | Já existe | `c123_racaxsexo_celulas` (P1 e P4), `c123_racaxsexo_domiciliar_anual`, `c1_quantis_celulas`, `c1_theil_celulas` | — |
+| C2 | Já existe | `c123_racaxsexo_celulas` (DiD), `c2_interacao_regressao` (β3 com EP design-based), `c2_interacao_tendencia` | — |
+| C3 | Já existe | `c123_racaxsexo_celulas` (Shapley, ordens sequenciais; reconciliado com `decomposicao_raca_genero`) | — |
+| C4 | Já existe | `c4_penalidade_maternidade` (UPA + V1008 + V1014; responsáveis/cônjuges; sensibilidade com qualquer criança 0–5) | — |
+| C5 | Já existe | `c5_trabalho_domestico`, `c5_tendencia` | — |
+| C6 | Novo | Chefia/estado conjugal: não feito na Onda 2 (opcional; a chefia aparece no S0.3 e no T1) | — |
 
 ## Bloco S — Seleção (o recorte "ocupados com renda" distorce o hiato?)
 

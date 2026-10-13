@@ -8,6 +8,12 @@ hiato bruto de renda. Ver [PLANO.md](PLANO.md) pra decisões de escopo e
 encontradas. Entregável em tabela: os parquets em `data/processed/` e esta análise
 textual dos achados (sem gráficos/PPTX próprios).
 
+> **Auditado na Onda 2 (13/10/2026):** as médias por célula raça × sexo deste texto conferem com o estudo
+> [C1](studies/C1/ficha.md) (ex.: homem branco R$ 5.238, mulher negra R$ 2.483 em 2026T2). A "interação" da seção 2 é
+> uma ordem sequencial (cada fator medido a partir do homem branco) e vale −DiD em R$; a repartição que não depende
+> da ordem (Shapley), em log e com IC, está no [C3](studies/C3/ficha.md); a interação formal com EP design-based está
+> no [C2](studies/C2/ficha.md). A seção 3 (ritmo de convergência) foi refeita no [B1](studies/B1/ficha.md).
+>
 > **Atualizado na Onda 1 (13/10/2026):** números de renda na população de referência (ocupados 18+ com renda
 > habitual do trabalho principal > 0). Segregação ocupacional/setorial e transições do painel não usam renda e
 > não mudaram.

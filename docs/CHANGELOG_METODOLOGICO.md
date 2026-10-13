@@ -5,6 +5,28 @@ calculá-lo: data, o quê, por quê, impacto. Mais recente primeiro.
 
 ---
 
+## 13/10/2026 — Onda 2: Blocos B e C (branch `onda2/b-c`)
+
+- **Estudos novos** (fichas B1–B6 e C1–C5 com hipóteses escritas antes de rodar; `src/processing/bloco_b.py`,
+  `bloco_c.py`, `graficos_onda2.py`). Sempre com a versão do Bloco T ao lado (P4 e/ou renda domiciliar per capita).
+- **R6 (refeito, muda números publicados):** `ritmo_convergencia_hiatos` e `quebra_estrutural` passam a EP EWC
+  (`src/inference/tendencia.py`), com Newey-West e GLS AR(1) ao lado; "tendência confiável" = os três IC excluem
+  zero (antes: R² ≥ 0,1). Inclinações pontuais iguais; Branca × Indígena segue sem tendência confiável; no teste tipo
+  Chow (com BH entre os 3 eventos) a **reforma da previdência deixa de ser significativa**; o coeficiente de patamar
+  passa a medir o salto na data do evento. Saem da tabela de ritmo a série suavizada de Branca × Indígena e o "anos
+  para zerar" (substituído pelo B6). Antes × depois: `docs/auditoria/antes_depois_pre_b1_onda2.json`; legado em
+  `data/processed/_legado/pre_b1_onda2/`. Textos atualizados: `ANALISE_FASE1.md`, `ANALISE_RACA_GENERO.md`,
+  `LIMITACOES_E_METODOLOGIA.md`; gráfico `hiato_quebra_estrutural.png` regenerado.
+- **Principais achados:** a queda do hiato P1 foi um degrau de −5 p.p. em 2022, não tendência contínua (B1); o
+  hiato entre todos os adultos é contracíclico (+1,6 p.p. por p.p. de desocupação, B5); a reclassificação racial
+  existiu mas não fabricou convergência (B2); na base da distribuição o hiato aumentou (B3); coortes nascidas depois
+  de 1990 têm hiato menor na mesma idade (B4); sem data finita de paridade no ritmo pós-2022 (B6); raça responde por
+  ~2/3 da distância homem branco − mulher negra entre ocupados e ~metade entre todos os adultos (C3); trabalho
+  doméstico: 14% das ocupadas negras × 8% das brancas (C5).
+- `_meta.json` de tabelas gravadas antes de o catálogo ter a entrada foram corrigidos só em `populacao` e `insumos`.
+
+---
+
 ## 13/10/2026 — Pendências da Onda 1 (branch `onda1/pendencias`)
 
 - **Estudos novos** (fichas com hipóteses escritas antes de rodar; `src/processing/bloco_s.py`, `bloco_t.py`):

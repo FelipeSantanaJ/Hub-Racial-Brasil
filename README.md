@@ -83,6 +83,26 @@ de uma pessoa branca, sem mudança desde 2012 ([T4](docs/studies/T4/ficha.md)).
 
 ![Pobreza por raça](docs/img/onda1_t2_pobreza_meio_sm.png)
 
+### No tempo e por raça × gênero (Onda 2)
+
+![Hiato em degrau](docs/img/onda2_b1_degraus_hiato.png)
+
+O hiato Branca × Negra entre ocupados caiu de 74% (2012) para 66% (2026), mas **em degrau**: com o erro-padrão que
+respeita a autocorrelação da série, a tendência contínua não se distingue de zero e a queda vem de um salto de −5 p.p.
+em 2022; desde então a série está plana ([B1](docs/studies/B1/ficha.md)). Por isso não há "data da igualdade" no
+ritmo recente ([B6](docs/studies/B6/ficha.md)). Entre todos os adultos, o hiato sobe com o desemprego (+1,6 p.p. por
+ponto de desocupação, [B5](docs/studies/B5/ficha.md)). A reclassificação racial existiu (mais pessoas se declaram
+pretas dentro das mesmas gerações), mas não fabricou a convergência ([B2](docs/studies/B2/ficha.md)); na base da
+distribuição o hiato até aumentou ([B3](docs/studies/B3/ficha.md)); quem nasceu depois de 1990 tem hiato menor na
+mesma idade ([B4](docs/studies/B4/ficha.md)).
+
+![Raça e gênero](docs/img/onda2_c3_shapley_raca_genero.png)
+
+Entre ocupados, mulheres negras ganham 47% do que ganham homens brancos; cerca de dois terços dessa distância se
+associam à raça e um terço ao gênero; contando todos os adultos, gênero e raça pesam quase o mesmo
+([C1](docs/studies/C1/ficha.md), [C3](docs/studies/C3/ficha.md)). 14% das mulheres negras ocupadas com renda são
+trabalhadoras domésticas, contra 8% das brancas ([C5](docs/studies/C5/ficha.md)).
+
 ### Quanto do hiato a ocupação explica?
 
 ![Decomposição do hiato por ocupação](docs/img/decomposicao_hiato_ocupacional.png)
@@ -149,7 +169,7 @@ P58 da distribuição de Branca (pouco acima da mediana), mas no P77 da distribu
 ganha quem está em cada percentil —, os 10% mais pobres entre os brancos ganham R$1.500,
 contra R$766 entre os 10% mais pobres dos negros (2026 T2).
 
-**687 imagens em `docs/img`** (500 da árvore `arv_*` + 187 das demais análises, 8 delas da Onda 1 `onda1_*`; contagem de 13/10/2026, sem as séries de renda 14–17, que ficam fora das análises, e sem as 3 células da árvore sem amostra, suprimidas; a galeria
+**695 imagens em `docs/img`** (500 da árvore `arv_*` + 195 das demais análises, 8 da Onda 1 `onda1_*` e 8 da Onda 2 `onda2_*`; contagem de 13/10/2026, sem as séries de renda 14–17, que ficam fora das análises, e sem as 3 células da árvore sem amostra, suprimidas; a galeria
 narrada em `docs/ANALISE_FASE1.md` usa 87 delas). O deck em PPTX
 ([docs/Datahub_Racial_Brasil_Fase1.pptx](docs/Datahub_Racial_Brasil_Fase1.pptx), 617
 slides; eram 657 até a Onda 1, que tirou as 37 folhas de renda 14–17, e 620 até as pendências da Onda 1, que
@@ -234,6 +254,9 @@ python -m src.processing.bloco_t                  # Onda 1: Bloco T (T1–T4, PN
 python -m src.processing.bloco_a                  # Onda 1: Bloco A (A2–A7)
 python -m src.processing.bloco_s                  # Onda 1, pendências: S0.3, S1.3, S1.4, S1.5
 python -m src.processing.graficos_onda1           # gráficos dos estudos da Onda 1 (docs/img/onda1_*)
+python -m src.processing.bloco_b                  # Onda 2: Bloco B (B1–B6)
+python -m src.processing.bloco_c                  # Onda 2: Bloco C (C1–C5)
+python -m src.processing.graficos_onda2           # gráficos dos estudos da Onda 2 (docs/img/onda2_*)
 ```
 
 Testes (rodam sem microdados, com dados sintéticos; também no CI a cada push):
