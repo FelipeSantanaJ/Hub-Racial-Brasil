@@ -78,8 +78,9 @@ em log-pontos (ln quantil Branca − ln quantil Negra), P1:
 As 5 diferenças entre janelas, menos a do P90, passam no BH. Renda domiciliar per capita (T1, anual, log-pontos):
 P10 0,579 → 0,457, P50 0,531 → 0,452, P90 0,744 → 0,674; nenhuma tendência confiável com 14 anos (ν = 2).
 
-**Heaping.** O P25 dos dois grupos cai no salário mínimo em quase todos os trimestres: o hiato de ~0,14 lp no P25 e o
-IC estreito refletem o valor redondo comum, não precisão. A série trimestral por quantil salta entre valores redondos
+**Heaping.** O P25 das pessoas negras cai no salário mínimo (R$ 1.621 em 2026T2) e o das brancas num valor redondo
+logo acima (R$ 1.800): o hiato de ~0,14 lp no P25 e o IC estreito refletem esses valores redondos, não precisão.
+Quantis de 2026T2: Branca R$ 1.500 / 1.800 / 3.000 / 5.000 / 10.000; Negra R$ 766 / 1.621 / 2.000 / 3.000 / 5.000. A série trimestral por quantil salta entre valores redondos
 (ex.: P90 de 100% em 2026T2 = R$ 10.000 ÷ R$ 5.000).
 
 **Leitura das hipóteses.** H1 refutada: na base (P10, abaixo do mínimo, onde está a informalidade) o hiato **aumentou**
