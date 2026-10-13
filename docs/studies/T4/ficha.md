@@ -6,7 +6,7 @@
 | Onda | 1 (pendências) |
 | Responsável | Felipe Santana (execução: Claude Code) |
 | Criada em / atualizada em | 2026-10-13 / 2026-10-13 |
-| Estado de publicação | **Aprovado com ressalvas** (proposto) |
+| Estado de publicação | **Aprovado com ressalvas** (aprovado pelo Felipe em 13/10/2026) |
 | PR | `onda1/pendencias` |
 
 > Seções 1–9 escritas **antes** de rodar (13/10/2026).
@@ -111,3 +111,4 @@ Na base há: a RC caiu de 3,00 para 2,38 (ICs disjuntos).
 | Data | Quem | O que mudou |
 |---|---|---|
 | 2026-10-13 | Claude Code | criação (seções 1–9 antes de rodar) |
+| 2026-10-13 | Felipe Santana | aprovada com ressalvas |

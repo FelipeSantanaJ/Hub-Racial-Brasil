@@ -7,6 +7,10 @@ calculá-lo: data, o quê, por quê, impacto. Mais recente primeiro.
 
 ## 13/10/2026 — Pendências da Onda 1 (branch `onda1/pendencias`)
 
+- **Decisões do Felipe (13/10/2026, depois do PR):** fichas S0.3, S1.3, S1.4, S1.5 e T4 aprovadas com ressalvas;
+  EWC aceito como método principal de tendência; download do fator de PPC autorizado (linhas internacionais do T2:
+  ver a entrada da Onda 2).
+
 - **Estudos novos** (fichas com hipóteses escritas antes de rodar; `src/processing/bloco_s.py`, `bloco_t.py`):
   S0.3 (perfis de quem está fora de P1), S1.3 (limites do hiato; sem Heckman), S1.4 (Pr(P1) × horas × renda por
   hora), S1.5 (seleção no tempo, por episódio) e T4 (décimos de renda domiciliar per capita). Nenhum número já
