@@ -37,8 +37,8 @@ especificamente.
 ## Regra de supressão: n < 30 ou CV > 30% não se publica
 
 Decisão do Ponto de parada 3 (13/10/2026; R8 da auditoria Rodada 2). Está no código desde
-13/10/2026 e **vale a partir da regeneração da Onda 1**: os parquets atuais ainda não têm as
-colunas.
+13/10/2026 e **vale nos parquets desde a regeneração da Onda 1** (13/10/2026). As tabelas também
+gravam `peso_<ind>` (Σ pesos de quem entra no indicador), o peso certo para combinar células.
 
 - **Regra.** Uma estimativa de célula é publicável só se tiver **n ≥ 30 observações no
   denominador do indicador** e **CV ≤ 30%**. Estimativa zero, ou CV indefinido (n < 2), não é
@@ -94,8 +94,15 @@ colunas.
   ver `docs/PLANO.md` para os detalhes de onde ele vem e como foi validado), a preços do
   trimestre de referência mais recente (hoje, 2026 T2). **Use sempre esta coluna** para
   qualquer comparação que atravesse mais de um trimestre.
-- Renda vem de `VD4019` (habitual) e `VD4020` (efetivo), somando **todos os trabalhos** da
-  pessoa — não só o principal.
+- **Desde a Onda 1 (13/10/2026)**, renda vem de `VD4016` (habitual) e `VD4017` (efetivo), do
+  **trabalho principal**, e só para a **população de referência**: ocupados de 18+ anos com `VD4016`
+  > 0 (`src/utils/populacao.py`). A faixa 14–17 não tem renda nas tabelas. Antes era `VD4019`/`VD4020`
+  (todos os trabalhos) para 14+, recorte que segue disponível na base como `renda_todos_trabalhos_*`
+  (sensibilidade P3). Quanto o hiato muda com outras populações (todos os adultos; renda domiciliar
+  per capita): `docs/studies/S1/ficha.md`.
+- **Para combinar células** (ex.: Preta + Parda, sexos juntos), ponderar pela coluna `peso_renda`
+  (Σ pesos de quem tem renda na célula), **não** por `populacao_estimada` (a célula inteira). Até a
+  Onda 1 os gráficos usavam `populacao_estimada` e superestimavam o hiato % em 4,3 p.p. em média.
 
 ## Rupturas e mudanças conhecidas que afetam comparabilidade histórica
 
@@ -222,7 +229,7 @@ Decodificação (ver `data/raw/pnadc_extraido/_tmp/dicionario/` pro dicionário 
 IBGE):
 
 - **VD4009** (posição na ocupação, detalhada) → `tem_carteira_assinada` e `vinculo_trabalho`.
-  **Mudança de definição em 13/10/2026 (R19; vale na regeneração da Onda 1):**
+  **Mudança de definição em 13/10/2026 (R19; vale desde a regeneração da Onda 1):**
   `tem_carteira_assinada` = `TRUE` só para CLT (empregado privado, doméstico ou público COM
   carteira: 01, 03, 05); `FALSE` para os mesmos SEM carteira (02, 04, 06); `NULL` para
   militar/servidor estatutário (07), empregador, conta-própria e familiar auxiliar. Antes, 07
@@ -280,7 +287,7 @@ tem os dois blocos.
   empatado ali, capturando mais que 10% de fato (checado manualmente: ~11,5% de Branca,
   ~12,8% de Negra no trimestre mais recente). A coluna `pct_populacao_capturada` em
   `perfil_topo10_racial.parquet` registra o valor real capturado a cada trimestre.
-  **Correção decidida em 13/10/2026 (R9; vale na regeneração da Onda 1):** o peso de quem está
+  **Correção de 13/10/2026 (R9; vale desde a regeneração da Onda 1):** o peso de quem está
   empatado no limiar passa a ser repartido proporcionalmente entre as fatias
   (`pnadc_core.fracao_na_fatia`), e cada fatia soma exatamente 10% ou 25%. Prévia 2026T2: Superior
   completo no topo 10% Negra vai de 56,9% para 61,4%, e no topo 10% Branca de 83,0% para 84,3%.
@@ -410,7 +417,7 @@ do topo10% dentro-da-raça). Amostra mínima antes de calcular um quantil: 200 (
 limiares), 100-150 nas células raça×gênero. Vale a **mesma ressalva de heaping** já
 documentada para o topo10% dentro-da-raça — renda autodeclarada concentra em valores
 redondos, e o filtro `>= limiar` capturava um pouco mais que 10%/25% exatos. Desde 13/10/2026
-(vale na regeneração da Onda 1), o peso empatado é repartido e `pct_populacao_capturada` dá 10,0/25,0.
+(Onda 1), o peso empatado é repartido e `pct_populacao_capturada` dá 10,0/25,0.
 Os escopos `brasil` e `genero` passam a incluir **Amarela** no universo e nas raças reportadas (R10): na prévia de
 2026T2, Amarela é 1,45% do topo 10% nacional e a participação Branca cai de 68,2% para 67,3%.
 Ignorado continua fora.

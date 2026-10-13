@@ -54,23 +54,26 @@ entre pessoas com o mesmo nível de instrução — ele se abre dramaticamente j
 
 Testado trimestre a trimestre a partir dos microdados, com erro-padrão que respeita o desenho
 amostral da PNAD Contínua (Estrato e UPA): os 58 trimestres da série são estatisticamente
-significativos (z entre 18,8 e 36,6) — o hiato caiu de ~76% para ~66% entre 2012 e 2026. O
+significativos (z entre 19,5 e 37,2) — o hiato caiu de 74,2% (2012 T1) para 65,7% (2026 T2). O
 hiato % é **relativo à renda média Negra** (Branca ganha ~66% a mais; Negra ganha ~60% da
-renda Branca). *A banda de IC desta imagem ainda é a antiga, estreita demais (~57×).*
+renda Branca). **População:** ocupados de 18+ com renda habitual do trabalho principal > 0 (desde a
+Onda 1, 13/10/2026); com todos os adultos (não ocupados = 0) o hiato fica maior, sobretudo entre
+mulheres — ver [`docs/studies/S1/ficha.md`](docs/studies/S1/ficha.md). *A banda de IC do hiato % no
+gráfico divide o IC absoluto pela média Negra e ignora a incerteza do denominador (R11, pendente).*
 
 ### Quanto do hiato a ocupação explica?
 
 ![Decomposição do hiato por ocupação](docs/img/decomposicao_hiato_ocupacional.png)
 
 Controlando por idade, escolaridade e ocupação (mesma categoria ocupacional), o hiato bruto
-de 67% cai para 24% — mas não desaparece. Boa parte do hiato racial de renda não se explica
+de 66% cai para 25% — mas não desaparece. Boa parte do hiato racial de renda não se explica
 por "estar em ocupações diferentes". Confirmado por um segundo método (regressão de
-Oaxaca-Blinder, com teste de significância formal — p < 0,001): resíduo de +22,4% (coeficiente
+Oaxaca-Blinder, com teste de significância formal — p < 0,001): resíduo de +22,8% (coeficiente
 restrito, controlando por idade, instrução e ocupação), perto da padronização direta acima
-(24,3%; são estimandos diferentes). O resíduo é a parte **não associada às covariáveis
+(24,7%; são estimandos diferentes). O resíduo é a parte **não associada às covariáveis
 incluídas**: não é medida de discriminação e não inclui região, horas trabalhadas, sexo ou
 informalidade, que serão adicionados na Onda 3 do plano. E ocupação SOZINHA (sem nem controlar
-idade/escolaridade) já explica quase tanto quanto as duas juntas — hiato cai de 67% pra 33%
+idade/escolaridade) já explica quase tanto quanto as duas juntas — hiato cai de 66% pra 34%
 só com essa variável. Dentro de **cada** categoria ocupacional, aliás, Branca ganha mais que
 Negra — o hiato não é só "estar em ocupações diferentes".
 
@@ -80,15 +83,15 @@ Negra — o hiato não é só "estar em ocupações diferentes".
 
 Decomposição por RIF (Firpo-Fortin-Lemieux): o hiato que sobra depois de controlar
 idade/escolaridade/ocupação tem formato em U — menor na mediana (~15%), maior na base
-(~31%, "piso pegajoso") e no topo (~36%, "teto de vidro").
+(~35%, "piso pegajoso") e no topo (~34%, "teto de vidro").
 
 ### O topo 10% dos negros ficou muito mais escolarizado — mas o hiato lá em cima persiste
 
 ![Topo 10% por escolaridade](docs/img/topo10_escolaridade.png)
 
 Olhando só pra quem está no topo 10% de renda DENTRO de cada raça (não um corte único pro
-Brasil): a % com Superior completo entre os negros do topo saltou de 38% (2012) para ~58%
-hoje — mas ainda fica atrás do topo dos brancos (~83%). E "faixa etária" não acompanha as
+Brasil): a % com Superior completo entre os negros do topo saltou de 37% (2012 T1) para 61%
+(2026 T2) — mas ainda fica atrás do topo dos brancos (84%). E "faixa etária" não acompanha as
 mesmas pessoas ao longo do tempo (é um corte transversal repetido) — por isso também
 seguimos **gerações** (coortes de nascimento) pra ver o hiato dentro do mesmo grupo
 envelhecendo, não misturado entre gerações diferentes.
@@ -99,15 +102,16 @@ envelhecendo, não misturado entre gerações diferentes.
 
 Generalizando o topo 10% pra toda a distribuição — os 4 quartis (Q1 = 25% mais pobres, Q4 =
 25% mais ricos), cada um calculado DENTRO de cada raça: a diferença de escolaridade entre
-Negra e Branca é de só ~6 p.p. no quartil mais pobre, mas chega a ~32 p.p. no mais rico.
+Negra e Branca é de só ~6 p.p. no quartil mais pobre, mas chega a ~30 p.p. no mais rico (2026 T2).
 Quanto mais alto na distribuição de renda, maior o hiato educacional entre as raças.
 
 ### O hiato racial é menor no setor público — mas a desigualdade tem muitas fontes
 
 ![Hiato setor público vs. privado](docs/img/hiato_setor_publico_privado.png)
 
-Confirma uma hipótese conhecida: como salário de concurso público segue tabela padronizada,
-o hiato racial é menor lá (~45-50%) do que no setor privado (~58-68%). Ao mesmo tempo, uma
+O hiato racial é menor no setor público (de 42% a 59% entre 2012 e 2026; mediana 48%) do que no
+privado (de 55% a 67%; mediana 60%) em todos os trimestres. Uma explicação comum é que o salário de
+concurso segue tabela padronizada (hipótese, não testada aqui). Ao mesmo tempo, uma
 decomposição do índice de Theil mostra que só ~7% da desigualdade TOTAL de renda no Brasil
 vem de diferença entre raças — os outros 93% são desigualdade dentro de cada raça. Isso não
 diminui o hiato racial (que segue grande e estatisticamente significativo), mas mostra que a
@@ -118,15 +122,15 @@ desigualdade brasileira tem várias fontes ao mesmo tempo.
 ![Percentil de um valor de renda, por raça](docs/img/percentil_de_valor_racial.png)
 
 A mesma quantia em R$ representa posições bem diferentes conforme a raça: R$3.000 está no
-P57 da distribuição de Branca (pouco acima da mediana), mas no P76 da distribuição de Negra
+P58 da distribuição de Branca (pouco acima da mediana), mas no P77 da distribuição de Negra
 (perto do topo dos 25% que mais ganham dentro do próprio grupo). Na direção oposta — quanto
 ganha quem está em cada percentil —, os 10% mais pobres entre os brancos ganham R$1.500,
-contra R$720 entre os 10% mais pobres dos negros.
+contra R$766 entre os 10% mais pobres dos negros (2026 T2).
 
-**721 imagens em `docs/img`** (540 da árvore `arv_*` + 181 das demais análises; a galeria
-narrada em `docs/ANALISE_FASE1.md` usa 89 delas). O deck em PPTX
-([docs/Datahub_Racial_Brasil_Fase1.pptx](docs/Datahub_Racial_Brasil_Fase1.pptx), ~657
-slides) é organizado como uma **árvore cruzada** de renda por raça (Branca /
+**682 imagens em `docs/img`** (503 da árvore `arv_*` + 179 das demais análises; contagem da Onda 1, 13/10/2026, sem as séries de renda 14–17, que deixaram de existir; a galeria
+narrada em `docs/ANALISE_FASE1.md` usa 87 delas). O deck em PPTX
+([docs/Datahub_Racial_Brasil_Fase1.pptx](docs/Datahub_Racial_Brasil_Fase1.pptx), 620
+slides; eram 657 até a Onda 1, que tirou as 37 folhas de renda 14–17) é organizado como uma **árvore cruzada** de renda por raça (Branca /
 Negra=Preta+Parda / Indígena): 11 itens — Raça; ×Gênero; ×Faixa Etária; ×Geração;
 ×Escolaridade; e os cruzamentos até Raça×Gênero×[Faixa|Geração]×Escolaridade. Cada folha de
 renda traz a série histórica (2012-2026); cada folha de hiato compara Branca vs. Negra e
@@ -198,8 +202,11 @@ python -m src.processing.graficos_arvore
 python -m src.processing.graficos_extremos
 python -m src.processing.graficos_aprofundamentos
 python -m src.processing.graficos_causal_cotas
-python -m src.processing.apresentacao_fase1       # decks PPTX
-python -m src.processing.apresentacao_arvore
+python -m src.processing.apresentacao_arvore      # docs/Datahub_Racial_Brasil_ARVORE.pptx (só a árvore)
+python -m src.processing.apresentacao_final       # deck publicado: grava docs/Datahub_Racial_Brasil_Fase1_v7.pptx;
+                                                  # renomear para docs/Datahub_Racial_Brasil_Fase1.pptx
+# (apresentacao_fase1 gera um deck antigo, em outro formato; NÃO sobrescreve o publicado à toa)
+python -m src.processing.sensibilidade_populacao  # Onda 1: Blocos S e F (sensibilidade P1–P5, composição, heaping)
 ```
 
 Testes (rodam sem microdados, com dados sintéticos; também no CI a cada push):

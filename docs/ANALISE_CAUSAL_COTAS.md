@@ -9,7 +9,7 @@ ser lido como "prova de efeito causal" — ver a seção final, "o que isso NÃO
 > **Estado (13/10/2026): Bloqueado até o B4b** (reespecificação do Desenho B no plano de análise).
 > As seções 2 e 3 foram reescritas como **exploratórias** depois da auditoria Rodada 2 (E9). O
 > Desenho B tem **40 testes de DiD**: 5 nacionais e 35 de heterogeneidade. **Nenhum sobrevive ao
-> FDR de Benjamini-Hochberg**; os menores p ajustados são 0,164 (nacional) e 0,348
+> FDR de Benjamini-Hochberg**; os menores p ajustados são 0,072 (nacional) e 0,191
 > (heterogeneidade). Toda menção a p abaixo traz o p ajustado (`did_p_valor_bh`) na mesma frase.
 
 ## 0. Enquadramento
@@ -94,12 +94,13 @@ de `gerar_decomposicao_oaxaca_blinder`), é diferente entre quem nasceu antes ou
 
 | Coorte | n | % explicada | Resíduo (log-pontos, p) | Resíduo aprox. em % |
 |---|---:|---:|---|---:|
-| Pré-exposição (< 1994) | 3.239.921 | 52,0% | 0,199 (p≈0) | ~22,0% |
-| Pós-exposição (1994+) | 1.501.352 | 40,7% | 0,172 (p≈0) | ~18,8% |
+| Pré-exposição (< 1994) | 3.238.942 | 51,3% | 0,200 (p≈0) | ~22,1% |
+| Pós-exposição (1994+) | 1.384.950 | 40,5% | 0,171 (p≈0) | ~18,6% |
 
 O resíduo (o que sobra do hiato mesmo controlando por escolaridade/ocupação/idade) é um
-pouco MENOR na coorte pós-exposição (~18,8% vs. ~22,0%), mas a % do hiato bruto EXPLICADA
-por essas características cai (40,7% vs. 52,0%). **Leitura correlacional, três motivos
+pouco MENOR na coorte pós-exposição (~18,6% vs. ~22,1%), mas a % do hiato bruto EXPLICADA
+por essas características cai (40,5% vs. 51,3%). (Valores da Onda 1, 13/10/2026: ocupados 18+ com
+renda do trabalho principal; antes, 14+ com todos os trabalhos.) **Leitura correlacional, três motivos
 pra não superinterpretar**: (1) as coortes pós-1994 ainda estão em início/meio de carreira
 (mesmo controlando por faixa etária, a composição etária dentro de cada faixa pode diferir);
 (2) não sei quem de fato passou pela cota — é a mesma aproximação de exposição do Desenho A,
@@ -154,9 +155,10 @@ janela de ~3 anos observada.
 
 ### Hiato de renda: sinal exploratório, que não sobrevive à correção de multiplicidade
 
-A tendência pré-lei não diverge (coef=-0,001 log-pontos por trimestre, p=0,61). O DiD global
-(interação tripla tempo × setor × raça, em log-renda) dá **+0,020 log-pontos (~2,0%), com p
-nominal de 0,041 e p ajustado (BH) de 0,164**. Depois do ajuste pelos 5 testes nacionais, não é
+A tendência pré-lei não diverge (coef=-0,001 log-pontos por trimestre, p=0,65). O DiD global
+(interação tripla tempo × setor × raça, em log-renda) dá **+0,024 log-pontos (~2,4%), com p
+nominal de 0,014 e p ajustado (BH) de 0,072**. (Na população de referência, Onda 1; antes da troca
+de população, com 14+ e todos os trabalhos, era +0,020, p = 0,041, p_BH = 0,164.) Depois do ajuste pelos 5 testes nacionais, não é
 significativo; entre os 40 testes do Desenho B, nenhum é.
 
 Direção do ponto estimado: o hiato de renda Branca-Negra DENTRO do setor público encolheu mais do
@@ -171,7 +173,7 @@ ressalvas:
 
 1. **Multiplicidade.** São 40 testes de DiD no Desenho B (5 nacionais + 35 de heterogeneidade),
    e não ~6, como dizia a versão anterior deste texto. Nenhum sobrevive ao FDR. Um p nominal de
-   0,041 escolhido entre 40 testes tende, além disso, a superestimar o tamanho do efeito
+   0,014 escolhido entre 40 testes tende, além disso, a superestimar o tamanho do efeito
    ("maldição do vencedor", *a confirmar: Gelman & Carlin, 2014*).
 2. **Esfera de governo.** `setor_trabalho` não distingue federal de estadual/municipal, e só o
    federal foi atingido pela Lei 12.990/2014. A categoria "Público" mistura tratados e nunca
@@ -179,7 +181,7 @@ ressalvas:
    concluir que o efeito "real" isolado ao federal seria maior. Nenhuma variável já extraída
    separa a esfera (`setor_atividade`/VD4010 tem administração pública, mas também sem esfera).
 3. **Curva pré-lei ruidosa.** Mesmo com a tendência LINEAR não significativa, a curva oscila
-   entre -2,4 e +7,2 pp antes da lei. "Tendência linear não significativa" não é o mesmo que
+   entre -2,2 e +5,8 pp antes da lei. "Tendência linear não significativa" não é o mesmo que
    "série plana".
 4. **Erro-padrão da curva.** A soma entre células ainda ignora covariâncias (limitação
    documentada no `CHANGELOG_METODOLOGICO.md`; reespecificação no B4b).
@@ -215,25 +217,26 @@ todos não significativos) — esperado dado o tamanho de amostra, não uma novi
 
 - **Falhas de tendências paralelas na participação**: Negra no Nordeste (p=0,012), Parda
   no Nordeste (p=0,009) e Parda no Sul (p=0,004) — identificação não se sustenta nesses
-  três pontos. O hiato de renda no Norte também falha (p=0,049, no limite). Todo o resto
-  (Centro-Oeste, Sudeste, as duas áreas, Indígena Norte/Resto, DF/Resto) sustenta
-  tendências paralelas.
+  três pontos. (Com a população antiga o hiato de renda no Norte também falhava, p=0,049; na
+  população de referência, p=0,096.) Todo o resto sustenta tendências paralelas.
 - **Centro-Oeste: maiores pontos estimados, nada significativo após o ajuste.** No hiato de
-  renda, o ponto estimado é **+5,6% (log-pontos), com p nominal 0,030 e p ajustado (BH) 0,348**;
-  as tendências paralelas se sustentam (p=0,30). Na participação, dois DiDs do Centro-Oeste
-  também passam do limiar nominal: **Negra, +1,71 pp, p nominal 0,021, p ajustado 0,348**; e
-  **Parda, +1,83 pp, p nominal 0,011, p ajustado 0,348** (tendências pré-lei com p=0,13 e
-  p=0,21). São os únicos 3 dos 35 testes de heterogeneidade com p nominal < 0,05, e todos estão
-  na mesma região. Isso pede investigação no B4b, mas não é evidência de efeito, porque nenhum
+  renda, o ponto estimado é **+6,0% (log-pontos), com p nominal 0,018 e p ajustado (BH) 0,191**;
+  as tendências paralelas se sustentam (p=0,37). Na participação, dois DiDs do Centro-Oeste
+  também passam do limiar nominal: **Negra, +1,71 pp, p nominal 0,021, p ajustado 0,191**; e
+  **Parda, +1,83 pp, p nominal 0,011, p ajustado 0,191** (tendências pré-lei com p=0,13 e
+  p=0,21). Na população de referência, 6 dos 35 testes de heterogeneidade têm p nominal < 0,05:
+  os três do Centro-Oeste e mais três de hiato de renda — Sul (−5,3%, p=0,035, p_BH=0,234; sinal
+  contrário), área urbana (+2,3%, p=0,022, p_BH=0,191) e Brasil sem o DF (+2,0%, p=0,040,
+  p_BH=0,234). Isso pede investigação no B4b, mas não é evidência de efeito, porque nenhum
   sobrevive ao FDR. A versão anterior deste texto chamava o hiato do Centro-Oeste de "efeito
   mais forte e mais bem-identificado de toda a análise" e omitia os dois resultados de
   participação.
 - **A hipótese do Distrito Federal NÃO se confirmou**. A ideia era usar o DF como
   aproximação parcial de "federal puro" (funcionalismo federal concentrado lá), esperando
   um efeito mais forte que a média nacional — o resultado saiu **praticamente zero**
-  (hiato de renda: coef=-0,006, p=0,89; participação: p=0,26). Como o DF está DENTRO do
+  (hiato de renda: coef=-0,013, p=0,76; participação: p=0,26). Como o DF está DENTRO do
   Centro-Oeste, isso é um resultado contraintuitivo: o ponto estimado alto do Centro-Oeste (não
-  significativo após o ajuste: p_BH=0,348) parece vir dos OUTROS três estados da região (Goiás,
+  significativo após o ajuste: p_BH=0,191) parece vir dos OUTROS três estados da região (Goiás,
   Mato Grosso, Mato Grosso do Sul), não do DF especificamente. Duas leituras possíveis, nenhuma confirmável
   com este dado: (a) o efeito da lei não está de fato concentrado onde o funcionalismo é
   mais federal, o que enfraqueceria a leitura "federal" do resultado nacional; ou (b) o
@@ -266,7 +269,7 @@ distinguir entre essas duas leituras, não este documento.
   funcionalismo.** A janela observada (~3 anos pós-lei) pode ser curta demais pra uma
   mudança de composição que depende de rotatividade lenta (concursos, aposentadorias);
   o resultado nulo é sobre ESTA janela, não uma afirmação geral.
-- **O sinal no hiato de renda do setor público (p nominal 0,041, p ajustado BH 0,164) NÃO é
+- **O sinal no hiato de renda do setor público (p nominal 0,014, p ajustado BH 0,072) NÃO é
   um efeito estabelecido nem uma estimativa do efeito da Lei 12.990/2014**: não sobrevive à
   correção de multiplicidade (0 de 40 testes sobrevivem) e mistura a esfera federal (tratada)
   com a estadual/municipal (não tratada).
