@@ -1,0 +1,11 @@
+{
+  "arquivo": "hiato_branca_indigena.parquet",
+  "se_metodo": "linearizacao_taylor_estrato_upa",
+  "commit": "da7b04baa2aaebe5544137b8f35e0197688b592e",
+  "gerado_em": "2026-10-13T02:59:39.965128+00:00",
+  "familia_fdr": [
+    "ano",
+    "trimestre"
+  ],
+  "alfa": 0.05
+}

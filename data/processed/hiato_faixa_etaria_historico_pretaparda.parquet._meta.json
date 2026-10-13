@@ -1,0 +1,11 @@
+{
+  "arquivo": "hiato_faixa_etaria_historico_pretaparda.parquet",
+  "se_metodo": "linearizacao_taylor_estrato_upa",
+  "commit": "e27278b4e61e4ede0d809e20e6110fc30a81d643",
+  "gerado_em": "2026-10-13T03:32:29.617643+00:00",
+  "familia_fdr": [
+    "ano",
+    "trimestre"
+  ],
+  "alfa": 0.05
+}

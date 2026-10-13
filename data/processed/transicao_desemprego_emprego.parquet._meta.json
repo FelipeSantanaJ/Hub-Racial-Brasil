@@ -1,0 +1,8 @@
+{
+  "arquivo": "transicao_desemprego_emprego.parquet",
+  "se_metodo": "linearizacao_taylor_estrato_upa",
+  "commit": "e27278b4e61e4ede0d809e20e6110fc30a81d643",
+  "gerado_em": "2026-10-13T04:16:24.118886+00:00",
+  "familia_fdr": null,
+  "alfa": 0.05
+}
