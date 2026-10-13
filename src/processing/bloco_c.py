@@ -114,7 +114,7 @@ def combinacoes(mz: dict, combos: dict[str, dict], upa, est, log: bool = True) -
     return pd.DataFrame({"metrica": nomes, "estimativa": ests, "ep": ep})
 
 
-def wls_design(y, X, w, upa, est, dominio=None) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+def wls_design(y, X, w, upa, est, dominio=None, apenas: list[int] | None = None) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """WLS com EP design-based: ψ_i = (X'WX)⁻¹ x_i w_i e_i (zero fora do domínio), linearizado por
     Estrato/UPA. Devolve (β, EP, ψ n×k) — ψ permite combinar coeficientes de regressões em domínios
     diferentes da mesma amostra."""
@@ -127,13 +127,18 @@ def wls_design(y, X, w, upa, est, dominio=None) -> tuple[np.ndarray, np.ndarray,
     A = (Xd * wd[:, None]).T @ Xd
     b_ = np.linalg.solve(A, (Xd * wd[:, None]).T @ yd)
     e = yd - Xd @ b_
-    psi = np.zeros((len(y), X.shape[1]))
-    psi[np.ix_(d, usa)] = np.linalg.solve(A, (Xd * (wd * e)[:, None]).T).T
     beta = np.full(X.shape[1], np.nan)
     beta[usa] = b_
-    cov, _ = variancia.variancia_linearizada(psi, upa, est)
-    ep = np.sqrt(np.maximum(np.diag(np.atleast_2d(cov)), 0.0))
-    ep[~usa] = np.nan
+    # ψ só das colunas pedidas (`apenas`): poupa memória com muitas dummies e milhões de linhas
+    cols = np.flatnonzero(usa) if apenas is None else np.array([c for c in apenas if usa[c]], int)
+    pos = np.searchsorted(np.flatnonzero(usa), cols)
+    Ainv = np.linalg.inv(A)[pos]                      # linhas de (X'WX)⁻¹ das colunas pedidas
+    psi = np.zeros((len(y), X.shape[1]))
+    psi[np.ix_(d, cols)] = (Xd * (wd * e)[:, None]) @ Ainv.T
+    ep = np.full(X.shape[1], np.nan)
+    if len(cols):
+        cov, _ = variancia.variancia_linearizada(psi[:, cols], upa, est)
+        ep[cols] = np.sqrt(np.maximum(np.diag(np.atleast_2d(cov)), 0.0))
     return beta, ep, psi
 
 
@@ -372,7 +377,7 @@ def penalidades(m: pd.DataFrame, flag: str, universo: np.ndarray, rotulo: str) -
                 dom = dom_base & (m["raca"] == r).to_numpy()
                 if dom.sum() < 200 or m.loc[dom, flag].sum() < 30:
                     continue
-                beta, ep, psi = wls_design(yy, X, w, upa, est, dom)
+                beta, ep, psi = wls_design(yy, X, w, upa, est, dom, apenas=[1])
                 sem = dom & ~m[flag].fillna(False).to_numpy(bool)
                 zb, base = variancia.influencia_media(np.where(sem, yy, 0.0), w, sem)
                 res[r] = (beta[1], ep[1], psi[:, 1])
@@ -398,6 +403,8 @@ def gerar_c4(con) -> pd.DataFrame:
     linhas = []
     for nome, tris in JANELAS.items():
         m = pd.concat([micro_c(con, a, t) for a, t in tris], ignore_index=True)
+        # universo da linearização = pessoas de 25–44 da janela (UPAs sem ninguém nessa idade não entram)
+        m = m[(m["idade"] >= 25) & (m["idade"] <= 44) & m["raca"].isin(RACAS_C)].reset_index(drop=True)
         idade = m["idade"].to_numpy()
         for lo, hi, faixa in ((25, 44, "25–44"), (25, 34, "25–34"), (35, 44, "35–44")):
             u = (idade >= lo) & (idade <= hi)

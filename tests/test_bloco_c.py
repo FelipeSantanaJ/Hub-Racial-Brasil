@@ -80,3 +80,15 @@ def test_wls_design_tolera_coluna_vazia_no_dominio():
     y = X[:, :2] @ [1.0, 2.0] + rng.normal(size=n)
     beta, ep, _ = C.wls_design(y, X, np.ones(n), np.arange(n), np.zeros(n))
     assert beta[:2] == pytest.approx([1.0, 2.0], abs=0.1) and np.isnan(beta[2]) and np.isnan(ep[2])
+
+
+def test_wls_design_apenas_igual_ao_completo():
+    rng = np.random.default_rng(6)
+    n = 4000
+    X = np.column_stack([np.ones(n), rng.integers(0, 2, n), rng.normal(size=(n, 3))])
+    y = X @ [1.0, -0.5, 0.2, 0.1, 0.0] + rng.normal(size=n)
+    upa, est, w = rng.integers(0, 300, n), rng.integers(0, 30, n), rng.uniform(1, 3, n)
+    b1, e1, _ = C.wls_design(y, X, w, upa, est)
+    b2, e2, p2 = C.wls_design(y, X, w, upa, est, apenas=[1])
+    assert b2 == pytest.approx(b1) and e2[1] == pytest.approx(e1[1], rel=1e-10)
+    assert np.isnan(e2[0]) and (p2[:, 0] == 0).all()
