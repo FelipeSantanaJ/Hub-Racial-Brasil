@@ -9,12 +9,21 @@
 | Tema | Decisão | Consequência |
 |---|---|---|
 | Renda de referência (F2) | **Rendimento habitual do trabalho principal** (`VD4016`/equivalente a confirmar no dicionário; o Hub hoje usa `VD4019`, que é o habitual de todos os trabalhos: **confirmar qual é qual antes de mudar**) | Se o Hub hoje usa "todos os trabalhos", a regeneração muda o estimando. Reportar a diferença entre as duas definições (Bloco F) |
-| População de referência (F3) | **Ocupados com renda do trabalho principal > 0**, 25–64 anos (faixa a confirmar contra o uso atual do Hub) | Todo resultado dos Blocos A–D vale para essa população e declara isso na legenda |
+| População de referência (F3) | **Ocupados com renda do trabalho principal > 0, 18 anos ou mais** (decidido no Ponto de parada 0, 12/10/2026; substitui "25–64 a confirmar"). **14+** (o recorte histórico do Hub) fica como teste de sensibilidade | Todo resultado dos Blocos A–D vale para essa população e declara isso na legenda |
 | Quem fica de fora | Não ocupados; ocupados sem rendimento (ex.: trabalhador familiar auxiliar); rendimento zero | **Bloco S** mede quanto essa exclusão importa; **Bloco T** repete a análise com a população inteira |
 | Educação × decomposição | Educação (E) **depois** da decomposição (D) | Onda 3 = D; Onda 4 = E + H |
 | Dados administrativos | **Incluídos** no escopo (INEP, RAIS, Painel de Pessoal) | Entram nas Ondas 4 e 5; acesso a confirmar |
 | Origem social e mobilidade (H) | **Entra agora**, não "fase posterior" | Onda 4, junto com E (compartilham a ligação filhos–pais) |
 | Licença | Código **MIT**; dados derivados e textos **CC BY 4.0** | Fase 2 do prompt |
+
+**Decisões do Ponto de parada 0 (12/10/2026)** — ver `docs/auditoria/fase0_relatorio.md` §9:
+1. Faixa etária de referência: **18+**; 14+ como sensibilidade. Os Blocos S e T usam "todos com 18+" no lugar de "todos 25–64".
+2. EP por **linearização de Taylor (Estrato/UPA)**; pesos replicados não extraídos por ora (extratores aceitam `--pesos-replicados`).
+3. Extração v2 trimestral com horas do trabalho principal (`V4039`), variáveis escolares e de trabalho principal (`data/raw/pnadc_extraido_v2`).
+4. Extração v2 anual: renda domiciliar (`VD5*`), fontes (`V500*A`), educação e trabalho; Visita 1 2012–2019 e 2022–2025, **Visita 5 para 2020–2021**.
+5. **Sem vínculo institucional:** RAIS identificada e SEDAP/INEP ficam **fora de alcance**. G1/E6 só com dados públicos simplificados do INEP (sem raça por aluno); D3.5/D8.2 (dentro da firma) só com literatura.
+6. Módulo de habitação versionado: o extrator anual é base de P5/Bloco T e `S01017` alimenta o H3.1.
+7. CI em **Python 3.12**.
 
 ---
 
@@ -127,7 +136,7 @@ Sem isso, todo bloco abaixo é frágil. Vale 1–2 semanas e vira a camada "meto
 
 | ID | Pergunta | Tipo | Método |
 |---|---|---|---|
-| S0.1 | Composição da população total 25–64 em: (a) ocupados com renda > 0; (b) ocupados sem rendimento / rendimento zero (ex.: trabalhador familiar auxiliar); (c) desocupados; (d) fora da força de trabalho (desalento, cuidados, estudo) | D | Tabela por raça, gênero e raça × gênero; evolução 2012–2026 |
+| S0.1 | Composição da população total 18+ em: (a) ocupados com renda > 0; (b) ocupados sem rendimento / rendimento zero (ex.: trabalhador familiar auxiliar); (c) desocupados; (d) fora da força de trabalho (desalento, cuidados, estudo) | D | Tabela por raça, gênero e raça × gênero; evolução 2012–2026 |
 | S0.2 | A probabilidade de estar em (a) difere por raça e por raça × gênero, controlando por idade, escolaridade e região? | C | Logit/probit ponderado, efeitos marginais, IC *design-based* |
 | S0.3 | Entre quem está fora de (a), as características diferem entre os grupos (escolaridade, idade, filhos pequenos, chefia)? | D | Perfis comparados |
 
@@ -140,8 +149,8 @@ Calcular o hiato Branca–Negra e os hiatos de raça × gênero em **cinco popul
 | P1 — ocupados com renda > 0 (**referência**) | trabalho principal | Linha de base |
 | P2 — ocupados (incluindo sem rendimento, renda = 0) | trabalho principal | Efeito de excluir os sem rendimento |
 | P3 — ocupados com renda > 0 | **todos os trabalhos** | Efeito do conceito de renda (F2) |
-| P4 — todos 25–64 (não ocupados = 0) | trabalho principal | Hiato "extensivo": inclui quem não consegue entrar |
-| P5 — todos 25–64 | **renda domiciliar per capita** (todas as fontes) | Hiato de bem-estar material (Bloco T) |
+| P4 — todos 18+ (não ocupados = 0) | trabalho principal | Hiato "extensivo": inclui quem não consegue entrar |
+| P5 — todos 18+ | **renda domiciliar per capita** (todas as fontes) | Hiato de bem-estar material (Bloco T) |
 
 **Critério pré-definido de "diferença grande"** (convenção do plano, não regra universal): o hiato em P2/P4 é considerado materialmente diferente do de P1 se a diferença for **maior que 10% em termos relativos *e* maior que o IC95% combinado** da diferença. Reportar a diferença, o IC e a decisão, sem arredondar a favor de nenhuma narrativa. Se a diferença for grande, o Bloco T deixa de ser opcional e vira eixo principal.
 
