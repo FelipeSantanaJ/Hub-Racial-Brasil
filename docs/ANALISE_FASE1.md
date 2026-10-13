@@ -152,8 +152,10 @@ bem finos, não só aos controles agregados já vistos nas seções de decomposi
 
 ![Hiato por região](img/hiato_racial_por_regiao.png)
 
-O hiato racial varia MUITO entre regiões — Sudeste tem o maior (65-85% ao longo da série),
-Sul o menor (45-55%). A desigualdade regional do Brasil também aparece especificamente no
+O hiato racial varia MUITO entre regiões. O Sudeste tem o maior nos 58 trimestres (de 61,6% a
+85,9% ao longo de 2012T1–2026T2); o Sul tem a faixa mais baixa (de 40,1% a 54,0%) e é o menor em
+43 dos 58 trimestres. Faixas = mínimo e máximo de `hiato_regional.parquet` (recorte histórico:
+14+, renda de todos os trabalhos). A desigualdade regional do Brasil também aparece especificamente no
 hiato racial, não é uniforme pelo país.
 
 ![Segregação ocupacional](img/segregacao_ocupacional.png)
@@ -177,8 +179,16 @@ completa em [LIMITACOES_E_METODOLOGIA.md](LIMITACOES_E_METODOLOGIA.md).
 
 ![Informalidade](img/informalidade_carteira_assinada.png)
 
-% com carteira assinada (entre empregados): Branca 72%, Negra 63%, Indígena 52% (2026 T2) —
-o hiato de proteção social/formalização acompanha o hiato de renda.
+% com carteira assinada em 2026 T2 (`informalidade.parquet`, Brasil, 14+): Branca 75,4%, Negra
+66,5%, Indígena 53,1%. Denominador: empregados privados, domésticos e públicos **mais** militares e
+estatutários, contados como "com carteira". O hiato de proteção social/formalização acompanha o
+hiato de renda.
+
+> **Nota (13/10/2026):** a definição muda na próxima regeneração (decisão do Ponto de parada 3).
+> "Com carteira" passa a ser só CLT, entre empregados privados, domésticos e públicos, com
+> estatutário/militar em coluna própria. Prévia 2026T2: Branca 71,7%, Negra 63,0%, Indígena 48,3%
+> (`docs/CHANGELOG_METODOLOGICO.md`). O texto anterior (72/63/52%) não correspondia a nenhuma das
+> duas definições (E8 da auditoria Rodada 2).
 
 ![Renda por hora](img/renda_por_hora.png)
 
@@ -194,9 +204,11 @@ Negra vs. 72% Indígena alfabetizados entre 60+ anos (2026 T2).
 
 ![Desalento](img/desalento.png)
 
-Entre quem está fora da força de trabalho, Negra (7,4%) e Indígena (5,9%) desistem de
-procurar emprego a taxas bem maiores que Branca (3,4%, 2026 T2) — desalento vai além da taxa
-de desocupação simples e também tem recorte racial.
+Entre quem está fora da força de trabalho (denominador: pessoas de 14+ anos fora da força,
+`desalento_subutilizacao.parquet`, Brasil, 2026 T2), estão desalentadas 4,5% das pessoas
+Negras e 4,1% das Indígenas, contra 2,0% das Brancas. Desalento vai além da taxa de
+desocupação simples e também tem recorte racial. (Até 13/10/2026 este parágrafo dizia
+7,4/5,9/3,4%, números que nenhuma definição testada reproduz: E7 da auditoria Rodada 2.)
 
 ## Geração: seguindo a mesma coorte, não a mesma faixa etária
 
@@ -317,8 +329,11 @@ fontes, e raça é uma delas identificável, não a maior fatia isolada.
 ![Hiato setor público vs. privado](img/hiato_setor_publico_privado.png)
 
 Confirma uma hipótese conhecida da literatura: o hiato racial é sistematicamente menor no
-setor Público (~45-50%, salário de concurso segue tabela padronizada) do que no Privado
-(~58-68%, mais espaço pra negociação individual e discricionariedade).
+setor Público (de 42,0% a 59,7% ao longo de 2012T1–2026T2, mediana 48,1%) do que no Privado
+(de 54,6% a 68,0%, mediana 61,1%). É menor em todos os 58 trimestres. Faixas = mínimo e máximo de
+`hiato_setor_publico_privado.parquet`. Mecanismos sugeridos (hipótese, não testada aqui): o
+salário de concurso segue tabela padronizada, e no setor privado há mais espaço para negociação
+individual e discricionariedade.
 
 ![Segregação setorial](img/segregacao_setorial.png)
 
@@ -503,8 +518,8 @@ as outras duas em quase toda célula" segura mesmo nesse nível de detalhe.
 
 ## Limitações a ter em mente lendo estes gráficos
 
-- Indígena tem amostra pequena — séries temporais de raça isolada usam média móvel de 4
-  trimestres; os cortes-instantâneo (escolaridade, faixa etária, heatmap completo) não
+- Indígena tem amostra pequena — séries temporais de raça isolada usam média móvel centrada de 4
+  trimestres (usa trimestres futuros; nas pontas, menos pontos); os cortes-instantâneo (escolaridade, faixa etária, heatmap completo) não
   suavizam, então alguns valores podem ser ruidosos nas células mais cruzadas.
 - "Negra" nos gráficos = Preta + Parda somadas (ponderado); os gráficos "Preta × Parda"
   mostram as duas populações separadas para quem quiser o detalhe.
@@ -530,7 +545,9 @@ as outras duas em quase toda célula" segura mesmo nesse nível de detalhe.
   do IBGE — o código inicial usava `'1'`,`'2'` sem padding, o que fazia `pct_com_carteira`
   sair inteiramente NULO sem erro nenhum. Encontrado só ao conferir a distribuição bruta dos
   valores antes de confiar no número.
-- **Frequência escolar (V3014) descartada**: a cobertura de V3014 na população
+- **Frequência escolar (V3014) descartada** *(correção de 13/10/2026, E11: `V3014` é "concluiu o
+  curso que frequentou", não frequência escolar; a frequência é `V3002`, extraída na v2. O motivo
+  abaixo não vale)*: a cobertura de V3014 na população
   14-17 anos é de só ~6-8% em vários trimestres testados (2018 a 2026) — bem menor que o
   ~95% de V3001 (alfabetização) ou os ~20% que uma rotação padrão de painel explicaria.
   Não foi possível confirmar se essa subamostra é aleatória

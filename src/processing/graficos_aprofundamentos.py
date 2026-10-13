@@ -246,7 +246,7 @@ def construir() -> list[dict]:
         ax.grid(axis="y", color=g.GRADE, linewidth=0.8, zorder=0)
         _salvar(fig, "apr_oaxaca_temporal.png")
         f.append(_folha("grafico", "Decomposição de Oaxaca-Blinder do hiato Branca vs. Negra — ano a ano",
-                        "controles: faixa etária + escolaridade + ocupação · parcela explicada por composição vs. não-explicada (retorno diferente = proxy de discriminação)",
+                        "controles: faixa etária + escolaridade + ocupação · parcela explicada por composição vs. não-explicada (não explicada = parte não associada às covariáveis incluídas)",
                         "apr_oaxaca_temporal.png",
                         "A parte não-explicada está caindo conforme a escolaridade de negros sobe, ou fica travada?"))
 

@@ -37,7 +37,7 @@ análises seguinte está em [docs/PLANO_DE_ANALISE.md](docs/PLANO_DE_ANALISE.md)
 
 Valores reais (deflacionados pelo deflator oficial do IBGE, a preços do trimestre mais
 recente). A população indígena tem amostra pequena na PNAD Contínua — a linha usa média
-móvel de 4 trimestres para reduzir ruído (ver
+móvel centrada de 4 trimestres para reduzir ruído (ver
 [docs/LIMITACOES_E_METODOLOGIA.md](docs/LIMITACOES_E_METODOLOGIA.md)).
 
 ### O hiato racial sobrevive ao controle por escolaridade

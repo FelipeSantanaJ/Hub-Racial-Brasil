@@ -13,6 +13,7 @@ Uso:
     python -m src.ingestion.extrator_pnadc --ano-inicial 2026 --ano-final 2026
 """
 import argparse
+import json
 import os
 import re
 import time
@@ -129,6 +130,39 @@ def baixar_arquivo(url: str, destino: Path, tentativas: int = 4) -> Path:
     raise RuntimeError(f"Não foi possível baixar {url}")
 
 
+ARQUIVO_FONTE = "_fonte.json"
+COLUNAS_FONTE = ["arquivo_zip", "last_modified_servidor", "tamanho_bytes", "url"]
+
+
+def info_remota(url: str) -> dict:
+    """Nome, `Last-Modified` e tamanho do arquivo no servidor (HEAD), para registrar QUAL
+    publicação do IBGE foi extraída (R15 da auditoria Rodada 2: a versão dos microdados só
+    era conhecida por inferência). Falha de rede não interrompe a extração: vira None."""
+    info = {"arquivo_zip": url.split("/")[-1], "url": url, "last_modified_servidor": None, "tamanho_bytes": None}
+    try:
+        r = requests.head(url, headers=HEADERS, timeout=60, allow_redirects=True)
+        r.raise_for_status()
+        info["last_modified_servidor"] = r.headers.get("Last-Modified")
+        tamanho = r.headers.get("Content-Length")
+        info["tamanho_bytes"] = int(tamanho) if tamanho and tamanho.isdigit() else None
+    except Exception as e:
+        print(f"  aviso: HEAD falhou para {url}: {e}")
+    return info
+
+
+def gravar_fonte(particao_dir: Path, info: dict) -> None:
+    (particao_dir / ARQUIVO_FONTE).write_text(json.dumps(info, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def ler_fonte(particao_dir: Path) -> dict:
+    """`_fonte.json` da partição, ou campos vazios (partições extraídas antes de 13/10/2026)."""
+    caminho = particao_dir / ARQUIVO_FONTE
+    if not caminho.exists():
+        return {c: None for c in COLUNAS_FONTE}
+    info = json.loads(caminho.read_text(encoding="utf-8"))
+    return {c: info.get(c) for c in COLUNAS_FONTE}
+
+
 def encontrar_zip_trimestre(ano: int, trimestre: int) -> str | None:
     """Procura, na pasta do ano, o zip de dados do trimestre."""
     url_ano = f"{BASE_URL}/{ano}/"
@@ -220,6 +254,7 @@ def processar_trimestre(ano: int, trimestre: int, colspecs, nomes_colunas, dtype
 
     nome_zip = url_zip.split("/")[-1]
     destino_zip = RAW_TMP_DIR / nome_zip
+    fonte = info_remota(url_zip)
     baixar_arquivo(url_zip, destino_zip)
 
     pasta_extraida = RAW_TMP_DIR / f"extraido_{ano}_{trimestre}"
@@ -266,6 +301,7 @@ def processar_trimestre(ano: int, trimestre: int, colspecs, nomes_colunas, dtype
         )
         total_linhas += len(bloco)
 
+    gravar_fonte(particao_dir, fonte)
     marcador.write_text(str(total_linhas))
 
     # limpeza dos arquivos brutos do trimestre para economizar espaço em disco
@@ -295,7 +331,8 @@ def main(ano_inicial: int, ano_final: int, pesos_replicados: bool = False) -> No
             status = processar_trimestre(ano, trimestre, colspecs, nomes_colunas, dtypes)
         except Exception as e:
             status = f"ERRO: {e}"
-        resultados.append({"ano": ano, "trimestre": trimestre, "status": status})
+        resultados.append({"ano": ano, "trimestre": trimestre, "status": status,
+                           **ler_fonte(OUTPUT_DIR / f"ano={ano}" / f"trimestre={trimestre}")})
         print(f"{ano} T{trimestre}: {status}")
 
     resumo_novo = pd.DataFrame(resultados)

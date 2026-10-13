@@ -5,7 +5,7 @@ Estrutura v3 (2026-09-06):
 - **hiato_serie**: série histórica do hiato de renda, com Welch. UM GRÁFICO POR
   COMPARAÇÃO — "Branca vs. Negra" e "Branca vs. Indígena" em slides SEPARADOS (a série
   de Indígena tem muitos picos por causa da amostra pequena; sobrepor as duas atrapalha
-  a leitura). A série de Indígena é suavizada (média móvel de 4 trimestres). "Combinada"
+  a leitura). A série de Indígena é suavizada (média móvel centrada de 4 trimestres). "Combinada"
   (todos os recortes num painel) também vira 2 slides, um por comparação.
 - **hiato_snapshot**: hiato do trimestre mais recente, também 1 gráfico por comparação
   (barras vs. Negra num slide, vs. Indígena noutro), com asteriscos de Welch.
@@ -46,7 +46,7 @@ RACAS_VALOR = ["Branca", "Negra", "Indígena"]
 CMP = [("Negra", "ne", g.COR_NEGRA), ("Indígena", "in", g.COR_INDIGENA)]
 NOTA_SERIE = "R$ reais, a preços do trimestre mais recente (deflator IBGE) · série 2012–2026"
 SUB_HS = "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre"
-SUB_HS_IND = SUB_HS + " · série de Indígena suavizada (média móvel 4 trim., amostra pequena)"
+SUB_HS_IND = SUB_HS + " · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)"
 SUB_HSNAP = "% de diferença de renda · Welch: *** p<0,001  ** p<0,01  * p<0,05  ·  n.s. = não signif."
 
 

@@ -55,7 +55,7 @@ def main() -> None:
                "sp_capital_interior": micro["localizacao"].where(micro["UF"] == "35"),
                "rm_sp": np.where(micro["RM_RIDE"] == "35",
                                  np.where(micro["Capital"].notna(), "RM São Paulo - Capital",
-                                          "RM São Paulo - Não-capital (proxy ABC Paulista)"), None)}
+                                          "RM São Paulo - Demais municípios"), None)}
         amostra = prec[prec[f"n_{ind.nome}"] >= 2].sample(min(args.n_celulas, len(prec)), random_state=1)
         difs, nulas = [], 0
         for _, r in amostra.iterrows():

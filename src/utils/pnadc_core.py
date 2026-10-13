@@ -386,7 +386,8 @@ def decomposicao_oaxaca_blinder(micro, outcome, controles, peso, col_grupo, grup
     - `parcela_explicada`: quanto do hiato vem de os dois grupos terem características
       (idade/escolaridade/ocupação) diferentes.
     - `parcela_nao_explicada`: quanto sobra mesmo com as MESMAS características — os
-      grupos têm retornos (coeficientes) diferentes pra elas. Proxy de discriminação,
+      grupos têm retornos (coeficientes) diferentes pra elas: a parte do hiato não associada às
+      covariáveis incluídas. NÃO é medida de discriminação (regra R5/D8 do plano),
       não prova direta (outras variáveis não observadas aqui também caem aqui dentro).
 
     Teste de significância: ajusta também um modelo único (mesmos coeficientes pros

@@ -55,9 +55,9 @@ NIVEIS_GEOGRAFICOS = [
     ("uf", "UF", "TRUE", "UF"),
     ("sp_capital_interior", "localizacao", "UF = '35'", "localizacao"),
     ("rm_sp", "CASE WHEN Capital IS NOT NULL THEN 'RM São Paulo - Capital' "
-              "ELSE 'RM São Paulo - Não-capital (proxy ABC Paulista)' END",
+              "ELSE 'RM São Paulo - Demais municípios' END",
      "RM_RIDE = '35'", "CASE WHEN Capital IS NOT NULL THEN 'RM São Paulo - Capital' "
-                        "ELSE 'RM São Paulo - Não-capital (proxy ABC Paulista)' END"),
+                        "ELSE 'RM São Paulo - Demais municípios' END"),
 ]
 
 CRIAR_BASE = f"""
@@ -1852,8 +1852,8 @@ def gerar_ritmo_convergencia() -> None:
 
     Branca-Indígena é a série mais ruidosa das três (menor amostra por trimestre) —
     ajusta a tendência TANTO na série bruta quanto numa versão suavizada (média móvel
-    de 4 trimestres, mesmo padrão já usado nos gráficos de série temporal de Indígena
-    em `graficos_fase1.py`) e compara o R² das duas: se mesmo suavizada o R² continuar
+    de 4 trimestres PARA TRÁS, `rolling(4, min_periods=4)`; os gráficos de Indígena em
+    `graficos_fase1.py` usam média móvel CENTRADA) e compara o R² das duas: se mesmo suavizada o R² continuar
     muito baixo, marca a série como `tendencia_confiavel=False` e NÃO reporta um "anos
     pra zerar" pra ela — segue a regra do projeto de não forçar uma leitura de uma
     série ruidosa demais.
@@ -2009,14 +2009,12 @@ def gerar_alfabetizacao(con: duckdb.DuckDBPyConnection) -> None:
     residual em cohorts mais velhas — complementa nivel_instrucao (que só mostra o
     nível já CONCLUÍDO).
 
-    NÃO inclui frequência escolar (V3014): checado direto no parquet bruto e a
-    cobertura de V3014 pra população 14-17 anos é de só ~6-8% em VÁRIOS trimestres
-    (2018 a 2026), não os ~95% de V3001 nem os ~20% que uma rotação padrão de painel
-    (1 de 5 grupos por trimestre) explicaria — não conseguimos confirmar se é uma
-    subamostra aleatória (estimativa válida, só com IC mais largo) ou um recorte
-    enviesado (ex.: só quem não trabalha). Descartado
-    até investigar a regra de coleta exata do IBGE pra essa variável especificamente —
-    ver docs/LIMITACOES_E_METODOLOGIA.md."""
+    NÃO inclui frequência escolar. Correção de 13/10/2026 (E11 da auditoria Rodada 2): este
+    docstring tratava `V3014` como frequência escolar e concluía, pela cobertura de ~6–8%
+    entre 14–17 anos, que o indicador era inviável. `V3014` é "concluiu o curso que
+    frequentou" e só se aplica a quem frequentou um curso antes; a cobertura baixa é
+    esperada. Frequência escolar é `V3002` ("frequenta escola?"), já extraída no extrato v2
+    (E1 do plano de análise usa `V3002`)."""
     query = """
         SELECT 'brasil' AS nivel_geografico, 'Brasil' AS geografia,
                ano, trimestre, raca_cor, sexo, faixa_etaria,
@@ -2841,8 +2839,9 @@ def gerar_oaxaca_blinder_temporal(con: duckdb.DuckDBPyConnection) -> None:
     """Oaxaca-Blinder (log-renda, controles faixa etária + escolaridade + ocupação) e
     RIF de P10/P50/P90 — a MESMA decomposição de `gerar_decomposicao_oaxaca_blinder`,
     mas rodada UMA VEZ POR ANO (todos os trimestres do ano agrupados), 2012→2026.
-    Responde: a parcela NÃO-explicada (mesma composição, retorno diferente — proxy de
-    discriminação) está caindo conforme a escolaridade de negros sobe, ou fica travada?
+    Responde: a parcela NÃO-explicada (mesma composição, retorno diferente — parte do hiato
+    não associada às covariáveis incluídas; não é medida de discriminação) está caindo
+    conforme a escolaridade de negros sobe, ou fica travada?
     """
     controles = ["faixa_etaria", "nivel_instrucao", "grupamento_ocupacional"]
     anos = [r[0] for r in con.execute("SELECT DISTINCT ano FROM base ORDER BY ano").fetchall()]

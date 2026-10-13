@@ -75,7 +75,9 @@ colunas.
 - **Municípios do ABC Paulista individualmente**: **não são identificáveis** na PNAD
   Contínua pública, por confidencialidade — o IBGE só libera o código de Região
   Metropolitana/RIDE (`RM_RIDE`), sem código de município dentro dela. O mais granular
-  possível é "RM São Paulo, não-capital" (`RM_RIDE='35'` e `Capital` nula), que mistura
+  possível é "RM São Paulo - Demais municípios" (`RM_RIDE='35'` e `Capital` nula; rótulo até
+  13/10/2026: "Não-capital (proxy ABC Paulista)", trocado porque a categoria tem os 38 municípios
+  da RM fora a capital, não só o ABC — R18), que mistura
   Santo André/São Bernardo/São Caetano/Diadema/Mauá/Ribeirão Pires/Rio Grande da Serra com
   outras cidades da Grande São Paulo (ex.: Guarulhos, Osasco). Um recorte por município
   específico do ABC só é possível a partir do Censo Demográfico (Etapa 2), que tem código de
@@ -236,9 +238,12 @@ IBGE):
 - **VD4012** (contribuição previdenciária) → `contribui_previdencia`: cobre TODOS os
   ocupados, inclusive conta-própria/empregador — é o indicador mais amplo de proteção
   social, complementar a `tem_carteira_assinada`.
-- **V3001** (alfabetização) e **V3014** (frequência escolar atual): perguntas feitas pra
-  toda a população 14+, não têm a ambiguidade de "sem instrução" (não são código de
-  não-resposta).
+- **V3001** (alfabetização): pergunta feita para toda a população 14+, sem a ambiguidade de
+  "sem instrução" (não é código de não-resposta). **Correção de 13/10/2026 (E11):** este trecho
+  dizia que **V3014** era "frequência escolar atual". `V3014` é "concluiu o curso que
+  frequentou?" e só se aplica a quem frequentou um curso antes; daí a cobertura baixa entre
+  14–17 anos, que fez a frequência escolar ser descartada por engano. Frequência escolar é
+  `V3002` ("frequenta escola ou creche?"), já extraída no extrato v2 e usada no E1 do plano.
 - **VD4003** (força de trabalho potencial) e **VD4005** (desalento): só têm valor definido
   para quem está FORA da força de trabalho (VD4001='2') — dentro da força de trabalho o
   conceito não se aplica e a coluna vem NULL, por desenho.
@@ -318,7 +323,7 @@ tem os dois blocos.
   captura sobre-qualificação em ocupações intermediárias (ex.: alguém com mestrado
   trabalhando em apoio administrativo também seria "sobrequalificado" em um sentido mais
   amplo, mas não entra nesse indicador). Indígena tem amostra pequena aqui (poucas pessoas
-  com Superior completo nesse grupo) — a série fica ruidosa mesmo com média móvel de 4
+  com Superior completo nesse grupo) — a série fica ruidosa mesmo com média móvel centrada de 4
   trimestres, ler com cautela.
 
 ## Matriz de combinações raça × A × B e "só ocupação" isolada

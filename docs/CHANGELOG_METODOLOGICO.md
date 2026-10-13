@@ -89,6 +89,39 @@ regeneração única da Onda 1**.
   2026T2 vai de 8,9 para 8,7 p.p. A definição antiga recalculada reproduz o parquet publicado.
 - Teste: `tests/test_carteira.py`.
 
+### 5. Textos, rótulos e registro da extração — **sem mudar números**
+
+- **E7/E8** (`ANALISE_FASE1.md`): o desalento passa a ser descrito com os valores do parquet e o
+  denominador explícito (2,0/4,5/4,1% para Branca/Negra/Indígena, 2026T2). A carteira passa a
+  75,4/66,5/53,1%, com o denominador explícito e uma nota sobre a nova definição (item 4).
+- **E9** (`ANALISE_CAUSAL_COTAS.md` §2–3): reescrito como exploratório, com estado **Bloqueado até
+  o B4b**. Cada p citado vem com o p ajustado (`did_p_valor_bh`) na mesma frase. O texto diz agora
+  que são 40 testes de DiD (5 + 35) e que 0 sobrevivem ao FDR, e inclui os dois p < 0,05 de
+  participação no Centro-Oeste (Negra p = 0,021 e Parda p = 0,011; p_BH = 0,348). Sai o argumento
+  "diluído ⇒ efeito real maior".
+- **E10/C8** (`ANALISE_RACA_GENERO.md`): a fórmula fica `gap = raça + gênero + interação`, a base
+  do % é a renda do Homem Branco e a tabela foi conferida contra o parquet regenerado no item 1. A
+  "maior rotatividade" passa a ser hipótese explícita.
+- **E11**: a docstring de `gerar_alfabetizacao`, o `LIMITACOES…` e o `ANALISE_FASE1.md` diziam que
+  `V3014` era frequência escolar. `V3014` é "concluiu o curso que frequentou"; frequência escolar
+  é `V3002`.
+- **C6**: "proxy de discriminação" sai das docstrings de `decomposicao_oaxaca_blinder` e
+  `gerar_oaxaca_blinder_temporal` e do subtítulo em `graficos_aprofundamentos.py`. O resíduo passa
+  a ser "parte não associada às covariáveis incluídas".
+- **C7** (`ANALISE_FASE1.md`): faixas pelo mínimo e máximo dos parquets. Regional: Sudeste
+  61,6–85,9%, Sul 40,1–54,0%. Setor: Público 42,0–59,7%, Privado 54,6–68,0%; o Público fica abaixo
+  do Privado nos 58 trimestres.
+- **R18**: o rótulo `rm_sp` passa a "RM São Paulo - Demais municípios". Nenhum gráfico filtra por
+  ele; os parquets mantêm o rótulo antigo até a regeneração da Onda 1.
+- **R13**: os rótulos de gráfico (`graficos_fase1.py`, `graficos_arvore.py`) e os textos dizem
+  "média móvel centrada de 4 trimestres". Vale nos próximos gráficos; `docs/arvore_manifest.json`
+  é gerado junto com as imagens e só muda com elas. O ritmo de convergência usa média móvel
+  para trás (não centrada), e o `ANALISE_RACA_GENERO.md` dizia que era "o mesmo padrão" dos
+  gráficos: corrigido.
+- **R15**: os dois extratores fazem HEAD no zip e gravam `_fonte.json` na partição (nome do zip,
+  URL, `Last-Modified`, tamanho), e o `_resumo_extracao.csv` passa a ter essas colunas. Nada foi
+  baixado; as partições atuais não têm o arquivo (colunas vazias até a próxima extração).
+
 ---
 
 ## 13/10/2026 — Etapa 2, Fase 2 (branch `auditoria/fase2-infra`)
