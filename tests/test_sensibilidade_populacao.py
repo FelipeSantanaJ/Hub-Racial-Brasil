@@ -91,3 +91,15 @@ def test_ep_do_efeito_marginal_bate_com_sanduiche_em_aas():
     # comparar só o termo dos coeficientes é o que o delta mede, então tolerância de 10%
     assert r.loc["Negra", "efeito_marginal_pp"] == pytest.approx(100 * f(b), rel=1e-4)
     assert r.loc["Negra", "ep_pp"] == pytest.approx(100 * np.sqrt(grad @ V @ grad), rel=0.10)
+
+
+def test_decomposicao_heaping_soma_exata():
+    """Shift-share do F4: total final − inicial = composição + dentro da faixa."""
+    from src.processing.sensibilidade_populacao import decomposicao_heaping
+    df = pd.DataFrame({"ano": [2012, 2012, 2026, 2026], "raca": "Total", "faixa_nominal": ["a", "c", "a", "c"],
+                       "pct_pessoas_na_faixa": [80.0, 20.0, 30.0, 70.0], "pct_multiplo_1000": [0.0, 50.0, 0.0, 45.0]})
+    r = decomposicao_heaping(df, 2012, 2026)
+    assert r["total_inicial"] == pytest.approx(10.0) and r["total_final"] == pytest.approx(31.5)
+    assert r["efeito_composicao_pp"] == pytest.approx(25.0)       # (0,7 − 0,2) × 50
+    assert r["efeito_dentro_da_faixa_pp"] == pytest.approx(-3.5)  # 0,7 × (45 − 50)
+    assert r["efeito_composicao_pp"] + r["efeito_dentro_da_faixa_pp"] == pytest.approx(r["total_final"] - r["total_inicial"])

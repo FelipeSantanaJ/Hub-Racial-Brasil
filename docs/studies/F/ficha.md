@@ -48,8 +48,21 @@ variável do IBGE, onde está no código e o que foi medido sobre ele.
   R$ 1.000 — Branca 22,8% (2012T1) → 48,3% (2026T2); Negra 11,4% → 32,7%; Indígena 8,7% → 29,6%. Múltiplos de
   R$ 100: 86% / 76% / 78% em 2026T2. O arredondamento **cresceu muito** e é **maior entre brancos**.
 - Tratamento já adotado: nos limiares de quantil, o peso empatado é repartido (R9, `pnadc_core.fracao_na_fatia`).
-- **Pendente:** por que o heaping dobrou (mudança de coleta? imputação?) — NÃO VERIFICADO; subdeclaração e topo da
-  distribuição (comparação com IRPF/contas nacionais) — não feito.
+- **Por que o % em múltiplos de R$ 1.000 dobrou (resolvido em 13/10/2026; `heaping_renda_faixas.parquet`,
+  `sensibilidade_populacao.gerar_heaping_faixas`).** Não é mudança de comportamento: dentro de cada faixa NOMINAL fixa,
+  o % múltiplo de R$ 1.000 é estável de 2012 a 2026 (R$ 2.000–4.999: 56% → 48%; R$ 5.000–9.999: 82% → 83%; R$ 10.000+:
+  95% → 95%), e o % de rendas arredondadas a até 2 algarismos significativos fica entre 81% e 86% (exceto 2016 e 2021,
+  ~95%, anos em que o salário mínimo — R$ 880 e R$ 1.100 — tem 2 algarismos). O que mudou foi **onde as rendas
+  nominais estão**: em 2012, 18% das pessoas de P1 ganhavam R$ 2.000 ou mais; em 2026, 62% (inflação + crescimento).
+  Decomposição *shift-share* 2012 → 2026 (2º trimestres): de 17,3% para 39,6% (+22,3 p.p.) = **+29,5 p.p. de
+  composição** (mais gente em faixas onde arredondar cai em milhares) **−7,3 p.p. dentro das faixas** (sobretudo a
+  faixa R$ 1.000–1.999, onde o salário mínimo de 2026, R$ 1.621, não é redondo). A diferença racial também é
+  composição: Branca +31,3 / −6,4 p.p.; Negra +28,7 / −7,5 p.p.; dentro de cada faixa, brancos e negros arredondam
+  quase igual (R$ 2.000–4.999 em 2026: 49,2% × 47,7%).
+- **Consequência:** o heaping é uma propriedade de **escala relativa** (pessoas arredondam a 1–2 algarismos), não uma
+  piora da qualidade da declaração. Quantis continuam caindo em valores redondos (IC de largura zero ≠ precisão).
+- **NÃO VERIFICADO:** se houve mudança de instrução ao entrevistador sobre arredondamento (documentação de campo não
+  consultada); subdeclaração e topo da distribuição (comparação com IRPF/contas nacionais) — não feito.
 
 ## F5 — Incerteza
 

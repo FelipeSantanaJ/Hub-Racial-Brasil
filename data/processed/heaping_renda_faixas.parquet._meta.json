@@ -1,0 +1,23 @@
+{
+  "esquema": "hub-racial-meta/1",
+  "arquivo": "heaping_renda_faixas.parquet",
+  "n_linhas": 225,
+  "gerado_em": "2026-10-13T17:39:59.927110+00:00",
+  "codigo": {
+    "commit": "2219b86ef613f5beb3b9df026d98c7f4da5670d0-modificado",
+    "modulo": "__main__"
+  },
+  "insumos": {
+    "chave": "trimestral_v2",
+    "descricao": "PNAD Contínua trimestral, extrato v2 + deflator IBGE",
+    "hash": "9b64f579fa63981e9237190166d333a9ac546041a4df260d2c67dabf49f1ceda",
+    "n_arquivos": 228
+  },
+  "se_metodo": "sem_inferencia",
+  "populacao": "Ocupados (VD4002=1) de 18+ anos com rendimento habitual do trabalho principal (VD4016) > 0; renda: Rendimento mensal habitual do trabalho principal (VD4016), deflacionado pelo deflator habitual do IBGE; 2º trimestres; % múltiplo de R$ 1.000/100 e arredondamento a 1–2 algarismos significativos dentro de faixas NOMINAIS fixas (F4)",
+  "periodo": {
+    "inicio": "2012",
+    "fim": "2026"
+  },
+  "nota": "Renda NOMINAL do trabalho principal; faixas nominais fixas; 2º trimestres"
+}
