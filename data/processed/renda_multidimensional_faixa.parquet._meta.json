@@ -2,9 +2,9 @@
   "esquema": "hub-racial-meta/1",
   "arquivo": "renda_multidimensional_faixa.parquet",
   "n_linhas": 2869,
-  "gerado_em": "2026-10-13T14:33:37.680926+00:00",
+  "gerado_em": "2026-10-13T16:02:02.151700+00:00",
   "codigo": {
-    "commit": "c1202a10fd9cedb6ee7d78647d0188dfd6dea81e-modificado",
+    "commit": "6544305e82a2aa6e2f39bdb883478efe255785c4-modificado",
     "modulo": "src.processing.agregacoes_pnadc"
   },
   "insumos": {

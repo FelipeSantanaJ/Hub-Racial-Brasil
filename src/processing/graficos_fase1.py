@@ -113,9 +113,16 @@ def peso_para(df: pd.DataFrame, col_valor: str) -> pd.Series:
     return df[nome] if nome and nome in df.columns else df["populacao_estimada"]
 
 
+# As tabelas por faixa etária guardam a faixa 14–17 como dado, mas as análises usam 18+ (população
+# de referência): ao combinar células de renda/horas, 14–17 fica de fora.
+FAIXAS_FORA_DAS_ANALISES = {"14-17"}
+
+
 def media_ponderada_celulas(g: pd.DataFrame, col_valor: str) -> float:
     w = peso_para(g, col_valor)
     ok = g[col_valor].notna() & (w > 0)
+    if col_valor in PESO_DA_COLUNA and "faixa_etaria" in g.columns and col_valor.startswith(("renda", "horas")):
+        ok &= ~g["faixa_etaria"].isin(FAIXAS_FORA_DAS_ANALISES)
     return float((g.loc[ok, col_valor] * w[ok]).sum() / w[ok].sum()) if ok.any() else np.nan
 
 
@@ -2271,8 +2278,8 @@ def grafico_raca_faixa_etaria_escolaridade(rm: pd.DataFrame) -> Path:
     combinado = _combinar_negra(rm, "renda_habitual_real_media", by=["faixa_etaria", "nivel_instrucao"])
     return _grafico_heatmap_raca(
         combinado, dim_linha="nivel_instrucao", dim_coluna="faixa_etaria",
-        ordem_linha=NIVEIS_INSTRUCAO_ORDEM, ordem_coluna=FAIXAS_ETARIAS_ORDEM,
-        rotulos_linha=NIVEIS_INSTRUCAO_ROTULO_CURTO, rotulos_coluna={f: f for f in FAIXAS_ETARIAS_ORDEM},
+        ordem_linha=NIVEIS_INSTRUCAO_ORDEM, ordem_coluna=FAIXAS_ETARIAS_RENDA,
+        rotulos_linha=NIVEIS_INSTRUCAO_ROTULO_CURTO, rotulos_coluna={f: f for f in FAIXAS_ETARIAS_RENDA},
         col_valor="renda_habitual_real_media",
         titulo="Renda habitual real por raça, faixa etária e escolaridade — Brasil",
         subtitulo="R$ reais (milhares), últimos 8 trimestres, ocupados · PNAD Contínua Trimestral",
@@ -2285,8 +2292,8 @@ def grafico_raca_faixa_etaria_ocupacao(rm: pd.DataFrame) -> Path:
     combinado = _combinar_negra(rm, "renda_habitual_real_media", by=["faixa_etaria", "grupamento_ocupacional"])
     return _grafico_heatmap_raca(
         combinado, dim_linha="grupamento_ocupacional", dim_coluna="faixa_etaria",
-        ordem_linha=GRUPAMENTOS_OCUPACIONAIS_ORDEM, ordem_coluna=FAIXAS_ETARIAS_ORDEM,
-        rotulos_linha=ROTULOS_OCUPACAO_CURTO, rotulos_coluna={f: f for f in FAIXAS_ETARIAS_ORDEM},
+        ordem_linha=GRUPAMENTOS_OCUPACIONAIS_ORDEM, ordem_coluna=FAIXAS_ETARIAS_RENDA,
+        rotulos_linha=ROTULOS_OCUPACAO_CURTO, rotulos_coluna={f: f for f in FAIXAS_ETARIAS_RENDA},
         col_valor="renda_habitual_real_media",
         titulo="Renda habitual real por raça, faixa etária e ocupação — Brasil",
         subtitulo="R$ reais (milhares), últimos 8 trimestres, ocupados · PNAD Contínua Trimestral",
@@ -2477,8 +2484,8 @@ def grafico_preta_parda_genero_faixa_etaria(renda: pd.DataFrame) -> Path:
     ].copy()
     return _grafico_heatmap_raca(
         r, dim_linha="faixa_etaria", dim_coluna="sexo",
-        ordem_linha=FAIXAS_ETARIAS_ORDEM, ordem_coluna=["Homem", "Mulher"],
-        rotulos_linha={f: f for f in FAIXAS_ETARIAS_ORDEM}, rotulos_coluna={"Homem": "Homens", "Mulher": "Mulheres"},
+        ordem_linha=FAIXAS_ETARIAS_RENDA, ordem_coluna=["Homem", "Mulher"],
+        rotulos_linha={f: f for f in FAIXAS_ETARIAS_RENDA}, rotulos_coluna={"Homem": "Homens", "Mulher": "Mulheres"},
         col_valor="renda_habitual_real_media",
         titulo="Renda habitual real por gênero e faixa etária — Preta vs. Parda — Brasil",
         subtitulo=f"R$ reais (milhares) · {ultimo_trimestre}º trimestre de {ultimo_ano} · PNAD Contínua Trimestral",
@@ -2530,8 +2537,8 @@ def grafico_preta_parda_faixa_etaria_escolaridade(rc: pd.DataFrame) -> Path:
     combinado = _media_ponderada_por_grupo(r, "renda_habitual_real_media", by=["raca_cor", "faixa_etaria", "nivel_instrucao"])
     return _grafico_heatmap_raca(
         combinado, dim_linha="nivel_instrucao", dim_coluna="faixa_etaria",
-        ordem_linha=NIVEIS_INSTRUCAO_ORDEM, ordem_coluna=FAIXAS_ETARIAS_ORDEM,
-        rotulos_linha=NIVEIS_INSTRUCAO_ROTULO_CURTO, rotulos_coluna={f: f for f in FAIXAS_ETARIAS_ORDEM},
+        ordem_linha=NIVEIS_INSTRUCAO_ORDEM, ordem_coluna=FAIXAS_ETARIAS_RENDA,
+        rotulos_linha=NIVEIS_INSTRUCAO_ROTULO_CURTO, rotulos_coluna={f: f for f in FAIXAS_ETARIAS_RENDA},
         col_valor="renda_habitual_real_media",
         titulo="Renda habitual real por faixa etária e escolaridade — Preta vs. Parda — Brasil",
         subtitulo=f"R$ reais (milhares) · {ultimo_trimestre}º trimestre de {ultimo_ano} · PNAD Contínua Trimestral",
@@ -2563,8 +2570,8 @@ def grafico_preta_parda_genero_faixa_etaria_escolaridade(rc: pd.DataFrame) -> Pa
     r = rc[(rc["ano"] == ultimo_ano) & (rc["trimestre"] == ultimo_trimestre) & (rc["raca_cor"].isin(["Preta", "Parda"]))]
     return _grafico_heatmap_4vias(
         r, dim_linha="nivel_instrucao", dim_coluna="faixa_etaria",
-        ordem_linha=NIVEIS_INSTRUCAO_ORDEM, ordem_coluna=FAIXAS_ETARIAS_ORDEM,
-        rotulos_linha=NIVEIS_INSTRUCAO_ROTULO_CURTO, rotulos_coluna={f: f for f in FAIXAS_ETARIAS_ORDEM},
+        ordem_linha=NIVEIS_INSTRUCAO_ORDEM, ordem_coluna=FAIXAS_ETARIAS_RENDA,
+        rotulos_linha=NIVEIS_INSTRUCAO_ROTULO_CURTO, rotulos_coluna={f: f for f in FAIXAS_ETARIAS_RENDA},
         col_valor="renda_habitual_real_media",
         titulo="Renda por gênero, faixa etária e escolaridade — Preta vs. Parda — Brasil",
         subtitulo="R$ reais (milhares), a preços do trimestre mais recente · PNAD Contínua Trimestral",

@@ -192,6 +192,7 @@ CREATE TEMP TABLE base AS
         -- horas habituais do trabalho principal (V4039, extrato v2), só na população de
         -- referência: denominador da renda por hora desde a Onda 1 (renda e horas do MESMO trabalho)
         CASE WHEN {pop.REFERENCIA.sql("m")} THEN m.V4039 END AS horas_trabalho_principal,
+        CASE WHEN {pop.REFERENCIA_14MAIS.sql("m")} THEN m.V4039 END AS horas_trabalho_principal_14mais,
         m.V1028 AS peso,
         -- UPA (Unidade Primária de Amostragem, conglomerado do desenho amostral da PNAD
         -- Contínua) — usada só como cluster de erro-padrão robusto (ver
@@ -288,6 +289,11 @@ def _bool_sql(expr: str) -> str:
 
 IND_RENDA = IndicadorPrecisao("renda", "renda_habitual_real", "renda_habitual_real IS NOT NULL")
 IND_RENDA_EFETIVA = IndicadorPrecisao("renda_efetiva", "renda_efetiva_real", "renda_efetiva_real IS NOT NULL")
+# Tabelas com dimensão de faixa etária guardam também a faixa 14–17 (ocupados 14+ com renda do
+# trabalho principal > 0); as análises (gráficos, hiatos, decomposições) usam só 18+.
+IND_RENDA_14 = IndicadorPrecisao("renda", "renda_14mais_habitual_real", "renda_14mais_habitual_real IS NOT NULL")
+IND_RENDA_EFETIVA_14 = IndicadorPrecisao("renda_efetiva", "renda_14mais_efetiva_real",
+                                         "renda_14mais_efetiva_real IS NOT NULL")
 NIVEL_BRASIL = [NIVEIS_GEOGRAFICOS[0]]
 RACA_NEGRA_SQL = "CASE WHEN raca_cor IN ('Preta','Parda') THEN 'Negra' ELSE raca_cor END"
 
@@ -374,20 +380,20 @@ def gerar_renda(con: duckdb.DuckDBPyConnection) -> None:
            ano, trimestre, raca_cor, sexo, faixa_etaria,
            COUNT(*) AS n_amostra,
            SUM(peso) AS populacao_estimada,
-           SUM(renda_habitual_nominal * peso)
-               / NULLIF(SUM(peso) FILTER (WHERE renda_habitual_nominal IS NOT NULL), 0)
+           SUM(renda_14mais_habitual_nominal * peso)
+               / NULLIF(SUM(peso) FILTER (WHERE renda_14mais_habitual_nominal IS NOT NULL), 0)
                AS renda_habitual_nominal_media,
-           SUM(renda_efetiva_nominal * peso)
-               / NULLIF(SUM(peso) FILTER (WHERE renda_efetiva_nominal IS NOT NULL), 0)
+           SUM(renda_14mais_efetiva_nominal * peso)
+               / NULLIF(SUM(peso) FILTER (WHERE renda_14mais_efetiva_nominal IS NOT NULL), 0)
                AS renda_efetiva_nominal_media,
-           SUM(renda_habitual_real * peso)
-               / NULLIF(SUM(peso) FILTER (WHERE renda_habitual_real IS NOT NULL), 0)
+           SUM(renda_14mais_habitual_real * peso)
+               / NULLIF(SUM(peso) FILTER (WHERE renda_14mais_habitual_real IS NOT NULL), 0)
                AS renda_habitual_real_media,
-           SUM(renda_efetiva_real * peso)
-               / NULLIF(SUM(peso) FILTER (WHERE renda_efetiva_real IS NOT NULL), 0)
+           SUM(renda_14mais_efetiva_real * peso)
+               / NULLIF(SUM(peso) FILTER (WHERE renda_14mais_efetiva_real IS NOT NULL), 0)
                AS renda_efetiva_real_media"""
     df = _agregar_por_geografia(con, select_agregado)
-    inds = [IND_RENDA, IND_RENDA_EFETIVA]
+    inds = [IND_RENDA_14, IND_RENDA_EFETIVA_14]
     df = _anexar_precisao(df, _precisao_celulas(con, inds, _chaves("raca_cor", "sexo", "faixa_etaria")), inds)
     destino = OUTPUT_DIR / "renda.parquet"
     salvar_tabela(df, destino, regra_supressao=precisao.REGRA_SUPRESSAO)
@@ -1996,17 +2002,17 @@ def gerar_horas_trabalhadas(con: duckdb.DuckDBPyConnection) -> None:
            ano, trimestre, raca_cor, sexo, faixa_etaria,
            COUNT(*) AS n_amostra,
            SUM(peso) AS populacao_estimada,
-           SUM(horas_trabalho_principal * peso)
-               / NULLIF(SUM(peso) FILTER (WHERE horas_trabalho_principal IS NOT NULL), 0)
+           SUM(horas_trabalho_principal_14mais * peso)
+               / NULLIF(SUM(peso) FILTER (WHERE horas_trabalho_principal_14mais IS NOT NULL), 0)
                AS horas_semanais_media,
-           SUM((renda_habitual_real / NULLIF(horas_trabalho_principal * 4.345, 0)) * peso)
-               / NULLIF(SUM(peso) FILTER (WHERE renda_habitual_real IS NOT NULL
-                                            AND horas_trabalho_principal > 0), 0)
+           SUM((renda_14mais_habitual_real / NULLIF(horas_trabalho_principal_14mais * 4.345, 0)) * peso)
+               / NULLIF(SUM(peso) FILTER (WHERE renda_14mais_habitual_real IS NOT NULL
+                                            AND horas_trabalho_principal_14mais > 0), 0)
                AS renda_por_hora_real_media"""
     df = _agregar_por_geografia(con, select_agregado)
-    inds = [IndicadorPrecisao("horas", "horas_trabalho_principal", "horas_trabalho_principal IS NOT NULL"),
-            IndicadorPrecisao("renda_hora", "renda_habitual_real / (horas_trabalho_principal * 4.345)",
-                              "renda_habitual_real IS NOT NULL AND horas_trabalho_principal > 0")]
+    inds = [IndicadorPrecisao("horas", "horas_trabalho_principal_14mais", "horas_trabalho_principal_14mais IS NOT NULL"),
+            IndicadorPrecisao("renda_hora", "renda_14mais_habitual_real / (horas_trabalho_principal_14mais * 4.345)",
+                              "renda_14mais_habitual_real IS NOT NULL AND horas_trabalho_principal_14mais > 0")]
     df = _anexar_precisao(df, _precisao_celulas(con, inds, _chaves("raca_cor", "sexo", "faixa_etaria")), inds)
     destino = OUTPUT_DIR / "horas_trabalhadas.parquet"
     salvar_tabela(df, destino, regra_supressao=precisao.REGRA_SUPRESSAO)
@@ -2557,8 +2563,8 @@ def gerar_renda_multidimensional_faixa(con: duckdb.DuckDBPyConnection, n_trimest
            raca_cor, sexo, faixa_etaria, nivel_instrucao, grupamento_ocupacional,
            COUNT(*) AS n_amostra,
            SUM(peso) AS populacao_estimada,
-           SUM(renda_habitual_real * peso)
-               / NULLIF(SUM(peso) FILTER (WHERE renda_habitual_real IS NOT NULL), 0)
+           SUM(renda_14mais_habitual_real * peso)
+               / NULLIF(SUM(peso) FILTER (WHERE renda_14mais_habitual_real IS NOT NULL), 0)
                AS renda_habitual_real_media"""
     query = f"""
         SELECT {select_agregado}
@@ -2570,7 +2576,7 @@ def gerar_renda_multidimensional_faixa(con: duckdb.DuckDBPyConnection, n_trimest
         GROUP BY raca_cor, sexo, faixa_etaria, nivel_instrucao, grupamento_ocupacional"""
     df = con.execute(query).df()
     df = df[df["nivel_instrucao"].notna()]
-    inds = [IND_RENDA]
+    inds = [IND_RENDA_14]
     ultimos = ("(ano, trimestre) IN (SELECT ano, trimestre FROM (SELECT DISTINCT ano, trimestre FROM base "
                f"ORDER BY ano DESC, trimestre DESC LIMIT {n_trimestres}))")
     prec = _precisao_celulas(con, inds, _chaves("raca_cor", "sexo", "faixa_etaria", "nivel_instrucao", "grupamento_ocupacional"),
@@ -2625,8 +2631,8 @@ def gerar_renda_completa(con: duckdb.DuckDBPyConnection) -> None:
            ano, trimestre, raca_cor, sexo, faixa_etaria, nivel_instrucao,
            COUNT(*) AS n_amostra,
            SUM(peso) AS populacao_estimada,
-           SUM(renda_habitual_real * peso)
-               / NULLIF(SUM(peso) FILTER (WHERE renda_habitual_real IS NOT NULL), 0)
+           SUM(renda_14mais_habitual_real * peso)
+               / NULLIF(SUM(peso) FILTER (WHERE renda_14mais_habitual_real IS NOT NULL), 0)
                AS renda_habitual_real_media"""
     query = f"""
         SELECT 'brasil' AS nivel_geografico, 'Brasil' AS geografia, {select_agregado}
@@ -2634,7 +2640,7 @@ def gerar_renda_completa(con: duckdb.DuckDBPyConnection) -> None:
         GROUP BY ano, trimestre, raca_cor, sexo, faixa_etaria, nivel_instrucao"""
     df = con.execute(query).df()
     df = df[df["nivel_instrucao"].notna()]
-    inds = [IND_RENDA]
+    inds = [IND_RENDA_14]
     df = _anexar_precisao(df, _precisao_celulas(con, inds, _chaves("raca_cor", "sexo", "faixa_etaria", "nivel_instrucao"), niveis=NIVEL_BRASIL), inds)
     destino = OUTPUT_DIR / "renda_completa.parquet"
     salvar_tabela(df, destino, regra_supressao=precisao.REGRA_SUPRESSAO)

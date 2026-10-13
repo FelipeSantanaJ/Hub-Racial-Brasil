@@ -100,6 +100,12 @@ def sql_colunas_renda_tabelas(alias: str = "m", alias_deflator: str = "d") -> st
         CASE WHEN {p1} THEN {a}.VD4017 END AS renda_efetiva_nominal,
         CASE WHEN {p1} THEN {a}.VD4016 * {d}.deflator_habitual END AS renda_habitual_real,
         CASE WHEN {p1} THEN {a}.VD4017 * {d}.deflator_efetivo END AS renda_efetiva_real,
+        -- Mesma renda para 14+ (ocupados 14+ com VD4016 > 0): só nas tabelas que têm faixa etária
+        -- (a faixa 14–17 fica disponível como dado, mas fora das análises, que usam 18+)
+        CASE WHEN {REFERENCIA_14MAIS.sql(a)} THEN {a}.VD4016 END AS renda_14mais_habitual_nominal,
+        CASE WHEN {REFERENCIA_14MAIS.sql(a)} THEN {a}.VD4017 END AS renda_14mais_efetiva_nominal,
+        CASE WHEN {REFERENCIA_14MAIS.sql(a)} THEN {a}.VD4016 * {d}.deflator_habitual END AS renda_14mais_habitual_real,
+        CASE WHEN {REFERENCIA_14MAIS.sql(a)} THEN {a}.VD4017 * {d}.deflator_efetivo END AS renda_14mais_efetiva_real,
         -- Recorte histórico (até a Onda 1): todos os trabalhos, 14+, só para sensibilidade
         {a}.{VARIAVEL_RENDA_TODOS_TRABALHOS} AS renda_todos_trabalhos_nominal,
         {a}.{VARIAVEL_RENDA_TODOS_TRABALHOS} * {d}.deflator_habitual AS renda_todos_trabalhos_real,

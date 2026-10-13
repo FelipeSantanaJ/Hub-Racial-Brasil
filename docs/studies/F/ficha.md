@@ -28,7 +28,7 @@ variável do IBGE, onde está no código e o que foi medido sobre ele.
 |---|---|
 | **Referência (P1)** | Ocupados (`VD4002 = 1`) de **18+** (`V2009`) com `VD4016` > 0 |
 | Onde | `src/utils/populacao.py` (`REFERENCIA`, `filtro_sql`, flags `em_populacao_referencia*`) |
-| Vale para | **Toda tabela de renda** desde a Onda 1 (`src/utils/catalogo_tabelas.py`). Tabelas de outros indicadores (escolaridade, ocupação, desalento, alfabetização, sobrequalificação, informalidade, segregação) mantêm o universo do indicador (14+) |
+| Vale para | **Toda análise de renda** desde a Onda 1 (`src/utils/catalogo_tabelas.py`). As tabelas com faixa etária guardam também 14–17 como dado, fora das análises. Tabelas de outros indicadores (escolaridade, ocupação, desalento, alfabetização, sobrequalificação, informalidade, segregação) mantêm o universo do indicador (14+) |
 | Quanto pesa | Em 2026T2, P1 = 62,7% das pessoas brancas de 18+, 60,5% das negras, 58,5% das indígenas; entre mulheres, 53,5% / 49,1% (S0.1) |
 | Sensibilidade | S1: P2 (com ocupados sem rendimento) ≈ P1; **P4 (todos os adultos, zero para não ocupados) aumenta o hiato em 8,9 p.p. em média, 17,5 entre mulheres** |
 

@@ -25,8 +25,9 @@ Decisões dos Pontos de parada 2 e 3. **Tudo abaixo já vale nos parquets, gráf
   trimestres seguem significativos após o FDR (z de 19,5 a 37,2). Branca × Indígena 2026T2: 72,7 →
   70,9%. Theil entre raças 6,67 → 6,96%. Resíduo de Oaxaca-Blinder (3 controles) 22,4 → 22,8%.
   Tabelas que não são de renda: **pontos idênticos** (`antes_depois_onda1_rotulo_rmsp.json`, com o
-  rótulo novo da RM SP mapeado). A faixa 14–17 deixa de ter renda (37 imagens da árvore e 2 da galeria
-  removidas; 682 imagens em `docs/img`).
+  rótulo novo da RM SP mapeado). A faixa 14–17 sai das análises (37 imagens da árvore e 2 da galeria
+  removidas; 682 imagens em `docs/img`); a renda dela volta às tabelas por faixa etária na parte 2
+  (ver a entrada seguinte).
 - Itens 2–4 da Fase 3b passam a valer: supressão (`n_*`, `cv_*`, `publicavel*`), heaping (fatias de
   exatamente 10/25%), carteira só CLT (2026T2: 71,7 / 63,0 / 48,4%).
 
