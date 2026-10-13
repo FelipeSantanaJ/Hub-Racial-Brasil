@@ -7,6 +7,15 @@ calculá-lo: data, o quê, por quê, impacto. Mais recente primeiro.
 
 ## 13/10/2026 — Onda 2: Blocos B e C (branch `onda2/b-c`)
 
+- **Decisões do Felipe (13/10/2026, depois do PR #9):** fichas B1–B6 e C1–C5 aprovadas com ressalvas; EWC aceito;
+  a leitura "degrau em 2022, sem tendência contínua" passa a ser a principal do Hub (README e deck); C6 feito
+  (ficha proposta); gráficos das Ondas 1 e 2 no deck publicado (seção "Leitura principal", 18 slides; 635 no total).
+- **Aprofundamentos:** saiu `apr_convergencia.png` (extrapolação linear até "fecharia por volta de 2078", sem IC nem
+  premissa na tela), substituída pela projeção condicional do B6; legenda da quebra estrutural no deck corrigida
+  ("2 dos 3 eventos").
+- **Linhas internacionais de pobreza em PPC (T2):** autorizadas pelo Felipe, mas **não feitas**: a leitura dos dados
+  externos baixados (fator de PPC e IPC do Banco Mundial) foi bloqueada pela política de permissões da sessão.
+
 - **Estudos novos** (fichas B1–B6 e C1–C5 com hipóteses escritas antes de rodar; `src/processing/bloco_b.py`,
   `bloco_c.py`, `graficos_onda2.py`). Sempre com a versão do Bloco T ao lado (P4 e/ou renda domiciliar per capita).
 - **R6 (refeito, muda números publicados):** `ritmo_convergencia_hiatos` e `quebra_estrutural` passam a EP EWC

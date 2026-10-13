@@ -4838,11 +4838,11 @@
         {
           "tipo": "grafico",
           "ramo": "—",
-          "sub": "Hiato de renda Branca vs. Negra — projeção linear da tendência",
-          "titulo": "Hiato de renda Branca vs. Negra — projeção linear da tendência",
-          "subtitulo": "extrapolação simples da reta de tendência até o hiato zerar · tendência 2012–2026: fecharia por volta de 2109 (~83 anos) · tendência 2016–2026 (pós-recessão): fecharia por volta de 2078 (~52 anos)",
-          "arquivo": "apr_convergencia.png",
-          "legenda": "NÃO é previsão — tendências não são garantia (a série tem quebras estruturais e pode estagnar). Cenário ilustrativo do ritmo recente."
+          "sub": "Hiato Branca vs. Negra — projeção condicional (não é previsão)",
+          "titulo": "Hiato Branca vs. Negra — projeção condicional (não é previsão)",
+          "subtitulo": "se o ritmo de 2012–2026 (-0,78 p.p./ano) continuar: zero por volta de 2110 (2079–2231); no ritmo desde 2022 (+0,55 p.p./ano): sem data",
+          "arquivo": "onda2_b6_projecao_condicional.png",
+          "legenda": "A queda de 2012–2026 veio de um degrau em 2022 (B1); desde então a série está plana. Ficha: docs/studies/B6."
         },
         {
           "tipo": "grafico",

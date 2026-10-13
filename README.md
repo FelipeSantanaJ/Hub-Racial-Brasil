@@ -20,16 +20,15 @@ O projeto tem **duas árvores**:
 deflator oficial do IBGE, agregações por raça/gênero/faixa etária/geografia), análises
 descritivas, decomposições, distribuição, primeira identificação causal e testes
 automatizados.
-🔧 **Auditoria científica em andamento (out/2026).** A Rodada 1 encontrou um erro no erro-padrão
-(corrigido: ver "O que é validado" abaixo e [docs/auditoria/](docs/auditoria/)). A agenda de
-análises seguinte está em [docs/PLANO_DE_ANALISE.md](docs/PLANO_DE_ANALISE.md).
+🔧 **Auditoria científica e plano de análise em andamento (out/2026).** A Rodada 1 encontrou um erro no
+erro-padrão (corrigido: ver "O que é validado" abaixo e [docs/auditoria/](docs/auditoria/)). Ondas 1 e 2 do
+[plano de análise](docs/PLANO_DE_ANALISE.md) concluídas, com fichas em [docs/studies](docs/studies/INDICE.md).
 ⏳ **Etapas 2 a 6: não iniciadas.** Ver [docs/PLANO.md](docs/PLANO.md).
 
-> **Atenção (13/10/2026):** os gráficos com banda de IC ou asterisco de significância em
-> `docs/img` ainda foram gerados com o erro-padrão antigo e serão regenerados depois da troca
-> da população de referência (lista em
-> [docs/auditoria/graficos_a_regenerar.md](docs/auditoria/graficos_a_regenerar.md)). As
-> estimativas pontuais não mudaram.
+> **Leitura principal (13/10/2026):** o hiato racial de renda caiu de 2012 a 2026, mas **em degrau** (−5 p.p. em
+> 2022), não em tendência contínua; desde 2022 ele está plano. Toda tendência do Hub usa erro-padrão robusto a
+> autocorrelação ([B1](docs/studies/B1/ficha.md)). Os gráficos de `docs/img` foram regenerados na Onda 1 com o
+> erro-padrão corrigido e a população de referência.
 
 ### Renda habitual do trabalho, por raça (2012–2026)
 
@@ -54,7 +53,8 @@ entre pessoas com o mesmo nível de instrução — ele se abre dramaticamente j
 
 Testado trimestre a trimestre a partir dos microdados, com erro-padrão que respeita o desenho
 amostral da PNAD Contínua (Estrato e UPA): os 58 trimestres da série são estatisticamente
-significativos (z entre 19,5 e 37,2) — o hiato caiu de 74,2% (2012 T1) para 65,7% (2026 T2). O
+significativos (z entre 19,5 e 37,2) — o hiato caiu de 74,2% (2012 T1) para 65,7% (2026 T2), quase todo num
+degrau depois da pandemia (2022), sem tendência contínua de queda ([B1](docs/studies/B1/ficha.md)). O
 hiato % é **relativo à renda média Negra** (Branca ganha ~66% a mais; Negra ganha ~60% da
 renda Branca). **População:** ocupados de 18+ com renda habitual do trabalho principal > 0 (desde a
 Onda 1, 13/10/2026); com todos os adultos (não ocupados = 0) o hiato fica maior, sobretudo entre
@@ -169,10 +169,10 @@ P58 da distribuição de Branca (pouco acima da mediana), mas no P77 da distribu
 ganha quem está em cada percentil —, os 10% mais pobres entre os brancos ganham R$1.500,
 contra R$766 entre os 10% mais pobres dos negros (2026 T2).
 
-**695 imagens em `docs/img`** (500 da árvore `arv_*` + 195 das demais análises, 8 da Onda 1 `onda1_*` e 8 da Onda 2 `onda2_*`; contagem de 13/10/2026, sem as séries de renda 14–17, que ficam fora das análises, e sem as 3 células da árvore sem amostra, suprimidas; a galeria
+**694 imagens em `docs/img`** (500 da árvore `arv_*` + 194 das demais análises, 8 da Onda 1 `onda1_*` e 8 da Onda 2 `onda2_*`; contagem de 13/10/2026, sem as séries de renda 14–17, que ficam fora das análises, e sem as 3 células da árvore sem amostra, suprimidas; a galeria
 narrada em `docs/ANALISE_FASE1.md` usa 87 delas). O deck em PPTX
-([docs/Datahub_Racial_Brasil_Fase1.pptx](docs/Datahub_Racial_Brasil_Fase1.pptx), 617
-slides; eram 657 até a Onda 1, que tirou as 37 folhas de renda 14–17, e 620 até as pendências da Onda 1, que
+([docs/Datahub_Racial_Brasil_Fase1.pptx](docs/Datahub_Racial_Brasil_Fase1.pptx), 635
+slides — abre com a leitura principal das Ondas 1 e 2 (18 slides); eram 657 até a Onda 1, que tirou as 37 folhas de renda 14–17, e 620 até as pendências da Onda 1, que
 suprimiram 3 folhas sem amostra) é organizado como uma **árvore cruzada** de renda por raça (Branca /
 Negra=Preta+Parda / Indígena): 11 itens — Raça; ×Gênero; ×Faixa Etária; ×Geração;
 ×Escolaridade; e os cruzamentos até Raça×Gênero×[Faixa|Geração]×Escolaridade. Cada folha de

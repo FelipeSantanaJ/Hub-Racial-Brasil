@@ -1,4 +1,5 @@
 """Deck final da Etapa 1 — junta:
+  0. Leitura principal das Ondas 1 e 2 (estudos com ficha em docs/studies) — `ONDAS`
   1. Árvore cruzada de renda por raça (itens 1-10) — `manifesto['arvore']`
   2. Topo 10% / base 10% / quartis com limiares Brasil / gênero / raça×gênero — `manifesto['extremos']`
   3. Ponteiro pra tabela de crescimento (arquivo à parte)
@@ -53,7 +54,7 @@ OUTRAS = [
     ("Região, segregação e quebras estruturais", None, [
         ("hiato_racial_por_regiao.png", "O hiato varia MUITO por região: 60–83% no Sudeste vs. 39–52% no Sul (2012–2026)."),
         ("segregacao_ocupacional.png", "Duncan: ~17% de um grupo precisaria trocar de categoria ocupacional pra igualar o outro."),
-        ("hiato_quebra_estrutural.png", "Teste tipo Chow: mudança de patamar/inclinação significativa nos 3 eventos testados."),
+        ("hiato_quebra_estrutural.png", "Teste tipo Chow com EP robusto (EWC): mudança significativa em 2 dos 3 eventos (a reforma da previdência não)."),
     ]),
     ("Novas variáveis da PNAD", "Informalidade, jornada, alfabetização, desalento.", [
         ("informalidade_carteira_assinada.png", "% com carteira (só CLT, entre empregados): Branca 72%, Negra 63%, Indígena 48% (2026 T2)."),
@@ -92,6 +93,55 @@ OUTRAS = [
 ]
 
 
+# ---- Leitura principal das Ondas 1 e 2 (decisão do Felipe, 13/10/2026: a queda do hiato é um degrau em 2022,
+# não uma tendência contínua). (título, nota, [(arquivo, legenda), ...]); fichas em docs/studies. ------------- #
+ONDAS = [
+    ("Como o hiato mudou no tempo (Onda 2, Bloco B)",
+     "Erro-padrão robusto a autocorrelação (EWC). Fichas B1–B6.", [
+        ("onda2_b1_degraus_hiato.png", "A queda de 2012–2026 é um degrau em 2022 (−5,0 p.p.; IC −6,8 a −3,1); sem tendência contínua, e plana desde 2022 (B1)."),
+        ("onda2_b6_projecao_condicional.png", "Projeção condicional: no ritmo de 2012–26, zero por volta de 2110 (2079–2231); no ritmo desde 2022, sem data (B6)."),
+        ("onda2_b3_hiato_quantis_janelas.png", "Na base (P10) o hiato aumentou (+0,08 lp); no salário mínimo caiu pouco; no topo (P90) não mudou (B3)."),
+        ("onda2_b4_efeitos_coorte.png", "Quem nasceu depois de 1990 tem hiato menor na mesma idade (25–34: 0,48 → 0,44 lp), sob restrição declarada (B4)."),
+     ]),
+    ("Quem fica de fora e a população inteira (Onda 1, Blocos S e T)", "Fichas S0–S1.5, T, T4.", [
+        ("onda1_s1_hiato_por_populacao.png", "Contando todos os adultos (quem não tem renda entra com zero), o hiato é maior, sobretudo entre mulheres (S1)."),
+        ("onda1_s14_margens_hiato.png", "Cerca de 9 em 10 partes do hiato por adulto vêm da renda por hora; entre mulheres, 15% vêm de estar menos ocupadas (S1.4)."),
+        ("onda1_s15_selecao_no_tempo.png", "A desvantagem negra em estar ocupado com renda cresceu na crise de 2015–19 e voltou ao nível de 2012 (S1.5)."),
+        ("onda1_t1_hiato_domiciliar_per_capita.png", "Renda domiciliar per capita: hiato de 99% (2012) para 82% (2025), população inteira (T1)."),
+        ("onda1_t2_pobreza_meio_sm.png", "Abaixo de ½ salário mínimo per capita: 29% das pessoas negras e 15% das brancas em 2025 (T2)."),
+        ("onda1_t4_topo_base_domiciliar.png", "Chance de estar entre os 10% mais ricos: ~1/4 da de pessoas brancas, sem mudança desde 2012 (T4)."),
+     ]),
+    ("Raça × gênero (Onda 2, Bloco C)", "Fichas C1–C6.", [
+        ("onda2_c1_celulas_pct_homem_branco.png", "Entre ocupados, mulheres negras ganham 47% do que ganham homens brancos; entre todos os adultos, 32% (C1)."),
+        ("onda2_c3_shapley_raca_genero.png", "Da distância homem branco − mulher negra entre ocupados, ~2/3 se associam a raça e ~1/3 a gênero (Shapley; C3)."),
+        ("onda2_c4_penalidade_maternidade.png", "Ter filho de 0–5 anos: −16 p.p. na chance de ocupação com renda para mães negras, −14 para brancas (C4)."),
+        ("onda2_c5_trabalho_domestico.png", "Trabalho doméstico: 14% das ocupadas negras, 8% das brancas — razão estável desde 2012 (C5)."),
+     ]),
+]
+
+
+FONTE_ANUAL = ("Fonte: IBGE, PNAD Contínua anual (Visita 1; Visita 5 em 2020–21) e trimestral. Renda domiciliar per "
+               "capita (VD5008). Elaboração própria.")
+
+
+def secao_ondas(prs, n):
+    A.slide_divisor(prs, "Leitura principal (Ondas 1 e 2)",
+                    "Estudos com ficha, hipóteses escritas antes de rodar e IC design-based (docs/studies).")
+    n += 1
+    for titulo, nota, imgs in ONDAS:
+        A.slide_subdivisor(prs, titulo)
+        n += 1
+        for arq, legenda in imgs:
+            if not (A.IMG_DIR / arq).exists():
+                continue
+            anual = arq.startswith(("onda1_t", "onda2_c3"))
+            _slide_outra(prs, {"tipo": "outra", "ramo": "—", "sub": titulo, "titulo": "", "subtitulo": nota or "",
+                               "arquivo": arq, "legenda": legenda,
+                               **({"fonte": FONTE_ANUAL} if anual else {})})
+            n += 1
+    return n
+
+
 def secao_extremos(prs, manifesto, n):
     for sec in manifesto.get("extremos", []):
         A.slide_divisor(prs, sec["titulo"],
@@ -127,7 +177,7 @@ def secao_aprofundamentos(prs, manifesto, n):
         A.slide_divisor(prs, sec["titulo"],
                         "Instabilidade de renda, retorno da escolaridade, "
                         "Capital×Interior, desocupação×escolaridade, formal×informal, salários mínimos, "
-                        "Oaxaca-Blinder ano a ano, dupla desvantagem, projeção de convergência.")
+                        "Oaxaca-Blinder ano a ano, dupla desvantagem, projeção condicional (B6).")
         n += 1
         for folha in sec["folhas"]:
             A.slide_grafico(prs, folha)
@@ -172,7 +222,7 @@ def _slide_outra(prs, folha):
         s.shapes.add_picture(str(caminho), Emu(int((A.LARGURA - w) / 2)), Inches(0.95), width=w, height=h)
     A._txt(s, Inches(0.7), Inches(6.75), Inches(11.9), Inches(0.5),
            folha["legenda"], 11.5, A.TINTA_SECUNDARIA, align=PP_ALIGN.CENTER, italic=True)
-    A._txt(s, Inches(0.55), Inches(7.16), Inches(9.0), Inches(0.3), A.FONTE_PADRAO, 8, A.TINTA_MUTED)
+    A._txt(s, Inches(0.55), Inches(7.16), Inches(9.0), Inches(0.3), folha.get("fonte", A.FONTE_PADRAO), 8, A.TINTA_MUTED)
 
 
 def main():
@@ -184,7 +234,7 @@ def main():
     A.slide_titulo(prs)
     A.slide_indice(prs, arvore)
 
-    n = 2
+    n = secao_ondas(prs, 2)
     for sec in arvore:
         n_val = sum(1 for f in sec["folhas"] if f["tipo"].startswith("valor"))
         n_hi = sum(1 for f in sec["folhas"] if f["tipo"].startswith("hiato"))
