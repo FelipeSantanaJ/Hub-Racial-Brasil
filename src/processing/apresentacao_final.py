@@ -35,9 +35,9 @@ OUTRAS = [
     #  série de hiato — com Indígena — nos itens 1-8.)
     ("É ocupação, ou é cor da pele? — decomposição do hiato",
      "Quanto idade, escolaridade e ocupação explicam do hiato Branca vs. Negra.", [
-        ("decomposicao_hiato_ocupacional.png", "Padronização direta: 67% bruto → 30% (+escolaridade) → 24% (+ocupação, residual). Ocupação sozinha: 33%."),
-        ("oaxaca_blinder_decomposicao.png", "Regressão (Oaxaca-Blinder) com teste de significância: resíduo +22% (p<0,001)."),
-        ("oaxaca_blinder_quantis.png", "O resíduo não é uniforme: ~15% na mediana, ~31% na base (piso pegajoso), ~36% no topo (teto de vidro)."),
+        ("decomposicao_hiato_ocupacional.png", "Padronização direta: 66% bruto → 31% (+escolaridade) → 25% (+ocupação, residual). Ocupação sozinha: 34%."),
+        ("oaxaca_blinder_decomposicao.png", "Regressão (Oaxaca-Blinder) com teste de significância: resíduo +23% (p<0,001; parte não associada às covariáveis, não é medida de discriminação)."),
+        ("oaxaca_blinder_quantis.png", "O resíduo não é uniforme: ~15% na mediana, ~35% na base (piso pegajoso), ~34% no topo (teto de vidro)."),
         ("renda_por_raca_ocupacao.png", "Dentro de CADA categoria ocupacional, Branca ganha mais que Negra."),
      ]),
     ("Raça × A × B — combinações com ocupação (pooled 8 trimestres)",
@@ -51,12 +51,12 @@ OUTRAS = [
         ("raca_escolaridade_ocupacao.png", "Mesmo nível de instrução E mesma ocupação — o hiato ainda aparece na maioria das células."),
      ]),
     ("Região, segregação e quebras estruturais", None, [
-        ("hiato_racial_por_regiao.png", "O hiato varia MUITO por região: ~65-85% no Sudeste vs. ~45-55% no Sul."),
+        ("hiato_racial_por_regiao.png", "O hiato varia MUITO por região: 60–83% no Sudeste vs. 39–52% no Sul (2012–2026)."),
         ("segregacao_ocupacional.png", "Duncan: ~17% de um grupo precisaria trocar de categoria ocupacional pra igualar o outro."),
         ("hiato_quebra_estrutural.png", "Teste tipo Chow: mudança de patamar/inclinação significativa nos 3 eventos testados."),
     ]),
     ("Novas variáveis da PNAD", "Informalidade, jornada, alfabetização, desalento.", [
-        ("informalidade_carteira_assinada.png", "% com carteira: Branca 72%, Negra 63%, Indígena 52% (2026 T2)."),
+        ("informalidade_carteira_assinada.png", "% com carteira (só CLT, entre empregados): Branca 72%, Negra 63%, Indígena 48% (2026 T2)."),
         ("renda_por_hora.png", "O hiato sobrevive quase intacto na renda POR HORA — não é jornada, é remuneração."),
         ("alfabetizacao_60mais.png", "60+ anos: Branca 93%, Negra 80%, Indígena 72% alfabetizados."),
         ("desalento.png", "Fora da força de trabalho, Negra e Indígena desistem de procurar emprego a taxas 2-4x a de Branca."),
@@ -64,15 +64,15 @@ OUTRAS = [
     ("Topo 10% — limiar DENTRO de cada raça (série histórica)",
      "Complementa a seção de topo 10% / base 10% / quartis (limiares Brasil / gênero / raça×gênero): aqui o P90 é calculado dentro de cada raça, 2012–2026.", [
         ("topo10_genero.png", "% de mulheres no topo 10% de cada raça."),
-        ("topo10_escolaridade.png", "% com Superior completo no topo 10% — negros 38%→58%, brancos ~83%."),
-        ("topo10_escolaridade_composicao.png", "Distribuição pelos 7 níveis — o topo negro tem mais Médio completo (23%) que o branco (10%)."),
+        ("topo10_escolaridade.png", "% com Superior completo no topo 10% — negros 37%→61%, brancos 84% (2012→2026)."),
+        ("topo10_escolaridade_composicao.png", "Distribuição pelos 7 níveis — o topo negro tem mais Médio completo (22%) que o branco (9%)."),
         ("topo10_faixa_etaria.png", "Composição por faixa etária do topo 10%."),
         ("topo10_geracao.png", "Composição por geração — topo negro pende a Millennial/Z; branco a Boomer/X."),
     ]),
     ("4 quartis — limiar DENTRO de cada raça (série histórica)",
      "Complementa a seção de topo 10% / base 10% / quartis: P25/P50/P75 dentro de cada raça, 2012–2026.", [
         ("quartis_genero.png", "% de mulheres por quartil — maioria entre as mais pobres nas duas raças."),
-        ("quartis_escolaridade.png", "% com Superior completo cresce em todo quartil, mas o hiato se abre no Q4 (~72% vs. ~40%)."),
+        ("quartis_escolaridade.png", "% com Superior completo cresce em todo quartil, mas o hiato se abre no Q4 (73% vs. 43%)."),
         ("quartis_escolaridade_composicao.png", "Distribuição pelos 7 níveis, um painel por quartil."),
         ("quartis_faixa_etaria.png", "Composição por faixa etária, um painel por quartil."),
         ("quartis_geracao.png", "Composição por geração, um painel por quartil."),
@@ -80,14 +80,14 @@ OUTRAS = [
     ("Desigualdade interna, setor público/privado, sobre-qualificação", None, [
         ("gini_por_raca.png", "Gini DENTRO de cada raça — Branca tem mais desigualdade interna (distribuição mais comprimida na base)."),
         ("theil_decomposicao.png", "Só ~7% da desigualdade total do Brasil vem de diferença ENTRE raças — 93% é dentro de cada uma."),
-        ("hiato_setor_publico_privado.png", "Hiato menor no Público (~45-50%) que no Privado (~58-65%)."),
+        ("hiato_setor_publico_privado.png", "Hiato menor no Público (mediana 48%) que no Privado (mediana 60%) em todos os trimestres."),
         ("segregacao_setorial.png", "Segregação por setor (10%) < por ocupação (17%)."),
         ("sobrequalificacao.png", "Negros com Superior completo em ocupação elementar: quase o dobro da taxa de brancos."),
     ]),
     ("A função quantil da renda em R$, e sua inversa", None, [
-        ("funcao_quantil_racial.png", "Em R$: P10 R$1.500 vs R$720; P50 R$3.000 vs R$2.000; P90 R$10.000 vs R$5.000."),
-        ("hiato_por_percentil.png", "O hiato bruto por percentil não é uniforme — maior na base (108% no P10) e no topo (100% no P90)."),
-        ("percentil_de_valor_racial.png", "R$3.000 = P57 entre brancos (meio), mas P76 entre negros (quase o topo)."),
+        ("funcao_quantil_racial.png", "Em R$: P10 R$1.500 vs R$766; P50 R$3.000 vs R$2.000; P90 R$10.000 vs R$5.000."),
+        ("hiato_por_percentil.png", "O hiato bruto por percentil não é uniforme — maior na base (96% no P10) e no topo (100% no P90)."),
+        ("percentil_de_valor_racial.png", "R$3.000 = P58 entre brancos (meio), mas P77 entre negros (quase o topo)."),
     ]),
 ]
 

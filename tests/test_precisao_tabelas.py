@@ -75,3 +75,11 @@ def test_n_renda_conta_so_quem_tem_renda(saidas):
     """R8: n_amostra conta todas as pessoas da célula; n_renda só o denominador da média."""
     df = saidas[0]["renda"]
     assert (df["n_renda"] < df["n_amostra"]).mean() > 0.5
+
+
+def test_peso_do_denominador(saidas):
+    """peso_<ind> = Σ pesos de quem entra no indicador: ≤ população da célula; 14–17 sem renda."""
+    df = saidas[0]["renda"]
+    assert (df["peso_renda"] <= df["populacao_estimada"] + 1e-6).all()
+    assert (df.loc[df["faixa_etaria"] == "14-17", "peso_renda"] == 0).all()
+    assert ((df["peso_renda"] > 0) == (df["n_renda"] > 0)).all()

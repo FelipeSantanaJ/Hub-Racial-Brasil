@@ -56,12 +56,13 @@ def cv_de_totais_upa(totais: pd.DataFrame, chaves: list[str], n_upas_estrato: pd
     n_upas_estrato:  `chaves_universo` + `estrato` + `n_h` (UPAs do estrato no universo).
     chaves_universo: subconjunto de `chaves` que define o universo (ex.: ano, trimestre);
                      [] quando o universo é um só (trimestres agrupados).
-    Devolve uma linha por célula: chaves, estimativa, ep, cv, n."""
+    Devolve uma linha por célula: chaves, estimativa, ep, cv, n e peso (Σ w no domínio — o peso
+    certo para combinar médias de células, ex.: Preta + Parda ou sexos juntos)."""
     if tipo not in ("media", "total"):
         raise ValueError("tipo deve ser 'media' ou 'total'")
     cu = list(chaves_universo or [])
     if totais.empty:
-        return pd.DataFrame(columns=[*chaves, "estimativa", "ep", "cv", "n"])
+        return pd.DataFrame(columns=[*chaves, "estimativa", "ep", "cv", "n", "peso"])
     t = totais.copy()
     t["_cel"] = t.groupby(chaves, dropna=False, sort=False).ngroup()
     cel = t.groupby("_cel", sort=True).agg(**{"B_tot": ("B", "sum"), "n": ("n", "sum")})
@@ -94,4 +95,5 @@ def cv_de_totais_upa(totais: pd.DataFrame, chaves: list[str], n_upas_estrato: pd
     cel.loc[cel["n"] < 2, "ep"] = np.nan  # como erro_padrao_media_design: sem variância com n < 2
     with np.errstate(invalid="ignore", divide="ignore"):
         cel["cv"] = np.where(cel["estimativa"] != 0, cel["ep"] / np.abs(cel["estimativa"]), np.nan)
-    return cel[[*chaves, "estimativa", "ep", "cv", "n"]].reset_index(drop=True)
+    cel["peso"] = cel["B_tot"]
+    return cel[[*chaves, "estimativa", "ep", "cv", "n", "peso"]].reset_index(drop=True)

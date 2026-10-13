@@ -37,17 +37,20 @@ ROT_NIV = g.NIVEIS_INSTRUCAO_ROTULO_CURTO
 NEG = {"Preta": "Negra", "Parda": "Negra"}
 
 
-def _mp(sub, val, w="populacao_estimada"):
-    if sub.empty or sub[w].sum() == 0:
+def _mp(sub, val, w=None):
+    """Média ponderada de células; sem `w`, usa o peso do denominador (`graficos_fase1.peso_para`)."""
+    if sub.empty:
         return np.nan
-    return float((sub[val] * sub[w]).sum() / sub[w].sum())
+    if w is None:
+        return g.media_ponderada_celulas(sub, val)
+    return float((sub[val] * sub[w]).sum() / sub[w].sum()) if sub[w].sum() else np.nan
 
 
 def _data(df):
     return pd.to_datetime(df["ano"].astype(str) + "-" + ((df["trimestre"] - 1) * 3 + 1).astype(str) + "-01")
 
 
-def _serie_por_raca_col(df, valcol, w="populacao_estimada", brasil=True):
+def _serie_por_raca_col(df, valcol, w=None, brasil=True):
     d = df.copy()
     if brasil and "nivel_geografico" in d.columns:
         d = d[d["nivel_geografico"] == "brasil"]
@@ -297,7 +300,7 @@ def construir() -> list[dict]:
 
     def _informal(r):
         gg = iv[iv["raca_cor"] == r]
-        return 100 - float((gg["pct_contribui_previdencia"] * gg["populacao_estimada"]).sum() / gg["populacao_estimada"].sum())
+        return 100 - g.media_ponderada_celulas(gg, "pct_contribui_previdencia")
 
     indic = [
         ("Desoc. Branca", 11.3, _desoc("Branca")),

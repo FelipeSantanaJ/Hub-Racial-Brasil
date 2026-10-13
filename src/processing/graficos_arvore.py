@@ -41,7 +41,7 @@ OUTPUT_DIR = g.OUTPUT_DIR
 PROCESSED = REPO_ROOT / "data" / "processed"
 MANIFESTO = REPO_ROOT / "docs" / "arvore_manifest.json"
 
-FONTE = "Fonte: IBGE, PNAD Contínua Trimestral (microdados). Elaboração própria."
+FONTE = "Fonte: IBGE, PNAD Contínua Trimestral (microdados). Renda (quando houver): habitual do trabalho principal, ocupados 18+ com renda > 0, a preços do último trimestre. Elaboração própria."
 RACAS_VALOR = ["Branca", "Negra", "Indígena"]
 CMP = [("Negra", "ne", g.COR_NEGRA), ("Indígena", "in", g.COR_INDIGENA)]
 NOTA_SERIE = "R$ reais, a preços do trimestre mais recente (deflator IBGE) · série 2012–2026"
@@ -438,7 +438,7 @@ def construir(itens: set, dados: dict) -> list[dict]:
     e345 = []
     if 3 in itens:
         e345.append((3, "Raça × Faixa Etária", renda, "faixa_etaria",
-                     [(fx, f"{fx} anos", _SLUG_FX[fx]) for fx in g.FAIXAS_ETARIAS_ORDEM], "faixa"))
+                     [(fx, f"{fx} anos", _SLUG_FX[fx]) for fx in g.FAIXAS_ETARIAS_RENDA], "faixa"))
     if 4 in itens:
         e345.append((4, "Raça × Geração", rg, "geracao",
                      [(ge, _ROT_GER[ge], g._slug(_ROT_GER[ge])) for ge in _GER], "geracao"))
@@ -467,7 +467,7 @@ def construir(itens: set, dados: dict) -> list[dict]:
     e678 = []
     if 6 in itens:
         e678.append((6, "Raça × Gênero × Faixa Etária", renda, "faixa_etaria",
-                     [(fx, f"{fx} anos", _SLUG_FX[fx]) for fx in g.FAIXAS_ETARIAS_ORDEM], "gfx", "sexo|faixa_etaria"))
+                     [(fx, f"{fx} anos", _SLUG_FX[fx]) for fx in g.FAIXAS_ETARIAS_RENDA], "gfx", "sexo|faixa_etaria"))
     if 7 in itens:
         e678.append((7, "Raça × Gênero × Geração", rg, "geracao",
                      [(ge, _ROT_GER[ge], g._slug(_ROT_GER[ge])) for ge in _GER], "gge", "sexo|geracao"))
@@ -500,7 +500,7 @@ def construir(itens: set, dados: dict) -> list[dict]:
     e910 = []
     if 9 in itens:
         e910.append((9, "Raça × Gênero × Faixa Etária × Escolaridade", rc, "faixa_etaria",
-                     [(fx, f"{fx} anos", _SLUG_FX[fx]) for fx in g.FAIXAS_ETARIAS_ORDEM],
+                     [(fx, f"{fx} anos", _SLUG_FX[fx]) for fx in g.FAIXAS_ETARIAS_RENDA],
                      "gfe", "sexo|faixa_etaria|nivel_instrucao"))
     if 10 in itens:
         e910.append((10, "Raça × Gênero × Geração × Escolaridade", rcg, "geracao",

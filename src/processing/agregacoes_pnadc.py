@@ -287,6 +287,7 @@ def _bool_sql(expr: str) -> str:
 
 
 IND_RENDA = IndicadorPrecisao("renda", "renda_habitual_real", "renda_habitual_real IS NOT NULL")
+IND_RENDA_EFETIVA = IndicadorPrecisao("renda_efetiva", "renda_efetiva_real", "renda_efetiva_real IS NOT NULL")
 NIVEL_BRASIL = [NIVEIS_GEOGRAFICOS[0]]
 RACA_NEGRA_SQL = "CASE WHEN raca_cor IN ('Preta','Parda') THEN 'Negra' ELSE raca_cor END"
 
@@ -335,7 +336,8 @@ def _precisao_celulas(con: duckdb.DuckDBPyConnection, indicadores: list[Indicado
                 if ind.y_sql:
                     t = t.rename(columns={f"A_{i}": "A"})
                 r = precisao.cv_de_totais_upa(t, cel_chaves, n_h, tipo="media" if ind.y_sql else "total")
-                r = r[[*cel_chaves, "n", "cv"]].rename(columns={"n": f"n_{ind.nome}", "cv": f"cv_{ind.nome}"})
+                r = r[[*cel_chaves, "n", "cv", "peso"]].rename(
+                    columns={"n": f"n_{ind.nome}", "cv": f"cv_{ind.nome}", "peso": f"peso_{ind.nome}"})
                 res = r if res is None else res.merge(r, on=cel_chaves, how="outer")
             res.insert(0, "nivel_geografico", nivel)
             if per:
@@ -345,16 +347,19 @@ def _precisao_celulas(con: duckdb.DuckDBPyConnection, indicadores: list[Indicado
 
 
 def _anexar_precisao(df: pd.DataFrame, prec: pd.DataFrame, indicadores: list[IndicadorPrecisao]) -> pd.DataFrame:
-    """Junta n/cv à tabela e aplica a regra (`precisao.publicavel`). `publicavel` (sem
+    """Junta n/cv/peso à tabela e aplica a regra (`precisao.publicavel`). `peso_<ind>` (Σ pesos
+    no denominador do indicador) é o peso para combinar células — NÃO `populacao_estimada`, que
+    conta a célula inteira (quem não entra no indicador também). `publicavel` (sem
     sufixo) é o do PRIMEIRO indicador da lista, o principal da tabela. Célula sem ninguém
     no denominador: n = 0, CV indefinido, não publicável. Nenhum valor é apagado."""
-    chaves = [c for c in prec.columns if c in df.columns and not c.startswith(("n_", "cv_"))]
+    chaves = [c for c in prec.columns if c in df.columns and not c.startswith(("n_", "cv_", "peso_"))]
     for c in ("ano", "trimestre"):
         if c in chaves:
             prec[c] = prec[c].astype(df[c].dtype)
     out = df.merge(prec, on=chaves, how="left", validate="one_to_one")
     for ind in indicadores:
         out[f"n_{ind.nome}"] = out[f"n_{ind.nome}"].fillna(0).astype("int64")
+        out[f"peso_{ind.nome}"] = out[f"peso_{ind.nome}"].fillna(0.0)
         out[f"publicavel_{ind.nome}"] = precisao.publicavel(out[f"n_{ind.nome}"], out[f"cv_{ind.nome}"])
     out["publicavel"] = out[f"publicavel_{indicadores[0].nome}"]
     return out
@@ -382,7 +387,7 @@ def gerar_renda(con: duckdb.DuckDBPyConnection) -> None:
                / NULLIF(SUM(peso) FILTER (WHERE renda_efetiva_real IS NOT NULL), 0)
                AS renda_efetiva_real_media"""
     df = _agregar_por_geografia(con, select_agregado)
-    inds = [IND_RENDA]
+    inds = [IND_RENDA, IND_RENDA_EFETIVA]
     df = _anexar_precisao(df, _precisao_celulas(con, inds, _chaves("raca_cor", "sexo", "faixa_etaria")), inds)
     destino = OUTPUT_DIR / "renda.parquet"
     salvar_tabela(df, destino, regra_supressao=precisao.REGRA_SUPRESSAO)
@@ -406,7 +411,7 @@ def gerar_renda_por_escolaridade(con: duckdb.DuckDBPyConnection) -> None:
         con, select_agregado, group_by_extra="nivel_instrucao", incluir_faixa_etaria=False
     )
     df = df[df["nivel_instrucao"].notna()]
-    inds = [IND_RENDA]
+    inds = [IND_RENDA, IND_RENDA_EFETIVA]
     df = _anexar_precisao(df, _precisao_celulas(con, inds, _chaves("raca_cor", "sexo", "nivel_instrucao")), inds)
     destino = OUTPUT_DIR / "renda_por_escolaridade.parquet"
     salvar_tabela(df, destino, regra_supressao=precisao.REGRA_SUPRESSAO)
