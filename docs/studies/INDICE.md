@@ -21,6 +21,7 @@ de publicação. Estudos entram aqui quando a ficha é criada, não quando o res
 | S1.5 | A seleção mudou no tempo (recessão, pandemia)? | D | 1 | Aprovado com ressalvas (proposto) | [S1.5/ficha.md](S1.5/ficha.md) | Onda 1, pendências |
 | B1 | Tendência 2012–2026 do hiato (EP robusto a autocorrelação, degraus) | D | 2 | Aprovado com ressalvas (proposto) | [B1/ficha.md](B1/ficha.md) | Onda 2 |
 | B5 | Ciclo × tendência do hiato (desocupação) | D | 2 | Aprovado com ressalvas (proposto) | [B5/ficha.md](B5/ficha.md) | Onda 2 |
+| B6 | Projeção condicional do ano de paridade (premissas explícitas) | D | 2 | Aprovado com ressalvas (proposto) | [B6/ficha.md](B6/ficha.md) | Onda 2 |
 
 O que já existe no Hub e a qual pergunta corresponde está em
 [`docs/auditoria/mapa_cobertura_plano.md`](../auditoria/mapa_cobertura_plano.md).

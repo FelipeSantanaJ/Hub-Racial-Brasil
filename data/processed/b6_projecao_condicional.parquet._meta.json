@@ -1,0 +1,20 @@
+{
+  "esquema": "hub-racial-meta/1",
+  "arquivo": "b6_projecao_condicional.parquet",
+  "n_linhas": 11,
+  "gerado_em": "2026-10-13T18:34:54.720052+00:00",
+  "codigo": {
+    "commit": "22180a1eb4cdf93dfb4cb5f3eb5bf534686271be-modificado",
+    "modulo": "__main__"
+  },
+  "insumos": {
+    "chave": "derivado",
+    "descricao": "Outras tabelas de data/processed",
+    "hash": null,
+    "n_arquivos": 0
+  },
+  "se_metodo": "ewc_lazarus_lewis_stock_watson; sensibilidades newey_west e gls_ar1",
+  "populacao": "Saída do B1 (tendência do hiato); projeção condicional",
+  "periodo": null,
+  "aviso": "Projeção CONDICIONAL: 'se o ritmo for X'. Não é previsão; só a incerteza do ritmo passado."
+}
