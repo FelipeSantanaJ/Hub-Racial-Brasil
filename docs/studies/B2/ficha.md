@@ -6,7 +6,7 @@
 | Onda | 2 |
 | Responsável | Felipe Santana (execução: Claude Code) |
 | Criada em / atualizada em | 2026-10-13 / 2026-10-13 |
-| Estado de publicação | **Aprovado com ressalvas** (proposto) |
+| Estado de publicação | **Aprovado com ressalvas** (aprovado pelo Felipe em 13/10/2026) |
 | PR | `onda2/b-c` |
 
 > Seções 1–9 escritas **antes** de rodar (13/10/2026).
@@ -129,3 +129,4 @@ metade da convergência. H4 confirmada: a parte não associada às covariáveis 
 | Data | Quem | O que mudou |
 |---|---|---|
 | 2026-10-13 | Claude Code | criação (seções 1–9 antes de rodar) |
+| 2026-10-13 | Felipe Santana | aprovada com ressalvas |

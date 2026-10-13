@@ -14,22 +14,22 @@ de publicação. Estudos entram aqui quando a ficha é criada, não quando o res
 | S1 | O hiato muda com a população (P1–P5)? | D | 1 | Aprovado com ressalvas | [S1/ficha.md](S1/ficha.md) | Onda 1 |
 | T | População inteira: renda domiciliar per capita, pobreza, fontes (T1–T3) | D | 1 | Aprovado com ressalvas | [T/ficha.md](T/ficha.md) | Onda 1, parte 2 |
 | A | A diferença existe? De quanto é? (A2–A7) | D | 1 | Aprovado com ressalvas | [A/ficha.md](A/ficha.md) | Onda 1, parte 2 |
-| T4 | Quem está em cada décimo de renda domiciliar per capita | D | 1 | Aprovado com ressalvas (proposto) | [T4/ficha.md](T4/ficha.md) | Onda 1, pendências |
-| S0.3 | Quem está fora de P1 é diferente entre os grupos? (perfis) | D | 1 | Aprovado com ressalvas (proposto) | [S0.3/ficha.md](S0.3/ficha.md) | Onda 1, pendências |
-| S1.4 | Margem extensiva × intensiva × renda por hora | C | 1 | Aprovado com ressalvas (proposto) | [S1.4/ficha.md](S1.4/ficha.md) | Onda 1, pendências |
-| S1.3 | Limites do hiato sob suposições sobre quem não é observado | C | 1 | Aprovado com ressalvas (proposto) | [S1.3/ficha.md](S1.3/ficha.md) | Onda 1, pendências |
-| S1.5 | A seleção mudou no tempo (recessão, pandemia)? | D | 1 | Aprovado com ressalvas (proposto) | [S1.5/ficha.md](S1.5/ficha.md) | Onda 1, pendências |
-| B1 | Tendência 2012–2026 do hiato (EP robusto a autocorrelação, degraus) | D | 2 | Aprovado com ressalvas (proposto) | [B1/ficha.md](B1/ficha.md) | Onda 2 |
-| B5 | Ciclo × tendência do hiato (desocupação) | D | 2 | Aprovado com ressalvas (proposto) | [B5/ficha.md](B5/ficha.md) | Onda 2 |
-| B6 | Projeção condicional do ano de paridade (premissas explícitas) | D | 2 | Aprovado com ressalvas (proposto) | [B6/ficha.md](B6/ficha.md) | Onda 2 |
-| B3 | Convergência por quantil (P10…P90) | D | 2 | Aprovado com ressalvas (proposto) | [B3/ficha.md](B3/ficha.md) | Onda 2 |
-| B4 | Coortes: mesma idade e idade-período-coorte (Deaton-Paxson) | D/C | 2 | Aprovado com ressalvas (proposto) | [B4/ficha.md](B4/ficha.md) | Onda 2 |
-| B2 | Mudança do hiato no tempo: reclassificação, composição e retornos (JMP) | C | 2 | Aprovado com ressalvas (proposto) | [B2/ficha.md](B2/ficha.md) | Onda 2 |
-| C1 | Células raça × sexo: ranking, hiatos, quantis, Theil (P1, P4, domiciliar) | D | 2 | Aprovado com ressalvas (proposto) | [C1/ficha.md](C1/ficha.md) | Onda 2 |
-| C2 | Interação raça × gênero (DiD e β3 com EP design-based) | D/C | 2 | Aprovado com ressalvas (proposto) | [C2/ficha.md](C2/ficha.md) | Onda 2 |
-| C3 | Shapley raça × gênero da distância homem branco − mulher negra | C | 2 | Aprovado com ressalvas (proposto) | [C3/ficha.md](C3/ficha.md) | Onda 2 |
-| C5 | Trabalho doméstico remunerado e o hiato das mulheres | D/C | 2 | Aprovado com ressalvas (proposto) | [C5/ficha.md](C5/ficha.md) | Onda 2 |
-| C4 | Penalidade da maternidade por raça (filho 0–5 no domicílio) | C/D | 2 | Aprovado com ressalvas (proposto) | [C4/ficha.md](C4/ficha.md) | Onda 2 |
+| T4 | Quem está em cada décimo de renda domiciliar per capita | D | 1 | Aprovado com ressalvas | [T4/ficha.md](T4/ficha.md) | Onda 1, pendências |
+| S0.3 | Quem está fora de P1 é diferente entre os grupos? (perfis) | D | 1 | Aprovado com ressalvas | [S0.3/ficha.md](S0.3/ficha.md) | Onda 1, pendências |
+| S1.4 | Margem extensiva × intensiva × renda por hora | C | 1 | Aprovado com ressalvas | [S1.4/ficha.md](S1.4/ficha.md) | Onda 1, pendências |
+| S1.3 | Limites do hiato sob suposições sobre quem não é observado | C | 1 | Aprovado com ressalvas | [S1.3/ficha.md](S1.3/ficha.md) | Onda 1, pendências |
+| S1.5 | A seleção mudou no tempo (recessão, pandemia)? | D | 1 | Aprovado com ressalvas | [S1.5/ficha.md](S1.5/ficha.md) | Onda 1, pendências |
+| B1 | Tendência 2012–2026 do hiato (EP robusto a autocorrelação, degraus) | D | 2 | Aprovado com ressalvas | [B1/ficha.md](B1/ficha.md) | Onda 2 |
+| B5 | Ciclo × tendência do hiato (desocupação) | D | 2 | Aprovado com ressalvas | [B5/ficha.md](B5/ficha.md) | Onda 2 |
+| B6 | Projeção condicional do ano de paridade (premissas explícitas) | D | 2 | Aprovado com ressalvas | [B6/ficha.md](B6/ficha.md) | Onda 2 |
+| B3 | Convergência por quantil (P10…P90) | D | 2 | Aprovado com ressalvas | [B3/ficha.md](B3/ficha.md) | Onda 2 |
+| B4 | Coortes: mesma idade e idade-período-coorte (Deaton-Paxson) | D/C | 2 | Aprovado com ressalvas | [B4/ficha.md](B4/ficha.md) | Onda 2 |
+| B2 | Mudança do hiato no tempo: reclassificação, composição e retornos (JMP) | C | 2 | Aprovado com ressalvas | [B2/ficha.md](B2/ficha.md) | Onda 2 |
+| C1 | Células raça × sexo: ranking, hiatos, quantis, Theil (P1, P4, domiciliar) | D | 2 | Aprovado com ressalvas | [C1/ficha.md](C1/ficha.md) | Onda 2 |
+| C2 | Interação raça × gênero (DiD e β3 com EP design-based) | D/C | 2 | Aprovado com ressalvas | [C2/ficha.md](C2/ficha.md) | Onda 2 |
+| C3 | Shapley raça × gênero da distância homem branco − mulher negra | C | 2 | Aprovado com ressalvas | [C3/ficha.md](C3/ficha.md) | Onda 2 |
+| C5 | Trabalho doméstico remunerado e o hiato das mulheres | D/C | 2 | Aprovado com ressalvas | [C5/ficha.md](C5/ficha.md) | Onda 2 |
+| C4 | Penalidade da maternidade por raça (filho 0–5 no domicílio) | C/D | 2 | Aprovado com ressalvas | [C4/ficha.md](C4/ficha.md) | Onda 2 |
 
 O que já existe no Hub e a qual pergunta corresponde está em
 [`docs/auditoria/mapa_cobertura_plano.md`](../auditoria/mapa_cobertura_plano.md).
