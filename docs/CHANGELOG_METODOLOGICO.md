@@ -5,6 +5,29 @@ calculá-lo: data, o quê, por quê, impacto. Mais recente primeiro.
 
 ---
 
+## 13/10/2026 — Pendências da Onda 1 (branch `onda1/pendencias`)
+
+- **Estudos novos** (fichas com hipóteses escritas antes de rodar; `src/processing/bloco_s.py`, `bloco_t.py`):
+  S0.3 (perfis de quem está fora de P1), S1.3 (limites do hiato; sem Heckman), S1.4 (Pr(P1) × horas × renda por
+  hora), S1.5 (seleção no tempo, por episódio) e T4 (décimos de renda domiciliar per capita). Nenhum número já
+  publicado muda.
+- **Tendência com autocorrelação (`src/inference/tendencia.py`, base do B1 da Onda 2).** Por simulação, Newey-West
+  com defasagem 4 cobre só ≈ 78% (nominal 95%) com AR(1) de 0,7 em 58 trimestres. Adotado o EWC (cossenos com pesos
+  iguais, t com ν = 5 g.l.; ≈ 89% no mesmo cenário), com Newey-West e GLS AR(1) reportados ao lado; "tendência
+  confiável" só quando os três excluem zero. Nenhum método é confiável com ρ ≥ 0,9.
+- **R11 (gráficos):** a banda de IC do hiato % (`hiato_racial_percentual.png`, `hiato_preta_parda_percentual.png`)
+  passa a usar o método delta (`a2_metricas_hiato`; nova `a2_metricas_hiato_preta_parda`), em vez do IC absoluto ÷
+  média do grupo. Diferença pequena (≈ 0,1 p.p. no limite em 2026), mas o método antigo ignorava o denominador.
+- **F4:** o % de rendas em múltiplos de R$ 1.000 dobrou (17% → 40%) por **composição nominal** (+29,5 p.p.), não
+  por mais arredondamento (−7,3 p.p. dentro de faixas fixas): `heaping_renda_faixas`.
+- **F6:** todos os gráficos de série marcam recessão 2015–16 (hachura), pandemia / telefone 2020–21 (faixa) e o
+  questionário de educação de 4T2015 (linha pontilhada) — `graficos_fase1.marcar_quebras`.
+- **Árvore:** células sem dado publicável não geram mais imagem vazia ("Amostra insuficiente"); o gráfico e a folha
+  do deck são suprimidos (3 casos: mulheres sem instrução, hiato vs. Indígena/Negra).
+- **Linhas de pobreza em PPC (T2):** seguem pendentes (exigem baixar o fator de PPC; sem autorização do Felipe).
+
+---
+
 ## 13/10/2026 — Decisões do Felipe sobre a Onda 1 (branch `onda1/pendencias`)
 
 - Fichas F, S0, S1, T e A **aprovadas com ressalvas** (deixam de ser "proposto").

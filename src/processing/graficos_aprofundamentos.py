@@ -28,7 +28,7 @@ import pandas as pd
 
 from src.processing import graficos_fase1 as g
 from src.processing.graficos_arvore import (
-    _salvar, _placeholder, _estilo, _fmt_reais, _fig_serie, MANIFESTO, PROCESSED, FONTE,
+    _salvar, _placeholder, _estilo, _fmt_reais, _fig_serie, MANIFESTO, PROCESSED, FONTE, so_folhas_com_imagem,
 )
 
 CORES_RACA = g.CORES_RACA
@@ -330,7 +330,7 @@ def construir() -> list[dict]:
                     "apr_validacao_ibge.png",
                     "Reproduzimos os números oficiais dentro de ~1-3 p.p. — diferenças cabem em universo/definição (a 'informalidade' do IBGE é um composto mais amplo). O hiato de renda Branca vs. Preta em 2021 dá ~70% no nosso pipeline (Branca vs. Negra combinada) vs. 76% do IBGE (Branca vs. Preta só) — Preta ganha menos que Parda, daí a diferença."))
 
-    return [{"item": "APR", "titulo": "Aprofundamentos", "folhas": f}]
+    return so_folhas_com_imagem([{"item": "APR", "titulo": "Aprofundamentos", "folhas": f}])
 
 
 def main():

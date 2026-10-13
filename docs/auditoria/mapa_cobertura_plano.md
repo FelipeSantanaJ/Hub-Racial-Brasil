@@ -21,7 +21,8 @@ referência (18+, `VD4016`), com supressão (`n_*`, `cv_*`, `publicavel`), repar
 limiares de quantil e carteira só CLT. O motivo `pop` das linhas abaixo **deixa de valer**: onde ele era
 o único motivo, a linha passa a "Já existe" na leitura do Ponto de parada da Onda 1; os outros motivos
 (`ic`, `esp`, `ser`, `met`) continuam. Estudos novos da Onda 1: F (definições), S0, S1 — ver
-`docs/studies/INDICE.md`. T1–T3 e A2–A7 **ainda não** foram feitos.
+`docs/studies/INDICE.md`. T1–T3 e A2–A7 entraram na parte 2 (PR #7); S0.3, S1.3–S1.5, T4 e as pendências
+técnicas (R11, F4, F6, imagens vazias da árvore) nas pendências da Onda 1 (`onda1/pendencias`).
 
 ## Bloco F — Fundações
 
@@ -30,9 +31,9 @@ o único motivo, a linha passa a "Já existe" na leitura do Ponto de parada da O
 | F1 | Novo | Composição declarada 2012–2026 e efeito composição × renda: nada | — |
 | F2 | Existe, precisa refazer | `VD4016` e `VD4019` na base; prévia do hiato sob os dois conceitos no CHANGELOG (13/10/2026). Falta a tabela de sensibilidade com IC (todas as fontes, por hora, domiciliar per capita) | `met` |
 | F3 | Existe, precisa refazer | `src/utils/populacao.py` (definição e flags 18+/14+); falta a tabela de sensibilidade de população | `met` |
-| F4 | Novo | Heaping, subdeclaração, topo: nada | — |
+| F4 | Já existe (parcial) | `heaping_renda`, `heaping_renda_faixas` (o heaping dobrou por composição nominal; shift-share). Subdeclaração e topo: não feito | `met` (topo) |
 | F5 | Já existe | `src/inference/` (linearização Estrato/UPA, Rao-Wu, FDR); `checagem_robustez_hiato_racial`. Réplicas não usadas por decisão | — |
-| F6 | Existe, precisa refazer | `quebra_estrutural` (3 eventos, OLS i.i.d.); sem marcação de 4T2015 (educação), 2020–21 (telefone), reponderação | `esp` |
+| F6 | Existe, precisa refazer | Marcas de 4T2015, recessão 2015–16 e 2020–21 em todos os gráficos de série (`graficos_fase1.marcar_quebras`, pendências da Onda 1). Falta: `quebra_estrutural` com EP robusto (B1/B5, Onda 2) | `esp` |
 
 ## Bloco A — A diferença existe? De quanto?
 
@@ -74,12 +75,12 @@ o único motivo, a linha passa a "Já existe" na leitura do Ponto de parada da O
 |---|---|---|---|
 | S0.1 | Já existe | `composicao_populacao_referencia` | — |
 | S0.2 | Já existe | `selecao_entrada_populacao_referencia` (efeito marginal com EP design-based) | — |
-| S0.3 | Novo | Perfis de quem fica de fora: nada | — |
+| S0.3 | Já existe | `s03_perfil_fora_populacao_referencia` (ficha `S0.3`) | — |
 | S1.1 | Já existe | `sensibilidade_hiato_populacao` (P1–P4) e `sensibilidade_hiato_p5_anual` | — |
 | S1.2 | Já existe | Idem, por sexo | — |
-| S1.3 | Novo | Limites de Manski/Lee: nada | — |
-| S1.4 | Novo | Margem intensiva × extensiva: nada | — |
-| S1.5 | Novo | Seleção no tempo: nada | — |
+| S1.3 | Já existe | `s13_limites_hiato` (Manski, seleção positiva, piso, aparamento à la Lee; IC de Imbens–Manski) | — |
+| S1.4 | Já existe | `s14_margens_intensiva_extensiva` | — |
+| S1.5 | Já existe | `s15_selecao_no_tempo`, `s15_selecao_episodios` (EP EWC) | — |
 
 ## Bloco T — População inteira
 
@@ -88,7 +89,7 @@ o único motivo, a linha passa a "Já existe" na leitura do Ponto de parada da O
 | T1 | Já existe | `t1_renda_domiciliar_per_capita` (por raça da pessoa e raça × sexo do responsável) | — |
 | T2 | Já existe | `t2_pobreza` (FGT 0/1/2; ¼ SM, ½ SM, 50% da mediana). Linhas em PPC pendentes | `met` (PPC) |
 | T3 | Já existe | `t3_fontes_de_renda` (2016+) | — |
-| T4 | Novo | Décimos de renda domiciliar per capita: nada | — |
+| T4 | Já existe | `t4_decimos_renda_domiciliar` | — |
 | T5 | Já existe | S1 (P1 × P5) e ficha T | — |
 
 ## Bloco D — Por que a diferença existe? (decomposição)

@@ -74,7 +74,10 @@ mediana 1,005 na Fase 1; na regeneração da Onda 1, 0,973 e 0,979 em 2026T1 e 2
 
 Marcar nos gráficos e testar sensibilidade: 4T2015 (questionário de educação), 2020–21 (coleta por telefone;
 Visita 5 no anual), recessão 2015–16, reponderação pela projeção pós-Censo 2022 (o extrato já está reponderado,
-Rodada 2). **Pendente:** marcas nos gráficos e testes de sensibilidade.
+Rodada 2). **Marcas feitas** (13/10/2026, `graficos_fase1.marcar_quebras`): hachura na recessão 2015–16, faixa cinza
+em 2020–21 e linha pontilhada em 4T2015, em todos os gráficos de série (Fase 1, árvore, Onda 1). **Sensibilidade:**
+o S1.5 compara a seleção por episódio; a separação ciclo × tendência do hiato é o B5 (Onda 2). A reponderação não tem
+marca própria (o extrato inteiro já está na projeção nova; não há série "antes" para comparar).
 
 ## Afirmações proibidas (todas as tabelas)
 

@@ -1824,15 +1824,6 @@
         {
           "tipo": "hiato_serie",
           "ramo": "Mulheres",
-          "sub": "Mulheres · Sem instrução · hiato vs. Indígena",
-          "titulo": "Hiato de renda — Mulheres · Sem instrução — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
-          "arquivo": "arv_ges_mulheres_sem_instrucao_hiato_serie_in.png",
-          "legenda": "Hiato de renda Branca vs. Indígena — Mulheres · Sem instrução — 2012–2026 (Welch)."
-        },
-        {
-          "tipo": "hiato_serie",
-          "ramo": "Mulheres",
           "sub": "Mulheres · Fundamental incompl. · hiato vs. Negra",
           "titulo": "Hiato de renda — Mulheres · Fundamental incompl. — Branca vs. Negra — Brasil",
           "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre",
@@ -2222,15 +2213,6 @@
           "subtitulo": "R$ reais, a preços do trimestre mais recente (deflator IBGE) · série 2012–2026",
           "arquivo": "arv_gfe_mulheres_18_24_sem_instrucao_serie.png",
           "legenda": "Renda média real por raça — Mulheres, 18-24 anos, Sem instrução — série histórica."
-        },
-        {
-          "tipo": "hiato_serie",
-          "ramo": "Mulheres · 18-24 anos",
-          "sub": "Mulheres · 18-24 anos · Sem instrução · hiato",
-          "titulo": "Hiato de renda — Mulheres, 18-24 anos, Sem instrução — Branca vs. Negra — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · (Indígena por célula sem amostra — ver heatmaps do item)",
-          "arquivo": "arv_gfe_mulheres_18_24_sem_instrucao_hiato_serie.png",
-          "legenda": "Hiato Branca vs. Negra — Mulheres, 18-24 anos, Sem instrução — 2012–2026 (Welch)."
         },
         {
           "tipo": "valor_serie",
@@ -3650,15 +3632,6 @@
           "subtitulo": "R$ reais, a preços do trimestre mais recente (deflator IBGE) · série 2012–2026",
           "arquivo": "arv_gge2_mulheres_geracao_z_sem_instrucao_serie.png",
           "legenda": "Renda média real por raça — Mulheres, Geração Z, Sem instrução — série histórica."
-        },
-        {
-          "tipo": "hiato_serie",
-          "ramo": "Mulheres · Geração Z",
-          "sub": "Mulheres · Geração Z · Sem instrução · hiato",
-          "titulo": "Hiato de renda — Mulheres, Geração Z, Sem instrução — Branca vs. Negra — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · (Indígena por célula sem amostra — ver heatmaps do item)",
-          "arquivo": "arv_gge2_mulheres_geracao_z_sem_instrucao_hiato_serie.png",
-          "legenda": "Hiato Branca vs. Negra — Mulheres, Geração Z, Sem instrução — 2012–2026 (Welch)."
         },
         {
           "tipo": "valor_serie",

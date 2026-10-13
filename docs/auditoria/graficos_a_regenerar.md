@@ -2,8 +2,8 @@
 
 > **Atualização (13/10/2026, Onda 1): todas as imagens de `docs/img` e os decks foram regenerados** com o
 > EP corrigido, a população de referência e a ponderação corrigida das médias. Pendências que continuam:
-> IC do hiato % ainda divide o IC absoluto pela média Negra (R11); legendas de Oaxaca-Blinder e quebra
-> estrutural (Onda 3 / R6); 3 imagens da árvore já vazias antes (células de mulheres sem instrução).
+> legendas de Oaxaca-Blinder e quebra estrutural (Onda 3 / R6). **Resolvidos nas pendências da Onda 1:** R11 (IC
+> do hiato % por método delta), as 3 imagens vazias da árvore (suprimidas) e as marcas de quebra de série (F6).
 > O texto abaixo é o registro histórico da Fase 1.
 
 **Estado: nenhum gráfico foi regenerado na Fase 1** (instrução do prompt). As imagens em

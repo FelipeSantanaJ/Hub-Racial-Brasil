@@ -64,13 +64,19 @@ def _salvar(fig, nome) -> Path:
 _salvar_bare = _salvar  # compat: graficos_extremos.py importa este nome
 
 
-def _placeholder(nome, msg="Amostra insuficiente para este corte") -> Path:
-    fig, ax = plt.subplots(figsize=(8, 4.0), dpi=150)
-    fig.patch.set_facecolor(g.SUPERFICIE)
-    ax.set_facecolor(g.SUPERFICIE)
-    ax.axis("off")
-    ax.text(0.5, 0.5, msg, ha="center", va="center", fontsize=13, color=g.TINTA_MUTED)
-    return _salvar(fig, nome)
+def _placeholder(nome, msg="Amostra insuficiente para este corte") -> None:
+    """Célula sem dado publicável: o gráfico é SUPRIMIDO (nenhuma imagem; uma antiga com o mesmo
+    nome é apagada) e a folha sai do manifesto em `so_folhas_com_imagem`. Antes gravava uma imagem
+    vazia com `msg` (3 casos: mulheres sem instrução)."""
+    (OUTPUT_DIR / nome).unlink(missing_ok=True)
+    return None
+
+
+def so_folhas_com_imagem(secoes: list[dict]) -> list[dict]:
+    """Tira do manifesto as folhas cuja imagem foi suprimida (`_placeholder`)."""
+    for s in secoes:
+        s["folhas"] = [f for f in s["folhas"] if (OUTPUT_DIR / f["arquivo"]).exists()]
+    return secoes
 
 
 def _estilo(ax):
@@ -91,7 +97,7 @@ def _fig_serie(serie: pd.DataFrame, cores: dict, nome, pct=False, cruza_zero=Fal
     fig, ax = plt.subplots(figsize=(11, 4.7), dpi=150)
     fig.patch.set_facecolor(g.SUPERFICIE)
     _estilo(ax)
-    ax.axvspan(pd.Timestamp("2020-01-01"), pd.Timestamp("2021-12-31"), color=g.GRADE, alpha=0.6, zorder=0)
+    g.marcar_quebras(ax)
     vmax = np.nanmax(serie.to_numpy(dtype=float))
     vmin = np.nanmin(serie.to_numpy(dtype=float))
     span = (vmax - vmin) or 1
@@ -136,7 +142,7 @@ def _fig_serie_multipanel(paineis: dict[str, pd.DataFrame], cores: dict, nome, p
     vmax, vmin = np.nanmax(todos.to_numpy(dtype=float)), np.nanmin(todos.to_numpy(dtype=float))
     for ax, (tp, serie) in zip(axes, paineis.items()):
         _estilo(ax)
-        ax.axvspan(pd.Timestamp("2020-01-01"), pd.Timestamp("2021-12-31"), color=g.GRADE, alpha=0.6, zorder=0)
+        g.marcar_quebras(ax, rotulos=False)
         if vmin < 0:
             ax.axhline(0, color=g.EIXO, linewidth=1)
         for c in serie.columns:
@@ -582,7 +588,7 @@ def construir(itens: set, dados: dict) -> list[dict]:
                             f"Hiato Branca vs. {cmp_} por geração e escolaridade, ambos os gêneros — {qq}."))
         secoes.append({"item": 11, "titulo": "Raça × Geração × Escolaridade (ambos os gêneros)", "folhas": f})
 
-    return secoes
+    return so_folhas_com_imagem(secoes)
 
 
 def _carregar():
