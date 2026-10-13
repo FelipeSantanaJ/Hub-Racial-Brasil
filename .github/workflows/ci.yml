@@ -17,5 +17,5 @@ jobs:
           cache-dependency-path: requirements.lock
       - name: Instalar dependências (versões travadas)
         run: pip install -r requirements.lock
-      - name: Testes (sem microdados: só dados sintéticos)
+      - name: "Testes (sem microdados; só dados sintéticos)"
         run: python -m pytest -q
