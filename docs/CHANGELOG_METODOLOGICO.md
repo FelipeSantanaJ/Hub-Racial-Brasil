@@ -5,6 +5,43 @@ calculá-lo: data, o quê, por quê, impacto. Mais recente primeiro.
 
 ---
 
+## 13/10/2026 — Etapa 2, Fase 2 (branch `auditoria/fase2-infra`)
+
+### População e renda de referência em código (Bloco F) — **implementado, NÃO regenerado**
+
+- **O quê.** `src/utils/populacao.py` define, num só lugar, a renda de referência (**habitual do
+  trabalho principal, `VD4016`**, deflator habitual do IBGE) e a população de referência
+  (**ocupados de 18+ com `VD4016` > 0**; 14+ como sensibilidade). A `CRIAR_BASE` ganha
+  `renda_referencia_nominal/real`, `em_populacao_referencia` e `em_populacao_referencia_14mais`.
+  Passam a usar essa definição: `hiato_racial`, `gini_por_raca`, `theil_racial`, os três
+  `decomposicao_oaxaca_blinder*` e `checagem_robustez_hiato`. Gini e Theil ficam na mesma
+  população (fecha E3/R1). As demais tabelas seguem no recorte histórico (14+, `VD4019`) e estão
+  marcadas no catálogo e no mapa de cobertura.
+- **Por quê.** Decisões de 12/10/2026 (`docs/PLANO_DE_ANALISE.md`, Bloco F; Ponto de parada 0).
+- **Impacto previsto** (prévia só de pontos, sem regenerar; hiato % Branca–Negra nacional, 58
+  trimestres): cai em média **1,36 p.p.** (de −2,52 a +0,02); a maior parte vem do conceito de renda
+  (todos os trabalhos → trabalho principal: −1,18 p.p. em média, ainda com 14+); a idade 18+ soma o
+  resto. Ex.: 2012T1 75,8% → 74,3%; 2026T2 66,2% → 65,7%. A nova população mantém 97,4–99,2% da
+  população ponderada atual. **Os números publicados mudam na próxima regeneração**, que vem com
+  relatório antes × depois e a ficha do Bloco F.
+- **Golden-file regerado (intencional):** no sintético, o hiato passou de 31,9%/22,6% para
+  32,7%/24,0% (18+ e `VD4016`).
+
+### Proveniência padronizada
+
+- `_meta.json` no esquema `hub-racial-meta/1` ao lado de **todos** os 101 parquets: commit e
+  módulo, hash do manifesto dos insumos, `se_metodo`, população (catálogo
+  `src/utils/catalogo_tabelas.py`), período, família do FDR. Para as tabelas atuais o meta foi
+  preenchido retroativamente (`meta_retroativo: true`); o pipeline passa a gravá-lo sozinho.
+
+### Outros (sem impacto numérico)
+
+- Licenças (MIT código; CC BY 4.0 dados derivados e textos), README (contagem de imagens corrigida:
+  721 em `docs/img`, 89 na galeria, e não 134), `conteudo/` marcado como *superseded*, modelo de
+  ficha de estudo (`docs/studies/`), mapa de cobertura do plano.
+
+---
+
 ## 12/10/2026 — Etapa 2 da auditoria, Fase 1 (branch `auditoria/fase1-p0`)
 
 Origem: `docs/auditoria/rodada1.md` (E1–E5, R3, R7) e decisões do Ponto de parada 0

@@ -13,6 +13,8 @@ from __future__ import annotations
 
 import re
 
+from src.utils import populacao as pop
+
 
 # --- descrições reutilizadas -------------------------------------------------------------
 RENDA_TODOS_14 = ("Ocupados de 14+ anos com rendimento habitual de qualquer trabalho (VD4019) "
@@ -30,6 +32,17 @@ INSUMO_DERIVADO = "derivado"  # lido de outro parquet de data/processed
 
 # (regex do nome do arquivo, população, insumo). Primeiro padrão que casar vale.
 CATALOGO: list[tuple[str, str, str]] = [
+    # --- migradas para a população/renda de referência (Fase 2; valem a partir da próxima regeneração)
+    (r"^(hiato_racial|checagem_robustez_hiato_racial)$",
+     pop.DESCRICAO_POPULACAO_REFERENCIA + "; renda: " + pop.DESCRICAO_RENDA_REFERENCIA + "; Branca × Negra (Preta+Parda)",
+     INSUMO_TRIMESTRAL_V1),
+    (r"^(gini_por_raca|theil_racial)$",
+     pop.DESCRICAO_POPULACAO_REFERENCIA + "; renda: " + pop.DESCRICAO_RENDA_REFERENCIA
+     + "; Branca, Negra e Indígena (Amarela e Ignorado fora)", INSUMO_TRIMESTRAL_V1),
+    (r"^decomposicao_oaxaca_blinder.*$",
+     pop.DESCRICAO_POPULACAO_REFERENCIA + " e ocupação informada; log de " + pop.DESCRICAO_RENDA_REFERENCIA,
+     INSUMO_TRIMESTRAL_V1),
+    # --- ainda no recorte histórico (14+, VD4019) ---
     (r"^checagem_robustez_hiato_racial$", RENDA_TODOS_14 + "; Branca × Negra (Preta+Parda)", INSUMO_TRIMESTRAL_V1),
     (r"^(hiato_racial|hiato_regional|hiato_setor_publico_privado|hiato_capital_interior|hiato_formal_informal|hiato_por_geracao)$",
      RENDA_TODOS_14 + "; Branca × Negra (Preta+Parda)", INSUMO_TRIMESTRAL_V1),

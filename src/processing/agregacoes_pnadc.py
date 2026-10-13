@@ -35,6 +35,7 @@ import statsmodels.formula.api as smf
 
 from src.inference.saida import salvar_com_inferencia, salvar_tabela
 from src.utils import pnadc_core
+from src.utils import populacao as pop
 
 # Inferência que NÃO passa pelo EP corrigido no B1 (12/10/2026) — registrada no _meta.json.
 SE_METODO_WLS_CLUSTER = "wls_statsmodels_cluster_upa"  # Oaxaca-Blinder (coeficiente restrito)
@@ -135,6 +136,7 @@ CREATE TEMP TABLE base AS
         -- de referência (ver src/ingestion/baixar_deflator.py) — não divide.
         m.VD4019 * d.deflator_habitual AS renda_habitual_real,
         m.VD4020 * d.deflator_efetivo AS renda_efetiva_real,
+{pop.sql_colunas_criar_base()}
         -- posição na ocupação com carteira assinada: só definida p/ empregados
         -- (privado/doméstico/público) e militar/estatutário (sempre "protegido"); NULL
         -- p/ empregador, conta-própria e familiar auxiliar (o conceito não se aplica).
@@ -481,17 +483,17 @@ def gerar_decomposicao_oaxaca_blinder(con: duckdb.DuckDBPyConnection, n_trimestr
     """
     micro = con.execute(f"""
         SELECT raca_cor, faixa_etaria, nivel_instrucao, grupamento_ocupacional,
-               renda_habitual_real, peso, upa
+               renda_referencia_real, peso, upa
         FROM base
         WHERE raca_cor IN ('Branca', 'Preta', 'Parda')
           AND grupamento_ocupacional IS NOT NULL
-          AND renda_habitual_real IS NOT NULL AND renda_habitual_real > 0
+          AND {pop.filtro_sql()}
           AND (ano, trimestre) IN (
               SELECT ano, trimestre FROM (SELECT DISTINCT ano, trimestre FROM base ORDER BY ano DESC, trimestre DESC LIMIT {n_trimestres})
           )
     """).df()
     micro["raca_cor"] = micro["raca_cor"].replace({"Preta": "Negra", "Parda": "Negra"})
-    micro["log_renda"] = np.log(micro["renda_habitual_real"])
+    micro["log_renda"] = np.log(micro["renda_referencia_real"])
 
     resultados = []
     # "grupamento_ocupacional" sozinho, no final, é uma comparação ISOLADA (sem idade/
@@ -542,16 +544,16 @@ def gerar_decomposicao_oaxaca_blinder_indigena(con: duckdb.DuckDBPyConnection, n
     já usado pra Preta/Parda, sem precisar agregar mais."""
     micro = con.execute(f"""
         SELECT raca_cor, faixa_etaria, nivel_instrucao, grupamento_ocupacional,
-               renda_habitual_real, peso, upa
+               renda_referencia_real, peso, upa
         FROM base
         WHERE raca_cor IN ('Branca', 'Indígena')
           AND grupamento_ocupacional IS NOT NULL
-          AND renda_habitual_real IS NOT NULL AND renda_habitual_real > 0
+          AND {pop.filtro_sql()}
           AND (ano, trimestre) IN (
               SELECT ano, trimestre FROM (SELECT DISTINCT ano, trimestre FROM base ORDER BY ano DESC, trimestre DESC LIMIT {n_trimestres})
           )
     """).df()
-    micro["log_renda"] = np.log(micro["renda_habitual_real"])
+    micro["log_renda"] = np.log(micro["renda_referencia_real"])
 
     resultados = []
     for controles in [["faixa_etaria"], ["faixa_etaria", "nivel_instrucao"],
@@ -598,16 +600,16 @@ def gerar_decomposicao_oaxaca_blinder_preta_parda(con: duckdb.DuckDBPyConnection
     não haver duas convenções de sinal diferentes pro mesmo par de grupos."""
     micro = con.execute(f"""
         SELECT raca_cor, faixa_etaria, nivel_instrucao, grupamento_ocupacional,
-               renda_habitual_real, peso, upa
+               renda_referencia_real, peso, upa
         FROM base
         WHERE raca_cor IN ('Preta', 'Parda')
           AND grupamento_ocupacional IS NOT NULL
-          AND renda_habitual_real IS NOT NULL AND renda_habitual_real > 0
+          AND {pop.filtro_sql()}
           AND (ano, trimestre) IN (
               SELECT ano, trimestre FROM (SELECT DISTINCT ano, trimestre FROM base ORDER BY ano DESC, trimestre DESC LIMIT {n_trimestres})
           )
     """).df()
-    micro["log_renda"] = np.log(micro["renda_habitual_real"])
+    micro["log_renda"] = np.log(micro["renda_referencia_real"])
 
     resultados = []
     for controles in [["faixa_etaria"], ["faixa_etaria", "nivel_instrucao"],
@@ -1977,18 +1979,18 @@ def gerar_hiato_racial(con: duckdb.DuckDBPyConnection) -> None:
     for _, row in trimestres.iterrows():
         ano, trimestre = int(row["ano"]), int(row["trimestre"])
         micro = con.execute(f"""
-            SELECT raca_cor, renda_habitual_real, peso, upa, estrato
+            SELECT raca_cor, renda_referencia_real, peso, upa, estrato
             FROM base
             WHERE ano = {ano} AND trimestre = {trimestre}
               AND raca_cor IN ('Branca', 'Preta', 'Parda')
-              AND renda_habitual_real IS NOT NULL
+              AND {pop.filtro_sql()}
         """).df()
         if micro.empty:
             continue
         micro["raca_cor"] = micro["raca_cor"].replace({"Preta": "Negra", "Parda": "Negra"})
 
         tabela = pnadc_core.tabela_hiatos_significancia(
-            micro, "renda_habitual_real", "raca_cor", grupo_referencia="Negra", peso="peso", upa="upa", estrato="estrato"
+            micro, "renda_referencia_real", "raca_cor", grupo_referencia="Negra", peso="peso", upa="upa", estrato="estrato"
         )
         if "Branca" not in tabela.index:
             continue
@@ -2347,16 +2349,16 @@ def gerar_gini_por_raca(con: duckdb.DuckDBPyConnection) -> None:
     for _, row in trimestres.iterrows():
         ano, trimestre = int(row["ano"]), int(row["trimestre"])
         micro = con.execute(f"""
-            SELECT raca_cor, renda_habitual_real, peso, upa, estrato
+            SELECT raca_cor, renda_referencia_real, peso, upa, estrato
             FROM base
             WHERE ano = {ano} AND trimestre = {trimestre}
               AND raca_cor IN ('Branca', 'Preta', 'Parda', 'Indígena')
-              AND renda_habitual_real IS NOT NULL AND renda_habitual_real > 0
+              AND {pop.filtro_sql()}
         """).df()
         if micro.empty:
             continue
         micro["raca_cor"] = micro["raca_cor"].replace({"Preta": "Negra", "Parda": "Negra"})
-        gini = pnadc_core.gini_ponderado_por_grupo(micro, "renda_habitual_real", by=["raca_cor"], peso="peso")
+        gini = pnadc_core.gini_ponderado_por_grupo(micro, "renda_referencia_real", by=["raca_cor"], peso="peso")
         gini["ano"] = ano
         gini["trimestre"] = trimestre
         resultados.append(gini)
@@ -2384,16 +2386,16 @@ def gerar_theil_racial(con: duckdb.DuckDBPyConnection, n_trimestres: int | None 
     for _, row in trimestres.iterrows():
         ano, trimestre = int(row["ano"]), int(row["trimestre"])
         micro = con.execute(f"""
-            SELECT raca_cor, renda_habitual_real, peso, upa, estrato
+            SELECT raca_cor, renda_referencia_real, peso, upa, estrato
             FROM base
             WHERE ano = {ano} AND trimestre = {trimestre}
               AND raca_cor IN ('Branca', 'Preta', 'Parda', 'Indígena')
-              AND renda_habitual_real IS NOT NULL AND renda_habitual_real > 0
+              AND {pop.filtro_sql()}
         """).df()
         if micro.empty:
             continue
         micro["raca_cor"] = micro["raca_cor"].replace({"Preta": "Negra", "Parda": "Negra"})
-        resumo, _ = pnadc_core.decomposicao_theil_entre_dentro(micro, "renda_habitual_real", "raca_cor", "peso")
+        resumo, _ = pnadc_core.decomposicao_theil_entre_dentro(micro, "renda_referencia_real", "raca_cor", "peso")
         resumo["ano"] = ano
         resumo["trimestre"] = trimestre
         resultados.append(resumo)
