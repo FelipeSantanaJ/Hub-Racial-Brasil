@@ -1,0 +1,4850 @@
+{
+  "gerado_em": "2026-10-13T02:23:38.816090+00:00",
+  "commit": "63563e36b3efcc1c0d17fbd99fbb643f34b0677f",
+  "pandas": "3.0.5",
+  "n_parquets": 101,
+  "parquets": [
+    {
+      "arquivo": "data/processed/alfabetizacao.parquet",
+      "linhas": 3344,
+      "colunas": [
+        {
+          "nome": "nivel_geografico",
+          "tipo": "str"
+        },
+        {
+          "nome": "geografia",
+          "tipo": "str"
+        },
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "raca_cor",
+          "tipo": "str"
+        },
+        {
+          "nome": "sexo",
+          "tipo": "str"
+        },
+        {
+          "nome": "faixa_etaria",
+          "tipo": "str"
+        },
+        {
+          "nome": "n_amostra",
+          "tipo": "int64"
+        },
+        {
+          "nome": "populacao_estimada",
+          "tipo": "float64"
+        },
+        {
+          "nome": "pct_alfabetizado",
+          "tipo": "float64"
+        }
+      ],
+      "sha256_arquivo": "97371b2df7a6eaea9e1c3cc3e4281ee13a4ba5b193f833dc1a369ac1b851c976",
+      "hash_conteudo": "8940c7b6749e26f64f84267323c56eba2806caf5214f3db369b0577319ef1b40",
+      "modificado_em": "2026-09-13T17:47:18.575582+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/checagem_robustez_hiato_racial.parquet",
+      "linhas": 58,
+      "colunas": [
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "hiato_absoluto",
+          "tipo": "float64"
+        },
+        {
+          "nome": "ep_peso_apenas",
+          "tipo": "float64"
+        },
+        {
+          "nome": "ep_cluster_bootstrap",
+          "tipo": "float64"
+        },
+        {
+          "nome": "p_valor_cluster_bootstrap",
+          "tipo": "float64"
+        },
+        {
+          "nome": "significativo_cluster_bootstrap",
+          "tipo": "bool"
+        },
+        {
+          "nome": "p_valor_peso_apenas",
+          "tipo": "float64"
+        },
+        {
+          "nome": "significativo_peso_apenas",
+          "tipo": "bool"
+        },
+        {
+          "nome": "razao_ep_cluster_sobre_peso",
+          "tipo": "float64"
+        }
+      ],
+      "sha256_arquivo": "e6cab2575dd0d083bd4fae12cf691482fd5aaaffbfedac42012683c42e890fc0",
+      "hash_conteudo": "ea0f117dbe0856f9e1af256b0272ba3632f5eb01d994b2d187eaa08ca9cb96e2",
+      "modificado_em": "2026-09-13T16:29:34.924592+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/decomposicao_hiato_ocupacional.parquet",
+      "linhas": 5,
+      "colunas": [
+        {
+          "nome": "controles",
+          "tipo": "str"
+        },
+        {
+          "nome": "media_branca_ajustada",
+          "tipo": "float64"
+        },
+        {
+          "nome": "media_negra",
+          "tipo": "float64"
+        },
+        {
+          "nome": "n_branca",
+          "tipo": "int64"
+        },
+        {
+          "nome": "n_negra",
+          "tipo": "int64"
+        },
+        {
+          "nome": "pct_amostra_negra_incluida",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_absoluto",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_percentual",
+          "tipo": "float64"
+        }
+      ],
+      "sha256_arquivo": "83d87b3d31d1df872876c3d58f01746fe3e3184329d163ec59ca92740e470416",
+      "hash_conteudo": "917f8ca9a255275a2271488ca4b13813384872de7f479988ab9082d1a60f4262",
+      "modificado_em": "2026-09-13T17:15:12.995927+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/decomposicao_oaxaca_blinder.parquet",
+      "linhas": 7,
+      "colunas": [
+        {
+          "nome": "hiato_total",
+          "tipo": "float64"
+        },
+        {
+          "nome": "parcela_explicada",
+          "tipo": "float64"
+        },
+        {
+          "nome": "parcela_nao_explicada",
+          "tipo": "float64"
+        },
+        {
+          "nome": "pct_explicada",
+          "tipo": "float64"
+        },
+        {
+          "nome": "pct_nao_explicada",
+          "tipo": "float64"
+        },
+        {
+          "nome": "residuo_restrito_coef",
+          "tipo": "float64"
+        },
+        {
+          "nome": "residuo_restrito_erro_padrao",
+          "tipo": "float64"
+        },
+        {
+          "nome": "residuo_restrito_p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "residuo_restrito_significativo",
+          "tipo": "bool"
+        },
+        {
+          "nome": "n_favorecido",
+          "tipo": "int64"
+        },
+        {
+          "nome": "n_desfavorecido",
+          "tipo": "int64"
+        },
+        {
+          "nome": "controles",
+          "tipo": "str"
+        },
+        {
+          "nome": "ponto",
+          "tipo": "str"
+        }
+      ],
+      "sha256_arquivo": "a0fdff26f8966707b4a8cc2a4e27c43658b8c9629740283fc1b10a59134211c9",
+      "hash_conteudo": "a697af6279b9e122bbaaf3436ec1b372674e8db6f20da1aab569e1189d4ed571",
+      "modificado_em": "2026-09-13T17:38:00.738159+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/decomposicao_oaxaca_blinder_indigena.parquet",
+      "linhas": 7,
+      "colunas": [
+        {
+          "nome": "hiato_total",
+          "tipo": "float64"
+        },
+        {
+          "nome": "parcela_explicada",
+          "tipo": "float64"
+        },
+        {
+          "nome": "parcela_nao_explicada",
+          "tipo": "float64"
+        },
+        {
+          "nome": "pct_explicada",
+          "tipo": "float64"
+        },
+        {
+          "nome": "pct_nao_explicada",
+          "tipo": "float64"
+        },
+        {
+          "nome": "residuo_restrito_coef",
+          "tipo": "float64"
+        },
+        {
+          "nome": "residuo_restrito_erro_padrao",
+          "tipo": "float64"
+        },
+        {
+          "nome": "residuo_restrito_p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "residuo_restrito_significativo",
+          "tipo": "bool"
+        },
+        {
+          "nome": "n_favorecido",
+          "tipo": "int64"
+        },
+        {
+          "nome": "n_desfavorecido",
+          "tipo": "int64"
+        },
+        {
+          "nome": "controles",
+          "tipo": "str"
+        },
+        {
+          "nome": "ponto",
+          "tipo": "str"
+        }
+      ],
+      "sha256_arquivo": "d420047e3fb318b20925fd1a236a0c07fbb794c77b5d38fe36f04f8f2dc3c89a",
+      "hash_conteudo": "c3d7d6beabb08d4d53f0df5190ada629069d2e103be3b83820c13d94a15e5f36",
+      "modificado_em": "2026-09-13T17:39:29.591942+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/decomposicao_oaxaca_blinder_pretaparda.parquet",
+      "linhas": 7,
+      "colunas": [
+        {
+          "nome": "hiato_total",
+          "tipo": "float64"
+        },
+        {
+          "nome": "parcela_explicada",
+          "tipo": "float64"
+        },
+        {
+          "nome": "parcela_nao_explicada",
+          "tipo": "float64"
+        },
+        {
+          "nome": "pct_explicada",
+          "tipo": "float64"
+        },
+        {
+          "nome": "pct_nao_explicada",
+          "tipo": "float64"
+        },
+        {
+          "nome": "residuo_restrito_coef",
+          "tipo": "float64"
+        },
+        {
+          "nome": "residuo_restrito_erro_padrao",
+          "tipo": "float64"
+        },
+        {
+          "nome": "residuo_restrito_p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "residuo_restrito_significativo",
+          "tipo": "bool"
+        },
+        {
+          "nome": "n_favorecido",
+          "tipo": "int64"
+        },
+        {
+          "nome": "n_desfavorecido",
+          "tipo": "int64"
+        },
+        {
+          "nome": "controles",
+          "tipo": "str"
+        },
+        {
+          "nome": "ponto",
+          "tipo": "str"
+        }
+      ],
+      "sha256_arquivo": "0b934a9c644d03e3d519262e4a67fcda8779ef681ac57784b979375686c11ab8",
+      "hash_conteudo": "2eca115413ed2c258cb7539205943b210a946944d14e260ea5503e3c469b7cf7",
+      "modificado_em": "2026-09-13T17:42:31.652596+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/decomposicao_raca_genero.parquet",
+      "linhas": 522,
+      "colunas": [
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "combinacao",
+          "tipo": "str"
+        },
+        {
+          "nome": "sexo",
+          "tipo": "str"
+        },
+        {
+          "nome": "raca_cor",
+          "tipo": "str"
+        },
+        {
+          "nome": "renda_homem_branco",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_alvo",
+          "tipo": "float64"
+        },
+        {
+          "nome": "gap_total",
+          "tipo": "float64"
+        },
+        {
+          "nome": "efeito_raca",
+          "tipo": "float64"
+        },
+        {
+          "nome": "efeito_genero",
+          "tipo": "float64"
+        },
+        {
+          "nome": "interacao",
+          "tipo": "float64"
+        },
+        {
+          "nome": "p_valor_gap_total",
+          "tipo": "float64"
+        }
+      ],
+      "sha256_arquivo": "e7c1fcd635ce526f9097a5d01930fb4da52a05075625efd9cd5de695c21e4923",
+      "hash_conteudo": "62d4a5eb0807c161cfea7351bd13139300cccc0702ff0c8821ec49a1d9fb2ee8",
+      "modificado_em": "2026-09-13T17:34:06.103149+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/deflator_ibge.parquet",
+      "linhas": 1566,
+      "colunas": [
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "UF",
+          "tipo": "str"
+        },
+        {
+          "nome": "deflator_habitual",
+          "tipo": "float64"
+        },
+        {
+          "nome": "deflator_efetivo",
+          "tipo": "float64"
+        }
+      ],
+      "sha256_arquivo": "191f03f800947f31fe8be70033bd7d063506f820f9d9e7ad9962225841d8c3c9",
+      "hash_conteudo": "b0f0be33031de26f9f5a867e6446a0671f097218369dfe8d9023dd8049e0caad",
+      "modificado_em": "2026-09-04T20:02:00.122413+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/desalento_subutilizacao.parquet",
+      "linhas": 105969,
+      "colunas": [
+        {
+          "nome": "nivel_geografico",
+          "tipo": "str"
+        },
+        {
+          "nome": "geografia",
+          "tipo": "str"
+        },
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "raca_cor",
+          "tipo": "str"
+        },
+        {
+          "nome": "sexo",
+          "tipo": "str"
+        },
+        {
+          "nome": "faixa_etaria",
+          "tipo": "str"
+        },
+        {
+          "nome": "populacao_estimada",
+          "tipo": "float64"
+        },
+        {
+          "nome": "pop_fora_forca_trabalho",
+          "tipo": "float64"
+        },
+        {
+          "nome": "pct_forca_trabalho_potencial",
+          "tipo": "float64"
+        },
+        {
+          "nome": "pct_desalento",
+          "tipo": "float64"
+        }
+      ],
+      "sha256_arquivo": "94454abdc648f91884d3b2c48e222230799b08ca6f689841b839a16e1a6076fc",
+      "hash_conteudo": "306c201337f10c373383b128870a0f821661863ec5c7646f6479a9035f405c4b",
+      "modificado_em": "2026-09-13T17:47:23.076884+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/desocupacao_por_escolaridade.parquet",
+      "linhas": 1218,
+      "colunas": [
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "raca_cor",
+          "tipo": "str"
+        },
+        {
+          "nome": "nivel_instrucao",
+          "tipo": "str"
+        },
+        {
+          "nome": "pop_desocupados",
+          "tipo": "float64"
+        },
+        {
+          "nome": "pop_forca",
+          "tipo": "float64"
+        },
+        {
+          "nome": "n_amostra",
+          "tipo": "int64"
+        },
+        {
+          "nome": "taxa_desocupacao_pct",
+          "tipo": "float64"
+        }
+      ],
+      "sha256_arquivo": "7a620c13c22165edf9f4eaf340ce9102c48ebbf8bbc0c7c86efca32b2fabbf27",
+      "hash_conteudo": "90dfb1c2435f072e1fb0efff02e3883287c16a18e67d4562c2b35abdbfa5e61b",
+      "modificado_em": "2026-09-13T17:15:21.566312+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/did_cotas_servico_publico.parquet",
+      "linhas": 5,
+      "colunas": [
+        {
+          "nome": "tendencia_pre_coef",
+          "tipo": "float64"
+        },
+        {
+          "nome": "tendencia_pre_p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "tendencias_paralelas_sustentadas",
+          "tipo": "bool"
+        },
+        {
+          "nome": "did_coef",
+          "tipo": "float64"
+        },
+        {
+          "nome": "did_p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "n_trimestres_pre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "n_trimestres_pos",
+          "tipo": "int64"
+        },
+        {
+          "nome": "raca_cor",
+          "tipo": "str"
+        },
+        {
+          "nome": "outcome",
+          "tipo": "str"
+        },
+        {
+          "nome": "nota",
+          "tipo": "str"
+        }
+      ],
+      "sha256_arquivo": "633a83bc1408f159e52c8d54e18467da7d7c6e72e351a1b06fdcb56e7f666438",
+      "hash_conteudo": "79e02b6f28ec8995d0ffe5c6e2881c661e337c086830f21b1de7eb956f0a479c",
+      "modificado_em": "2026-09-14T00:11:14.784069+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/did_cotas_servico_publico_curvas.parquet",
+      "linhas": 115,
+      "colunas": [
+        {
+          "nome": "relative_quarter",
+          "tipo": "int64"
+        },
+        {
+          "nome": "coef",
+          "tipo": "float64"
+        },
+        {
+          "nome": "se",
+          "tipo": "float64"
+        },
+        {
+          "nome": "ic_inferior",
+          "tipo": "float64"
+        },
+        {
+          "nome": "ic_superior",
+          "tipo": "float64"
+        },
+        {
+          "nome": "n_publico",
+          "tipo": "int64"
+        },
+        {
+          "nome": "n_privado",
+          "tipo": "int64"
+        },
+        {
+          "nome": "raca_cor",
+          "tipo": "str"
+        },
+        {
+          "nome": "outcome",
+          "tipo": "str"
+        }
+      ],
+      "sha256_arquivo": "245b2f4d201102e019507d90029e79d8e46e09d04a3ec72586406f959a4d0fdd",
+      "hash_conteudo": "c694be1b8731ba5a20d56a024f68030d554c908c3bb8c40e7a9be0291984e1cf",
+      "modificado_em": "2026-09-14T00:11:14.778834+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/did_cotas_servico_publico_heterogeneidade.parquet",
+      "linhas": 35,
+      "colunas": [
+        {
+          "nome": "tendencia_pre_coef",
+          "tipo": "float64"
+        },
+        {
+          "nome": "tendencia_pre_p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "tendencias_paralelas_sustentadas",
+          "tipo": "bool"
+        },
+        {
+          "nome": "did_coef",
+          "tipo": "float64"
+        },
+        {
+          "nome": "did_p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "n_trimestres_pre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "n_trimestres_pos",
+          "tipo": "int64"
+        },
+        {
+          "nome": "raca_cor",
+          "tipo": "str"
+        },
+        {
+          "nome": "outcome",
+          "tipo": "str"
+        },
+        {
+          "nome": "nota",
+          "tipo": "str"
+        },
+        {
+          "nome": "estrato_tipo",
+          "tipo": "str"
+        },
+        {
+          "nome": "estrato",
+          "tipo": "str"
+        }
+      ],
+      "sha256_arquivo": "0e9399c43f15dc5f8ec34472d8eb9147e4623000bba1c97bab67e93e6c898513",
+      "hash_conteudo": "aa0c756e3e781b80bce9cfcc2e57b7d6ef23b890e17dcf1c7b5ad92b6bdef0c3",
+      "modificado_em": "2026-09-14T00:13:24.814152+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/did_cotas_servico_publico_heterogeneidade_curvas.parquet",
+      "linhas": 805,
+      "colunas": [
+        {
+          "nome": "relative_quarter",
+          "tipo": "int64"
+        },
+        {
+          "nome": "coef",
+          "tipo": "float64"
+        },
+        {
+          "nome": "se",
+          "tipo": "float64"
+        },
+        {
+          "nome": "ic_inferior",
+          "tipo": "float64"
+        },
+        {
+          "nome": "ic_superior",
+          "tipo": "float64"
+        },
+        {
+          "nome": "n_publico",
+          "tipo": "int64"
+        },
+        {
+          "nome": "n_privado",
+          "tipo": "int64"
+        },
+        {
+          "nome": "raca_cor",
+          "tipo": "str"
+        },
+        {
+          "nome": "outcome",
+          "tipo": "str"
+        },
+        {
+          "nome": "estrato_tipo",
+          "tipo": "str"
+        },
+        {
+          "nome": "estrato",
+          "tipo": "str"
+        }
+      ],
+      "sha256_arquivo": "f2a8f63a2b93952cc2552cee7eb7bf45e49337eac4f4fc05fc7d42f231a0a40d",
+      "hash_conteudo": "11c7056de3d2e1ab0b999ba5e81fc84b5a88637c7b4a983092e5d75566780026",
+      "modificado_em": "2026-09-14T00:13:24.807392+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/did_cotas_universitarias.parquet",
+      "linhas": 8,
+      "colunas": [
+        {
+          "nome": "raca_tratado",
+          "tipo": "str"
+        },
+        {
+          "nome": "ano_lei",
+          "tipo": "int64"
+        },
+        {
+          "nome": "limiar_nascimento",
+          "tipo": "int64"
+        },
+        {
+          "nome": "n_coortes_pre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "tendencia_pre_coef",
+          "tipo": "float64"
+        },
+        {
+          "nome": "tendencia_pre_p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "tendencias_paralelas_sustentadas",
+          "tipo": "object"
+        },
+        {
+          "nome": "tipo",
+          "tipo": "str"
+        },
+        {
+          "nome": "n_coortes_pos",
+          "tipo": "float64"
+        },
+        {
+          "nome": "did_nivel_coef",
+          "tipo": "float64"
+        },
+        {
+          "nome": "did_nivel_p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "did_rampa_coef",
+          "tipo": "float64"
+        },
+        {
+          "nome": "did_rampa_p_valor",
+          "tipo": "float64"
+        }
+      ],
+      "sha256_arquivo": "971153749d5c5149e60c44ae4aee65e85d335d9021801390e34faaf85eb41865",
+      "hash_conteudo": "6beb7a092bac7a99973bd08b464c5df7ecd5571fe58430ebe8ae5b0913db53eb",
+      "modificado_em": "2026-09-14T00:07:11.119589+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/did_cotas_universitarias_heterogeneidade.parquet",
+      "linhas": 40,
+      "colunas": [
+        {
+          "nome": "raca_tratado",
+          "tipo": "str"
+        },
+        {
+          "nome": "ano_lei",
+          "tipo": "int64"
+        },
+        {
+          "nome": "limiar_nascimento",
+          "tipo": "int64"
+        },
+        {
+          "nome": "n_coortes_pre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "tendencia_pre_coef",
+          "tipo": "float64"
+        },
+        {
+          "nome": "tendencia_pre_p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "tendencias_paralelas_sustentadas",
+          "tipo": "object"
+        },
+        {
+          "nome": "estrato_tipo",
+          "tipo": "str"
+        },
+        {
+          "nome": "estrato",
+          "tipo": "str"
+        },
+        {
+          "nome": "tipo",
+          "tipo": "str"
+        },
+        {
+          "nome": "n_coortes_pos",
+          "tipo": "float64"
+        },
+        {
+          "nome": "did_nivel_coef",
+          "tipo": "float64"
+        },
+        {
+          "nome": "did_nivel_p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "did_rampa_coef",
+          "tipo": "float64"
+        },
+        {
+          "nome": "did_rampa_p_valor",
+          "tipo": "float64"
+        }
+      ],
+      "sha256_arquivo": "373c871f0994eef953a8eb867592eb8174f1cbca063dea43534094739a51c12e",
+      "hash_conteudo": "b230c13f3512b8326ab92fdcf7988f667a9ce46f6758846328fb2e7a0edbefec",
+      "modificado_em": "2026-09-14T00:10:09.442650+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/dupla_desvantagem.parquet",
+      "linhas": 58,
+      "colunas": [
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "renda_hb",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_hn",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_mb",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_mn",
+          "tipo": "float64"
+        },
+        {
+          "nome": "gap_total",
+          "tipo": "float64"
+        },
+        {
+          "nome": "efeito_raca",
+          "tipo": "float64"
+        },
+        {
+          "nome": "efeito_genero",
+          "tipo": "float64"
+        },
+        {
+          "nome": "interacao",
+          "tipo": "float64"
+        },
+        {
+          "nome": "p_valor_gap_total",
+          "tipo": "float64"
+        }
+      ],
+      "sha256_arquivo": "482d2a4ddab2b9f16876bb59f38fabf64dae8ac303afcc7abd75bf27fa13932a",
+      "hash_conteudo": "372bbb4bbe5053e7cf7c6af4b1f76e150c6c9d165b7e295ca0248d8509126a90",
+      "modificado_em": "2026-09-13T17:33:13.533312+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/escolaridade.parquet",
+      "linhas": 544540,
+      "colunas": [
+        {
+          "nome": "nivel_geografico",
+          "tipo": "str"
+        },
+        {
+          "nome": "geografia",
+          "tipo": "str"
+        },
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "raca_cor",
+          "tipo": "str"
+        },
+        {
+          "nome": "sexo",
+          "tipo": "str"
+        },
+        {
+          "nome": "faixa_etaria",
+          "tipo": "str"
+        },
+        {
+          "nome": "nivel_instrucao",
+          "tipo": "str"
+        },
+        {
+          "nome": "n_amostra",
+          "tipo": "int64"
+        },
+        {
+          "nome": "populacao_estimada",
+          "tipo": "float64"
+        }
+      ],
+      "sha256_arquivo": "49d03cca12d223c6b31bb802c6bc904e8cdae6219fb2bc7d7f885670d022dc07",
+      "hash_conteudo": "856b2eabc9178de2ce4151bc6420c38202a135323773df1cd0759095c9b36c0a",
+      "modificado_em": "2026-09-13T17:07:04.088507+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/extremos_composicao_racial.parquet",
+      "linhas": 10959,
+      "colunas": [
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "extremo",
+          "tipo": "str"
+        },
+        {
+          "nome": "recorte",
+          "tipo": "str"
+        },
+        {
+          "nome": "grupo",
+          "tipo": "str"
+        },
+        {
+          "nome": "dimensao",
+          "tipo": "str"
+        },
+        {
+          "nome": "categoria",
+          "tipo": "str"
+        },
+        {
+          "nome": "pct_no_extremo",
+          "tipo": "float64"
+        }
+      ],
+      "sha256_arquivo": "ed4972cefc513f7e94afdd1b6cf4b709c0036f0c4f92272468f92da4911b417e",
+      "hash_conteudo": "b8849b9a3fccc8cd6608d88aeea41a858cb4bfd41c663ad2342e174ef67da681",
+      "modificado_em": "2026-09-13T17:45:19.935098+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/extremos_distribuicao_racial.parquet",
+      "linhas": 1044,
+      "colunas": [
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "extremo",
+          "tipo": "str"
+        },
+        {
+          "nome": "escopo_limiar",
+          "tipo": "str"
+        },
+        {
+          "nome": "grupo_limiar",
+          "tipo": "str"
+        },
+        {
+          "nome": "raca_cor",
+          "tipo": "str"
+        },
+        {
+          "nome": "limiar",
+          "tipo": "float64"
+        },
+        {
+          "nome": "pct_do_extremo",
+          "tipo": "float64"
+        },
+        {
+          "nome": "pct_populacao_capturada",
+          "tipo": "float64"
+        }
+      ],
+      "sha256_arquivo": "1a89ba8606e244b99e6327e244e90b7bd2f56613adba73fb3db8306374a872cc",
+      "hash_conteudo": "a826a806870c9b061f9bf81892483c3a1132e1ec4c68ca8dc37436e5ab41762b",
+      "modificado_em": "2026-09-13T17:45:19.864214+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/extremos_renda_racial.parquet",
+      "linhas": 696,
+      "colunas": [
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "extremo",
+          "tipo": "str"
+        },
+        {
+          "nome": "recorte",
+          "tipo": "str"
+        },
+        {
+          "nome": "grupo",
+          "tipo": "str"
+        },
+        {
+          "nome": "limiar",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_media_extremo",
+          "tipo": "float64"
+        },
+        {
+          "nome": "n_extremo",
+          "tipo": "int64"
+        },
+        {
+          "nome": "pct_populacao_capturada",
+          "tipo": "float64"
+        }
+      ],
+      "sha256_arquivo": "9c8935f570a80b3d10a69c960ebd55a7fd5dc3176371afe117accf07610f25c0",
+      "hash_conteudo": "d01344fe1943e6c8619cbbeb71367894dd4cbe62e71a8f7fc029225a6cf2b037",
+      "modificado_em": "2026-09-13T17:45:19.880683+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/faixas_salario_minimo.parquet",
+      "linhas": 174,
+      "colunas": [
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "raca_cor",
+          "tipo": "str"
+        },
+        {
+          "nome": "pop",
+          "tipo": "float64"
+        },
+        {
+          "nome": "ate_1sm",
+          "tipo": "float64"
+        },
+        {
+          "nome": "ate_2sm",
+          "tipo": "float64"
+        },
+        {
+          "nome": "acima_3sm",
+          "tipo": "float64"
+        },
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "salario_minimo",
+          "tipo": "int64"
+        },
+        {
+          "nome": "pct_ate_1sm",
+          "tipo": "float64"
+        },
+        {
+          "nome": "pct_ate_2sm",
+          "tipo": "float64"
+        },
+        {
+          "nome": "pct_acima_3sm",
+          "tipo": "float64"
+        }
+      ],
+      "sha256_arquivo": "aae3f77bc74d9708a84932b40698eb7bbb064d9fc369cb686c5730d7205ca46e",
+      "hash_conteudo": "e0aa59701b78819444d08b267bbdd440b060905453929cd4eb89003ae47c4b6d",
+      "modificado_em": "2026-09-13T17:15:30.332230+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/funcao_quantil_racial.parquet",
+      "linhas": 1044,
+      "colunas": [
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "raca_cor",
+          "tipo": "str"
+        },
+        {
+          "nome": "percentil",
+          "tipo": "int64"
+        },
+        {
+          "nome": "renda_no_percentil",
+          "tipo": "float64"
+        }
+      ],
+      "sha256_arquivo": "2be3b92dded8a2e4f7c838ee79b80eaadfb8b5300e19ba3bd7a841e9b56d7205",
+      "hash_conteudo": "07f5d9836d6041660a8aaad157671214b7fecb51398d87ea5c615b3c93e965c3",
+      "modificado_em": "2026-09-13T17:46:59.225676+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/gini_por_raca.parquet",
+      "linhas": 174,
+      "colunas": [
+        {
+          "nome": "gini",
+          "tipo": "float64"
+        },
+        {
+          "nome": "n",
+          "tipo": "int64"
+        },
+        {
+          "nome": "raca_cor",
+          "tipo": "str"
+        },
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        }
+      ],
+      "sha256_arquivo": "03a7af6209c7428870ee27ac593e70a3647ef8c23ad2f5dadabb02aa9c2313ab",
+      "hash_conteudo": "f6fc38c51b59097e7481ed64aa400f1c91c1d4e1e8ed7f6cbaeadca12e1d55a8",
+      "modificado_em": "2026-09-13T17:14:18.862915+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/habitacao_hiato_racial.parquet",
+      "linhas": 144,
+      "colunas": [
+        {
+          "nome": "raca_cor",
+          "tipo": "str"
+        },
+        {
+          "nome": "media",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_media",
+          "tipo": "float64"
+        },
+        {
+          "nome": "p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "ic_inferior",
+          "tipo": "float64"
+        },
+        {
+          "nome": "ic_superior",
+          "tipo": "float64"
+        },
+        {
+          "nome": "significativo",
+          "tipo": "bool"
+        },
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "indicador",
+          "tipo": "str"
+        }
+      ],
+      "sha256_arquivo": "6b925ac75a449a4efdac101d399ca4daf00ad42d8a8dfa03c40b93847d346a5d",
+      "hash_conteudo": "206fee320b7da1ae98abe8f4043bd9bf22e4ac72fccd1442423f8324dfb8175f",
+      "modificado_em": "2026-09-14T12:07:17.150934+00:00",
+      "versionado_git": false
+    },
+    {
+      "arquivo": "data/processed/habitacao_hiato_racial_genero.parquet",
+      "linhas": 288,
+      "colunas": [
+        {
+          "nome": "grupo",
+          "tipo": "str"
+        },
+        {
+          "nome": "media",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_media",
+          "tipo": "float64"
+        },
+        {
+          "nome": "p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "ic_inferior",
+          "tipo": "float64"
+        },
+        {
+          "nome": "ic_superior",
+          "tipo": "float64"
+        },
+        {
+          "nome": "significativo",
+          "tipo": "bool"
+        },
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "indicador",
+          "tipo": "str"
+        }
+      ],
+      "sha256_arquivo": "f597d6aa21a06a63ab9d6121ae1cf0ee1b8dca186789bf0183151ed292937422",
+      "hash_conteudo": "3930054e1b5707ebf5a32dd793af536a25aff2008f13d20e7674ec775c2837eb",
+      "modificado_em": "2026-09-14T12:08:05.828093+00:00",
+      "versionado_git": false
+    },
+    {
+      "arquivo": "data/processed/habitacao_hiato_regional.parquet",
+      "linhas": 90,
+      "colunas": [
+        {
+          "nome": "raca_cor",
+          "tipo": "str"
+        },
+        {
+          "nome": "media",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_media",
+          "tipo": "float64"
+        },
+        {
+          "nome": "p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "ic_inferior",
+          "tipo": "float64"
+        },
+        {
+          "nome": "ic_superior",
+          "tipo": "float64"
+        },
+        {
+          "nome": "significativo",
+          "tipo": "bool"
+        },
+        {
+          "nome": "regiao",
+          "tipo": "str"
+        },
+        {
+          "nome": "indicador",
+          "tipo": "str"
+        }
+      ],
+      "sha256_arquivo": "bf587e0bb0b9a662fedc1ff6ee760a0b125ec46b87d68ba3b441988e6c1d67f7",
+      "hash_conteudo": "799a87958df52e033ccdfe9c38aae9e834bb16dacc52ee51c71ba2caf2bab412",
+      "modificado_em": "2026-09-14T12:08:54.118008+00:00",
+      "versionado_git": false
+    },
+    {
+      "arquivo": "data/processed/hiato_arvore.parquet",
+      "linhas": 14598,
+      "colunas": [
+        {
+          "nome": "combo",
+          "tipo": "str"
+        },
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "comparacao",
+          "tipo": "str"
+        },
+        {
+          "nome": "renda_media_branca",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_media_outro",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_absoluto",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_percentual",
+          "tipo": "float64"
+        },
+        {
+          "nome": "p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "significativo",
+          "tipo": "bool"
+        },
+        {
+          "nome": "n_branca",
+          "tipo": "int64"
+        },
+        {
+          "nome": "n_outro",
+          "tipo": "int64"
+        },
+        {
+          "nome": "sexo",
+          "tipo": "str"
+        },
+        {
+          "nome": "faixa_etaria",
+          "tipo": "str"
+        },
+        {
+          "nome": "geracao",
+          "tipo": "str"
+        },
+        {
+          "nome": "nivel_instrucao",
+          "tipo": "str"
+        }
+      ],
+      "sha256_arquivo": "bbc6dc5097d513b9cddb3c9a5852c91de585d87114232b4c16127331cd6e36b0",
+      "hash_conteudo": "748c1766d1463acac05a6bfc7d8bd621ab9736520c0d718421a5cdc801335eba",
+      "modificado_em": "2026-09-13T17:12:41.008229+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/hiato_branca_indigena.parquet",
+      "linhas": 58,
+      "colunas": [
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "renda_media_branca",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_media_indigena",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_absoluto",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_percentual",
+          "tipo": "float64"
+        },
+        {
+          "nome": "ic_inferior",
+          "tipo": "float64"
+        },
+        {
+          "nome": "ic_superior",
+          "tipo": "float64"
+        },
+        {
+          "nome": "p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "significativo",
+          "tipo": "bool"
+        }
+      ],
+      "sha256_arquivo": "e0fc738fa13ff2f74a2081d21abd603062e566b124a92eeac5a9f48692a76902",
+      "hash_conteudo": "c0000cc812587de679642c5e992bf491468d4b38ada211eeb60323fee208cf5e",
+      "modificado_em": "2026-09-13T17:07:30.730895+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/hiato_capital_interior.parquet",
+      "linhas": 116,
+      "colunas": [
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "localizacao",
+          "tipo": "str"
+        },
+        {
+          "nome": "renda_media_branca",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_media_negra",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_absoluto",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_percentual",
+          "tipo": "float64"
+        },
+        {
+          "nome": "p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "significativo",
+          "tipo": "bool"
+        }
+      ],
+      "sha256_arquivo": "201d99719395e656b0d9a438e90c0a9b1fd0ceff8d1ba16b2fe77c32f38b3dff",
+      "hash_conteudo": "4f35c166c28fb7f11f517ed455c0a47e7ab824fbf71a228fc3fd4e7fd10ce42f",
+      "modificado_em": "2026-09-13T17:15:20.848783+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/hiato_escolaridade_historico_pretaparda.parquet",
+      "linhas": 406,
+      "colunas": [
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "nivel_instrucao",
+          "tipo": "str"
+        },
+        {
+          "nome": "renda_media_preta",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_media_parda",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_absoluto",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_percentual",
+          "tipo": "float64"
+        },
+        {
+          "nome": "p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "significativo",
+          "tipo": "bool"
+        }
+      ],
+      "sha256_arquivo": "6446601bb0253067abb7effec14c69f0d77e632aae0bf9707940c2a91e05600a",
+      "hash_conteudo": "549520006ab7831a4c036a8eb8eafd13f81a0d7cb3894af123f8b39c47b8a0b2",
+      "modificado_em": "2026-09-13T17:13:52.159261+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/hiato_escolaridade_historico_todas.parquet",
+      "linhas": 406,
+      "colunas": [
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "nivel_instrucao",
+          "tipo": "str"
+        },
+        {
+          "nome": "renda_media_branca",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_media_negra",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_absoluto",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_percentual",
+          "tipo": "float64"
+        },
+        {
+          "nome": "p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "significativo",
+          "tipo": "bool"
+        }
+      ],
+      "sha256_arquivo": "2e4a35085bdca6625a9b039f283495ed28d5b82222f98ac6e4fb6dd310003c53",
+      "hash_conteudo": "ff3fa115b97aeaacfcfa3dcf40473acd526c042895b63717c7e1334727e73147",
+      "modificado_em": "2026-09-13T17:13:40.630742+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/hiato_escolaridade_pretaparda.parquet",
+      "linhas": 7,
+      "colunas": [
+        {
+          "nome": "nivel_instrucao",
+          "tipo": "str"
+        },
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "n_amostra",
+          "tipo": "int64"
+        },
+        {
+          "nome": "renda_media_preta",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_media_parda",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_absoluto",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_percentual",
+          "tipo": "float64"
+        },
+        {
+          "nome": "p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "significativo",
+          "tipo": "bool"
+        }
+      ],
+      "sha256_arquivo": "d9b4cdb19e7f55515e1371912abeaff392158705877d42215da01d3812ef4213",
+      "hash_conteudo": "5b44782a78ebeac8410e4e83fd5c3c2f4fa1cba9389c32e752ca27ed4e4c4dbd",
+      "modificado_em": "2026-09-13T17:07:35.235152+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/hiato_escolaridade_todas.parquet",
+      "linhas": 7,
+      "colunas": [
+        {
+          "nome": "nivel_instrucao",
+          "tipo": "str"
+        },
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "n_amostra",
+          "tipo": "int64"
+        },
+        {
+          "nome": "renda_media_branca",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_media_negra",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_absoluto",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_percentual",
+          "tipo": "float64"
+        },
+        {
+          "nome": "p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "significativo",
+          "tipo": "bool"
+        }
+      ],
+      "sha256_arquivo": "f59f36e61308c28d039a2d12cc9ed60c8f183d338616adeaf6a390849720c082",
+      "hash_conteudo": "5a424b11cc8f1cfdc84921dcc1a7b9afd5a964b20d9217bd3e8627bfaa3d62fc",
+      "modificado_em": "2026-09-13T17:07:31.723036+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/hiato_faixa_etaria_escolaridade_pretaparda.parquet",
+      "linhas": 33,
+      "colunas": [
+        {
+          "nome": "faixa_etaria",
+          "tipo": "str"
+        },
+        {
+          "nome": "nivel_instrucao",
+          "tipo": "str"
+        },
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "n_amostra",
+          "tipo": "int64"
+        },
+        {
+          "nome": "renda_media_preta",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_media_parda",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_absoluto",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_percentual",
+          "tipo": "float64"
+        },
+        {
+          "nome": "p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "significativo",
+          "tipo": "bool"
+        }
+      ],
+      "sha256_arquivo": "455638ddf5166827420b36be8cde2cb8c86db80bc2086ef456c3fad999eff692",
+      "hash_conteudo": "45c88b8ae97dca077397bec119469ef56150155320a5740f339cfa04d1171e45",
+      "modificado_em": "2026-09-13T17:07:36.317042+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/hiato_faixa_etaria_escolaridade_todas.parquet",
+      "linhas": 34,
+      "colunas": [
+        {
+          "nome": "faixa_etaria",
+          "tipo": "str"
+        },
+        {
+          "nome": "nivel_instrucao",
+          "tipo": "str"
+        },
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "n_amostra",
+          "tipo": "int64"
+        },
+        {
+          "nome": "renda_media_branca",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_media_negra",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_absoluto",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_percentual",
+          "tipo": "float64"
+        },
+        {
+          "nome": "p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "significativo",
+          "tipo": "bool"
+        }
+      ],
+      "sha256_arquivo": "dbb93bd000a44afe5abab8420f32d7fbf32f47ffbd048c21f6fb3a98d888f079",
+      "hash_conteudo": "ae4ae8b2ca8232318c407af1b403a43e1c9be8684813e90d5ba5fbeb4baf5f94",
+      "modificado_em": "2026-09-13T17:07:32.857123+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/hiato_faixa_etaria_historico_pretaparda.parquet",
+      "linhas": 290,
+      "colunas": [
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "faixa_etaria",
+          "tipo": "str"
+        },
+        {
+          "nome": "renda_media_preta",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_media_parda",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_absoluto",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_percentual",
+          "tipo": "float64"
+        },
+        {
+          "nome": "p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "significativo",
+          "tipo": "bool"
+        }
+      ],
+      "sha256_arquivo": "a6eb502f7dc838fa414fef3ef304bfd56c82eb819988f26e37f011e0240e13c6",
+      "hash_conteudo": "1c1b69e78fd51697fb5bdda00537382095f693e2bac38744161aff5d2ab4db50",
+      "modificado_em": "2026-09-13T17:13:24.016650+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/hiato_faixa_etaria_historico_todas.parquet",
+      "linhas": 290,
+      "colunas": [
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "faixa_etaria",
+          "tipo": "str"
+        },
+        {
+          "nome": "renda_media_branca",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_media_negra",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_absoluto",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_percentual",
+          "tipo": "float64"
+        },
+        {
+          "nome": "p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "significativo",
+          "tipo": "bool"
+        }
+      ],
+      "sha256_arquivo": "6b4b4ba58723d750135943a05d4222012b94e4d7f171a3f5ff465e1576e17364",
+      "hash_conteudo": "7db9764872e7bce8619be5feb8f22c71c9de5954686d13063b1a1df3bc0ef347",
+      "modificado_em": "2026-09-13T17:13:14.728419+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/hiato_faixa_etaria_pretaparda.parquet",
+      "linhas": 5,
+      "colunas": [
+        {
+          "nome": "faixa_etaria",
+          "tipo": "str"
+        },
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "n_amostra",
+          "tipo": "int64"
+        },
+        {
+          "nome": "renda_media_preta",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_media_parda",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_absoluto",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_percentual",
+          "tipo": "float64"
+        },
+        {
+          "nome": "p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "significativo",
+          "tipo": "bool"
+        }
+      ],
+      "sha256_arquivo": "aab783df9bb820226b5e3d3e757191b21372657c7b6bfdae9b31be1c4d7d0a7a",
+      "hash_conteudo": "01a15bd4c5cde5c5131834916c33ac9b22d25e31e4e370d4fe9f95162219b444",
+      "modificado_em": "2026-09-13T17:07:34.989845+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/hiato_faixa_etaria_todas.parquet",
+      "linhas": 5,
+      "colunas": [
+        {
+          "nome": "faixa_etaria",
+          "tipo": "str"
+        },
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "n_amostra",
+          "tipo": "int64"
+        },
+        {
+          "nome": "renda_media_branca",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_media_negra",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_absoluto",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_percentual",
+          "tipo": "float64"
+        },
+        {
+          "nome": "p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "significativo",
+          "tipo": "bool"
+        }
+      ],
+      "sha256_arquivo": "c66172c5794d6631f0286258aed71967136c317590d7b3907a483d28552fa9e7",
+      "hash_conteudo": "818b90e78eb75cf3dfa75c057014f174c82036fbea51cb4f1c48a7df8f12c7bf",
+      "modificado_em": "2026-09-13T17:07:31.346833+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/hiato_formal_informal.parquet",
+      "linhas": 116,
+      "colunas": [
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "setor",
+          "tipo": "str"
+        },
+        {
+          "nome": "renda_media_branca",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_media_negra",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_absoluto",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_percentual",
+          "tipo": "float64"
+        },
+        {
+          "nome": "p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "significativo",
+          "tipo": "bool"
+        }
+      ],
+      "sha256_arquivo": "85049ec3dfa07fe528c55e6bf43c725d4c6145535619523de2725d7ac3a1d8ab",
+      "hash_conteudo": "c98b52e758c1643669f56b2ebd684f9ac0c0798a5c710a900f6aaf69a80a9330",
+      "modificado_em": "2026-09-13T17:15:29.557708+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/hiato_genero_escolaridade_pretaparda.parquet",
+      "linhas": 14,
+      "colunas": [
+        {
+          "nome": "sexo",
+          "tipo": "str"
+        },
+        {
+          "nome": "nivel_instrucao",
+          "tipo": "str"
+        },
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "n_amostra",
+          "tipo": "int64"
+        },
+        {
+          "nome": "renda_media_preta",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_media_parda",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_absoluto",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_percentual",
+          "tipo": "float64"
+        },
+        {
+          "nome": "p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "significativo",
+          "tipo": "bool"
+        }
+      ],
+      "sha256_arquivo": "82feb6c52b1c874fc32d60351ba47ecb1e533e2acb0061f6b92e5b35e71a7235",
+      "hash_conteudo": "91fddf199ffd9d025e5ae2e11c0cca37f0964b22b092324f3ce9504eb156f074",
+      "modificado_em": "2026-09-13T17:07:35.710839+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/hiato_genero_escolaridade_todas.parquet",
+      "linhas": 14,
+      "colunas": [
+        {
+          "nome": "sexo",
+          "tipo": "str"
+        },
+        {
+          "nome": "nivel_instrucao",
+          "tipo": "str"
+        },
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "n_amostra",
+          "tipo": "int64"
+        },
+        {
+          "nome": "renda_media_branca",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_media_negra",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_absoluto",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_percentual",
+          "tipo": "float64"
+        },
+        {
+          "nome": "p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "significativo",
+          "tipo": "bool"
+        }
+      ],
+      "sha256_arquivo": "d832aee3e4bf4b3fa856895e7ce3f2137c914b2fca061f8002865796dee4cdf0",
+      "hash_conteudo": "7d4dbe1bdcc042bf508eb309843160fc2731959f88a3b4f2b6cc3185b4c63a1e",
+      "modificado_em": "2026-09-13T17:07:32.440289+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/hiato_genero_faixa_etaria_escolaridade_pretaparda.parquet",
+      "linhas": 64,
+      "colunas": [
+        {
+          "nome": "sexo",
+          "tipo": "str"
+        },
+        {
+          "nome": "faixa_etaria",
+          "tipo": "str"
+        },
+        {
+          "nome": "nivel_instrucao",
+          "tipo": "str"
+        },
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "n_amostra",
+          "tipo": "int64"
+        },
+        {
+          "nome": "renda_media_preta",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_media_parda",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_absoluto",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_percentual",
+          "tipo": "float64"
+        },
+        {
+          "nome": "p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "significativo",
+          "tipo": "bool"
+        }
+      ],
+      "sha256_arquivo": "2b7aef7b197b829037c3d00ce605828383416debc18f34ec55e6da746595b28c",
+      "hash_conteudo": "3712f2e44eaf383296d554742d70d4a26b0a0d9c35b893548b639c9843574fe4",
+      "modificado_em": "2026-09-13T17:07:38.708517+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/hiato_genero_faixa_etaria_escolaridade_todas.parquet",
+      "linhas": 66,
+      "colunas": [
+        {
+          "nome": "sexo",
+          "tipo": "str"
+        },
+        {
+          "nome": "faixa_etaria",
+          "tipo": "str"
+        },
+        {
+          "nome": "nivel_instrucao",
+          "tipo": "str"
+        },
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "n_amostra",
+          "tipo": "int64"
+        },
+        {
+          "nome": "renda_media_branca",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_media_negra",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_absoluto",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_percentual",
+          "tipo": "float64"
+        },
+        {
+          "nome": "p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "significativo",
+          "tipo": "bool"
+        }
+      ],
+      "sha256_arquivo": "f201ad782d50440ba7b651c8bab7b41e533718bb82d86d09ba256f6fc73fd327",
+      "hash_conteudo": "a31928c2bf01d8fba05cf88713017169c5ba9317b45e0ef2956e540df6f36a19",
+      "modificado_em": "2026-09-13T17:07:33.850520+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/hiato_genero_faixa_etaria_pretaparda.parquet",
+      "linhas": 10,
+      "colunas": [
+        {
+          "nome": "sexo",
+          "tipo": "str"
+        },
+        {
+          "nome": "faixa_etaria",
+          "tipo": "str"
+        },
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "n_amostra",
+          "tipo": "int64"
+        },
+        {
+          "nome": "renda_media_preta",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_media_parda",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_absoluto",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_percentual",
+          "tipo": "float64"
+        },
+        {
+          "nome": "p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "significativo",
+          "tipo": "bool"
+        }
+      ],
+      "sha256_arquivo": "7e00f5ce2ccbfdb5fe2b862c8b53d6479d696ce067940c2cfab558ce4d622f69",
+      "hash_conteudo": "cb12894b7a4e3582c3a4642a8880c530f6af3640b974a6f899fd23659da69301",
+      "modificado_em": "2026-09-13T17:07:35.378670+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/hiato_genero_faixa_etaria_todas.parquet",
+      "linhas": 10,
+      "colunas": [
+        {
+          "nome": "sexo",
+          "tipo": "str"
+        },
+        {
+          "nome": "faixa_etaria",
+          "tipo": "str"
+        },
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "n_amostra",
+          "tipo": "int64"
+        },
+        {
+          "nome": "renda_media_branca",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_media_negra",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_absoluto",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_percentual",
+          "tipo": "float64"
+        },
+        {
+          "nome": "p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "significativo",
+          "tipo": "bool"
+        }
+      ],
+      "sha256_arquivo": "17253941f7c547af7608bb8b9f568f31db123fd86e422ffce19471bcc06d4df7",
+      "hash_conteudo": "02e4590450f297baf68cbc9db337be48193948c3461e33097873a54d7614fd05",
+      "modificado_em": "2026-09-13T17:07:31.941475+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/hiato_genero_geracao_escolaridade_pretaparda.parquet",
+      "linhas": 65,
+      "colunas": [
+        {
+          "nome": "sexo",
+          "tipo": "str"
+        },
+        {
+          "nome": "geracao",
+          "tipo": "str"
+        },
+        {
+          "nome": "nivel_instrucao",
+          "tipo": "str"
+        },
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "n_amostra",
+          "tipo": "int64"
+        },
+        {
+          "nome": "renda_media_preta",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_media_parda",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_absoluto",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_percentual",
+          "tipo": "float64"
+        },
+        {
+          "nome": "p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "significativo",
+          "tipo": "bool"
+        }
+      ],
+      "sha256_arquivo": "d28a5af757dda1ce3d09434411944fb1d944bf2934783d96e28089067bd7924b",
+      "hash_conteudo": "42643a54288ef8d53303891609b5435522808d777640c6ef341f50787613cf1f",
+      "modificado_em": "2026-09-13T17:07:40.272817+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/hiato_genero_geracao_escolaridade_todas.parquet",
+      "linhas": 67,
+      "colunas": [
+        {
+          "nome": "sexo",
+          "tipo": "str"
+        },
+        {
+          "nome": "geracao",
+          "tipo": "str"
+        },
+        {
+          "nome": "nivel_instrucao",
+          "tipo": "str"
+        },
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "n_amostra",
+          "tipo": "int64"
+        },
+        {
+          "nome": "renda_media_branca",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_media_negra",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_absoluto",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_percentual",
+          "tipo": "float64"
+        },
+        {
+          "nome": "p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "significativo",
+          "tipo": "bool"
+        }
+      ],
+      "sha256_arquivo": "b791c8843605afd5f63e9ca199606c7ba05bbe4940cd0d5753e41d9cc665a110",
+      "hash_conteudo": "8d3cc7277e113ac547302764e562fffd831f2f17c863a00cc559f4ff8d05169b",
+      "modificado_em": "2026-09-13T17:07:34.525089+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/hiato_genero_geracao_pretaparda.parquet",
+      "linhas": 10,
+      "colunas": [
+        {
+          "nome": "sexo",
+          "tipo": "str"
+        },
+        {
+          "nome": "geracao",
+          "tipo": "str"
+        },
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "n_amostra",
+          "tipo": "int64"
+        },
+        {
+          "nome": "renda_media_preta",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_media_parda",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_absoluto",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_percentual",
+          "tipo": "float64"
+        },
+        {
+          "nome": "p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "significativo",
+          "tipo": "bool"
+        }
+      ],
+      "sha256_arquivo": "a9a240f97f8f44421a6b80b753393b383020be707be80d297dc8e93bb8cbbd53",
+      "hash_conteudo": "f9f0715f5048ee7cb43d0635d7ca5f1c2946a0ea2bfc7f963e603f20e5e4a8f6",
+      "modificado_em": "2026-09-13T17:07:35.540991+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/hiato_genero_geracao_todas.parquet",
+      "linhas": 10,
+      "colunas": [
+        {
+          "nome": "sexo",
+          "tipo": "str"
+        },
+        {
+          "nome": "geracao",
+          "tipo": "str"
+        },
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "n_amostra",
+          "tipo": "int64"
+        },
+        {
+          "nome": "renda_media_branca",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_media_negra",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_absoluto",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_percentual",
+          "tipo": "float64"
+        },
+        {
+          "nome": "p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "significativo",
+          "tipo": "bool"
+        }
+      ],
+      "sha256_arquivo": "6c8567c503d539d7b97e2adfb638bcf426f188750f24d3e8ce4581e0ec51b26c",
+      "hash_conteudo": "5945889fcf5a3ada93146fa3dda5b790d4c603c52bca81e1bb808413a9c00960",
+      "modificado_em": "2026-09-13T17:07:32.162574+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/hiato_genero_historico_pretaparda.parquet",
+      "linhas": 116,
+      "colunas": [
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "sexo",
+          "tipo": "str"
+        },
+        {
+          "nome": "renda_media_preta",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_media_parda",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_absoluto",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_percentual",
+          "tipo": "float64"
+        },
+        {
+          "nome": "p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "significativo",
+          "tipo": "bool"
+        }
+      ],
+      "sha256_arquivo": "0d8c5004a1a4391fcc02e61d9eeb448d9a18aa28a2af8bcd64e4620b28e613db",
+      "hash_conteudo": "abf8d15c772580a9561e97339cf80194c657ed563172083bccc8cb9469ff22d0",
+      "modificado_em": "2026-09-13T17:12:58.913286+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/hiato_genero_historico_todas.parquet",
+      "linhas": 116,
+      "colunas": [
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "sexo",
+          "tipo": "str"
+        },
+        {
+          "nome": "renda_media_branca",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_media_negra",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_absoluto",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_percentual",
+          "tipo": "float64"
+        },
+        {
+          "nome": "p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "significativo",
+          "tipo": "bool"
+        }
+      ],
+      "sha256_arquivo": "572a9cf29dd293b3213e8d68ef3a6ca4f4daf70b4944d4b778ecbbf7f57dc624",
+      "hash_conteudo": "eaeb9e1cdb23089af26f47db8d2e922216f1eb40114671b8445b27f56cf66e8c",
+      "modificado_em": "2026-09-13T17:12:51.809327+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/hiato_genero_pretaparda.parquet",
+      "linhas": 2,
+      "colunas": [
+        {
+          "nome": "sexo",
+          "tipo": "str"
+        },
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "n_amostra",
+          "tipo": "int64"
+        },
+        {
+          "nome": "renda_media_preta",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_media_parda",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_absoluto",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_percentual",
+          "tipo": "float64"
+        },
+        {
+          "nome": "p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "significativo",
+          "tipo": "bool"
+        }
+      ],
+      "sha256_arquivo": "f86a509be1f47b61f07428c20e9fc4f7e88d437fc3e79b46afd50c470da981b6",
+      "hash_conteudo": "71743a2405ee2839e44cde96203dc51e169adb964f3e193cef2787e3839f31c5",
+      "modificado_em": "2026-09-13T17:07:34.868348+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/hiato_genero_todas.parquet",
+      "linhas": 2,
+      "colunas": [
+        {
+          "nome": "sexo",
+          "tipo": "str"
+        },
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "n_amostra",
+          "tipo": "int64"
+        },
+        {
+          "nome": "renda_media_branca",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_media_negra",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_absoluto",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_percentual",
+          "tipo": "float64"
+        },
+        {
+          "nome": "p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "significativo",
+          "tipo": "bool"
+        }
+      ],
+      "sha256_arquivo": "f5551d6e4f7aa537f303f298c2dc27f1fa0231e5e074b758c590160cfb99d7cf",
+      "hash_conteudo": "d3314d4a209f4ae18c331fd5bbdc7d0d3f4107eee066aa8ddc948ab41b1dded6",
+      "modificado_em": "2026-09-13T17:07:31.157110+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/hiato_geracao_escolaridade_pretaparda.parquet",
+      "linhas": 33,
+      "colunas": [
+        {
+          "nome": "geracao",
+          "tipo": "str"
+        },
+        {
+          "nome": "nivel_instrucao",
+          "tipo": "str"
+        },
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "n_amostra",
+          "tipo": "int64"
+        },
+        {
+          "nome": "renda_media_preta",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_media_parda",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_absoluto",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_percentual",
+          "tipo": "float64"
+        },
+        {
+          "nome": "p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "significativo",
+          "tipo": "bool"
+        }
+      ],
+      "sha256_arquivo": "292ac1c187c4256f5ace91e867f9368d025214a740cd0b2167ca2fc43c8db437",
+      "hash_conteudo": "3238dc21faf3df2f5a4a305714ac068a22fe0ab9799d6a3ef4d5d562645a5536",
+      "modificado_em": "2026-09-13T17:07:37.261239+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/hiato_geracao_escolaridade_todas.parquet",
+      "linhas": 34,
+      "colunas": [
+        {
+          "nome": "geracao",
+          "tipo": "str"
+        },
+        {
+          "nome": "nivel_instrucao",
+          "tipo": "str"
+        },
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "n_amostra",
+          "tipo": "int64"
+        },
+        {
+          "nome": "renda_media_branca",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_media_negra",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_absoluto",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_percentual",
+          "tipo": "float64"
+        },
+        {
+          "nome": "p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "significativo",
+          "tipo": "bool"
+        }
+      ],
+      "sha256_arquivo": "7384c86a6f9cfe53ee0c2a25e77644d7ad6d5156af112312e945ea0aed7e5371",
+      "hash_conteudo": "bf7321954cf38b2344a9561c69e726a40f85581e104744231329bd0eaf04a7d8",
+      "modificado_em": "2026-09-13T17:07:33.277939+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/hiato_geracao_historico_pretaparda.parquet",
+      "linhas": 232,
+      "colunas": [
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "geracao",
+          "tipo": "str"
+        },
+        {
+          "nome": "renda_media_preta",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_media_parda",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_absoluto",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_percentual",
+          "tipo": "float64"
+        },
+        {
+          "nome": "p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "significativo",
+          "tipo": "bool"
+        }
+      ],
+      "sha256_arquivo": "9d30d8209f6ad3bb8efd0369c6c834e59f6e1b7383c5a754f910ff8eee90615e",
+      "hash_conteudo": "6c9e2c4ec3176c008ed3a629ce1b54dca6bb5e88fe62521b02572070f8a5e470",
+      "modificado_em": "2026-09-13T17:13:59.791788+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/hiato_geracao_pretaparda.parquet",
+      "linhas": 5,
+      "colunas": [
+        {
+          "nome": "geracao",
+          "tipo": "str"
+        },
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "n_amostra",
+          "tipo": "int64"
+        },
+        {
+          "nome": "renda_media_preta",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_media_parda",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_absoluto",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_percentual",
+          "tipo": "float64"
+        },
+        {
+          "nome": "p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "significativo",
+          "tipo": "bool"
+        }
+      ],
+      "sha256_arquivo": "562a8b233bb5e5fb6bceb359af985dfebe673d1bd8e58308b1ae511c3c7cb8ae",
+      "hash_conteudo": "9878381535771b929eb035bb81d6fea5cb9f742f764ac6583dfe0dbe0e30d81a",
+      "modificado_em": "2026-09-13T17:07:35.110969+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/hiato_geracao_todas.parquet",
+      "linhas": 5,
+      "colunas": [
+        {
+          "nome": "geracao",
+          "tipo": "str"
+        },
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "n_amostra",
+          "tipo": "int64"
+        },
+        {
+          "nome": "renda_media_branca",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_media_negra",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_absoluto",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_percentual",
+          "tipo": "float64"
+        },
+        {
+          "nome": "p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "significativo",
+          "tipo": "bool"
+        }
+      ],
+      "sha256_arquivo": "f59b674ed19d30ca88cd9d983e25e0450d8560096923f0e7e561be5b952a00b5",
+      "hash_conteudo": "9479ff22164afbecb35611a5162d65f22a14531013b53a1672e0b89722439b57",
+      "modificado_em": "2026-09-13T17:07:31.533038+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/hiato_por_geracao.parquet",
+      "linhas": 232,
+      "colunas": [
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "geracao",
+          "tipo": "str"
+        },
+        {
+          "nome": "renda_media_branca",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_media_negra",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_absoluto",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_percentual",
+          "tipo": "float64"
+        },
+        {
+          "nome": "p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "significativo",
+          "tipo": "bool"
+        }
+      ],
+      "sha256_arquivo": "e714252e0f8af2399c820c209186989e92b1cf6b68f215ebb09a2c9c55a8ccb0",
+      "hash_conteudo": "8345de9c6964eb7c3533125ce67e1418d4048705b61fcbb6ac2dd1ec51c9bacd",
+      "modificado_em": "2026-09-13T17:14:12.643862+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/hiato_preta_parda.parquet",
+      "linhas": 58,
+      "colunas": [
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "renda_media_preta",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_media_parda",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_absoluto",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_percentual",
+          "tipo": "float64"
+        },
+        {
+          "nome": "ic_inferior",
+          "tipo": "float64"
+        },
+        {
+          "nome": "ic_superior",
+          "tipo": "float64"
+        },
+        {
+          "nome": "p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "significativo",
+          "tipo": "bool"
+        }
+      ],
+      "sha256_arquivo": "722e9374bfd5bf012cf50740d52bf76b1298c912f75ab7229af600daafe5642b",
+      "hash_conteudo": "0dc77f3139a3df7d3ba21b48b7c1b5801bbb07445fd5b9957301b59c795b9e74",
+      "modificado_em": "2026-09-13T17:07:27.372894+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/hiato_racial.parquet",
+      "linhas": 58,
+      "colunas": [
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "renda_media_branca",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_media_negra",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_absoluto",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_percentual",
+          "tipo": "float64"
+        },
+        {
+          "nome": "ic_inferior",
+          "tipo": "float64"
+        },
+        {
+          "nome": "ic_superior",
+          "tipo": "float64"
+        },
+        {
+          "nome": "p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "significativo",
+          "tipo": "bool"
+        }
+      ],
+      "sha256_arquivo": "3a8599d914da9f2488f951a7c9ca020143093ffd8710703d11251d1564e48b36",
+      "hash_conteudo": "7995d224dc711c68adf31c4dd6aaccfdd74273de645832633aa5a1b1945f91c1",
+      "modificado_em": "2026-09-13T17:07:23.332785+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/hiato_regional.parquet",
+      "linhas": 290,
+      "colunas": [
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "regiao",
+          "tipo": "str"
+        },
+        {
+          "nome": "renda_media_branca",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_media_negra",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_absoluto",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_percentual",
+          "tipo": "float64"
+        },
+        {
+          "nome": "p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "significativo",
+          "tipo": "bool"
+        }
+      ],
+      "sha256_arquivo": "3dc43928f357e441d7863085f4807a13a4596fd33da9991e4b099615a9850169",
+      "hash_conteudo": "5c6ec3a30ea0a417fa232074661b8e3b6c23d8c4f058f3b6f4c7ec7969121813",
+      "modificado_em": "2026-09-13T17:14:34.140194+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/hiato_regional_indigena.parquet",
+      "linhas": 290,
+      "colunas": [
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "regiao",
+          "tipo": "str"
+        },
+        {
+          "nome": "renda_media_branca",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_media_indigena",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_absoluto",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_percentual",
+          "tipo": "float64"
+        },
+        {
+          "nome": "p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "significativo",
+          "tipo": "bool"
+        }
+      ],
+      "sha256_arquivo": "ca76727750d4c648c2e052eff73833b2351e0bca7641fea7a3dbb630e8740806",
+      "hash_conteudo": "cd0ca71b39ca13aa82ef546708dada9561e650e0fa79943c9682b0d011998074",
+      "modificado_em": "2026-09-13T17:14:39.822062+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/hiato_regional_pretaparda.parquet",
+      "linhas": 1566,
+      "colunas": [
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "UF",
+          "tipo": "str"
+        },
+        {
+          "nome": "renda_media_preta",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_media_parda",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_absoluto",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_percentual",
+          "tipo": "float64"
+        },
+        {
+          "nome": "p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "significativo",
+          "tipo": "bool"
+        }
+      ],
+      "sha256_arquivo": "c17ffab5f3dc1d33794cbc578b53780f817c1aa71bf480818466c51c71f381ac",
+      "hash_conteudo": "d0b34202487774c1f29052084f1fe7084a41bdd42c37b0a5c003922ed4157edf",
+      "modificado_em": "2026-09-13T17:14:59.998457+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/hiato_setor_publico_privado.parquet",
+      "linhas": 116,
+      "colunas": [
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "setor_trabalho",
+          "tipo": "str"
+        },
+        {
+          "nome": "renda_media_branca",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_media_negra",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_absoluto",
+          "tipo": "float64"
+        },
+        {
+          "nome": "hiato_percentual",
+          "tipo": "float64"
+        },
+        {
+          "nome": "p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "significativo",
+          "tipo": "bool"
+        }
+      ],
+      "sha256_arquivo": "d7adc6557f817d0163b0e65cff71990943d5a704d6c6fdf62dca4407ba1bb794",
+      "hash_conteudo": "a3d3d23a523ad97626633bb683567d08cd724c5732cf6db935977721215d7170",
+      "modificado_em": "2026-09-13T17:15:07.597867+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/horas_trabalhadas.parquet",
+      "linhas": 105969,
+      "colunas": [
+        {
+          "nome": "nivel_geografico",
+          "tipo": "str"
+        },
+        {
+          "nome": "geografia",
+          "tipo": "str"
+        },
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "raca_cor",
+          "tipo": "str"
+        },
+        {
+          "nome": "sexo",
+          "tipo": "str"
+        },
+        {
+          "nome": "faixa_etaria",
+          "tipo": "str"
+        },
+        {
+          "nome": "n_amostra",
+          "tipo": "int64"
+        },
+        {
+          "nome": "populacao_estimada",
+          "tipo": "float64"
+        },
+        {
+          "nome": "horas_semanais_media",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_por_hora_real_media",
+          "tipo": "float64"
+        }
+      ],
+      "sha256_arquivo": "c956eed8cf2e09033a7e2118228edcdf66a61de612a62dac1c20f7275b929236",
+      "hash_conteudo": "79b1d967e525b66f377bcb579d9c74e24f67d55d301ddb587ff17c3151ec5eef",
+      "modificado_em": "2026-09-13T17:47:17.792914+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/informalidade.parquet",
+      "linhas": 105969,
+      "colunas": [
+        {
+          "nome": "nivel_geografico",
+          "tipo": "str"
+        },
+        {
+          "nome": "geografia",
+          "tipo": "str"
+        },
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "raca_cor",
+          "tipo": "str"
+        },
+        {
+          "nome": "sexo",
+          "tipo": "str"
+        },
+        {
+          "nome": "faixa_etaria",
+          "tipo": "str"
+        },
+        {
+          "nome": "n_amostra",
+          "tipo": "int64"
+        },
+        {
+          "nome": "populacao_estimada",
+          "tipo": "float64"
+        },
+        {
+          "nome": "pop_empregados",
+          "tipo": "float64"
+        },
+        {
+          "nome": "pct_com_carteira",
+          "tipo": "float64"
+        },
+        {
+          "nome": "pct_contribui_previdencia",
+          "tipo": "float64"
+        }
+      ],
+      "sha256_arquivo": "869134628b153854db37e06ac9058aa6a6c6cd3f336bf125f4cfa11d96d05178",
+      "hash_conteudo": "c8e201a8f6c1807ebf3ae86d8bd5df50c6112dc68af278673fb9f85d37d7defd",
+      "modificado_em": "2026-09-13T17:47:12.960658+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/mecanismo_renda_cohortes_cotas.parquet",
+      "linhas": 2,
+      "colunas": [
+        {
+          "nome": "hiato_total",
+          "tipo": "float64"
+        },
+        {
+          "nome": "parcela_explicada",
+          "tipo": "float64"
+        },
+        {
+          "nome": "parcela_nao_explicada",
+          "tipo": "float64"
+        },
+        {
+          "nome": "pct_explicada",
+          "tipo": "float64"
+        },
+        {
+          "nome": "pct_nao_explicada",
+          "tipo": "float64"
+        },
+        {
+          "nome": "residuo_restrito_coef",
+          "tipo": "float64"
+        },
+        {
+          "nome": "residuo_restrito_erro_padrao",
+          "tipo": "float64"
+        },
+        {
+          "nome": "residuo_restrito_p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "residuo_restrito_significativo",
+          "tipo": "bool"
+        },
+        {
+          "nome": "n_favorecido",
+          "tipo": "int64"
+        },
+        {
+          "nome": "n_desfavorecido",
+          "tipo": "int64"
+        },
+        {
+          "nome": "cohort_era",
+          "tipo": "str"
+        },
+        {
+          "nome": "n_total",
+          "tipo": "int64"
+        }
+      ],
+      "sha256_arquivo": "5b08c8e3973651376be77ec0290898c1c8b1cee94afcdcff1cfcc6f30a1528d1",
+      "hash_conteudo": "14bddb956b87dd11cf6459483fc5b43d5abd05f910cc6b79ea2f184fd87e5988",
+      "modificado_em": "2026-09-14T00:09:58.226193+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/oaxaca_blinder_temporal.parquet",
+      "linhas": 60,
+      "colunas": [
+        {
+          "nome": "hiato_total",
+          "tipo": "float64"
+        },
+        {
+          "nome": "parcela_explicada",
+          "tipo": "float64"
+        },
+        {
+          "nome": "parcela_nao_explicada",
+          "tipo": "float64"
+        },
+        {
+          "nome": "pct_explicada",
+          "tipo": "float64"
+        },
+        {
+          "nome": "pct_nao_explicada",
+          "tipo": "float64"
+        },
+        {
+          "nome": "residuo_restrito_coef",
+          "tipo": "float64"
+        },
+        {
+          "nome": "residuo_restrito_erro_padrao",
+          "tipo": "float64"
+        },
+        {
+          "nome": "residuo_restrito_p_valor",
+          "tipo": "float64"
+        },
+        {
+          "nome": "residuo_restrito_significativo",
+          "tipo": "bool"
+        },
+        {
+          "nome": "n_favorecido",
+          "tipo": "int64"
+        },
+        {
+          "nome": "n_desfavorecido",
+          "tipo": "int64"
+        },
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "ponto",
+          "tipo": "str"
+        }
+      ],
+      "sha256_arquivo": "edfa041f42d422e7c1125d3ae4108cf5f96632ecf4b2ebd7a997d22df37a6a44",
+      "hash_conteudo": "082308135c8a4e887c3aed4a24d5b57ec5b6bf67bf7f2d616c8b161385a06f0d",
+      "modificado_em": "2026-09-13T17:33:00.275737+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/ocupacao.parquet",
+      "linhas": 105969,
+      "colunas": [
+        {
+          "nome": "nivel_geografico",
+          "tipo": "str"
+        },
+        {
+          "nome": "geografia",
+          "tipo": "str"
+        },
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "raca_cor",
+          "tipo": "str"
+        },
+        {
+          "nome": "sexo",
+          "tipo": "str"
+        },
+        {
+          "nome": "faixa_etaria",
+          "tipo": "str"
+        },
+        {
+          "nome": "n_amostra",
+          "tipo": "int64"
+        },
+        {
+          "nome": "pop_forca_trabalho",
+          "tipo": "float64"
+        },
+        {
+          "nome": "pop_ocupados",
+          "tipo": "float64"
+        },
+        {
+          "nome": "pop_desocupados",
+          "tipo": "float64"
+        },
+        {
+          "nome": "taxa_desocupacao_pct",
+          "tipo": "float64"
+        }
+      ],
+      "sha256_arquivo": "d5180c7b61650ea3ebb6bc9c9be07ad22fdb31ae73c9a76e57d8dfbf821f2771",
+      "hash_conteudo": "de96e53e818010f8ec036de7865bcc50a1bc07c97f18baee55194249f950ff1f",
+      "modificado_em": "2026-09-13T17:47:08.919768+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/painel_cohortes_superior_completo.parquet",
+      "linhas": 57,
+      "colunas": [
+        {
+          "nome": "ano_nascimento",
+          "tipo": "int64"
+        },
+        {
+          "nome": "raca_cor",
+          "tipo": "str"
+        },
+        {
+          "nome": "pct_superior",
+          "tipo": "float64"
+        },
+        {
+          "nome": "n_amostra",
+          "tipo": "int64"
+        }
+      ],
+      "sha256_arquivo": "d2fe072e28cfb7721aab2ba012fef1521bc394aef61dfc6d79fa047970e5b203",
+      "hash_conteudo": "e10a0aae6fc734d975b14b86415e8a1c401f8242c75bd2cbe1f388f06633a23d",
+      "modificado_em": "2026-09-14T00:07:10.902121+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/painel_cohortes_superior_completo_area.parquet",
+      "linhas": 114,
+      "colunas": [
+        {
+          "nome": "ano_nascimento",
+          "tipo": "int64"
+        },
+        {
+          "nome": "raca_cor",
+          "tipo": "str"
+        },
+        {
+          "nome": "estrato",
+          "tipo": "str"
+        },
+        {
+          "nome": "pct_superior",
+          "tipo": "float64"
+        },
+        {
+          "nome": "n_amostra",
+          "tipo": "int64"
+        }
+      ],
+      "sha256_arquivo": "3ee2f54bd087148f53f79b05f32807ffd6ce046fca148e1e12da9875815d65ea",
+      "hash_conteudo": "ed4a03fdf08cc2b0b17b08a18e4730b21c1d46272653395b4dee232752a6545b",
+      "modificado_em": "2026-09-14T00:10:08.825769+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/painel_cohortes_superior_completo_regiao.parquet",
+      "linhas": 285,
+      "colunas": [
+        {
+          "nome": "ano_nascimento",
+          "tipo": "int64"
+        },
+        {
+          "nome": "raca_cor",
+          "tipo": "str"
+        },
+        {
+          "nome": "estrato",
+          "tipo": "str"
+        },
+        {
+          "nome": "pct_superior",
+          "tipo": "float64"
+        },
+        {
+          "nome": "n_amostra",
+          "tipo": "int64"
+        }
+      ],
+      "sha256_arquivo": "462ecf6b23069b3ab935c174b10b649878d7b285ea628f343a5ed680b36e7453",
+      "hash_conteudo": "3ba6e93ab31c2b4218633b69f8d2630a330f997027fb4a685473a626f3d3316e",
+      "modificado_em": "2026-09-14T00:10:02.041642+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/percentil_de_valor_racial.parquet",
+      "linhas": 1044,
+      "colunas": [
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "raca_cor",
+          "tipo": "str"
+        },
+        {
+          "nome": "valor_referencia",
+          "tipo": "int64"
+        },
+        {
+          "nome": "percentil_correspondente",
+          "tipo": "float64"
+        }
+      ],
+      "sha256_arquivo": "7653c982599569c921aade315cba1eaeef9e166893773a7c139e2edd31f6f741",
+      "hash_conteudo": "b4376d0336dc4592e9ae49f7e69675c4491798155f87eebb0e944ce60bda755e",
+      "modificado_em": "2026-09-13T17:46:59.239010+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/perfil_quartis_racial.parquet",
+      "linhas": 8814,
+      "colunas": [
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "raca_cor",
+          "tipo": "str"
+        },
+        {
+          "nome": "quartil",
+          "tipo": "str"
+        },
+        {
+          "nome": "n_quartil",
+          "tipo": "int64"
+        },
+        {
+          "nome": "pct_populacao_capturada",
+          "tipo": "float64"
+        },
+        {
+          "nome": "dimensao",
+          "tipo": "str"
+        },
+        {
+          "nome": "categoria",
+          "tipo": "str"
+        },
+        {
+          "nome": "pct_do_quartil",
+          "tipo": "float64"
+        }
+      ],
+      "sha256_arquivo": "b2d97017231aa500ccad4dc53f57e093fa179ea7fc8d3bb1ad77d6a262ec0c3c",
+      "hash_conteudo": "2690269b8452e6d9abf489ccaf621b83b62c5d3fedf4b6572fcb03d238c8abdf",
+      "modificado_em": "2026-09-13T17:43:43.641748+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/perfil_quartis_racial_indigena.parquet",
+      "linhas": 75,
+      "colunas": [
+        {
+          "nome": "trimestre_inicio",
+          "tipo": "str"
+        },
+        {
+          "nome": "trimestre_fim",
+          "tipo": "str"
+        },
+        {
+          "nome": "quartil",
+          "tipo": "str"
+        },
+        {
+          "nome": "n_quartil",
+          "tipo": "int64"
+        },
+        {
+          "nome": "pct_populacao_capturada",
+          "tipo": "float64"
+        },
+        {
+          "nome": "dimensao",
+          "tipo": "str"
+        },
+        {
+          "nome": "categoria",
+          "tipo": "str"
+        },
+        {
+          "nome": "pct_do_quartil",
+          "tipo": "float64"
+        }
+      ],
+      "sha256_arquivo": "cec5bbb99e8913d32770dc979f8884e93a0998a6388274256e649b3e5167f009",
+      "hash_conteudo": "fb47d503350aef173986e9f695a8490479ebcd4c5e01e1bc8f24d824fe139b3d",
+      "modificado_em": "2026-09-13T17:44:18.785184+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/perfil_quartis_racial_pretaparda.parquet",
+      "linhas": 8802,
+      "colunas": [
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "raca_cor",
+          "tipo": "str"
+        },
+        {
+          "nome": "quartil",
+          "tipo": "str"
+        },
+        {
+          "nome": "n_quartil",
+          "tipo": "int64"
+        },
+        {
+          "nome": "pct_populacao_capturada",
+          "tipo": "float64"
+        },
+        {
+          "nome": "dimensao",
+          "tipo": "str"
+        },
+        {
+          "nome": "categoria",
+          "tipo": "str"
+        },
+        {
+          "nome": "pct_do_quartil",
+          "tipo": "float64"
+        }
+      ],
+      "sha256_arquivo": "37d942e283f8d27c6ba87e32405cfda506383ce8b11b8a6735018b081688970f",
+      "hash_conteudo": "2e06d894401553a06b8538b72f77ecc9ee16cb888fbb4379c4c52b7ea2a61a7b",
+      "modificado_em": "2026-09-13T17:44:18.345862+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/perfil_topo10_racial.parquet",
+      "linhas": 2169,
+      "colunas": [
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "raca_cor",
+          "tipo": "str"
+        },
+        {
+          "nome": "limiar_p90",
+          "tipo": "float64"
+        },
+        {
+          "nome": "n_topo10",
+          "tipo": "int64"
+        },
+        {
+          "nome": "pct_populacao_capturada",
+          "tipo": "float64"
+        },
+        {
+          "nome": "dimensao",
+          "tipo": "str"
+        },
+        {
+          "nome": "categoria",
+          "tipo": "str"
+        },
+        {
+          "nome": "pct_do_topo10",
+          "tipo": "float64"
+        }
+      ],
+      "sha256_arquivo": "8de92a54c8a3ea7f7e3b97a8080ae35c7bd812fcdcb050370696f1018ba87fd1",
+      "hash_conteudo": "1afc13c1f36cb505af75ef8a5c9c388b2acd756dec0f5c41f8490fee0959471d",
+      "modificado_em": "2026-09-13T17:42:56.794121+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/perfil_topo10_racial_indigena.parquet",
+      "linhas": 17,
+      "colunas": [
+        {
+          "nome": "trimestre_inicio",
+          "tipo": "str"
+        },
+        {
+          "nome": "trimestre_fim",
+          "tipo": "str"
+        },
+        {
+          "nome": "limiar_p90",
+          "tipo": "float64"
+        },
+        {
+          "nome": "n_topo10",
+          "tipo": "int64"
+        },
+        {
+          "nome": "pct_populacao_capturada",
+          "tipo": "float64"
+        },
+        {
+          "nome": "dimensao",
+          "tipo": "str"
+        },
+        {
+          "nome": "categoria",
+          "tipo": "str"
+        },
+        {
+          "nome": "pct_do_topo10",
+          "tipo": "float64"
+        }
+      ],
+      "sha256_arquivo": "33c8106e3cb5ec1630e43147cd077725d91fac13e4102178a47b70fbd0fb5a4a",
+      "hash_conteudo": "9d45e759dee0b63302d45121d964a30f15bb9d05e7f808cd30458459ca3f4b70",
+      "modificado_em": "2026-09-13T17:44:18.776157+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/perfil_topo10_racial_pretaparda.parquet",
+      "linhas": 2144,
+      "colunas": [
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "raca_cor",
+          "tipo": "str"
+        },
+        {
+          "nome": "limiar_p90",
+          "tipo": "float64"
+        },
+        {
+          "nome": "n_topo10",
+          "tipo": "int64"
+        },
+        {
+          "nome": "pct_populacao_capturada",
+          "tipo": "float64"
+        },
+        {
+          "nome": "dimensao",
+          "tipo": "str"
+        },
+        {
+          "nome": "categoria",
+          "tipo": "str"
+        },
+        {
+          "nome": "pct_do_topo10",
+          "tipo": "float64"
+        }
+      ],
+      "sha256_arquivo": "dde4ba88b5902ad2b40575f2506db1935ecdf7ad3192b04187148b83563f19df",
+      "hash_conteudo": "c5097ea615338bfbd5782bbe55984e199057689db1de25e160938d8c0851f086",
+      "modificado_em": "2026-09-13T17:44:18.303016+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/quartis_multi_racial.parquet",
+      "linhas": 23171,
+      "colunas": [
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "recorte",
+          "tipo": "str"
+        },
+        {
+          "nome": "grupo",
+          "tipo": "str"
+        },
+        {
+          "nome": "quartil",
+          "tipo": "str"
+        },
+        {
+          "nome": "dimensao",
+          "tipo": "str"
+        },
+        {
+          "nome": "categoria",
+          "tipo": "str"
+        },
+        {
+          "nome": "pct_do_quartil",
+          "tipo": "float64"
+        },
+        {
+          "nome": "pct_populacao_capturada",
+          "tipo": "float64"
+        }
+      ],
+      "sha256_arquivo": "daa965e2d78ffca312fc6dcb6310f832adbf30ae6c2d4f1e63c0e6c6b375eaa2",
+      "hash_conteudo": "99fedb24a8e9e4f0c113c660658fd06055104c7205b4841721732c8268b989dd",
+      "modificado_em": "2026-09-13T17:46:42.435550+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/quebra_estrutural.parquet",
+      "linhas": 3,
+      "colunas": [
+        {
+          "nome": "evento",
+          "tipo": "str"
+        },
+        {
+          "nome": "ano_evento",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre_evento",
+          "tipo": "int64"
+        },
+        {
+          "nome": "coef_mudanca_patamar",
+          "tipo": "float64"
+        },
+        {
+          "nome": "p_valor_mudanca_patamar",
+          "tipo": "float64"
+        },
+        {
+          "nome": "coef_mudanca_inclinacao",
+          "tipo": "float64"
+        },
+        {
+          "nome": "p_valor_mudanca_inclinacao",
+          "tipo": "float64"
+        },
+        {
+          "nome": "significativo_a_5pct",
+          "tipo": "bool"
+        }
+      ],
+      "sha256_arquivo": "0339917745f6a524b6beb1996332f8fd4d807704668695144927ea4d82b3b992",
+      "hash_conteudo": "63fbebe51b8d296e9695f5650f81331d1ea57eb5c6f6733a80595579a7c0c1a9",
+      "modificado_em": "2026-09-13T17:14:24.711519+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/renda.parquet",
+      "linhas": 105969,
+      "colunas": [
+        {
+          "nome": "nivel_geografico",
+          "tipo": "str"
+        },
+        {
+          "nome": "geografia",
+          "tipo": "str"
+        },
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "raca_cor",
+          "tipo": "str"
+        },
+        {
+          "nome": "sexo",
+          "tipo": "str"
+        },
+        {
+          "nome": "faixa_etaria",
+          "tipo": "str"
+        },
+        {
+          "nome": "n_amostra",
+          "tipo": "int64"
+        },
+        {
+          "nome": "populacao_estimada",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_habitual_nominal_media",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_efetiva_nominal_media",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_habitual_real_media",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_efetiva_real_media",
+          "tipo": "float64"
+        }
+      ],
+      "sha256_arquivo": "77e7c0040189ff98b84a224ef29cb07695ee6810a17bb220c30498283a219921",
+      "hash_conteudo": "75f5d38032daa18e488b483d56b7d49c76d566b59c69374924010883aa884085",
+      "modificado_em": "2026-09-13T17:06:57.848823+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/renda_completa.parquet",
+      "linhas": 20377,
+      "colunas": [
+        {
+          "nome": "nivel_geografico",
+          "tipo": "str"
+        },
+        {
+          "nome": "geografia",
+          "tipo": "str"
+        },
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "raca_cor",
+          "tipo": "str"
+        },
+        {
+          "nome": "sexo",
+          "tipo": "str"
+        },
+        {
+          "nome": "faixa_etaria",
+          "tipo": "str"
+        },
+        {
+          "nome": "nivel_instrucao",
+          "tipo": "str"
+        },
+        {
+          "nome": "n_amostra",
+          "tipo": "int64"
+        },
+        {
+          "nome": "populacao_estimada",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_habitual_real_media",
+          "tipo": "float64"
+        }
+      ],
+      "sha256_arquivo": "19891b7bab619eef4e39f7816b2b8248a54e47f90e7ab3b898b16816788ee3f8",
+      "hash_conteudo": "dac2ced8bbbe68401c20058c2408921c083df2a80b9cebc131f64c679472a02a",
+      "modificado_em": "2026-09-13T17:07:13.995636+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/renda_completa_geracao.parquet",
+      "linhas": 20735,
+      "colunas": [
+        {
+          "nome": "nivel_geografico",
+          "tipo": "str"
+        },
+        {
+          "nome": "geografia",
+          "tipo": "str"
+        },
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "raca_cor",
+          "tipo": "str"
+        },
+        {
+          "nome": "sexo",
+          "tipo": "str"
+        },
+        {
+          "nome": "geracao",
+          "tipo": "str"
+        },
+        {
+          "nome": "nivel_instrucao",
+          "tipo": "str"
+        },
+        {
+          "nome": "n_amostra",
+          "tipo": "int64"
+        },
+        {
+          "nome": "populacao_estimada",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_habitual_real_media",
+          "tipo": "float64"
+        }
+      ],
+      "sha256_arquivo": "9807ae845b4236c7374f40412380d198076e7e52fe0f70bbcf902e6ebcf32657",
+      "hash_conteudo": "8d161cffcd36c7774c23b73f9b964055dfb6b1ba447f3cbc7917d585160f1d4d",
+      "modificado_em": "2026-09-13T17:07:15.174418+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/renda_multidimensional_faixa.parquet",
+      "linhas": 2869,
+      "colunas": [
+        {
+          "nome": "raca_cor",
+          "tipo": "str"
+        },
+        {
+          "nome": "sexo",
+          "tipo": "str"
+        },
+        {
+          "nome": "faixa_etaria",
+          "tipo": "str"
+        },
+        {
+          "nome": "nivel_instrucao",
+          "tipo": "str"
+        },
+        {
+          "nome": "grupamento_ocupacional",
+          "tipo": "str"
+        },
+        {
+          "nome": "n_amostra",
+          "tipo": "int64"
+        },
+        {
+          "nome": "populacao_estimada",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_habitual_real_media",
+          "tipo": "float64"
+        }
+      ],
+      "sha256_arquivo": "fe1a019abb77a6f2f09de7371dfd0bacb015512502599ea7bc28ac9f1858139d",
+      "hash_conteudo": "459cf3d6220411d7ca93cee562d35edfa65958a2cc6df5d3063cb87dacaa71d6",
+      "modificado_em": "2026-09-13T17:07:15.541482+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/renda_multidimensional_geracao.parquet",
+      "linhas": 2830,
+      "colunas": [
+        {
+          "nome": "raca_cor",
+          "tipo": "str"
+        },
+        {
+          "nome": "sexo",
+          "tipo": "str"
+        },
+        {
+          "nome": "geracao",
+          "tipo": "str"
+        },
+        {
+          "nome": "nivel_instrucao",
+          "tipo": "str"
+        },
+        {
+          "nome": "grupamento_ocupacional",
+          "tipo": "str"
+        },
+        {
+          "nome": "n_amostra",
+          "tipo": "int64"
+        },
+        {
+          "nome": "populacao_estimada",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_habitual_real_media",
+          "tipo": "float64"
+        }
+      ],
+      "sha256_arquivo": "11015bba62a8433f1a2ab3bd10e9440537a8a46c2a6eca010f76893e63e5e93b",
+      "hash_conteudo": "ac0fa4b4dcc2b961ee56f144147c98653c258573bd865b06f620c567b0d5dfe5",
+      "modificado_em": "2026-09-13T17:07:15.920228+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/renda_por_escolaridade.parquet",
+      "linhas": 143157,
+      "colunas": [
+        {
+          "nome": "nivel_geografico",
+          "tipo": "str"
+        },
+        {
+          "nome": "geografia",
+          "tipo": "str"
+        },
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "raca_cor",
+          "tipo": "str"
+        },
+        {
+          "nome": "sexo",
+          "tipo": "str"
+        },
+        {
+          "nome": "nivel_instrucao",
+          "tipo": "str"
+        },
+        {
+          "nome": "n_amostra",
+          "tipo": "int64"
+        },
+        {
+          "nome": "populacao_estimada",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_habitual_real_media",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_efetiva_real_media",
+          "tipo": "float64"
+        }
+      ],
+      "sha256_arquivo": "907e226a888de3033c081f42625d6863b23b9de9afec152661cf888764b2408b",
+      "hash_conteudo": "07616f7ee5bb94b5391a13501f3f4f381dac1f8a1aa226b6028358989f195941",
+      "modificado_em": "2026-09-13T17:07:09.623206+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/renda_por_geracao.parquet",
+      "linhas": 105569,
+      "colunas": [
+        {
+          "nome": "nivel_geografico",
+          "tipo": "str"
+        },
+        {
+          "nome": "geografia",
+          "tipo": "str"
+        },
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "raca_cor",
+          "tipo": "str"
+        },
+        {
+          "nome": "sexo",
+          "tipo": "str"
+        },
+        {
+          "nome": "geracao",
+          "tipo": "str"
+        },
+        {
+          "nome": "n_amostra",
+          "tipo": "int64"
+        },
+        {
+          "nome": "populacao_estimada",
+          "tipo": "float64"
+        },
+        {
+          "nome": "renda_habitual_real_media",
+          "tipo": "float64"
+        }
+      ],
+      "sha256_arquivo": "c7debf2fdf61e593772118477f26f3c52bcf666c0cf35796675a844551a54cd3",
+      "hash_conteudo": "91741b02cd0f1f38105ef013a8b8b48142018bb3ee57ae0ba5e910f14d1067e9",
+      "modificado_em": "2026-09-13T17:07:13.008162+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/ritmo_convergencia_hiatos.parquet",
+      "linhas": 3,
+      "colunas": [
+        {
+          "nome": "par",
+          "tipo": "str"
+        },
+        {
+          "nome": "n_trimestres",
+          "tipo": "int64"
+        },
+        {
+          "nome": "hiato_percentual_atual",
+          "tipo": "float64"
+        },
+        {
+          "nome": "inclinacao_pp_por_trimestre",
+          "tipo": "float64"
+        },
+        {
+          "nome": "inclinacao_pp_por_ano",
+          "tipo": "float64"
+        },
+        {
+          "nome": "r2",
+          "tipo": "float64"
+        },
+        {
+          "nome": "p_valor_inclinacao",
+          "tipo": "float64"
+        },
+        {
+          "nome": "inclinacao_pct_por_trimestre_log",
+          "tipo": "float64"
+        },
+        {
+          "nome": "p_valor_inclinacao_log",
+          "tipo": "float64"
+        },
+        {
+          "nome": "r2_log",
+          "tipo": "float64"
+        },
+        {
+          "nome": "tendencia_confiavel",
+          "tipo": "bool"
+        },
+        {
+          "nome": "anos_para_zerar_extrapolacao_ingenua",
+          "tipo": "float64"
+        },
+        {
+          "nome": "inclinacao_pp_por_trimestre_suavizada",
+          "tipo": "float64"
+        },
+        {
+          "nome": "r2_suavizada",
+          "tipo": "float64"
+        }
+      ],
+      "sha256_arquivo": "863cd93b8bf868880cd45ab361974f516cb958b8a48ebc44d9670537f77cc36e",
+      "hash_conteudo": "48f6be0584c3b718bba25097b9d5a17acab6aeadce5816121cd7de7114ca2c21",
+      "modificado_em": "2026-09-13T17:14:24.767437+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/segregacao_ocupacional.parquet",
+      "linhas": 58,
+      "colunas": [
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "indice_duncan_branca_negra",
+          "tipo": "float64"
+        }
+      ],
+      "sha256_arquivo": "f9711d4c642819edb30a9ee87f17648a368e26985453a4635e6d5d7243b7950f",
+      "hash_conteudo": "a1066636920debe77a99a992927bd6a297e729b5111e700c69045c8b21fa916f",
+      "modificado_em": "2026-09-13T17:47:00.213478+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/segregacao_ocupacional_indigena.parquet",
+      "linhas": 1,
+      "colunas": [
+        {
+          "nome": "n_trimestres_pooled",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre_inicio",
+          "tipo": "str"
+        },
+        {
+          "nome": "trimestre_fim",
+          "tipo": "str"
+        },
+        {
+          "nome": "indice_duncan_branca_indigena",
+          "tipo": "float64"
+        }
+      ],
+      "sha256_arquivo": "68fd227638f9f7714eab24e4e75a3232a5b8403a69326a57de154eb38a895835",
+      "hash_conteudo": "89adb7671e4232f5d6119dcd07ded1084352b699b9cd409c27d7a8e1728aa7f4",
+      "modificado_em": "2026-09-13T17:47:03.702916+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/segregacao_ocupacional_pretaparda.parquet",
+      "linhas": 58,
+      "colunas": [
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "indice_duncan_preta_parda",
+          "tipo": "float64"
+        }
+      ],
+      "sha256_arquivo": "366922d5569ee59f34f2019822814f4e36ac0f2b069c1f0de4585be361942615",
+      "hash_conteudo": "0a487e3aec4478f1c14369ed85f565c10dc7058ac61385db0016269201e1d2c4",
+      "modificado_em": "2026-09-13T17:47:02.185329+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/segregacao_setorial.parquet",
+      "linhas": 58,
+      "colunas": [
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "indice_duncan_branca_negra",
+          "tipo": "float64"
+        }
+      ],
+      "sha256_arquivo": "c0c4d1fff2c308f6172f2606c4cbe53d6ba245b70d86d50fc82755664f67b46d",
+      "hash_conteudo": "86ab7f27cc6669eea99f6542d9d6eb438c2567a9a995ecb1c0584fbd215d07eb",
+      "modificado_em": "2026-09-13T17:47:01.292382+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/segregacao_setorial_pretaparda.parquet",
+      "linhas": 58,
+      "colunas": [
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "indice_duncan_preta_parda",
+          "tipo": "float64"
+        }
+      ],
+      "sha256_arquivo": "1e7e7057340e8acaac32165600f4202f21d576fac73f971e3dfef17ffaf1c974",
+      "hash_conteudo": "6c5f9ab66175ff27552310d9cea2ed561d3ba8823577702196bcae5c0b33d1b2",
+      "modificado_em": "2026-09-13T17:47:03.302157+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/sobrequalificacao.parquet",
+      "linhas": 23109,
+      "colunas": [
+        {
+          "nome": "nivel_geografico",
+          "tipo": "str"
+        },
+        {
+          "nome": "geografia",
+          "tipo": "str"
+        },
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        },
+        {
+          "nome": "raca_cor",
+          "tipo": "str"
+        },
+        {
+          "nome": "sexo",
+          "tipo": "str"
+        },
+        {
+          "nome": "n_amostra",
+          "tipo": "int64"
+        },
+        {
+          "nome": "populacao_estimada",
+          "tipo": "float64"
+        },
+        {
+          "nome": "pop_superior_completo_ocupado",
+          "tipo": "float64"
+        },
+        {
+          "nome": "pct_sobrequalificado",
+          "tipo": "float64"
+        }
+      ],
+      "sha256_arquivo": "06466518a53111a8497f0354ed8f4284283932fe30d6df474ace1b260c33d171",
+      "hash_conteudo": "095d78f978e35324431bf714934f892781e45851d26ab745dc9c3eb3d8a7e393",
+      "modificado_em": "2026-09-13T17:47:26.989739+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/theil_racial.parquet",
+      "linhas": 58,
+      "colunas": [
+        {
+          "nome": "theil_total",
+          "tipo": "float64"
+        },
+        {
+          "nome": "theil_entre_grupos",
+          "tipo": "float64"
+        },
+        {
+          "nome": "theil_dentro_grupos",
+          "tipo": "float64"
+        },
+        {
+          "nome": "pct_entre_grupos",
+          "tipo": "float64"
+        },
+        {
+          "nome": "pct_dentro_grupos",
+          "tipo": "float64"
+        },
+        {
+          "nome": "ano",
+          "tipo": "int64"
+        },
+        {
+          "nome": "trimestre",
+          "tipo": "int64"
+        }
+      ],
+      "sha256_arquivo": "e6dee2b6be8127399bbe30e03538af8fe7bff61d03ee88996cca8b6e77b4e38d",
+      "hash_conteudo": "f2d71286a122008dd5645bc2dfac2356a222e8563991516e70781170bc1eb95e",
+      "modificado_em": "2026-09-13T17:14:24.628800+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/transicao_desemprego_emprego.parquet",
+      "linhas": 10,
+      "colunas": [
+        {
+          "nome": "raca_cor",
+          "tipo": "str"
+        },
+        {
+          "nome": "sexo",
+          "tipo": "str"
+        },
+        {
+          "nome": "n_amostra",
+          "tipo": "int64"
+        },
+        {
+          "nome": "taxa",
+          "tipo": "float64"
+        },
+        {
+          "nome": "ic_inferior",
+          "tipo": "float64"
+        },
+        {
+          "nome": "ic_superior",
+          "tipo": "float64"
+        }
+      ],
+      "sha256_arquivo": "e255f4dbd15bcf58767bcc3a3e97e439c6b65de3ac2c26560ca49601acaf4d94",
+      "hash_conteudo": "68a11a1e8e3754ae22abbe3595994a0f18b1de1593292bacbb4b86d28bbd6fde",
+      "modificado_em": "2026-09-13T17:47:34.290858+00:00",
+      "versionado_git": true
+    },
+    {
+      "arquivo": "data/processed/transicao_informal_formal.parquet",
+      "linhas": 10,
+      "colunas": [
+        {
+          "nome": "raca_cor",
+          "tipo": "str"
+        },
+        {
+          "nome": "sexo",
+          "tipo": "str"
+        },
+        {
+          "nome": "n_amostra",
+          "tipo": "int64"
+        },
+        {
+          "nome": "taxa",
+          "tipo": "float64"
+        },
+        {
+          "nome": "ic_inferior",
+          "tipo": "float64"
+        },
+        {
+          "nome": "ic_superior",
+          "tipo": "float64"
+        }
+      ],
+      "sha256_arquivo": "4b70e3fc910ef9793bafdbc205624c456da1c71e979a762f7bea9c88c844b897",
+      "hash_conteudo": "ab109db15f4a9105d57f42d76a3c54f023533246283d2c2c5a64cb4135715c89",
+      "modificado_em": "2026-09-13T17:47:40.979800+00:00",
+      "versionado_git": true
+    }
+  ]
+}
