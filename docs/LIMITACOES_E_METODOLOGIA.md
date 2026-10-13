@@ -107,29 +107,66 @@ trimestres) para trazer essa coluna — usada na decomposição do hiato racial 
   de `cov_type` i.i.d. padrão, sem capturar o conglomerado por UPA do desenho amostral
   complexo da PNAD Contínua — corrigido para `cov_type='cluster'` sobre a UPA nos três
   modelos WLS (ver seção "Hardening" abaixo para o antes/depois). Ainda não é o desenho
-  completo (réplicas de estratificação por Estrato, que a PNAD Contínua pública não
-  distribui) — o que sobra de otimismo no erro-padrão é bem menor do que o corrigido aqui.
-- **Hiato histórico por Welch** (`pnadc_core.tabela_hiatos_significancia`, usada em
-  `gerar_hiato_racial` e toda a família de hiatos): mesma limitação do Oaxaca-Blinder acima
-  (só peso analítico, sem UPA), mas sem um `cov_type='cluster'` pronto pra usar — o teste de
-  Welch aqui é calculado à mão, não via regressão. Checagem de robustez feita
-  via `pnadc_core.erro_padrao_cluster_bootstrap` (bootstrap por cluster, 200 réplicas)
-  rodada sobre os 58 trimestres de `hiato_racial.parquet`
-  (`src/processing/checagem_robustez_hiato.py` →
-  `data/processed/checagem_robustez_hiato_racial.parquet`): o erro-padrão bootstrap ficou
-  **54×-90× maior** (média 67×) que o erro-padrão em produção — bem mais dramático que a
-  inflação de 2-3× vista no Oaxaca-Blinder. Causa identificada (não é bug): renda tem cauda
-  MUITO pesada (ex.: 2012 T1, Branca — mediana R\$2.089, máximo R\$328.247) e o bootstrap por
-  cluster reamostra a UPA inteira como bloco; quando uma UPA isolada concentra 1-2 pessoas com
-  renda extrema (achado real e conferido no microdado bruto — não um artefato do pipeline),
-  ela entra/sai do bootstrap de forma binária a cada réplica, inflando a variância muito mais
-  do que a fórmula fechada (que nunca trata UPA como bloco) ou do que um erro-padrão
-  clusterizado de regressão (que pesa a CONTRIBUIÇÃO de cada observação ao score do modelo,
-  não o valor bruto — bem menos sensível a um único outlier). **Apesar disso, os 58
-  trimestres continuam significativos** mesmo sob esse erro-padrão muito mais conservador —
-  o hiato (~R\$1.750-2.040) segue de longe maior que o erro-padrão bootstrap (~R\$55-90).
-  Não substitui `tabela_hiatos_significancia` em produção, só confirma que a conclusão de
-  significância resiste a um método de erro-padrão bem mais rigoroso.
+  completo: o Estrato não entra no `cov_type='cluster'` (e os pesos replicados existem nos
+  microdados, mas não estão extraídos; ver a correção de 12/10/2026 logo abaixo).
+- **Correção de 12/10/2026 — erro-padrão dos hiatos** (`pnadc_core.tabela_hiatos_significancia`,
+  `gerar_hiato_racial` e toda a família `hiato_*`; E1 da auditoria, `docs/auditoria/rodada1.md`).
+  A explicação anterior ("causa identificada, não é bug", citada abaixo como histórico)
+  **estava errada**. A diferença de 54–90× entre o EP de produção e o bootstrap por UPA era
+  sobretudo um **erro de fórmula**:
+  - **Causa dominante: a potência do peso.** O EP antigo era `Σ w(x−m)² / (Σw)²`, que trata
+    V1028 (pessoas representadas, média ~400) como peso de FREQUÊNCIA, isto é, como se cada
+    registro fossem centenas de observações independentes. O resultado muda com a escala dos
+    pesos: com os mesmos dados sintéticos (n = 100.000), pesos constantes 1, 10 e 500 dão EP
+    9,67, 3,06 e 0,43. Nos dados reais (hiato Branca–Negra), corrigir só o peso, tratando cada
+    pessoa como sua própria UPA, já multiplica o EP por **28,6×** (2012T1: R$ 1,07 → R$ 30,54)
+    e **30,1×** (2026T2: R$ 1,12 → R$ 33,81): a ordem de grandeza de √média(V1028) ≈ 19–21,
+    ampliada pela variabilidade dos pesos.
+  - **Resíduo: conglomeração por UPA.** Usar o desenho completo (Estrato + UPA) multiplica o EP
+    por mais **1,73×** (2012T1, → R$ 52,97) e **1,54×** (2026T2, → R$ 52,21). A auditoria
+    estimou esse resíduo em ~2,7× a partir dos agregados; medido nos microdados, é menor. A
+    diferença vem do bootstrap antigo, que ignorava o Estrato e tratava as médias Branca e
+    Negra como independentes (ele dá EP ~13% maior que o desenho completo).
+  - **Método atual:** linearização de Taylor com Estrato e UPA (`src/inference/variancia.py`),
+    médias de grupo como domínios e covariância entre as duas médias incluída na diferença
+    (correlação de 0,08 a 0,42 entre trimestres; ignorá-la aumentaria o EP em 2–16%). Validação
+    independente: bootstrap de Rao-Wu dentro do estrato (1.000 réplicas). Nos 58 trimestres, a
+    razão linearização/bootstrap tem mediana **1,005** (mín. 0,944; máx. 1,047)
+    (`data/processed/checagem_robustez_hiato_racial.parquet`).
+  - **O que se mantém:** a conclusão de que o hiato nacional Branca–Negra é significativo nos 58
+    trimestres **se mantém**: estatística z entre **18,8** e **36,6** (mediana 27,7) sob o EP
+    corrigido (17,8 a 36,8 sob o bootstrap). O que **muda** são os ICs (cerca de 57× mais largos,
+    mediana da série) e as flags de significância de células finas; ver
+    `docs/auditoria/antes_depois.md`.
+  - Estratos com uma única UPA (até 6 por trimestre): centrados na média geral dos totais de
+    UPA (equivalente ao `survey.lonely.psu = "adjust"` do R, *a confirmar*), nunca descartados.
+  - Pesos replicados (`V1028001`–`V1028200`) existem nos microdados do IBGE, mas não estão
+    extraídos (decisão de 12/10/2026); a frase antiga "réplicas de estratificação por Estrato,
+    que a PNAD Contínua pública não distribui" também estava errada.
+
+  Texto anterior, mantido como histórico (incorreto):
+
+  > - **Hiato histórico por Welch** (`pnadc_core.tabela_hiatos_significancia`, usada em
+  > `gerar_hiato_racial` e toda a família de hiatos): mesma limitação do Oaxaca-Blinder acima
+  > (só peso analítico, sem UPA), mas sem um `cov_type='cluster'` pronto pra usar — o teste de
+  > Welch aqui é calculado à mão, não via regressão. Checagem de robustez feita
+  > via `pnadc_core.erro_padrao_cluster_bootstrap` (bootstrap por cluster, 200 réplicas)
+  > rodada sobre os 58 trimestres de `hiato_racial.parquet`
+  > (`src/processing/checagem_robustez_hiato.py` →
+  > `data/processed/checagem_robustez_hiato_racial.parquet`): o erro-padrão bootstrap ficou
+  > **54×-90× maior** (média 67×) que o erro-padrão em produção — bem mais dramático que a
+  > inflação de 2-3× vista no Oaxaca-Blinder. Causa identificada (não é bug): renda tem cauda
+  > MUITO pesada (ex.: 2012 T1, Branca — mediana R\$2.089, máximo R\$328.247) e o bootstrap por
+  > cluster reamostra a UPA inteira como bloco; quando uma UPA isolada concentra 1-2 pessoas com
+  > renda extrema (achado real e conferido no microdado bruto — não um artefato do pipeline),
+  > ela entra/sai do bootstrap de forma binária a cada réplica, inflando a variância muito mais
+  > do que a fórmula fechada (que nunca trata UPA como bloco) ou do que um erro-padrão
+  > clusterizado de regressão (que pesa a CONTRIBUIÇÃO de cada observação ao score do modelo,
+  > não o valor bruto — bem menos sensível a um único outlier). **Apesar disso, os 58
+  > trimestres continuam significativos** mesmo sob esse erro-padrão muito mais conservador —
+  > o hiato (~R\$1.750-2.040) segue de longe maior que o erro-padrão bootstrap (~R\$55-90).
+  > Não substitui `tabela_hiatos_significancia` em produção, só confirma que a conclusão de
+  > significância resiste a um método de erro-padrão bem mais rigoroso.
 - **RIF por quantil** (`pnadc_core.rif_quantil`, Firpo-Fortin-Lemieux 2009): a densidade no
   ponto do quantil é estimada por kernel gaussiano ponderado sobre a distribuição CONJUNTA
   (Branca+Negra), não separadamente por grupo — é assim que a definição de RIF garante que a

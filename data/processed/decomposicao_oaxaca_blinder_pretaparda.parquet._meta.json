@@ -1,0 +1,6 @@
+{
+  "arquivo": "decomposicao_oaxaca_blinder_pretaparda.parquet",
+  "se_metodo": "wls_statsmodels_cluster_upa",
+  "commit": "e27278b4e61e4ede0d809e20e6110fc30a81d643",
+  "gerado_em": "2026-10-13T04:12:57.733376+00:00"
+}

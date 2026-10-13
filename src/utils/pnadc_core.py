@@ -1,8 +1,10 @@
 """Funcoes compartilhadas do projeto PNAD Continua.
 
 Cobre recorte racial/genero, geografia, estatistica ponderada (media, erro
-padrao, IC, coeficiente de variacao), significancia (teste t Welch), deflator
-de renda e coeficiente de Gini ponderado.
+padrao design-based, IC, coeficiente de variacao), significancia (teste t Welch),
+Gini/Theil ponderados e decomposicoes. O deflator usado em producao e o oficial do IBGE
+(src/ingestion/baixar_deflator.py, aplicado na CRIAR_BASE); as funcoes antigas
+`carregar_deflator`/`aplicar_deflator` (IPEA, dividiam) foram removidas em 12/10/2026 (E4).
 """
 
 
@@ -12,6 +14,8 @@ import pandas as pd
 import statsmodels.formula.api as smf
 from scipy import stats
 from scipy.stats import gaussian_kde
+
+from src.inference import variancia
 
 COLUNA_PESO = 'V1028'
 # V2010/V2007/UF/Capital/RM_RIDE são lidos do layout fixo do IBGE como TEXTO (largura
@@ -26,7 +30,6 @@ ORDEM_RECORTE2_MULHERES = ['Mulheres Brancas', 'Mulheres Pretas', 'Mulheres Pard
 ROTULO_GRUPO_RECORTE2 = {('Homem', 'Branca'): 'Homens Brancos', ('Homem', 'Preta'): 'Homens Pretos', ('Homem', 'Parda'): 'Homens Pardos', ('Homem', 'Negra'): 'Homens Negros', ('Homem', 'Indígena'): 'Homens Indígenas', ('Mulher', 'Branca'): 'Mulheres Brancas', ('Mulher', 'Preta'): 'Mulheres Pretas', ('Mulher', 'Parda'): 'Mulheres Pardas', ('Mulher', 'Negra'): 'Mulheres Negras', ('Mulher', 'Indígena'): 'Mulheres Indígenas'}
 REGIAO_POR_UF = {'11': 'Norte', '12': 'Norte', '13': 'Norte', '14': 'Norte', '15': 'Norte', '16': 'Norte', '17': 'Norte', '21': 'Nordeste', '22': 'Nordeste', '23': 'Nordeste', '24': 'Nordeste', '25': 'Nordeste', '26': 'Nordeste', '27': 'Nordeste', '28': 'Nordeste', '29': 'Nordeste', '31': 'Sudeste', '32': 'Sudeste', '33': 'Sudeste', '35': 'Sudeste', '41': 'Sul', '42': 'Sul', '43': 'Sul', '50': 'Centro-Oeste', '51': 'Centro-Oeste', '52': 'Centro-Oeste', '53': 'Centro-Oeste'}
 NIVEIS_GEOGRAFICOS = ['brasil', 'regiao', 'uf', 'capital_interior']
-URL_DEFLATOR_TRIMESTRAL = None
 CORES_RACA = {'Branca': '#4E79A7', 'Preta': '#E15759', 'Parda': '#F28E2B', 'Negra': '#B07AA1', 'Indígena': '#59A14F', 'Amarela': '#EDC948'}
 CORES_GENERO = {'Homem': '#4E79A7', 'Mulher': '#B07AA1'}
 
@@ -42,47 +45,33 @@ def media_ponderada(valores, pesos):
     return np.average(valores[valid], weights=pesos[valid])
 
 
-def erro_padrao_media_ponderada(valores, pesos):
-    """Erro padrão de média ponderada, ignorando NaNs e pesos zero ou negativos."""
-    valores = np.asarray(valores, dtype=float)
-    pesos = np.asarray(pesos, dtype=float)
-    valid = ~np.isnan(valores) & ~np.isnan(pesos) & (pesos > 0)
-    if not valid.any() or len(valores[valid]) == 1: # precisa de pelo menos 2 pontos para calcular EP
-        return np.nan
-    valores = valores[valid]
-    pesos = pesos[valid]
+def erro_padrao_media_ponderada(valores, pesos, upa=None, estrato=None, dominio=None):
+    """Erro padrão *design-based* da média ponderada (linearização de Taylor com
+    `Estrato` e `UPA` — ver `src/inference/variancia.py`). Ignora NaNs e pesos ≤ 0.
 
-    # Cochran (1977), Sampling Techniques, p. 30
-    # Variância (da MÉDIA) = (n / (n-1)) * (sum(w_i * (x_i - mean)^2) / (sum(w_i)^2))
-    # O termo (n / (n-1)) é para amostras finitas.
-    # BUG histórico corrigido em 2026-09-04: a versão anterior usava um denominador
-    # diferente do documentado aqui (sum(w)^2 - sum(w^2)) e ainda multiplicava o
-    # resultado por len(valores) no final — isso inflava o erro padrão em ~sqrt(n)x
-    # (para n ~ centenas de milhares, um fator de centenas de vezes), gerando
-    # intervalos de confiança absurdamente largos mesmo com amostras enormes. Ver
-    # docs/PLANO.md para como isso foi encontrado (banda de IC do gráfico de hiato
-    # racial cobrindo de 40% a mais de 100%, incompatível com p-valores já
-    # extremamente pequenos calculados com a mesma fórmula).
-    n = len(valores)
-    media = np.average(valores, weights=pesos)
-    variancia_media = (n / (n - 1)) * np.sum(pesos * (valores - media)**2) / (np.sum(pesos)**2)
-    erro_padrao = np.sqrt(variancia_media)
-    return erro_padrao
+    `upa` e `estrato` são OBRIGATÓRIOS. Correção de 12/10/2026 (E1 da auditoria Rodada 1):
+    a versão anterior calculava `Σ w(x−m)² / (Σw)²`, que trata V1028 como peso de
+    FREQUÊNCIA — o EP caía com a escala dos pesos (pesos ×500 → EP ÷22) e ignorava a
+    conglomeração por UPA. Ver docs/CHANGELOG_METODOLOGICO.md e
+    docs/LIMITACOES_E_METODOLOGIA.md ("Correção de 12/10/2026").
+    """
+    if upa is None or estrato is None:
+        raise ValueError(
+            "erro_padrao_media_ponderada exige `upa` e `estrato` (desenho da PNAD Contínua). "
+            "A fórmula antiga, só com o peso, foi removida por não ser invariante à escala "
+            "dos pesos (E1, docs/auditoria/rodada1.md)."
+        )
+    return variancia.erro_padrao_media_design(valores, pesos, upa, estrato, dominio=dominio)
 
 
 def erro_padrao_cluster_bootstrap(df, coluna_valor, peso, cluster_col='UPA', n_boot=200, seed=0):
     """Erro padrão da média ponderada de `coluna_valor`, via bootstrap por CLUSTER (UPA) —
     reamostra UPAs inteiras com reposição e recalcula a média ponderada a cada réplica;
-    erro padrão = desvio-padrão das réplicas. Diferente de `erro_padrao_media_ponderada`
-    (que só usa o peso analítico, V1028), este método incorpora o efeito de conglomerado
-    da UPA no desenho amostral complexo da PNAD Contínua — mais conservador (erro padrão
-    maior ou igual), mais lento de calcular.
+    erro padrão = desvio-padrão das réplicas.
 
-    Usado (ver `docs/PLANO.md`, bloco de robustez estatística) como CHECAGEM DE
-    ROBUSTEZ da série histórica de hiatos (`tabela_hiatos_significancia`), que segue
-    usando `erro_padrao_media_ponderada` em produção — este método não a substitui, só
-    confirma se as conclusões de significância se mantêm sob um erro padrão mais
-    conservador (ver `docs/LIMITACOES_E_METODOLOGIA.md`).
+    LEGADO (12/10/2026): ignora o `Estrato` e sorteia n UPAs (não n_h − 1 por estrato).
+    Mantido só para reproduzir a checagem histórica; a checagem independente atual é
+    `src.inference.variancia.erro_padrao_bootstrap_estrato_upa` (Rao-Wu dentro do estrato).
 
     Implementação otimizada: em vez de reamostrar linha a linha a cada réplica (caro para
     centenas de milhares de registros), agrega `sum(peso*valor)` e `sum(peso)` por UPA uma
@@ -127,12 +116,15 @@ def coeficiente_variacao_ponderado(valores, pesos):
     return desvio_padrao / media
 
 
-def intervalo_confianca_media_ponderada(df, coluna_valor, peso=COLUNA_PESO, nivel_confianca=0.95):
-    """Calcula o intervalo de confiança para a média ponderada.
-    Retorna uma tupla (inferior, superior).
+def intervalo_confianca_media_ponderada(df, coluna_valor, peso=COLUNA_PESO, nivel_confianca=0.95,
+                                        upa=None, estrato=None):
+    """Calcula o intervalo de confiança para a média ponderada (EP design-based; `upa` e
+    `estrato` são nomes de coluna obrigatórios). Retorna uma tupla (inferior, superior).
     """
+    if upa is None or estrato is None:
+        raise ValueError("intervalo_confianca_media_ponderada exige `upa` e `estrato` (nomes de coluna).")
     media = media_ponderada(df[coluna_valor], df[peso])
-    ep = erro_padrao_media_ponderada(df[coluna_valor], df[peso])
+    ep = erro_padrao_media_ponderada(df[coluna_valor], df[peso], df[upa], df[estrato])
 
     if np.isnan(media) or np.isnan(ep):
         return np.nan, np.nan
@@ -207,81 +199,62 @@ def preparar_niveis_geograficos(df):
     return df
 
 
-def carregar_deflator(url=URL_DEFLATOR_TRIMESTRAL):
-    """Carrega o deflator de preços trimestral (IPCA-CO2/CO2e) do IPEA. Ajusta os dados
-    para ter um trimestre de referência único (último trimestre completo disponível)
-    e prepara para merge.
+def tabela_hiatos_significancia(df, coluna_valor, col_grupo, grupo_referencia, peso=COLUNA_PESO,
+                                nivel_confianca=0.95, upa=None, estrato=None):
+    """Calcula hiatos de média (grupo − referência), seus intervalos de confiança e
+    p-valor (teste t). Retorna um DataFrame indexado por grupo.
+
+    Inferência *design-based* (12/10/2026, E1 da auditoria): `upa` e `estrato` são nomes
+    de coluna OBRIGATÓRIOS. O DataFrame passado é o universo do cálculo; cada grupo é um
+    DOMÍNIO dentro dele (as UPAs sem ninguém do grupo continuam no cálculo com
+    contribuição zero) e o EP da diferença inclui a covariância entre as duas médias
+    (grupos diferentes dividem UPAs) — ver `src.inference.variancia.diferenca_medias_design`.
     """
-    if url is None:
+    if upa is None or estrato is None:
         raise ValueError(
-            "URL_DEFLATOR_TRIMESTRAL não preenchido. Defina-o no notebook base (pnadc_core.ipynb) "
-            "e regere o pnadc_core.py, ou passe um caminho local válido para o df_deflator."
+            "tabela_hiatos_significancia exige `upa` e `estrato` (nomes de coluna) para o "
+            "erro-padrão design-based (E1, docs/auditoria/rodada1.md)."
         )
-    df_deflator = pd.read_csv(url, sep=';', skiprows=1, decimal=',')
-    df_deflator = df_deflator.iloc[:-1] # ultima linha é nota de rodape
-    df_deflator['Data'] = pd.to_datetime(df_deflator['Data'], format='%d/%m/%Y')
-    df_deflator['ano'] = df_deflator['Data'].dt.year
-    df_deflator['trimestre'] = df_deflator['Data'].dt.quarter
-
-    # Ajustar para o último trimestre completo para que o deflator seja 1
-    ultimo_ano = df_deflator['ano'].max()
-    ultimo_trimestre = df_deflator[df_deflator['ano'] == ultimo_ano]['trimestre'].max()
-    deflator_referencia = df_deflator[(df_deflator['ano'] == ultimo_ano) &
-                                      (df_deflator['trimestre'] == ultimo_trimestre)]['CO2'].iloc[0]
-
-    df_deflator['deflator_ajustado'] = df_deflator['CO2'] / deflator_referencia
-    return df_deflator[['ano', 'trimestre', 'deflator_ajustado']]
-
-
-def aplicar_deflator(df, df_deflator):
-    """Aplica o deflator ao DataFrame de renda, criando colunas '_real'."""
-    df = pd.merge(df, df_deflator, on=['ano', 'trimestre'], how='left')
-    df['VD4019_real'] = df['VD4019'] / df['deflator_ajustado']
-    df['VD4020_real'] = df['VD4020'] / df['deflator_ajustado']
-    return df
-
-
-def tabela_hiatos_significancia(df, coluna_valor, col_grupo, grupo_referencia, peso=COLUNA_PESO, nivel_confianca=0.95):
-    """Calcula hiatos de média, seus intervalos de confiança e p-valor (teste t).
-    Retorna um DataFrame com os resultados.
-    """
     grupos = sorted(df[col_grupo].unique())
 
     if grupo_referencia not in grupos:
         raise ValueError(f"Grupo de referência '{grupo_referencia}' não encontrado na coluna '{col_grupo}'.")
 
-    df_ref = df[df[col_grupo] == grupo_referencia].copy()
-    media_ref = media_ponderada(df_ref[coluna_valor], df_ref[peso])
-    ep_ref = erro_padrao_media_ponderada(df_ref[coluna_valor], df_ref[peso])
+    y, w = df[coluna_valor].to_numpy(dtype=float), df[peso].to_numpy(dtype=float)
+    u, e = df[upa].to_numpy(dtype=object), df[estrato].to_numpy(dtype=object)
+    em_ref = (df[col_grupo] == grupo_referencia).to_numpy()
+    ep_ref = variancia.erro_padrao_media_design(y, w, u, e, dominio=em_ref)
 
     resultados = []
     for grupo in grupos:
+        em_grupo = (df[col_grupo] == grupo).to_numpy()
+        n_grupo = int((em_grupo & ~np.isnan(y) & ~np.isnan(w)).sum())
         if grupo == grupo_referencia:
             hiato_media = 0.0
             p_valor = 1.0
             ic_inferior = 0.0
             ic_superior = 0.0
             significativo = False
+            ep_media, ep_hiato, df_welch = ep_ref, 0.0, np.nan
         else:
-            df_grupo = df[df[col_grupo] == grupo].copy()
-            media_grupo = media_ponderada(df_grupo[coluna_valor], df_grupo[peso])
-            ep_grupo = erro_padrao_media_ponderada(df_grupo[coluna_valor], df_grupo[peso])
+            r = variancia.diferenca_medias_design(y, w, u, e, em_grupo, em_ref)
+            hiato_media = r["diferenca"]
+            ep_media, ep_ref_d, ep_diferenca = r["ep_a"], r["ep_b"], r["ep_diferenca"]
+            ep_hiato = ep_diferenca
+            n1, n2 = r["n_a"], r["n_b"]
 
-            hiato_media = media_grupo - media_ref
-
-            # Erro padrão da diferença de médias (assumindo amostras independentes)
-            ep_diferenca = np.sqrt(ep_grupo**2 + ep_ref**2)
+            # Graus de liberdade de Welch-Satterthwaite com o EP da MÉDIA (corrige o E2: a
+            # versão antiga dividia ep² por n de novo) e n EFETIVO de desenho
+            # (n_ef = s²_w / EP², que já desconta o efeito de desenho), em vez do n bruto.
+            n_ef1 = variancia.n_efetivo_desenho(y[em_grupo], w[em_grupo], ep_media)
+            n_ef2 = variancia.n_efetivo_desenho(y[em_ref], w[em_ref], ep_ref_d)
+            df_welch = variancia.graus_liberdade_welch(ep_media, ep_ref_d, n_ef1, n_ef2)
 
             # Teste t para diferença de médias
             if ep_diferenca > 0:
                 t_stat = hiato_media / ep_diferenca
-                # Graus de liberdade aproximados (Welch-Satterthwaite)
-                n1 = len(df_grupo.dropna(subset=[coluna_valor, peso]))
-                n2 = len(df_ref.dropna(subset=[coluna_valor, peso]))
-                if n1 > 1 and n2 > 1:
-                    df_welch = (ep_grupo**2/n1 + ep_ref**2/n2)**2 / \
-                               ((ep_grupo**2/n1)**2 / (n1-1) + (ep_ref**2/n2)**2 / (n2-1))
-                    p_valor = 2 * (1 - stats.t.cdf(abs(t_stat), df=df_welch))
+                if n1 > 1 and n2 > 1 and not np.isnan(df_welch):
+                    p_valor = 2 * stats.t.sf(abs(t_stat), df=df_welch)
                 else:
                     p_valor = np.nan # Não há dados suficientes para teste t
             else:
@@ -290,7 +263,7 @@ def tabela_hiatos_significancia(df, coluna_valor, col_grupo, grupo_referencia, p
 
             # Intervalo de confiança da diferença
             if not np.isnan(ep_diferenca) and ep_diferenca > 0:
-                if n1 > 1 and n2 > 1:
+                if n1 > 1 and n2 > 1 and not np.isnan(df_welch):
                     # Usar t-distribuição para o IC
                     t_critical = stats.t.ppf((1 + nivel_confianca) / 2, df=df_welch)
                 else:
@@ -311,7 +284,11 @@ def tabela_hiatos_significancia(df, coluna_valor, col_grupo, grupo_referencia, p
             'p_valor': p_valor,
             'ic_inferior': ic_inferior,
             'ic_superior': ic_superior,
-            'significativo': significativo
+            'significativo': significativo,
+            'ep_media': ep_media,
+            'ep_hiato': ep_hiato,
+            'gl_welch': df_welch,
+            'n_amostra': n_grupo,
         })
 
     return pd.DataFrame(resultados).set_index(col_grupo)
@@ -510,7 +487,14 @@ def gini_ponderado_por_grupo(df, coluna_valor, by, peso=COLUNA_PESO):
 def theil_t(valores, pesos):
     """Índice de Theil T (medida de desigualdade), ponderado — T=0 é igualdade
     perfeita (todo mundo ganha a mesma coisa), quanto maior mais desigual. Só definido
-    pra valores > 0 (renda zero ou negativa é excluída, mesma convenção do Gini aqui)."""
+    pra valores > 0: renda zero ou negativa é EXCLUÍDA aqui dentro (log de zero).
+
+    Correção de docstring (12/10/2026, E3): a FUNÇÃO de Gini (`calcular_gini_ponderado`)
+    NÃO exclui zeros — com zeros na entrada, Gini e Theil seriam calculados sobre
+    populações diferentes. Decisão: a população é definida ANTES, por quem chama (renda > 0;
+    em produção `gerar_gini_por_raca` e `gerar_theil_racial` já filtram `renda > 0`, e a
+    partir da Fase 2 a população de referência vem de `src/utils/populacao.py`). Diferença
+    conceitual que permanece: Gini é sensível ao meio da distribuição; Theil T, ao topo."""
     valores = np.asarray(valores, dtype=float)
     pesos = np.asarray(pesos, dtype=float)
     valid = ~np.isnan(valores) & ~np.isnan(pesos) & (pesos > 0) & (valores > 0)

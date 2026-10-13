@@ -2,7 +2,8 @@
 
 Baixa cada trimestre (zip de microdados de largura fixa), interpreta o layout SAS
 oficial, seleciona as colunas de interesse do projeto e grava em Parquet particionado
-por ano/trimestre (data/raw/pnadc_extraido/parquet/ano=AAAA/trimestre=T/parte_NNNN.parquet).
+por ano/trimestre (data/raw/pnadc_extraido_v2/parquet/ano=AAAA/trimestre=T/parte_NNNN.parquet;
+a v1 em data/raw/pnadc_extraido/ é preservada).
 
 Idempotente: um trimestre já processado (marcador _SUCCESS) é pulado. Pode ser
 reexecutado a qualquer momento para só buscar trimestres novos.
@@ -32,8 +33,17 @@ BASE_URL = (
 DOC_URL = f"{BASE_URL}/Documentacao/"
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-OUTPUT_DIR = REPO_ROOT / "data" / "raw" / "pnadc_extraido" / "parquet"
-RAW_TMP_DIR = REPO_ROOT / "data" / "raw" / "pnadc_extraido" / "_tmp"
+# Extração v2 (12/10/2026, Etapa 2 da auditoria): pasta NOVA, para não sobrescrever o
+# extrato v1 (data/raw/pnadc_extraido), que segue sendo a base de produção até a troca
+# da população/renda de referência (Fase 2) — o marcador _SUCCESS faria a v1 pular
+# todos os trimestres sem acrescentar as colunas novas.
+OUTPUT_DIR = REPO_ROOT / "data" / "raw" / "pnadc_extraido_v2" / "parquet"
+# Pesos replicados (V1028001..V1028200) em dataset SEPARADO (mesma partição ano/trimestre,
+# mesma ordem de linhas + chaves de ligação), só quando pedido com --pesos-replicados:
+# são 200 colunas e multiplicam o tamanho da base. Decisão de 12/10/2026: não extrair
+# por enquanto (EP por linearização Estrato/UPA).
+OUTPUT_DIR_REPLICADOS = REPO_ROOT / "data" / "raw" / "pnadc_extraido_v2" / "pesos_replicados"
+RAW_TMP_DIR = REPO_ROOT / "data" / "raw" / "pnadc_extraido_v2" / "_tmp"
 
 CHUNKSIZE = 200_000
 HEADERS = {"User-Agent": "Mozilla/5.0 (datahub-racial-brasil)"}
@@ -57,7 +67,25 @@ VARIAVEIS_DESEJADAS = [
     "VD4019", "VD4020",
     # outras
     "V3001", "V3009A", "V3014", "VD4031", "VD4035",
+    # --- acrescentadas na extração v2 (12/10/2026; ver docs/auditoria/fase0_relatorio.md) ---
+    # desenho amostral / calibração (F5: variância, pós-estratos)
+    "V1027", "V1029", "V1033", "posest", "posest_sxi",
+    # composição do domicílio (C4-C6, H: ligação filhos-pais)
+    "VD2002", "VD2003", "VD2004",
+    # educação: frequência, rede, curso, série (Bloco E). V3003 vale até 3T2015 e V3003A
+    # a partir de 4T2015 (categorias diferentes); V3002A só a partir de 4T2015.
+    "V3002", "V3002A", "V3003", "V3003A", "V3004", "V3005", "V3005A", "V3006", "V3006A",
+    "V3007", "V3008", "V3009", "V3010", "V3011", "V3011A", "V3012", "V3013", "V3013A",
+    "V3013B", "VD3006",
+    # trabalho principal (D3.3 CBO 4 dígitos, D5 informalidade/setor, D6 experiência,
+    # F2: horas do trabalho principal coerentes com VD4016)
+    "V4010", "V4012", "V40121", "V4013", "V4019", "V4028", "V4029", "V4032",
+    "V4039", "V4040", "V40401", "V40402", "V40403",
+    "VD4007", "VD4015", "VD4018", "VD4032", "VD4036",
 ]
+
+PESOS_REPLICADOS = [f"V1028{i:03d}" for i in range(1, 201)]
+CHAVES_LIGACAO = ["UPA", "V1008", "V1014", "V2003"]
 
 
 def listar_diretorio(url: str, tentativas: int = 4) -> list[str]:
@@ -214,11 +242,22 @@ def processar_trimestre(ano: int, trimestre: int, colspecs, nomes_colunas, dtype
         encoding="latin-1",
     )
 
+    replicados = [c for c in nomes_colunas if c in PESOS_REPLICADOS]
+    if replicados:
+        particao_rep = OUTPUT_DIR_REPLICADOS / f"ano={ano}" / f"trimestre={trimestre}"
+        particao_rep.mkdir(parents=True, exist_ok=True)
+
     total_linhas = 0
     for i, bloco in enumerate(leitor):
         for col, tipo in dtypes.items():
             if tipo == "float64":
                 bloco[col] = pd.to_numeric(bloco[col], errors="coerce")
+        if replicados:
+            pq.write_table(
+                pa.Table.from_pandas(bloco[CHAVES_LIGACAO + replicados], preserve_index=False),
+                particao_rep / f"parte_{i:04d}.parquet", compression="zstd",
+            )
+            bloco = bloco.drop(columns=replicados)
         tabela = pa.Table.from_pandas(bloco, preserve_index=False)
         pq.write_table(
             tabela,
@@ -238,14 +277,15 @@ def processar_trimestre(ano: int, trimestre: int, colspecs, nomes_colunas, dtype
     return f"ok ({total_linhas:,} linhas)".replace(",", ".")
 
 
-def main(ano_inicial: int, ano_final: int) -> None:
+def main(ano_inicial: int, ano_final: int, pesos_replicados: bool = False) -> None:
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     RAW_TMP_DIR.mkdir(parents=True, exist_ok=True)
 
     print("Baixando e interpretando o dicionário de variáveis (input SAS)...")
     layout, _ = obter_layout()
     print(f"Layout carregado: {len(layout)} variáveis identificadas.")
-    colspecs, nomes_colunas, dtypes = montar_colspecs(layout, VARIAVEIS_DESEJADAS)
+    variaveis = VARIAVEIS_DESEJADAS + (PESOS_REPLICADOS if pesos_replicados else [])
+    colspecs, nomes_colunas, dtypes = montar_colspecs(layout, variaveis)
     print(f"{len(nomes_colunas)} colunas serão extraídas de cada registro.")
 
     combinacoes = [(a, t) for a in range(ano_inicial, ano_final + 1) for t in (1, 2, 3, 4)]
@@ -280,5 +320,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--ano-inicial", type=int, default=2012)
     parser.add_argument("--ano-final", type=int, default=2026)
+    parser.add_argument("--pesos-replicados", action="store_true",
+                        help="também extrai V1028001..V1028200 (dataset separado)")
     args = parser.parse_args()
-    main(args.ano_inicial, args.ano_final)
+    main(args.ano_inicial, args.ano_final, args.pesos_replicados)

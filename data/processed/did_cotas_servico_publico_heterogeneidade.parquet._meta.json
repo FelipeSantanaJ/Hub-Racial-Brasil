@@ -1,0 +1,8 @@
+{
+  "arquivo": "did_cotas_servico_publico_heterogeneidade.parquet",
+  "se_metodo": "wls_statsmodels_cluster_upa",
+  "commit": "e27278b4e61e4ede0d809e20e6110fc30a81d643",
+  "gerado_em": "2026-10-13T04:23:14.073592+00:00",
+  "familia_fdr": null,
+  "alfa": 0.05
+}

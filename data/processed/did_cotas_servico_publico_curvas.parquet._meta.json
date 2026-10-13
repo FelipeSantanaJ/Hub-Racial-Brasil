@@ -1,0 +1,7 @@
+{
+  "arquivo": "did_cotas_servico_publico_curvas.parquet",
+  "se_metodo": "linearizacao_taylor_estrato_upa",
+  "commit": "e27278b4e61e4ede0d809e20e6110fc30a81d643",
+  "gerado_em": "2026-10-13T04:20:28.099234+00:00",
+  "nota": "se por célula design-based (Estrato/UPA); soma ignora covariância entre células (ver _curva_event_study). Bloqueado para publicação até o B4b."
+}

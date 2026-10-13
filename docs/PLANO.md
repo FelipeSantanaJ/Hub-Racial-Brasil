@@ -375,7 +375,12 @@ Texto completo, com a seção "o que isso NÃO prova", em
    Welch: erro padrão 54×-90× maior (média 67×), puxado por UPAs com rendas extremas
    reamostradas em bloco. Mesmo assim os **58 trimestres continuam significativos**
    (`checagem_robustez_hiato_racial.parquet`).
-3. **Múltiplas comparações**: sem correção formal; o tamanho de efeito (60-70 p.p.) é
+   **Corrigido em 12/10/2026:** a explicação "puxado por UPAs com rendas extremas" estava
+   errada; a diferença vinha da fórmula do EP de produção (peso tratado como frequência).
+   Ver `docs/LIMITACOES_E_METODOLOGIA.md` ("Correção de 12/10/2026") e
+   `docs/CHANGELOG_METODOLOGICO.md`.
+3. **Múltiplas comparações** (*desatualizado: desde 12/10/2026 há `significativo_fdr`, BH por
+   família, ver `src/inference/multiplicidade.py`*): sem correção formal; o tamanho de efeito (60-70 p.p.) é
    ordens de grandeza maior que o que ruído explicaria. Limitação registrada, com atenção
    especial aos cortes de amostra pequena.
 4. **Testes automatizados** (`tests/test_pnadc_core.py`, pytest, 13 casos): round-trip de

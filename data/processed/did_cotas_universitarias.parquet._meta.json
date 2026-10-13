@@ -1,0 +1,8 @@
+{
+  "arquivo": "did_cotas_universitarias.parquet",
+  "se_metodo": "wls_statsmodels_iid_celulas_coorte",
+  "commit": "e27278b4e61e4ede0d809e20e6110fc30a81d643",
+  "gerado_em": "2026-10-13T04:17:01.541609+00:00",
+  "familia_fdr": null,
+  "alfa": 0.05
+}
