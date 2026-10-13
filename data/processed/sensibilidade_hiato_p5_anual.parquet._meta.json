@@ -1,0 +1,27 @@
+{
+  "esquema": "hub-racial-meta/1",
+  "arquivo": "sensibilidade_hiato_p5_anual.parquet",
+  "n_linhas": 112,
+  "gerado_em": "2026-10-13T14:22:45.960175+00:00",
+  "codigo": {
+    "commit": "c1202a10fd9cedb6ee7d78647d0188dfd6dea81e-modificado",
+    "modulo": "__main__"
+  },
+  "insumos": {
+    "chave": "anual_v2",
+    "descricao": "PNAD Contínua anual, Visitas 1 e 5, extrato v2",
+    "hash": "27d6da89b515f8a7725534eb72c33059af69f15f2827b5f00f759695714ee107",
+    "n_arquivos": 63
+  },
+  "se_metodo": "linearizacao_taylor_estrato_upa",
+  "populacao": "Pessoas 18+ da PNAD Contínua anual (Visita 1; Visita 5 em 2020–2021); P1 vs. P5 (renda domiciliar per capita VD5008), valores nominais do ano",
+  "periodo": {
+    "inicio": "2012",
+    "fim": "2025"
+  },
+  "nota_renda": "Valores NOMINAIS do ano (o hiato % não depende do deflator dentro do ano)",
+  "criterio_diferenca_grande": {
+    "relativo": 0.1,
+    "z": 1.959963984540054
+  }
+}

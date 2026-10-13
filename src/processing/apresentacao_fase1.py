@@ -39,14 +39,12 @@ _SERIE_GENERO_PP = [
     ("renda_preta_parda_mulheres.png", "Série histórica — só Mulheres."),
 ]
 _SERIE_FAIXA_TODAS = [
-    ("renda_por_raca_faixa_14_17.png", "Série histórica — 14-17 anos."),
     ("renda_por_raca_faixa_18_24.png", "Série histórica — 18-24 anos."),
     ("renda_por_raca_faixa_25_39.png", "Série histórica — 25-39 anos."),
     ("renda_por_raca_faixa_40_59.png", "Série histórica — 40-59 anos."),
     ("renda_por_raca_faixa_60mais.png", "Série histórica — 60+ anos."),
 ]
 _SERIE_FAIXA_PP = [
-    ("renda_preta_parda_faixa_14_17.png", "Série histórica — 14-17 anos."),
     ("renda_preta_parda_faixa_18_24.png", "Série histórica — 18-24 anos."),
     ("renda_preta_parda_faixa_25_39.png", "Série histórica — 25-39 anos."),
     ("renda_preta_parda_faixa_40_59.png", "Série histórica — 40-59 anos."),
@@ -312,7 +310,6 @@ SECOES = [
     ]),
     ("Raça × Faixa etária", "Combinado + um por faixa etária", [
         ("renda_por_raca_faixa_etaria.png", "Hiato racial se abre na faixa de maior potencial de renda (40-59 anos)."),
-        ("renda_por_raca_faixa_14_17.png", "14-17 anos."),
         ("renda_por_raca_faixa_18_24.png", "18-24 anos."),
         ("renda_por_raca_faixa_25_39.png", "25-39 anos."),
         ("renda_por_raca_faixa_40_59.png", "40-59 anos — maior hiato."),
@@ -320,7 +317,6 @@ SECOES = [
     ]),
     ("Preta × Parda × Faixa etária", "Combinado + uma por faixa etária", [
         ("renda_preta_parda_faixa_etaria.png", "Preta vs. Parda por faixa etária, snapshot mais recente."),
-        ("renda_preta_parda_faixa_14_17.png", "14-17 anos."),
         ("renda_preta_parda_faixa_18_24.png", "18-24 anos."),
         ("renda_preta_parda_faixa_25_39.png", "25-39 anos."),
         ("renda_preta_parda_faixa_40_59.png", "40-59 anos."),
@@ -400,7 +396,7 @@ def slide_titulo(prs: Presentation) -> None:
     p2.space_before = Pt(12)
 
     p3 = tf.add_paragraph()
-    p3.text = "Fonte: IBGE, PNAD Contínua Trimestral (microdados). Elaboração própria."
+    p3.text = "Fonte: IBGE, PNAD Contínua Trimestral (microdados). Renda (quando houver): habitual do trabalho principal, ocupados 18+ com renda > 0, a preços do último trimestre. Elaboração própria."
     p3.font.size = Pt(13)
     p3.font.color.rgb = TINTA_SECUNDARIA
     p3.space_before = Pt(24)

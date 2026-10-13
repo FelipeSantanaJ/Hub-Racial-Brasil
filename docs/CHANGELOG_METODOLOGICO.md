@@ -5,6 +5,66 @@ calculá-lo: data, o quê, por quê, impacto. Mais recente primeiro.
 
 ---
 
+## 13/10/2026 — Onda 1: regeneração única com a população de referência (branch `onda1/regeneracao`)
+
+Decisões dos Pontos de parada 2 e 3. **Tudo abaixo já vale nos parquets, gráficos e decks.**
+
+### População e renda de referência em todas as tabelas de renda
+
+- **O quê.** `renda_habitual_*`/`renda_efetiva_*` da `CRIAR_BASE` passam a ser `VD4016`/`VD4017`
+  (trabalho principal) **só para a população de referência** (ocupados 18+ com `VD4016` > 0;
+  `populacao.sql_colunas_renda_tabelas`). Todo gerador de renda migra sem mudar código; o recorte
+  histórico fica em `renda_todos_trabalhos_*`. Tabelas de outros indicadores (escolaridade, ocupação,
+  desalento, alfabetização, sobrequalificação, informalidade, segregação, transições) mantêm o universo
+  14+ do indicador. Renda por hora: `VD4016` ÷ horas do trabalho principal (`V4039`). Gini e Theil
+  incluem Amarela (A4). Produção passa ao **extrato v2** (idêntico ao v1 nas colunas comuns: 0 linhas
+  diferentes em 58 trimestres, `docs/auditoria/extrato_v1_v2_identicos.json`).
+- **Impacto medido** (`docs/auditoria/antes_depois_onda1.json`; legado em
+  `data/processed/_legado/pre_onda1_1bd6472/`): hiato % Branca × Negra cai em média **1,36 p.p.**
+  (−2,52 a +0,02; 2012T1 75,8 → 74,2%; 2026T2 66,2 → 65,7%), igual à prévia da Fase 2; os 58
+  trimestres seguem significativos após o FDR (z de 19,5 a 37,2). Branca × Indígena 2026T2: 72,7 →
+  70,9%. Theil entre raças 6,67 → 6,96%. Resíduo de Oaxaca-Blinder (3 controles) 22,4 → 22,8%.
+  Tabelas que não são de renda: **pontos idênticos** (`antes_depois_onda1_rotulo_rmsp.json`, com o
+  rótulo novo da RM SP mapeado). A faixa 14–17 deixa de ter renda (37 imagens da árvore e 2 da galeria
+  removidas; 682 imagens em `docs/img`).
+- Itens 2–4 da Fase 3b passam a valer: supressão (`n_*`, `cv_*`, `publicavel*`), heaping (fatias de
+  exatamente 10/25%), carteira só CLT (2026T2: 71,7 / 63,0 / 48,4%).
+
+### Correção: ponderação das médias nos gráficos (achado da Onda 1)
+
+- **O quê.** Os gráficos combinavam células (sexo, faixa, Preta + Parda) ponderando a média de renda por
+  `populacao_estimada` (todas as pessoas da célula) em vez do peso de quem tem renda. As tabelas de nível
+  passam a gravar `peso_<ind>` (Σ pesos no denominador de cada indicador) e `graficos_fase1.peso_para` /
+  `media_ponderada_celulas` ponderam por ele (também em `graficos_aprofundamentos` e
+  `tabela_crescimento`).
+- **Por quê / impacto.** Com a ponderação antiga, sobre as tabelas antigas, o hiato % dos gráficos ficava
+  **4,3 p.p. acima** do hiato do microdado em média (+1,2 a +8,1) e a renda média Negra de 2026T2 saía
+  R$ 2.687 em vez de R$ 2.888. Agora o gráfico reproduz o hiato oficial (65,7% em 2026T2). Números de
+  texto tirados dos gráficos (ex.: renda por escolaridade) herdavam o viés e foram recalculados.
+
+### Bloco F e Bloco S (Onda 1)
+
+- `src/processing/sensibilidade_populacao.py` e fichas `docs/studies/{F,S0,S1}/ficha.md`. **Resultado
+  central:** P2 e P3 ≈ P1; **P4 (todos os adultos, zero para não ocupados) aumenta o hiato em 8,9 p.p. em
+  média (17,5 entre mulheres; "diferença grande" em 40 de 58 trimestres, 58 de 58 entre mulheres)** e
+  **P5 (domiciliar per capita) em 12 a 22 p.p. (grande nos 14 anos)**. Pelo critério do plano, o Bloco T
+  vira eixo principal (decisão pendente no Ponto de parada da Onda 1).
+
+### Textos e decks
+
+- `ANALISE_FASE1.md`, `ANALISE_RACA_GENERO.md`, `ANALISE_CAUSAL_COTAS.md` e `README.md` com os números
+  novos. Duas afirmações caíram: o hiato do Baby Boomer "cresce" (não sustentado) e a tendência de alta do
+  hiato Branca × Indígena (inclinação bruta p = 0,11; só a série suavizada sobe, sem HAC). No Desenho B das
+  cotas, o hiato de renda nacional passa a p = 0,014 (p_BH = 0,072) — segue sem sobreviver ao FDR.
+- O deck publicado `Datahub_Racial_Brasil_Fase1.pptx` é gerado por `apresentacao_final` (620 slides;
+  eram 657 com as folhas 14–17); `apresentacao_fase1` gera um deck antigo e não deve sobrescrevê-lo
+  (README corrigido). `Datahub_Racial_Brasil_ARVORE.pptx` regenerado (534 slides; o arquivo anterior,
+  412 slides, já não correspondia ao código — NÃO VERIFICADO desde quando).
+- `docs/tabela_crescimento_renda.csv` regenerado; **`docs/tabela_crescimento_renda.xlsx` NÃO** (falta
+  `openpyxl` no ambiente) e por isso está **desatualizado e diverge do CSV** até ser regerado.
+
+---
+
 ## 13/10/2026 — Etapa 2, Fase 3b: correções da Rodada 2 (branch `auditoria/fase3b-correcoes`)
 
 Origem: `docs/auditoria/rodada2.md` e decisões do Ponto de parada 3 (13/10/2026). Só o item 1

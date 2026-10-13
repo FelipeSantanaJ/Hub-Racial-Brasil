@@ -1,0 +1,19 @@
+{
+  "esquema": "hub-racial-meta/1",
+  "arquivo": "selecao_entrada_populacao_referencia.parquet",
+  "n_linhas": 12,
+  "gerado_em": "2026-10-13T14:24:11.101640+00:00",
+  "codigo": {
+    "commit": "c1202a10fd9cedb6ee7d78647d0188dfd6dea81e-modificado",
+    "modulo": "__main__"
+  },
+  "insumos": {
+    "chave": "trimestral_v2",
+    "descricao": "PNAD Contínua trimestral, extrato v2 + deflator IBGE",
+    "hash": "9b64f579fa63981e9237190166d333a9ac546041a4df260d2c67dabf49f1ceda",
+    "n_arquivos": 228
+  },
+  "se_metodo": "logit_sanduiche_linearizacao_estrato_upa",
+  "populacao": "Pessoas 18+ Brancas, Negras e Indígenas; Pr(estar na população de referência)",
+  "periodo": null
+}

@@ -35,7 +35,7 @@ TINTA_SECUNDARIA = RGBColor(0x5C, 0x4F, 0x3F)
 TINTA_MUTED = RGBColor(0x8F, 0x82, 0x71)
 ACENTO = RGBColor(0x0D, 0x90, 0x86)
 
-FONTE_PADRAO = "Fonte: IBGE, PNAD Contínua Trimestral (microdados). Elaboração própria."
+FONTE_PADRAO = "Fonte: IBGE, PNAD Contínua Trimestral (microdados). Renda (quando houver): habitual do trabalho principal, ocupados 18+ com renda > 0, a preços do último trimestre. Elaboração própria."
 
 
 def _slide(prs):

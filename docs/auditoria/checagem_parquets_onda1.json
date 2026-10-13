@@ -1,0 +1,1707 @@
+{
+  "tabelas": [
+    {
+      "arquivo": "alfabetizacao.parquet",
+      "linhas": 3344,
+      "chaves": [
+        "nivel_geografico",
+        "geografia",
+        "ano",
+        "trimestre",
+        "raca_cor",
+        "sexo",
+        "faixa_etaria",
+        "publicavel_alfabetizado",
+        "publicavel"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {
+        "pct_alfabetizado": 0.12,
+        "cv_alfabetizado": 2.21
+      },
+      "faixas": [],
+      "celulas_n_menor_30": {
+        "n_amostra": 400
+      }
+    },
+    {
+      "arquivo": "checagem_robustez_hiato_racial.parquet",
+      "linhas": 58,
+      "chaves": [
+        "ano",
+        "trimestre",
+        "se_metodo"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "composicao_populacao_referencia.parquet",
+      "linhas": 3478,
+      "chaves": [
+        "ano",
+        "trimestre",
+        "raca",
+        "sexo",
+        "condicao"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {
+        "n": 497
+      }
+    },
+    {
+      "arquivo": "composicao_racial_declarada.parquet",
+      "linhas": 1023,
+      "chaves": [
+        "ano",
+        "trimestre",
+        "raca_cor",
+        "universo"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {
+        "n": 64
+      }
+    },
+    {
+      "arquivo": "decomposicao_hiato_ocupacional.parquet",
+      "linhas": 5,
+      "chaves": [
+        "controles"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "decomposicao_oaxaca_blinder.parquet",
+      "linhas": 7,
+      "chaves": [
+        "controles",
+        "ponto"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "decomposicao_oaxaca_blinder_indigena.parquet",
+      "linhas": 7,
+      "chaves": [
+        "controles",
+        "ponto"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "decomposicao_oaxaca_blinder_pretaparda.parquet",
+      "linhas": 7,
+      "chaves": [
+        "controles",
+        "ponto"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "decomposicao_raca_genero.parquet",
+      "linhas": 522,
+      "chaves": [
+        "ano",
+        "trimestre",
+        "combinacao",
+        "sexo",
+        "raca_cor"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "deflator_ibge.parquet",
+      "linhas": 1566,
+      "chaves": [
+        "ano",
+        "trimestre",
+        "UF"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "desalento_subutilizacao.parquet",
+      "linhas": 105969,
+      "chaves": [
+        "nivel_geografico",
+        "geografia",
+        "ano",
+        "trimestre",
+        "raca_cor",
+        "sexo",
+        "faixa_etaria",
+        "publicavel_desalento",
+        "publicavel_forca_potencial",
+        "publicavel"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {
+        "pop_fora_forca_trabalho": 8.03,
+        "pct_forca_trabalho_potencial": 30.63,
+        "pct_desalento": 39.81,
+        "cv_desalento": 40.52,
+        "cv_forca_potencial": 32.0
+      },
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "desocupacao_por_escolaridade.parquet",
+      "linhas": 1218,
+      "chaves": [
+        "ano",
+        "trimestre",
+        "raca_cor",
+        "nivel_instrucao",
+        "publicavel_desocupacao",
+        "publicavel"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {
+        "pop_desocupados": 1.07,
+        "taxa_desocupacao_pct": 1.07,
+        "cv_desocupacao": 1.07
+      },
+      "faixas": [],
+      "celulas_n_menor_30": {
+        "n_amostra": 28
+      }
+    },
+    {
+      "arquivo": "did_cotas_servico_publico.parquet",
+      "linhas": 5,
+      "chaves": [
+        "tendencias_paralelas_sustentadas",
+        "raca_cor",
+        "outcome",
+        "nota"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "did_cotas_servico_publico_curvas.parquet",
+      "linhas": 115,
+      "chaves": [
+        "relative_quarter",
+        "raca_cor",
+        "outcome"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "did_cotas_servico_publico_heterogeneidade.parquet",
+      "linhas": 35,
+      "chaves": [
+        "tendencias_paralelas_sustentadas",
+        "raca_cor",
+        "outcome",
+        "nota",
+        "estrato_tipo",
+        "estrato"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "did_cotas_servico_publico_heterogeneidade_curvas.parquet",
+      "linhas": 805,
+      "chaves": [
+        "relative_quarter",
+        "raca_cor",
+        "outcome",
+        "estrato_tipo",
+        "estrato"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "did_cotas_universitarias.parquet",
+      "linhas": 8,
+      "chaves": [
+        "raca_tratado",
+        "ano_lei",
+        "limiar_nascimento",
+        "tendencias_paralelas_sustentadas",
+        "tipo"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {
+        "tendencia_pre_coef": 75.0,
+        "n_coortes_pos": 25.0,
+        "did_nivel_coef": 25.0,
+        "did_rampa_coef": 25.0
+      },
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "did_cotas_universitarias_heterogeneidade.parquet",
+      "linhas": 40,
+      "chaves": [
+        "raca_tratado",
+        "ano_lei",
+        "limiar_nascimento",
+        "tendencias_paralelas_sustentadas",
+        "estrato_tipo",
+        "estrato",
+        "tipo"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {
+        "tendencia_pre_coef": 75.0,
+        "n_coortes_pos": 25.0,
+        "did_nivel_coef": 25.0,
+        "did_rampa_coef": 25.0
+      },
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "dupla_desvantagem.parquet",
+      "linhas": 58,
+      "chaves": [
+        "ano",
+        "trimestre"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "escolaridade.parquet",
+      "linhas": 544540,
+      "chaves": [
+        "nivel_geografico",
+        "geografia",
+        "ano",
+        "trimestre",
+        "raca_cor",
+        "sexo",
+        "faixa_etaria",
+        "nivel_instrucao",
+        "publicavel_populacao",
+        "publicavel"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {
+        "cv_populacao": 13.48
+      },
+      "faixas": [],
+      "celulas_n_menor_30": {
+        "n_amostra": 320058
+      }
+    },
+    {
+      "arquivo": "extremos_composicao_racial.parquet",
+      "linhas": 10285,
+      "chaves": [
+        "ano",
+        "trimestre",
+        "extremo",
+        "recorte",
+        "grupo",
+        "dimensao",
+        "categoria"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "extremos_distribuicao_racial.parquet",
+      "linhas": 1392,
+      "chaves": [
+        "ano",
+        "trimestre",
+        "extremo",
+        "escopo_limiar",
+        "grupo_limiar",
+        "raca_cor"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "extremos_renda_racial.parquet",
+      "linhas": 696,
+      "chaves": [
+        "ano",
+        "trimestre",
+        "extremo",
+        "recorte",
+        "grupo"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "faixas_salario_minimo.parquet",
+      "linhas": 174,
+      "chaves": [
+        "trimestre",
+        "raca_cor",
+        "ano",
+        "salario_minimo",
+        "publicavel_ate_1sm",
+        "publicavel_ate_2sm",
+        "publicavel_acima_3sm",
+        "publicavel"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "funcao_quantil_racial.parquet",
+      "linhas": 1044,
+      "chaves": [
+        "ano",
+        "trimestre",
+        "raca_cor",
+        "percentil"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "gini_por_raca.parquet",
+      "linhas": 232,
+      "chaves": [
+        "raca_cor",
+        "ano",
+        "trimestre"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "habitacao_hiato_racial.parquet",
+      "linhas": 144,
+      "chaves": [
+        "raca_cor",
+        "ano",
+        "indicador"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "habitacao_hiato_racial_genero.parquet",
+      "linhas": 288,
+      "chaves": [
+        "grupo",
+        "ano",
+        "indicador"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "habitacao_hiato_regional.parquet",
+      "linhas": 90,
+      "chaves": [
+        "raca_cor",
+        "regiao",
+        "indicador"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "heaping_renda.parquet",
+      "linhas": 174,
+      "chaves": [
+        "ano",
+        "trimestre",
+        "raca"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "hiato_arvore.parquet",
+      "linhas": 13811,
+      "chaves": [
+        "combo",
+        "ano",
+        "trimestre",
+        "comparacao",
+        "sexo",
+        "faixa_etaria",
+        "geracao",
+        "nivel_instrucao"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "hiato_branca_indigena.parquet",
+      "linhas": 58,
+      "chaves": [
+        "ano",
+        "trimestre"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "hiato_capital_interior.parquet",
+      "linhas": 116,
+      "chaves": [
+        "ano",
+        "trimestre",
+        "localizacao"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "hiato_escolaridade_historico_pretaparda.parquet",
+      "linhas": 406,
+      "chaves": [
+        "ano",
+        "trimestre",
+        "nivel_instrucao"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "hiato_escolaridade_historico_todas.parquet",
+      "linhas": 406,
+      "chaves": [
+        "ano",
+        "trimestre",
+        "nivel_instrucao"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "hiato_escolaridade_pretaparda.parquet",
+      "linhas": 7,
+      "chaves": [
+        "nivel_instrucao",
+        "ano",
+        "trimestre"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "hiato_escolaridade_todas.parquet",
+      "linhas": 7,
+      "chaves": [
+        "nivel_instrucao",
+        "ano",
+        "trimestre"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "hiato_faixa_etaria_escolaridade_pretaparda.parquet",
+      "linhas": 28,
+      "chaves": [
+        "faixa_etaria",
+        "nivel_instrucao",
+        "ano",
+        "trimestre"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "hiato_faixa_etaria_escolaridade_todas.parquet",
+      "linhas": 28,
+      "chaves": [
+        "faixa_etaria",
+        "nivel_instrucao",
+        "ano",
+        "trimestre"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "hiato_faixa_etaria_historico_pretaparda.parquet",
+      "linhas": 232,
+      "chaves": [
+        "ano",
+        "trimestre",
+        "faixa_etaria"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "hiato_faixa_etaria_historico_todas.parquet",
+      "linhas": 232,
+      "chaves": [
+        "ano",
+        "trimestre",
+        "faixa_etaria"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "hiato_faixa_etaria_pretaparda.parquet",
+      "linhas": 4,
+      "chaves": [
+        "faixa_etaria",
+        "ano",
+        "trimestre"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "hiato_faixa_etaria_todas.parquet",
+      "linhas": 4,
+      "chaves": [
+        "faixa_etaria",
+        "ano",
+        "trimestre"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "hiato_formal_informal.parquet",
+      "linhas": 116,
+      "chaves": [
+        "ano",
+        "trimestre",
+        "setor"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "hiato_genero_escolaridade_pretaparda.parquet",
+      "linhas": 14,
+      "chaves": [
+        "sexo",
+        "nivel_instrucao",
+        "ano",
+        "trimestre"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "hiato_genero_escolaridade_todas.parquet",
+      "linhas": 14,
+      "chaves": [
+        "sexo",
+        "nivel_instrucao",
+        "ano",
+        "trimestre"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "hiato_genero_faixa_etaria_escolaridade_pretaparda.parquet",
+      "linhas": 56,
+      "chaves": [
+        "sexo",
+        "faixa_etaria",
+        "nivel_instrucao",
+        "ano",
+        "trimestre"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {
+        "n_amostra": 1
+      }
+    },
+    {
+      "arquivo": "hiato_genero_faixa_etaria_escolaridade_todas.parquet",
+      "linhas": 56,
+      "chaves": [
+        "sexo",
+        "faixa_etaria",
+        "nivel_instrucao",
+        "ano",
+        "trimestre"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {
+        "n_amostra": 1
+      }
+    },
+    {
+      "arquivo": "hiato_genero_faixa_etaria_pretaparda.parquet",
+      "linhas": 8,
+      "chaves": [
+        "sexo",
+        "faixa_etaria",
+        "ano",
+        "trimestre"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "hiato_genero_faixa_etaria_todas.parquet",
+      "linhas": 8,
+      "chaves": [
+        "sexo",
+        "faixa_etaria",
+        "ano",
+        "trimestre"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "hiato_genero_geracao_escolaridade_pretaparda.parquet",
+      "linhas": 65,
+      "chaves": [
+        "sexo",
+        "geracao",
+        "nivel_instrucao",
+        "ano",
+        "trimestre"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {
+        "n_amostra": 8
+      }
+    },
+    {
+      "arquivo": "hiato_genero_geracao_escolaridade_todas.parquet",
+      "linhas": 67,
+      "chaves": [
+        "sexo",
+        "geracao",
+        "nivel_instrucao",
+        "ano",
+        "trimestre"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {
+        "n_amostra": 7
+      }
+    },
+    {
+      "arquivo": "hiato_genero_geracao_pretaparda.parquet",
+      "linhas": 10,
+      "chaves": [
+        "sexo",
+        "geracao",
+        "ano",
+        "trimestre"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "hiato_genero_geracao_todas.parquet",
+      "linhas": 10,
+      "chaves": [
+        "sexo",
+        "geracao",
+        "ano",
+        "trimestre"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "hiato_genero_historico_pretaparda.parquet",
+      "linhas": 116,
+      "chaves": [
+        "ano",
+        "trimestre",
+        "sexo"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "hiato_genero_historico_todas.parquet",
+      "linhas": 116,
+      "chaves": [
+        "ano",
+        "trimestre",
+        "sexo"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "hiato_genero_pretaparda.parquet",
+      "linhas": 2,
+      "chaves": [
+        "sexo",
+        "ano",
+        "trimestre"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "hiato_genero_todas.parquet",
+      "linhas": 2,
+      "chaves": [
+        "sexo",
+        "ano",
+        "trimestre"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "hiato_geracao_escolaridade_pretaparda.parquet",
+      "linhas": 33,
+      "chaves": [
+        "geracao",
+        "nivel_instrucao",
+        "ano",
+        "trimestre"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {
+        "n_amostra": 3
+      }
+    },
+    {
+      "arquivo": "hiato_geracao_escolaridade_todas.parquet",
+      "linhas": 34,
+      "chaves": [
+        "geracao",
+        "nivel_instrucao",
+        "ano",
+        "trimestre"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {
+        "n_amostra": 2
+      }
+    },
+    {
+      "arquivo": "hiato_geracao_historico_pretaparda.parquet",
+      "linhas": 220,
+      "chaves": [
+        "ano",
+        "trimestre",
+        "geracao"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "hiato_geracao_pretaparda.parquet",
+      "linhas": 5,
+      "chaves": [
+        "geracao",
+        "ano",
+        "trimestre"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "hiato_geracao_todas.parquet",
+      "linhas": 5,
+      "chaves": [
+        "geracao",
+        "ano",
+        "trimestre"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "hiato_por_geracao.parquet",
+      "linhas": 220,
+      "chaves": [
+        "ano",
+        "trimestre",
+        "geracao"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "hiato_preta_parda.parquet",
+      "linhas": 58,
+      "chaves": [
+        "ano",
+        "trimestre"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "hiato_racial.parquet",
+      "linhas": 58,
+      "chaves": [
+        "ano",
+        "trimestre"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "hiato_regional.parquet",
+      "linhas": 290,
+      "chaves": [
+        "ano",
+        "trimestre",
+        "regiao"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "hiato_regional_indigena.parquet",
+      "linhas": 290,
+      "chaves": [
+        "ano",
+        "trimestre",
+        "regiao"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "hiato_regional_pretaparda.parquet",
+      "linhas": 1566,
+      "chaves": [
+        "ano",
+        "trimestre",
+        "UF"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "hiato_setor_publico_privado.parquet",
+      "linhas": 116,
+      "chaves": [
+        "ano",
+        "trimestre",
+        "setor_trabalho"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "horas_trabalhadas.parquet",
+      "linhas": 105969,
+      "chaves": [
+        "nivel_geografico",
+        "geografia",
+        "ano",
+        "trimestre",
+        "raca_cor",
+        "sexo",
+        "faixa_etaria",
+        "publicavel_horas",
+        "publicavel_renda_hora",
+        "publicavel"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {
+        "horas_semanais_media": 23.47,
+        "renda_por_hora_real_media": 23.47,
+        "cv_horas": 29.97,
+        "cv_renda_hora": 29.97
+      },
+      "faixas": [],
+      "celulas_n_menor_30": {
+        "n_amostra": 38971
+      }
+    },
+    {
+      "arquivo": "informalidade.parquet",
+      "linhas": 105969,
+      "chaves": [
+        "nivel_geografico",
+        "geografia",
+        "ano",
+        "trimestre",
+        "raca_cor",
+        "sexo",
+        "faixa_etaria",
+        "publicavel_carteira",
+        "publicavel_estatutario_militar",
+        "publicavel_previdencia",
+        "publicavel"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {
+        "pop_empregados": 15.19,
+        "pop_estatutario_militar": 44.19,
+        "pct_com_carteira": 24.52,
+        "pct_estatutario_militar": 44.19,
+        "pct_contribui_previdencia": 18.68,
+        "cv_carteira": 28.8,
+        "cv_estatutario_militar": 45.4,
+        "cv_previdencia": 22.35
+      },
+      "faixas": [],
+      "celulas_n_menor_30": {
+        "n_amostra": 38971
+      }
+    },
+    {
+      "arquivo": "mecanismo_renda_cohortes_cotas.parquet",
+      "linhas": 2,
+      "chaves": [
+        "cohort_era"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "oaxaca_blinder_temporal.parquet",
+      "linhas": 60,
+      "chaves": [
+        "ano",
+        "ponto"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "ocupacao.parquet",
+      "linhas": 105969,
+      "chaves": [
+        "nivel_geografico",
+        "geografia",
+        "ano",
+        "trimestre",
+        "raca_cor",
+        "sexo",
+        "faixa_etaria",
+        "publicavel_desocupacao",
+        "publicavel"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {
+        "pop_forca_trabalho": 7.54,
+        "pop_ocupados": 9.11,
+        "pop_desocupados": 31.42,
+        "taxa_desocupacao_pct": 31.42,
+        "cv_desocupacao": 32.69
+      },
+      "faixas": [],
+      "celulas_n_menor_30": {
+        "n_amostra": 38971
+      }
+    },
+    {
+      "arquivo": "painel_cohortes_superior_completo.parquet",
+      "linhas": 57,
+      "chaves": [
+        "ano_nascimento",
+        "raca_cor"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "painel_cohortes_superior_completo_area.parquet",
+      "linhas": 114,
+      "chaves": [
+        "ano_nascimento",
+        "raca_cor",
+        "estrato"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {
+        "n_amostra": 1
+      }
+    },
+    {
+      "arquivo": "painel_cohortes_superior_completo_regiao.parquet",
+      "linhas": 285,
+      "chaves": [
+        "ano_nascimento",
+        "raca_cor",
+        "estrato"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {
+        "n_amostra": 20
+      }
+    },
+    {
+      "arquivo": "percentil_de_valor_racial.parquet",
+      "linhas": 1044,
+      "chaves": [
+        "ano",
+        "trimestre",
+        "raca_cor",
+        "valor_referencia"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "perfil_quartis_racial.parquet",
+      "linhas": 8256,
+      "chaves": [
+        "ano",
+        "trimestre",
+        "raca_cor",
+        "quartil",
+        "dimensao",
+        "categoria"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "perfil_quartis_racial_indigena.parquet",
+      "linhas": 71,
+      "chaves": [
+        "trimestre_inicio",
+        "trimestre_fim",
+        "quartil",
+        "dimensao",
+        "categoria"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "perfil_quartis_racial_pretaparda.parquet",
+      "linhas": 8255,
+      "chaves": [
+        "ano",
+        "trimestre",
+        "raca_cor",
+        "quartil",
+        "dimensao",
+        "categoria"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "perfil_topo10_racial.parquet",
+      "linhas": 2063,
+      "chaves": [
+        "ano",
+        "trimestre",
+        "raca_cor",
+        "dimensao",
+        "categoria"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "perfil_topo10_racial_indigena.parquet",
+      "linhas": 17,
+      "chaves": [
+        "trimestre_inicio",
+        "trimestre_fim",
+        "dimensao",
+        "categoria"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "perfil_topo10_racial_pretaparda.parquet",
+      "linhas": 2056,
+      "chaves": [
+        "ano",
+        "trimestre",
+        "raca_cor",
+        "dimensao",
+        "categoria"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "quartis_multi_racial.parquet",
+      "linhas": 21520,
+      "chaves": [
+        "ano",
+        "trimestre",
+        "recorte",
+        "grupo",
+        "quartil",
+        "dimensao",
+        "categoria"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "quebra_estrutural.parquet",
+      "linhas": 3,
+      "chaves": [
+        "evento",
+        "ano_evento",
+        "trimestre_evento"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "renda.parquet",
+      "linhas": 105969,
+      "chaves": [
+        "nivel_geografico",
+        "geografia",
+        "ano",
+        "trimestre",
+        "raca_cor",
+        "sexo",
+        "faixa_etaria",
+        "publicavel_renda",
+        "publicavel_renda_efetiva",
+        "publicavel"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {
+        "renda_habitual_nominal_media": 23.47,
+        "renda_efetiva_nominal_media": 23.47,
+        "renda_habitual_real_media": 23.47,
+        "renda_efetiva_real_media": 23.47,
+        "cv_renda": 29.97,
+        "cv_renda_efetiva": 29.98
+      },
+      "faixas": [],
+      "celulas_n_menor_30": {
+        "n_amostra": 38971
+      }
+    },
+    {
+      "arquivo": "renda_completa.parquet",
+      "linhas": 20377,
+      "chaves": [
+        "nivel_geografico",
+        "geografia",
+        "ano",
+        "trimestre",
+        "raca_cor",
+        "sexo",
+        "faixa_etaria",
+        "nivel_instrucao",
+        "publicavel_renda",
+        "publicavel"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {
+        "renda_habitual_real_media": 19.14,
+        "cv_renda": 24.02
+      },
+      "faixas": [],
+      "celulas_n_menor_30": {
+        "n_amostra": 7095
+      }
+    },
+    {
+      "arquivo": "renda_completa_geracao.parquet",
+      "linhas": 20735,
+      "chaves": [
+        "nivel_geografico",
+        "geografia",
+        "ano",
+        "trimestre",
+        "raca_cor",
+        "sexo",
+        "geracao",
+        "nivel_instrucao",
+        "publicavel_renda",
+        "publicavel"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {
+        "renda_habitual_real_media": 11.62,
+        "cv_renda": 18.22
+      },
+      "faixas": [],
+      "celulas_n_menor_30": {
+        "n_amostra": 7185
+      }
+    },
+    {
+      "arquivo": "renda_multidimensional_faixa.parquet",
+      "linhas": 2869,
+      "chaves": [
+        "raca_cor",
+        "sexo",
+        "faixa_etaria",
+        "nivel_instrucao",
+        "grupamento_ocupacional",
+        "publicavel_renda",
+        "publicavel"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {
+        "renda_habitual_real_media": 11.36,
+        "cv_renda": 19.69
+      },
+      "faixas": [],
+      "celulas_n_menor_30": {
+        "n_amostra": 1364
+      }
+    },
+    {
+      "arquivo": "renda_multidimensional_geracao.parquet",
+      "linhas": 2830,
+      "chaves": [
+        "raca_cor",
+        "sexo",
+        "geracao",
+        "nivel_instrucao",
+        "grupamento_ocupacional",
+        "publicavel_renda",
+        "publicavel"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {
+        "renda_habitual_real_media": 0.67,
+        "cv_renda": 11.52
+      },
+      "faixas": [],
+      "celulas_n_menor_30": {
+        "n_amostra": 1373
+      }
+    },
+    {
+      "arquivo": "renda_por_escolaridade.parquet",
+      "linhas": 143157,
+      "chaves": [
+        "nivel_geografico",
+        "geografia",
+        "ano",
+        "trimestre",
+        "raca_cor",
+        "sexo",
+        "nivel_instrucao",
+        "publicavel_renda",
+        "publicavel_renda_efetiva",
+        "publicavel"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {
+        "renda_habitual_real_media": 7.54,
+        "renda_efetiva_real_media": 7.54,
+        "cv_renda": 17.16,
+        "cv_renda_efetiva": 17.17
+      },
+      "faixas": [],
+      "celulas_n_menor_30": {
+        "n_amostra": 56862
+      }
+    },
+    {
+      "arquivo": "renda_por_geracao.parquet",
+      "linhas": 105569,
+      "chaves": [
+        "nivel_geografico",
+        "geografia",
+        "ano",
+        "trimestre",
+        "raca_cor",
+        "sexo",
+        "geracao",
+        "publicavel_renda",
+        "publicavel"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {
+        "renda_habitual_real_media": 14.51,
+        "cv_renda": 22.99
+      },
+      "faixas": [],
+      "celulas_n_menor_30": {
+        "n_amostra": 39582
+      }
+    },
+    {
+      "arquivo": "ritmo_convergencia_hiatos.parquet",
+      "linhas": 3,
+      "chaves": [
+        "par",
+        "tendencia_confiavel"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {
+        "inclinacao_pct_por_trimestre_log": 33.33,
+        "r2_log": 33.33,
+        "anos_para_zerar_extrapolacao_ingenua": 66.67,
+        "inclinacao_pp_por_trimestre_suavizada": 66.67,
+        "r2_suavizada": 66.67
+      },
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "segregacao_ocupacional.parquet",
+      "linhas": 58,
+      "chaves": [
+        "ano",
+        "trimestre"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "segregacao_ocupacional_indigena.parquet",
+      "linhas": 1,
+      "chaves": [
+        "trimestre_inicio",
+        "trimestre_fim"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "segregacao_ocupacional_pretaparda.parquet",
+      "linhas": 58,
+      "chaves": [
+        "ano",
+        "trimestre"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "segregacao_setorial.parquet",
+      "linhas": 58,
+      "chaves": [
+        "ano",
+        "trimestre"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "segregacao_setorial_pretaparda.parquet",
+      "linhas": 58,
+      "chaves": [
+        "ano",
+        "trimestre"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "selecao_entrada_populacao_referencia.parquet",
+      "linhas": 12,
+      "chaves": [
+        "janela",
+        "sexo",
+        "grupo"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "sensibilidade_hiato_p5_anual.parquet",
+      "linhas": 112,
+      "chaves": [
+        "ano",
+        "comparacao",
+        "populacao",
+        "diferenca_grande",
+        "descricao_populacao"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "sensibilidade_hiato_populacao.parquet",
+      "linhas": 928,
+      "chaves": [
+        "trimestre",
+        "ano",
+        "comparacao",
+        "populacao",
+        "diferenca_grande",
+        "descricao_populacao"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "sobrequalificacao.parquet",
+      "linhas": 23109,
+      "chaves": [
+        "nivel_geografico",
+        "geografia",
+        "ano",
+        "trimestre",
+        "raca_cor",
+        "sexo",
+        "publicavel_sobrequalificado",
+        "publicavel"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {
+        "pop_superior_completo_ocupado": 11.42,
+        "pct_sobrequalificado": 50.89,
+        "cv_sobrequalificado": 51.02
+      },
+      "faixas": [],
+      "celulas_n_menor_30": {
+        "n_amostra": 6189
+      }
+    },
+    {
+      "arquivo": "theil_racial.parquet",
+      "linhas": 58,
+      "chaves": [
+        "ano",
+        "trimestre"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "transicao_desemprego_emprego.parquet",
+      "linhas": 10,
+      "chaves": [
+        "raca_cor",
+        "sexo"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    },
+    {
+      "arquivo": "transicao_informal_formal.parquet",
+      "linhas": 10,
+      "chaves": [
+        "raca_cor",
+        "sexo"
+      ],
+      "linhas_chave_duplicada": 0,
+      "pct_nan_colunas_ponto": {},
+      "faixas": [],
+      "celulas_n_menor_30": {}
+    }
+  ],
+  "consistencias": [
+    {
+      "checagem": "renda.populacao_estimada: Brasil = soma por regiao",
+      "desvio_rel_max": 7.986771914197581e-15,
+      "ok": true
+    },
+    {
+      "checagem": "renda.populacao_estimada: Brasil = soma por uf",
+      "desvio_rel_max": 7.276836632935574e-15,
+      "ok": true
+    },
+    {
+      "checagem": "renda: população 14+ estimada (milhões) por trimestre",
+      "min": 153.03113900001662,
+      "max": 175.39963000000594,
+      "maior_salto_trimestral_pct": 0.35201008280922874,
+      "trimestre_maior_salto": "(np.int64(2012), np.int64(3))"
+    },
+    {
+      "checagem": "theil: entre + dentro = total",
+      "desvio_abs_max": 0.0,
+      "ok": true
+    },
+    {
+      "checagem": "hiato_racial: absoluto = Branca − Negra e % = abs/Negra",
+      "desvio_abs": 2.2737367544323206e-12,
+      "desvio_pct": 0.0,
+      "ok": true
+    },
+    {
+      "checagem": "hiato_arvore (combo vazio, Negra) = hiato_racial",
+      "desvio_pp_max": 9.947598300641403e-14,
+      "ok": true
+    }
+  ]
+}

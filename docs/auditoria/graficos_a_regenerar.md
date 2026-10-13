@@ -1,5 +1,11 @@
 # Gráficos a regenerar após o B1/B3 (Etapa 2, Fase 1)
 
+> **Atualização (13/10/2026, Onda 1): todas as imagens de `docs/img` e os decks foram regenerados** com o
+> EP corrigido, a população de referência e a ponderação corrigida das médias. Pendências que continuam:
+> IC do hiato % ainda divide o IC absoluto pela média Negra (R11); legendas de Oaxaca-Blinder e quebra
+> estrutural (Onda 3 / R6); 3 imagens da árvore já vazias antes (células de mulheres sem instrução).
+> O texto abaixo é o registro histórico da Fase 1.
+
 **Estado: nenhum gráfico foi regenerado na Fase 1** (instrução do prompt). As imagens em
 `docs/img` abaixo ainda mostram IC, p-valor ou asteriscos calculados com a fórmula antiga
 (E1) e o Welch antigo (E2). **Não usar em publicação até a regeneração.**

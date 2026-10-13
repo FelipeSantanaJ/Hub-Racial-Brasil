@@ -8,31 +8,35 @@ hiato bruto de renda. Ver [PLANO.md](PLANO.md) pra decisões de escopo e
 encontradas. Entregável em tabela: os parquets em `data/processed/` e esta análise
 textual dos achados (sem gráficos/PPTX próprios).
 
+> **Atualizado na Onda 1 (13/10/2026):** números de renda na população de referência (ocupados 18+ com renda
+> habitual do trabalho principal > 0). Segregação ocupacional/setorial e transições do painel não usam renda e
+> não mudaram.
+
 ## 1. Levando o toolkit pesado também pra Branca-Indígena e Preta-Parda
 
 ### Oaxaca-Blinder
 
 - **Branca vs. Indígena** (`decomposicao_oaxaca_blinder_indigena.parquet`): controlando
-  por faixa etária + escolaridade + ocupação, **44,5%** do hiato (em log-renda) é
-  explicado por essas três características observáveis, **55,5%** é resíduo
+  por faixa etária + escolaridade + ocupação, **43,3%** do hiato (em log-renda) é
+  explicado por essas três características observáveis, **56,7%** é resíduo
   não-explicado — coeficiente residual (log-pontos) equivalente a um hiato residual de
-  ~30% (`exp(0,263)-1`), altamente significativo (p<1e-36). Comparando com Branca-Negra
-  (residual ~24-30%, ordem de grandeza parecida): **o mecanismo é
+  ~31% (`exp(0,269)-1`), com p < 0,001 (EP do WLS com cluster por UPA; não passa pela linearização do B1). Comparando com Branca-Negra
+  (residual ~23–29%, ordem de grandeza parecida): **o mecanismo é
   parecido em magnitude**, não um caso completamente diferente — ocupação sozinha já
-  explica 33,4% do hiato Branca-Indígena, próximo do que explica pra Branca-Negra.
+  explica 32,5% do hiato Branca-Indígena, próximo do que explica pra Branca-Negra.
 - **Preta vs. Parda** (`decomposicao_oaxaca_blinder_pretaparda.parquet`): decomposto
   pela primeira vez (antes só existia o hiato bruto de média). Achado importante: o
-  hiato bruto atual (~-5,8%, Preta ganha menos que Parda) é **pequeno o bastante pra
+  hiato bruto atual (~−6,0%, Preta ganha menos que Parda) é **pequeno o bastante pra
   fazer os "% do hiato explicado" saírem instáveis/sem sentido interpretativo direto**
-  (variam de -191% a +345% dependendo do conjunto de controles — divisão por um
+  (variam de −21% a +142% dependendo do conjunto de controles — divisão por um
   denominador perto de zero, não um bug, ver LIMITACOES). Em vez de "% explicado",
   o coeficiente residual (log-pontos, direto, sem dividir por nada) é a leitura
   confiável aqui: controlando por idade+escolaridade+ocupação, o hiato médio Preta-Parda
-  **deixa de ser estatisticamente significativo** (coef=0,003, p=0,449) — ou seja, o
+  **deixa de ser estatisticamente significativo** (coef=0,003, p=0,533) — ou seja, o
   hiato de MÉDIA some quase inteiro depois de controlar por características
   observáveis. Mas a história muda ao longo da distribuição: no P10 (base da
-  distribuição), o coeficiente residual é positivo e significativo (Preta > Parda
-  controlando por X); no P90 (topo), é negativo e significativo (Preta < Parda
+  distribuição), o coeficiente residual é positivo e significativo (+0,078; Preta > Parda
+  controlando por X); no P90 (topo), é negativo e significativo (−0,032; Preta < Parda
   controlando por X) — um "teto de vidro" especificamente para Preta DENTRO da própria
   população negra, mesmo depois de controlar por idade/escolaridade/ocupação, que não
   aparece na média.
@@ -89,7 +93,7 @@ Fórmula, com HB = renda média do Homem Branco e Y(sexo, raça) = renda média 
 
 Logo **`gap_total = efeito_raça + efeito_gênero + interação`**. A versão anterior deste texto
 trazia "− interação", com o sinal errado (E10). A coluna "Gap" em % é relativa à renda do
-**Homem Branco** (gap_total ÷ HB; HB = R$ 5.370 em 2026 T2). Isso difere do hiato % do resto do
+**Homem Branco** (gap_total ÷ HB; HB = R$ 5.238 em 2026 T2, população de referência). Isso difere do hiato % do resto do
 Hub, que é relativo ao grupo de menor renda. Achados do trimestre mais recente (2026 T2), a
 partir de `decomposicao_raca_genero.parquet` regenerado em 13/10/2026 com a correção do E6. Até
 essa data, a tabela publicada trazia, por erro, efeito gênero de R$ 1.258 e interação de
@@ -97,23 +101,23 @@ essa data, a tabela publicada trazia, por erro, efeito gênero de R$ 1.258 e int
 
 | Combinação | Gap vs. Homem Branco (% da renda do HB) | efeito raça | efeito gênero | interação |
 |---|---:|---:|---:|---:|
-| Mulher Preta | 55,1% | R$2.379 | R$1.258 | -R$677 |
-| Mulher Negra | 52,6% | R$2.239 | R$1.258 | -R$671 |
-| Mulher Parda | 52,0% | R$2.202 | R$1.258 | -R$669 |
-| Mulher Indígena | 48,9% | R$2.561 | R$1.258 | -R$1.193 |
-| Homem Indígena | 47,7% | R$2.561 | R$0 | R$0 |
-| Homem Preto | 44,3% | R$2.379 | R$0 | R$0 |
-| Homem Negro | 41,7% | R$2.239 | R$0 | R$0 |
-| Homem Pardo | 41,0% | R$2.202 | R$0 | R$0 |
-| Mulher Branca | 23,4% | R$0 | R$1.258 | R$0 |
+| Mulher Preta | 55,3% | R$2.306 | R$1.225 | -R$636 |
+| Mulher Negra | 52,6% | R$2.168 | R$1.225 | -R$638 |
+| Mulher Parda | 51,9% | R$2.132 | R$1.225 | -R$638 |
+| Mulher Indígena | 48,5% | R$2.464 | R$1.225 | -R$1.148 |
+| Homem Indígena | 47,0% | R$2.464 | R$0 | R$0 |
+| Homem Preto | 44,0% | R$2.306 | R$0 | R$0 |
+| Homem Negro | 41,4% | R$2.168 | R$0 | R$0 |
+| Homem Pardo | 40,7% | R$2.132 | R$0 | R$0 |
+| Mulher Branca | 23,4% | R$0 | R$1.225 | R$0 |
 
 Três achados não-óbvios:
 
-1. **Homem Indígena tem o MAIOR "efeito raça puro" isolado** (R$2.561, maior até que o
+1. **Homem Indígena tem o MAIOR "efeito raça puro" isolado** (R$2.464, maior até que o
    de Homem Preto) — o penalty de raça sozinho (mantendo gênero=Homem fixo) é mais
    forte pra Indígena que pra qualquer recorte de Negra. Ainda assim, o gap TOTAL de
-   Mulher Indígena (48,9%) fica ABAIXO do de Mulher Preta/Negra/Parda (52-55%) — porque
-   o termo de interação de Mulher Indígena é o mais negativo de todos (-R$1.193).
+   Mulher Indígena (48,5%) fica ABAIXO do de Mulher Preta/Negra/Parda (52-55%) — porque
+   o termo de interação de Mulher Indígena é o mais negativo de todos (-R$1.148).
 2. **O termo de interação é negativo em toda combinação "Mulher + raça não-branca"**:
    o gap total observado é sempre MENOR que a soma simples de efeito-raça +
    efeito-gênero previsse. Isso NÃO significa que ser mulher negra/indígena "não
@@ -133,27 +137,28 @@ construir a função).
 ## 3. Ritmo de convergência do hiato — Branca-Negra, Branca-Indígena, Preta-Parda
 
 `ritmo_convergencia_hiatos.parquet` ajusta uma tendência linear simples no hiato
-percentual de cada par ao longo dos 58 trimestres:
+percentual de cada par ao longo dos 58 trimestres (OLS com EP i.i.d. sobre a série; sem correção
+para autocorrelação, R6 da auditoria, pendente para a Onda 2 com HAC):
 
 | Par | Hiato atual | Inclinação (p.p./ano) | R² | Tendência confiável? | Anos p/ zerar (extrapolação ingênua) |
 |---|---:|---:|---:|---|---:|
-| Branca-Negra | 66,2% | -0,85 | 0,58 | Sim | ~78 anos |
-| Branca-Indígena | 72,7% | +0,70 (bruta) / +0,85 (suavizada) | 0,07 (bruta) / 0,25 (suavizada) | Sim (só na série suavizada) | — (não converge, está piorando) |
-| Preta-Parda | -5,8% | -0,35 | 0,50 | Sim | — (não converge, está piorando) |
+| Branca-Negra | 65,7% | -0,78 | 0,58 | Sim | ~84 anos |
+| Branca-Indígena | 70,9% | +0,53 (bruta, p=0,11) / +0,67 (suavizada) | 0,05 (bruta) / 0,20 (suavizada) | Só na série suavizada | — (não converge) |
+| Preta-Parda | -6,0% | -0,31 | 0,47 | Sim | — (não converge, está piorando) |
 
-- **Branca-Negra**: converge lentamente. "~78 anos pra zerar no ritmo atual" é só um
+- **Branca-Negra**: converge lentamente. "~84 anos pra zerar no ritmo atual" é só um
   exercício ilustrativo de extrapolação ingênua (assume a mesma inclinação linear
   projetada indefinidamente) — nunca uma projeção de verdade.
 - **Branca-Indígena é a série mais ruidosa das três** (menor amostra por trimestre):
-  o ajuste na série BRUTA tem R²=0,07 (baixo, não confiável isoladamente); numa
+  o ajuste na série BRUTA tem R²=0,05 e inclinação não significativa (p=0,11); numa
   versão suavizada (média móvel de 4 trimestres para trás; os gráficos de Indígena
-  usam média móvel centrada) o R² sobe pra 0,25 — confiável o bastante pra dizer a DIREÇÃO (hiato
-  SUBINDO, não descendo), mas não confiável o bastante pra um número preciso de
-  inclinação. Como o hiato está subindo (divergindo), não faz sentido nenhum "anos
+  usam média móvel centrada) o R² sobe pra 0,20 — a direção (hiato subindo) aparece só na série
+  suavizada, e a suavização cria autocorrelação que o EP i.i.d. ignora: **não afirmar que o hiato
+  Branca-Indígena está aumentando** até o teste com HAC (Onda 2). Como o hiato está subindo (divergindo), não faz sentido nenhum "anos
   pra zerar" — reportado como tal (branco/NaN), não forçado.
 - **Preta-Parda tem um resultado sutil que exige atenção ao SINAL**: o hiato atual já é
-  NEGATIVO (Preta ganha menos que Parda, -5,8%) e a inclinação também é negativa
-  (-0,35 p.p./ano) — os dois têm o MESMO sinal, então o hiato está ficando **mais
+  NEGATIVO (Preta ganha menos que Parda, -6,0%) e a inclinação também é negativa
+  (-0,31 p.p./ano) — os dois têm o MESMO sinal, então o hiato está ficando **mais
   negativo** (Preta se afastando ainda mais de Parda por baixo), não convergindo pra
   zero. Um bug real foi encontrado e corrigido durante a construção desta função: a
   primeira versão calculava "anos pra zerar" só checando se a inclinação era negativa,

@@ -1,0 +1,183 @@
+[
+  {
+    "arquivo": "desalento_subutilizacao.parquet",
+    "linhas_antes": 105969,
+    "linhas_depois": 105969,
+    "colunas_novas": [
+      "cv_desalento",
+      "cv_forca_potencial",
+      "n_desalento",
+      "n_forca_potencial",
+      "publicavel",
+      "publicavel_desalento",
+      "publicavel_forca_potencial"
+    ],
+    "colunas_removidas": [],
+    "pontos_identicos": true,
+    "colunas_ponto_diferentes": [],
+    "dif_max_abs": 8.381903171539307e-08,
+    "dif_max_rel": 8.318107705572645e-15,
+    "nota_rotulo": "rótulo da RM SP antigo mapeado para o novo antes de comparar"
+  },
+  {
+    "arquivo": "escolaridade.parquet",
+    "linhas_antes": 544540,
+    "linhas_depois": 544540,
+    "colunas_novas": [
+      "cv_populacao",
+      "n_populacao",
+      "publicavel",
+      "publicavel_populacao"
+    ],
+    "colunas_removidas": [],
+    "pontos_identicos": true,
+    "colunas_ponto_diferentes": [],
+    "dif_max_abs": 2.0489096641540527e-08,
+    "dif_max_rel": 5.7668002721506175e-15,
+    "nota_rotulo": "rótulo da RM SP antigo mapeado para o novo antes de comparar"
+  },
+  {
+    "arquivo": "horas_trabalhadas.parquet",
+    "linhas_antes": 105969,
+    "linhas_depois": 105969,
+    "colunas_novas": [
+      "cv_horas",
+      "cv_renda_hora",
+      "n_horas",
+      "n_renda_hora",
+      "publicavel",
+      "publicavel_horas",
+      "publicavel_renda_hora"
+    ],
+    "colunas_removidas": [],
+    "pontos_identicos": false,
+    "colunas_ponto_diferentes": [
+      "horas_semanais_media",
+      "renda_por_hora_real_media"
+    ],
+    "dif_max_abs": 107.17033681419367,
+    "dif_max_rel": 2.849252549602246,
+    "nota_rotulo": "rótulo da RM SP antigo mapeado para o novo antes de comparar"
+  },
+  {
+    "arquivo": "informalidade.parquet",
+    "linhas_antes": 105969,
+    "linhas_depois": 105969,
+    "colunas_novas": [
+      "cv_carteira",
+      "cv_estatutario_militar",
+      "cv_previdencia",
+      "n_carteira",
+      "n_estatutario_militar",
+      "n_previdencia",
+      "pct_estatutario_militar",
+      "pop_estatutario_militar",
+      "publicavel",
+      "publicavel_carteira",
+      "publicavel_estatutario_militar",
+      "publicavel_previdencia"
+    ],
+    "colunas_removidas": [],
+    "pontos_identicos": false,
+    "colunas_ponto_diferentes": [
+      "pop_empregados",
+      "pct_com_carteira"
+    ],
+    "dif_max_abs": 1435891.7660610331,
+    "dif_max_rel": 0.9816637913229537,
+    "nota_rotulo": "rótulo da RM SP antigo mapeado para o novo antes de comparar"
+  },
+  {
+    "arquivo": "ocupacao.parquet",
+    "linhas_antes": 105969,
+    "linhas_depois": 105969,
+    "colunas_novas": [
+      "cv_desocupacao",
+      "n_desocupacao",
+      "publicavel",
+      "publicavel_desocupacao"
+    ],
+    "colunas_removidas": [],
+    "pontos_identicos": true,
+    "colunas_ponto_diferentes": [],
+    "dif_max_abs": 7.636845111846924e-08,
+    "dif_max_rel": 8.038570048016543e-15,
+    "nota_rotulo": "rótulo da RM SP antigo mapeado para o novo antes de comparar"
+  },
+  {
+    "arquivo": "renda.parquet",
+    "linhas_antes": 105969,
+    "linhas_depois": 105969,
+    "colunas_novas": [
+      "cv_renda",
+      "n_renda",
+      "publicavel",
+      "publicavel_renda"
+    ],
+    "colunas_removidas": [],
+    "pontos_identicos": false,
+    "colunas_ponto_diferentes": [
+      "renda_habitual_real_media",
+      "renda_efetiva_real_media"
+    ],
+    "dif_max_abs": 84777.89041916057,
+    "dif_max_rel": 1.2557981769065558,
+    "nota_rotulo": "rótulo da RM SP antigo mapeado para o novo antes de comparar"
+  },
+  {
+    "arquivo": "renda_por_escolaridade.parquet",
+    "linhas_antes": 143157,
+    "linhas_depois": 143157,
+    "colunas_novas": [
+      "cv_renda",
+      "n_renda",
+      "publicavel",
+      "publicavel_renda"
+    ],
+    "colunas_removidas": [],
+    "pontos_identicos": false,
+    "colunas_ponto_diferentes": [
+      "renda_habitual_real_media",
+      "renda_efetiva_real_media"
+    ],
+    "dif_max_abs": 54633.8835928707,
+    "dif_max_rel": 9.850513176345094,
+    "nota_rotulo": "rótulo da RM SP antigo mapeado para o novo antes de comparar"
+  },
+  {
+    "arquivo": "renda_por_geracao.parquet",
+    "linhas_antes": 105569,
+    "linhas_depois": 105569,
+    "colunas_novas": [
+      "cv_renda",
+      "n_renda",
+      "publicavel",
+      "publicavel_renda"
+    ],
+    "colunas_removidas": [],
+    "pontos_identicos": false,
+    "colunas_ponto_diferentes": [
+      "renda_habitual_real_media"
+    ],
+    "dif_max_abs": 66018.83556813063,
+    "dif_max_rel": 1.8789874946019323,
+    "nota_rotulo": "rótulo da RM SP antigo mapeado para o novo antes de comparar"
+  },
+  {
+    "arquivo": "sobrequalificacao.parquet",
+    "linhas_antes": 23109,
+    "linhas_depois": 23109,
+    "colunas_novas": [
+      "cv_sobrequalificado",
+      "n_sobrequalificado",
+      "publicavel",
+      "publicavel_sobrequalificado"
+    ],
+    "colunas_removidas": [],
+    "pontos_identicos": true,
+    "colunas_ponto_diferentes": [],
+    "dif_max_abs": 6.258487701416016e-07,
+    "dif_max_rel": 1.7868617036879128e-14,
+    "nota_rotulo": "rótulo da RM SP antigo mapeado para o novo antes de comparar"
+  }
+]

@@ -2,25 +2,23 @@
   "esquema": "hub-racial-meta/1",
   "arquivo": "hiato_regional_pretaparda.parquet",
   "n_linhas": 1566,
-  "gerado_em": "2026-10-13T03:40:56.967047+00:00",
+  "gerado_em": "2026-10-13T13:10:23.819272+00:00",
   "codigo": {
-    "commit": "e27278b4e61e4ede0d809e20e6110fc30a81d643",
-    "modulo": "(retroativo)"
+    "commit": "c1202a10fd9cedb6ee7d78647d0188dfd6dea81e",
+    "modulo": "__main__"
   },
   "insumos": {
-    "chave": "trimestral_v1",
-    "descricao": "PNAD Contínua trimestral, extrato v1 + deflator IBGE",
-    "hash": "524457dd7482fc957d4a0f46ac8810fd4402a35d2c1dd703acec80ba40cbee01",
+    "chave": "trimestral_v2",
+    "descricao": "PNAD Contínua trimestral, extrato v2 + deflator IBGE",
+    "hash": "9b64f579fa63981e9237190166d333a9ac546041a4df260d2c67dabf49f1ceda",
     "n_arquivos": 228
   },
   "se_metodo": "linearizacao_taylor_estrato_upa",
-  "populacao": "Ocupados de 14+ anos com rendimento habitual de qualquer trabalho (VD4019) informado; no extrato não há VD4019 = 0, então equivale a renda > 0; Preta × Parda",
+  "populacao": "Ocupados (VD4002=1) de 18+ anos com rendimento habitual do trabalho principal (VD4016) > 0; renda: Rendimento mensal habitual do trabalho principal (VD4016), deflacionado pelo deflator habitual do IBGE; Preta × Parda",
   "periodo": {
     "inicio": "2012T1",
     "fim": "2026T2"
   },
-  "meta_retroativo": true,
-  "meta_preenchido_em": "2026-10-13T04:59:22.526792+00:00",
   "familia_fdr": [
     "ano",
     "trimestre"

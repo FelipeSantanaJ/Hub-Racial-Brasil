@@ -2,15 +2,15 @@
   "esquema": "hub-racial-meta/1",
   "arquivo": "escolaridade.parquet",
   "n_linhas": 544540,
-  "gerado_em": "2026-10-13T04:51:07.687969+00:00",
+  "gerado_em": "2026-10-13T14:36:05.795336+00:00",
   "codigo": {
-    "commit": "da7b04b",
-    "modulo": "(retroativo)"
+    "commit": "c1202a10fd9cedb6ee7d78647d0188dfd6dea81e-modificado",
+    "modulo": "src.processing.agregacoes_pnadc"
   },
   "insumos": {
-    "chave": "trimestral_v1",
-    "descricao": "PNAD Contínua trimestral, extrato v1 + deflator IBGE",
-    "hash": "524457dd7482fc957d4a0f46ac8810fd4402a35d2c1dd703acec80ba40cbee01",
+    "chave": "trimestral_v2",
+    "descricao": "PNAD Contínua trimestral, extrato v2 + deflator IBGE",
+    "hash": "9b64f579fa63981e9237190166d333a9ac546041a4df260d2c67dabf49f1ceda",
     "n_arquivos": 228
   },
   "se_metodo": "sem_inferencia",
@@ -19,6 +19,10 @@
     "inicio": "2012T1",
     "fim": "2026T2"
   },
-  "meta_retroativo": true,
-  "meta_preenchido_em": "2026-10-13T04:59:21.594295+00:00"
+  "regra_supressao": {
+    "n_minimo": 30,
+    "cv_maximo": 0.3,
+    "descricao": "Estimativa publicável só se n ≥ 30 observações no denominador do indicador E CV design-based (linearização Estrato/UPA) ≤ 30%. Estimativa zero ou CV indefinido ⇒ não publicável. Valores não são apagados: filtrar pela coluna publicavel_<ind>.",
+    "decisao": "Ponto de parada 3, 13/10/2026 (R8 da auditoria Rodada 2)"
+  }
 }

@@ -68,7 +68,7 @@ def _titulo(ax, titulo: str, subtitulo: str) -> None:
     ax.text(0, 1.03, subtitulo, transform=ax.transAxes, fontsize=9.5, color=TINTA_SECUNDARIA, ha="left")
 
 
-def _rodape(fig, nota: str = "Fonte: IBGE, PNAD Contínua Trimestral (microdados). Elaboração própria.") -> None:
+def _rodape(fig, nota: str = "Fonte: IBGE, PNAD Contínua Trimestral (microdados). Renda (quando houver): habitual do trabalho principal, ocupados 18+ com renda > 0, a preços do último trimestre. Elaboração própria.") -> None:
     fig.text(0.01, 0.01, nota, fontsize=8, color=TINTA_MUTED)
 
 
@@ -91,13 +91,41 @@ def _salvar(fig, nome_arquivo: str) -> Path:
     return destino
 
 
+# Peso certo para combinar médias/percentuais de células (Onda 1, 13/10/2026): a soma dos pesos de
+# quem ENTRA no indicador (`peso_<ind>`, gravado pelas tabelas de nível), e não `populacao_estimada`,
+# que é a célula inteira. Ponderar a renda média por `populacao_estimada` dava peso demais a células
+# com pouca gente com renda (e, depois da troca para 18+, contava a faixa 14–17, que não tem renda).
+PESO_DA_COLUNA = {
+    "renda_habitual_real_media": "peso_renda", "renda_habitual_nominal_media": "peso_renda",
+    "renda_efetiva_real_media": "peso_renda_efetiva", "renda_efetiva_nominal_media": "peso_renda_efetiva",
+    "horas_semanais_media": "peso_horas", "renda_por_hora_real_media": "peso_renda_hora",
+    "pct_com_carteira": "peso_carteira", "pct_estatutario_militar": "peso_estatutario_militar",
+    "pct_contribui_previdencia": "peso_previdencia", "pct_desalento": "peso_desalento",
+    "pct_forca_trabalho_potencial": "peso_forca_potencial", "pct_alfabetizado": "peso_alfabetizado",
+    "pct_sobrequalificado": "peso_sobrequalificado", "taxa_desocupacao_pct": "peso_desocupacao",
+}
+
+
+def peso_para(df: pd.DataFrame, col_valor: str) -> pd.Series:
+    """Peso para combinar `col_valor` entre células; `populacao_estimada` só se a tabela não tiver
+    o peso do denominador (tabelas antigas ou contagens)."""
+    nome = PESO_DA_COLUNA.get(col_valor)
+    return df[nome] if nome and nome in df.columns else df["populacao_estimada"]
+
+
+def media_ponderada_celulas(g: pd.DataFrame, col_valor: str) -> float:
+    w = peso_para(g, col_valor)
+    ok = g[col_valor].notna() & (w > 0)
+    return float((g.loc[ok, col_valor] * w[ok]).sum() / w[ok].sum()) if ok.any() else np.nan
+
+
 def _media_ponderada_por_grupo(df: pd.DataFrame, col_valor: str, by: list[str]) -> pd.DataFrame:
-    """Média de col_valor ponderada por populacao_estimada, colapsando tudo que não está em `by`."""
+    """Média de col_valor ponderada pelo peso do denominador (`peso_para`), colapsando tudo que não está em `by`."""
     if df.empty:
         return pd.DataFrame(columns=by + [col_valor])
     return (
         df.groupby(by)
-        .apply(lambda g: (g[col_valor] * g["populacao_estimada"]).sum() / g["populacao_estimada"].sum())
+        .apply(lambda g: media_ponderada_celulas(g, col_valor))
         .rename(col_valor)
         .reset_index()
     )
@@ -122,10 +150,8 @@ def _combinar_negra(df: pd.DataFrame, col_valor: str, by: list[str]) -> pd.DataF
 
 
 def _media_ponderada_por_data(df: pd.DataFrame) -> pd.Series:
-    """Colapsa sexo x faixa_etaria numa média ponderada por data (populacao_estimada)."""
-    return df.groupby("data").apply(
-        lambda g: (g["renda_habitual_real_media"] * g["populacao_estimada"]).sum() / g["populacao_estimada"].sum()
-    )
+    """Colapsa sexo x faixa_etaria numa média ponderada por data (peso do denominador)."""
+    return df.groupby("data").apply(lambda g: media_ponderada_celulas(g, "renda_habitual_real_media"))
 
 
 def _preparar_serie_brasil(renda: pd.DataFrame) -> pd.DataFrame:
@@ -226,7 +252,7 @@ def grafico_renda_por_raca(renda: pd.DataFrame) -> Path:
     ax.tick_params(axis="both", colors=TINTA_MUTED, labelsize=9.5, length=0)
     ax.set_xlim(serie.index.min(), serie.index.max() + pd.Timedelta(days=270))
 
-    fonte = "Fonte: IBGE, PNAD Contínua Trimestral (microdados). Elaboração própria."
+    fonte = "Fonte: IBGE, PNAD Contínua Trimestral (microdados). Renda (quando houver): habitual do trabalho principal, ocupados 18+ com renda > 0, a preços do último trimestre. Elaboração própria."
     fig.text(0.01, 0.01, fonte, fontsize=8, color=TINTA_MUTED)
 
     fig.tight_layout(rect=(0, 0.03, 1, 1))
@@ -242,9 +268,7 @@ def _media_ponderada_por_data_generico(df: pd.DataFrame, coluna_valor: str) -> p
     """Como _media_ponderada_por_data, mas com a coluna de valor parametrizada."""
     if df.empty:
         return pd.Series(dtype=float)
-    return df.groupby("data").apply(
-        lambda g: (g[coluna_valor] * g["populacao_estimada"]).sum() / g["populacao_estimada"].sum()
-    )
+    return df.groupby("data").apply(lambda g: media_ponderada_celulas(g, coluna_valor))
 
 
 def _serie_por_raca(
@@ -439,20 +463,20 @@ def grafico_preta_parda_faixa_etaria_combinada(renda: pd.DataFrame) -> Path:
     ].copy()
     combinado = _media_ponderada_por_grupo(r, "renda_habitual_real_media", by=["raca_cor", "faixa_etaria"])
 
-    x = np.arange(len(FAIXAS_ETARIAS_ORDEM))
+    x = np.arange(len(FAIXAS_ETARIAS_RENDA))
     largura = 0.35
     fig, ax = _novo_eixo(figsize=(10, 5.5))
     for i, raca in enumerate(["Preta", "Parda"]):
         valores = [
             combinado[(combinado["raca_cor"] == raca) & (combinado["faixa_etaria"] == f)]["renda_habitual_real_media"].sum()
-            for f in FAIXAS_ETARIAS_ORDEM
+            for f in FAIXAS_ETARIAS_RENDA
         ]
         deslocamento = (i - 0.5) * largura
         cor = {"Preta": COR_PRETA, "Parda": COR_PARDA}[raca]
         ax.bar(x + deslocamento, valores, largura, color=cor, zorder=3, label=raca)
 
     ax.set_xticks(x)
-    ax.set_xticklabels(FAIXAS_ETARIAS_ORDEM, fontsize=10.5)
+    ax.set_xticklabels(FAIXAS_ETARIAS_RENDA, fontsize=10.5)
     ax.legend(loc="upper left", frameon=False, fontsize=9.5)
     _titulo(
         ax, "Renda habitual real, Preta vs. Parda, por faixa etária — Brasil",
@@ -468,7 +492,7 @@ def grafico_preta_parda_faixa_etaria_combinada(renda: pd.DataFrame) -> Path:
 
 def graficos_preta_parda_faixa_etaria_individual(renda: pd.DataFrame) -> list[Path]:
     destinos = []
-    for faixa in FAIXAS_ETARIAS_ORDEM:
+    for faixa in FAIXAS_ETARIAS_RENDA:
         serie = _serie_por_raca(renda, ["Preta", "Parda"], filtro_extra={"faixa_etaria": faixa})
         slug = faixa.replace("+", "mais").replace("-", "_")
         destinos.append(_grafico_serie_temporal(
@@ -700,7 +724,7 @@ def grafico_renda_por_faixa_etaria(renda: pd.DataFrame) -> Path:
     ].copy()
     combinado = _combinar_negra(r, "renda_habitual_real_media", by=["sexo", "faixa_etaria"])
 
-    faixas = ["14-17", "18-24", "25-39", "40-59", "60+"]
+    faixas = FAIXAS_ETARIAS_RENDA
     fig, axes = plt.subplots(1, 2, figsize=(12, 5.5), dpi=150, sharey=True)
     fig.patch.set_facecolor(SUPERFICIE)
 
@@ -851,6 +875,9 @@ def grafico_renda_por_raca_escolaridade(rpe: pd.DataFrame, sexo: str | None = No
 
 
 FAIXAS_ETARIAS_ORDEM = ["14-17", "18-24", "25-39", "40-59", "60+"]
+# Renda só existe de 18+ desde a Onda 1 (população de referência): gráficos de renda por faixa
+# começam em 18-24; gráficos de escolaridade/ocupação seguem com 14-17.
+FAIXAS_ETARIAS_RENDA = FAIXAS_ETARIAS_ORDEM[1:]
 
 # Gerações com amostra ao longo de toda a janela 2012-2026 (Geração Silenciosa e Alpha
 # ficam de fora dos gráficos — amostra residual/inexistente, ver agregacoes_pnadc.py).
@@ -896,20 +923,20 @@ def grafico_renda_por_raca_faixa_etaria_combinada(renda: pd.DataFrame) -> Path:
     combinado = _combinar_negra(r, "renda_habitual_real_media", by=["faixa_etaria"])
 
     ordem_raca = ["Branca", "Negra", "Indígena"]
-    x = np.arange(len(FAIXAS_ETARIAS_ORDEM))
+    x = np.arange(len(FAIXAS_ETARIAS_RENDA))
     largura = 0.26
 
     fig, ax = _novo_eixo(figsize=(10, 5.5))
     for i, raca in enumerate(ordem_raca):
         valores = [
             combinado[(combinado["raca_cor"] == raca) & (combinado["faixa_etaria"] == f)]["renda_habitual_real_media"].sum()
-            for f in FAIXAS_ETARIAS_ORDEM
+            for f in FAIXAS_ETARIAS_RENDA
         ]
         deslocamento = (i - 1) * largura
         ax.bar(x + deslocamento, valores, largura, color=CORES_RACA[raca], zorder=3, label=raca)
 
     ax.set_xticks(x)
-    ax.set_xticklabels(FAIXAS_ETARIAS_ORDEM, fontsize=10.5)
+    ax.set_xticklabels(FAIXAS_ETARIAS_RENDA, fontsize=10.5)
     ax.legend(loc="upper left", frameon=False, fontsize=9.5)
     _titulo(
         ax, "Renda habitual real por faixa etária e raça — Brasil",
@@ -926,7 +953,7 @@ def grafico_renda_por_raca_faixa_etaria_combinada(renda: pd.DataFrame) -> Path:
 def graficos_renda_por_raca_faixa_etaria_individual(renda: pd.DataFrame) -> list[Path]:
     """Um gráfico de série temporal por faixa etária ('um pra cada faixa etária')."""
     destinos = []
-    for faixa in FAIXAS_ETARIAS_ORDEM:
+    for faixa in FAIXAS_ETARIAS_RENDA:
         serie = _serie_por_raca(
             renda, ["Branca", "Negra", "Indígena"],
             filtro_extra={"faixa_etaria": faixa}, suavizar={"Indígena"},
@@ -1529,7 +1556,7 @@ def grafico_renda_completa_heatmap(rc: pd.DataFrame) -> Path:
     negra = (
         r[r["raca_cor"].isin(["Preta", "Parda"])]
         .groupby(["sexo", "faixa_etaria", "nivel_instrucao"])
-        .apply(lambda g: (g["renda_habitual_real_media"] * g["populacao_estimada"]).sum() / g["populacao_estimada"].sum())
+        .apply(lambda g: media_ponderada_celulas(g, "renda_habitual_real_media"))
         .rename("renda_habitual_real_media")
         .reset_index()
     )
@@ -1550,11 +1577,11 @@ def grafico_renda_completa_heatmap(rc: pd.DataFrame) -> Path:
             ax.set_facecolor(SUPERFICIE)
             sub = completo[(completo["raca_cor"] == raca) & (completo["sexo"] == sexo)]
             matriz = sub.pivot_table(index="nivel_instrucao", columns="faixa_etaria", values="renda_habitual_real_media")
-            matriz = matriz.reindex(index=NIVEIS_INSTRUCAO_ORDEM, columns=FAIXAS_ETARIAS_ORDEM)
+            matriz = matriz.reindex(index=NIVEIS_INSTRUCAO_ORDEM, columns=FAIXAS_ETARIAS_RENDA)
             ax.imshow(matriz.values, cmap=CMAP_SEQUENCIAL, vmin=vmin, vmax=vmax, aspect="auto")
 
-            ax.set_xticks(range(len(FAIXAS_ETARIAS_ORDEM)))
-            ax.set_xticklabels(FAIXAS_ETARIAS_ORDEM, fontsize=7.5, color=TINTA_MUTED)
+            ax.set_xticks(range(len(FAIXAS_ETARIAS_RENDA)))
+            ax.set_xticklabels(FAIXAS_ETARIAS_RENDA, fontsize=7.5, color=TINTA_MUTED)
             if j == 0:
                 ax.set_yticks(range(len(NIVEIS_INSTRUCAO_ORDEM)))
                 ax.set_yticklabels(

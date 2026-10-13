@@ -2,22 +2,20 @@
   "esquema": "hub-racial-meta/1",
   "arquivo": "did_cotas_universitarias_heterogeneidade.parquet",
   "n_linhas": 40,
-  "gerado_em": "2026-10-13T04:19:05.575540+00:00",
+  "gerado_em": "2026-10-13T14:10:01.652820+00:00",
   "codigo": {
-    "commit": "e27278b4e61e4ede0d809e20e6110fc30a81d643",
-    "modulo": "(retroativo)"
+    "commit": "c1202a10fd9cedb6ee7d78647d0188dfd6dea81e",
+    "modulo": "__main__"
   },
   "insumos": {
-    "chave": "trimestral_v1",
-    "descricao": "PNAD Contínua trimestral, extrato v1 + deflator IBGE",
-    "hash": "524457dd7482fc957d4a0f46ac8810fd4402a35d2c1dd703acec80ba40cbee01",
+    "chave": "trimestral_v2",
+    "descricao": "PNAD Contínua trimestral, extrato v2 + deflator IBGE",
+    "hash": "9b64f579fa63981e9237190166d333a9ac546041a4df260d2c67dabf49f1ceda",
     "n_arquivos": 228
   },
   "se_metodo": "wls_statsmodels_iid_celulas_coorte",
   "populacao": "Pessoas de 25–29 anos, agregadas por coorte de nascimento × raça (Desenho A)",
   "periodo": null,
-  "meta_retroativo": true,
-  "meta_preenchido_em": "2026-10-13T04:59:21.536161+00:00",
   "familia_fdr": null,
   "alfa": 0.05
 }

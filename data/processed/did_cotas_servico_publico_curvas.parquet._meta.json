@@ -2,21 +2,19 @@
   "esquema": "hub-racial-meta/1",
   "arquivo": "did_cotas_servico_publico_curvas.parquet",
   "n_linhas": 115,
-  "gerado_em": "2026-10-13T04:20:28.099234+00:00",
+  "gerado_em": "2026-10-13T14:11:26.501490+00:00",
   "codigo": {
-    "commit": "e27278b4e61e4ede0d809e20e6110fc30a81d643",
-    "modulo": "(retroativo)"
+    "commit": "c1202a10fd9cedb6ee7d78647d0188dfd6dea81e",
+    "modulo": "__main__"
   },
   "insumos": {
-    "chave": "trimestral_v1",
-    "descricao": "PNAD Contínua trimestral, extrato v1 + deflator IBGE",
-    "hash": "524457dd7482fc957d4a0f46ac8810fd4402a35d2c1dd703acec80ba40cbee01",
+    "chave": "trimestral_v2",
+    "descricao": "PNAD Contínua trimestral, extrato v2 + deflator IBGE",
+    "hash": "9b64f579fa63981e9237190166d333a9ac546041a4df260d2c67dabf49f1ceda",
     "n_arquivos": 228
   },
   "se_metodo": "linearizacao_taylor_estrato_upa",
-  "populacao": "Ocupados de 14+ anos com setor público/privado classificável (empregados e militares/estatutários), janela de −10 a +12 trimestres em torno de 2014T2 (Desenho B)",
+  "populacao": "Participação: ocupados de 14+ anos com setor público/privado classificável (empregados e militares/estatutários); hiato de renda: Ocupados (VD4002=1) de 18+ anos com rendimento habitual do trabalho principal (VD4016) > 0; renda: Rendimento mensal habitual do trabalho principal (VD4016), deflacionado pelo deflator habitual do IBGE; janela de −10 a +12 trimestres em torno de 2014T2 (Desenho B)",
   "periodo": null,
-  "meta_retroativo": true,
-  "meta_preenchido_em": "2026-10-13T04:59:21.507153+00:00",
   "nota": "se por célula design-based (Estrato/UPA); soma ignora covariância entre células (ver _curva_event_study). Bloqueado para publicação até o B4b."
 }
