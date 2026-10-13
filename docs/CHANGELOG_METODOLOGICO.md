@@ -5,6 +5,30 @@ calculá-lo: data, o quê, por quê, impacto. Mais recente primeiro.
 
 ---
 
+## 13/10/2026 — Etapa 2, Fase 3b: correções da Rodada 2 (branch `auditoria/fase3b-correcoes`)
+
+Origem: `docs/auditoria/rodada2.md` e decisões do Ponto de parada 3 (13/10/2026). Só o item 1
+(E6) **já vale** nos parquets; os itens 2–4 estão no código e testados, mas **só valem na
+regeneração única da Onda 1**.
+
+### 1. E6 — decomposição raça × gênero com alvo masculino — **JÁ VALE (tabela regenerada)**
+
+- **O quê.** `gerar_decomposicao_raca_genero` usava sempre Mulher Branca no termo de gênero
+  (`mb = media(base_df, "Branca", "Mulher")`). Agora usa a Branca do mesmo sexo do alvo; o
+  cálculo saiu para `decompor_raca_genero` (função pura, `tests/test_decomposicao_raca_genero.py`).
+- **Por quê.** Com alvo masculino, `efeito_genero` = HB − Y(Homem, Branca) = 0 por definição; a
+  tabela publicada trazia R$ 1.258 (2026T2) e a `interacao` compensava com −R$ 1.258.
+- **Impacto medido** (`docs/auditoria/antes_depois_e6.json`; cópia anterior em
+  `data/processed/_legado/pre_e6_138151e/`, local): mudam **só** `efeito_genero` e `interacao`
+  das **232 linhas masculinas** (diferença máxima R$ 1.489); `gap_total`, `efeito_raca`, rendas,
+  p-valores e as 290 linhas femininas ficam idênticos (|dif| ≤ 3×10⁻¹²). A soma
+  `gap_total = efeito_raca + efeito_genero + interacao` fecha nas 522 linhas.
+- Regenerada com `python -m src.auditoria.regenerar_tabela gerar_decomposicao_raca_genero`, que
+  materializa a `CRIAR_BASE` e chama só esse gerador (a função usa `renda_habitual_real`, que a
+  troca de população não afeta).
+
+---
+
 ## 13/10/2026 — Etapa 2, Fase 2 (branch `auditoria/fase2-infra`)
 
 ### População e renda de referência em código (Bloco F) — **implementado, NÃO regenerado**

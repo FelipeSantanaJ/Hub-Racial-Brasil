@@ -1,0 +1,18 @@
+[
+  {
+    "arquivo": "decomposicao_raca_genero.parquet",
+    "linhas_antes": 522,
+    "linhas_depois": 522,
+    "colunas_novas": [],
+    "colunas_removidas": [],
+    "pontos_identicos": false,
+    "colunas_ponto_diferentes": [
+      "efeito_genero",
+      "interacao"
+    ],
+    "dif_max_abs": 1489.47763906594,
+    "dif_max_rel": 1.0,
+    "gap_total_significativo_fdr_total_sim": 521,
+    "gap_total_significativo_nominal_total_sim": 521
+  }
+]
