@@ -1,0 +1,21 @@
+{
+  "esquema": "hub-racial-meta/1",
+  "arquivo": "segregacao_ocupacional_indigena.parquet",
+  "n_linhas": 1,
+  "gerado_em": "2026-10-13T04:51:08.302350+00:00",
+  "codigo": {
+    "commit": "da7b04b",
+    "modulo": "(retroativo)"
+  },
+  "insumos": {
+    "chave": "trimestral_v1",
+    "descricao": "PNAD Contínua trimestral, extrato v1 + deflator IBGE",
+    "hash": "524457dd7482fc957d4a0f46ac8810fd4402a35d2c1dd703acec80ba40cbee01",
+    "n_arquivos": 228
+  },
+  "se_metodo": "sem_inferencia",
+  "populacao": "Ocupados de 14+ anos com ocupação (VD4011) ou setor (VD4010) informado",
+  "periodo": null,
+  "meta_retroativo": true,
+  "meta_preenchido_em": "2026-10-13T04:59:23.394058+00:00"
+}

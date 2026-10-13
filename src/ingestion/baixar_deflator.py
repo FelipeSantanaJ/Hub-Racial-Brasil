@@ -26,6 +26,8 @@ from pathlib import Path
 import pandas as pd
 import requests
 
+from src.inference.saida import salvar_tabela
+
 URL_DEFLATORES_ZIP = (
     "https://ftp.ibge.gov.br/Trabalho_e_Rendimento/"
     "Pesquisa_Nacional_por_Amostra_de_Domicilios_continua/Trimestral/Microdados/"
@@ -74,7 +76,7 @@ def baixar_e_processar() -> pd.DataFrame:
 def main() -> None:
     DESTINO.parent.mkdir(parents=True, exist_ok=True)
     df = baixar_e_processar()
-    df.to_parquet(DESTINO, index=False)
+    salvar_tabela(df, DESTINO)
     trimestre_referencia = df[
         (df["deflator_habitual"] == 1.0)
     ][["ano", "trimestre"]].drop_duplicates()

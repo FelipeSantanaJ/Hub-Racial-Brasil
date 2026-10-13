@@ -43,7 +43,8 @@ import statsmodels.formula.api as smf
 
 from src.processing.agregacoes_pnadc import CRIAR_BASE, OUTPUT_DIR
 from src.inference import variancia
-from src.inference.saida import escrever_meta, salvar_com_inferencia
+from src.inference.variancia import SE_METODO as SE_METODO_DESENHO
+from src.inference.saida import salvar_com_inferencia, salvar_tabela
 
 SE_METODO_WLS = "wls_statsmodels_iid_celulas_coorte"  # Desenho A (R2: ~38 células, i.i.d.)
 SE_METODO_WLS_CLUSTER = "wls_statsmodels_cluster_upa"
@@ -178,7 +179,7 @@ def rodar_desenho_a(con: duckdb.DuckDBPyConnection) -> pd.DataFrame:
     pros dois pares (Branca vs. Negra, Branca vs. Indígena). Resultado em formato longo,
     uma linha por (par racial, tipo de teste)."""
     painel = construir_painel_cohortes(con)
-    painel.to_parquet(OUTPUT_DIR / "painel_cohortes_superior_completo.parquet", index=False)
+    salvar_tabela(painel, OUTPUT_DIR / "painel_cohortes_superior_completo.parquet")
 
     resultados = []
     for raca_tratado in ["Negra", "Indígena"]:
@@ -240,8 +241,7 @@ def rodar_mecanismo_renda_cohortes(con: duckdb.DuckDBPyConnection) -> None:
 
     df = pd.DataFrame(resultados)
     destino = OUTPUT_DIR / "mecanismo_renda_cohortes_cotas.parquet"
-    df.to_parquet(destino, index=False)
-    escrever_meta(destino, se_metodo=SE_METODO_WLS_CLUSTER)
+    salvar_tabela(df, destino, se_metodo=SE_METODO_WLS_CLUSTER)
     print(f"mecanismo_renda_cohortes_cotas.parquet: {len(df)} linhas", flush=True)
     print(df[["cohort_era", "n_total", "pct_explicada", "pct_nao_explicada",
               "residuo_restrito_coef", "residuo_restrito_p_valor"]].to_string(index=False), flush=True)
@@ -315,12 +315,12 @@ def rodar_desenho_a_heterogeneidade(con: duckdb.DuckDBPyConnection) -> None:
     fecha (n mínimo 25, abaixo de 30) — só a área Urbana é publicada pra Indígena; Rural
     fica de fora, documentado como limitação, não forçado."""
     painel_regiao = construir_painel_cohortes_por_estrato(con, "regiao")
-    painel_regiao.to_parquet(OUTPUT_DIR / "painel_cohortes_superior_completo_regiao.parquet", index=False)
+    salvar_tabela(painel_regiao, OUTPUT_DIR / "painel_cohortes_superior_completo_regiao.parquet")
     painel_norte_resto = construir_painel_cohortes_por_estrato(
         con, "CASE WHEN regiao='Norte' THEN 'Norte' ELSE 'Resto do Brasil' END"
     )
     painel_area = construir_painel_cohortes_por_estrato(con, "area")
-    painel_area.to_parquet(OUTPUT_DIR / "painel_cohortes_superior_completo_area.parquet", index=False)
+    salvar_tabela(painel_area, OUTPUT_DIR / "painel_cohortes_superior_completo_area.parquet")
 
     resultados = []
     resultados += _rodar_bateria_desenho_a(painel_regiao, "Negra", "regiao")
@@ -661,8 +661,7 @@ def rodar_desenho_b_heterogeneidade(micro_evento: pd.DataFrame) -> None:
 
     curvas = pd.concat(resultados_curva, ignore_index=True)
     resumo = pd.concat(resultados_resumo, ignore_index=True)
-    curvas.to_parquet(OUTPUT_DIR / "did_cotas_servico_publico_heterogeneidade_curvas.parquet", index=False)
-    escrever_meta(OUTPUT_DIR / "did_cotas_servico_publico_heterogeneidade_curvas.parquet", nota=NOTA_CURVAS)
+    salvar_tabela(curvas, OUTPUT_DIR / "did_cotas_servico_publico_heterogeneidade_curvas.parquet", se_metodo=SE_METODO_DESENHO, nota=NOTA_CURVAS)
     salvar_com_inferencia(resumo, OUTPUT_DIR / "did_cotas_servico_publico_heterogeneidade.parquet",
                           familia=None, coluna_p="did_p_valor", se_metodo=SE_METODO_WLS_CLUSTER)
     print(f"did_cotas_servico_publico_heterogeneidade.parquet: {len(resumo)} linhas", flush=True)
@@ -689,8 +688,7 @@ def main() -> None:
 
     curvas = pd.concat([curvas_participacao, curva_renda], ignore_index=True)
     resumo = pd.concat([resumo_participacao, resumo_renda], ignore_index=True)
-    curvas.to_parquet(OUTPUT_DIR / "did_cotas_servico_publico_curvas.parquet", index=False)
-    escrever_meta(OUTPUT_DIR / "did_cotas_servico_publico_curvas.parquet", nota=NOTA_CURVAS)
+    salvar_tabela(curvas, OUTPUT_DIR / "did_cotas_servico_publico_curvas.parquet", se_metodo=SE_METODO_DESENHO, nota=NOTA_CURVAS)
     salvar_com_inferencia(resumo, OUTPUT_DIR / "did_cotas_servico_publico.parquet",
                           familia=None, coluna_p="did_p_valor", se_metodo=SE_METODO_WLS_CLUSTER)
     print(f"\ndid_cotas_servico_publico.parquet: {len(resumo)} linhas", flush=True)

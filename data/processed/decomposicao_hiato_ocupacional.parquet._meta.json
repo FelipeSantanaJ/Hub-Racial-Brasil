@@ -1,0 +1,21 @@
+{
+  "esquema": "hub-racial-meta/1",
+  "arquivo": "decomposicao_hiato_ocupacional.parquet",
+  "n_linhas": 5,
+  "gerado_em": "2026-10-13T04:51:07.514148+00:00",
+  "codigo": {
+    "commit": "da7b04b",
+    "modulo": "(retroativo)"
+  },
+  "insumos": {
+    "chave": "trimestral_v1",
+    "descricao": "PNAD Contínua trimestral, extrato v1 + deflator IBGE",
+    "hash": "524457dd7482fc957d4a0f46ac8810fd4402a35d2c1dd703acec80ba40cbee01",
+    "n_arquivos": 228
+  },
+  "se_metodo": "sem_inferencia",
+  "populacao": "Ocupados de 14+ anos com rendimento habitual de qualquer trabalho (VD4019) informado; no extrato não há VD4019 = 0, então equivale a renda > 0; Branca × Negra; padronização direta, últimos 8 trimestres",
+  "periodo": null,
+  "meta_retroativo": true,
+  "meta_preenchido_em": "2026-10-13T04:59:21.354478+00:00"
+}

@@ -1,0 +1,24 @@
+{
+  "esquema": "hub-racial-meta/1",
+  "arquivo": "deflator_ibge.parquet",
+  "n_linhas": 1566,
+  "gerado_em": "2026-09-04T20:02:00.122413+00:00",
+  "codigo": {
+    "commit": "anterior a 63563e3 (src/ingestion/baixar_deflator.py; não regenerado na Fase 1)",
+    "modulo": "(retroativo)"
+  },
+  "insumos": {
+    "chave": "ibge_deflator",
+    "descricao": "Planilha de deflatores do IBGE (FTP)",
+    "hash": "1b92d32aa78926082642759664954f6556e5d730fefd433996d6323bc2b500ce",
+    "n_arquivos": 2
+  },
+  "se_metodo": "sem_inferencia",
+  "populacao": "Não se aplica (deflatores oficiais do IBGE por UF × trimestre)",
+  "periodo": {
+    "inicio": "2012T1",
+    "fim": "2026T2"
+  },
+  "meta_retroativo": true,
+  "meta_preenchido_em": "2026-10-13T04:59:21.382954+00:00"
+}

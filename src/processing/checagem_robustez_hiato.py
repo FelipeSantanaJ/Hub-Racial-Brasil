@@ -25,7 +25,8 @@ import pandas as pd
 from scipy import stats
 
 from src.inference import variancia
-from src.inference.saida import escrever_meta
+from src.inference.variancia import SE_METODO as SE_METODO_DESENHO
+from src.inference.saida import salvar_tabela
 from src.processing.agregacoes_pnadc import CRIAR_BASE, OUTPUT_DIR
 from src.utils import pnadc_core
 
@@ -93,8 +94,7 @@ def main() -> None:
     df["se_metodo"] = variancia.SE_METODO
 
     destino = OUTPUT_DIR / "checagem_robustez_hiato_racial.parquet"
-    df.to_parquet(destino, index=False)
-    escrever_meta(destino, n_boot=N_BOOT, bootstrap="rao_wu_estrato_upa")
+    salvar_tabela(df, destino, se_metodo=SE_METODO_DESENHO, n_boot=N_BOOT, bootstrap="rao_wu_estrato_upa")
 
     razao = df["razao_linearizacao_sobre_bootstrap"]
     print(f"checagem_robustez_hiato_racial.parquet: {len(df)} trimestres", flush=True)
