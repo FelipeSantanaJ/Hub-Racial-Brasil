@@ -1,0 +1,29 @@
+{
+  "esquema": "hub-racial-meta/1",
+  "arquivo": "t4_decimos_renda_domiciliar.parquet",
+  "n_linhas": 616,
+  "gerado_em": "2026-10-13T17:43:14.163324+00:00",
+  "codigo": {
+    "commit": "2219b86ef613f5beb3b9df026d98c7f4da5670d0-modificado",
+    "modulo": "__main__"
+  },
+  "insumos": {
+    "chave": "anual_v2",
+    "descricao": "PNAD Contínua anual, Visitas 1 e 5, extrato v2",
+    "hash": "27d6da89b515f8a7725534eb72c33059af69f15f2827b5f00f759695714ee107",
+    "n_arquivos": 63
+  },
+  "se_metodo": "linearizacao_taylor_estrato_upa",
+  "populacao": "Todas as pessoas (todas as idades) da PNAD Contínua anual (Visita 1; Visita 5 em 2020–2021), exceto pensionistas/empregados domésticos e parentes (V2005 17–19); renda domiciliar per capita habitual (VD5008), valores nominais do ano",
+  "periodo": {
+    "inicio": "2012",
+    "fim": "2025"
+  },
+  "nota_renda": "Valores NOMINAIS do ano; VD5008 = renda habitual domiciliar per capita",
+  "regra_supressao": {
+    "n_minimo": 30,
+    "cv_maximo": 0.3,
+    "descricao": "Estimativa publicável só se n ≥ 30 observações no denominador do indicador E CV design-based (linearização Estrato/UPA) ≤ 30%. Estimativa zero ou CV indefinido ⇒ não publicável. Valores não são apagados: filtrar pela coluna publicavel_<ind>.",
+    "decisao": "Ponto de parada 3, 13/10/2026 (R8 da auditoria Rodada 2)"
+  }
+}

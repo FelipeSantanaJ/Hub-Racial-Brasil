@@ -15,12 +15,14 @@ e seus parentes (`V2005` 17–19) ficam fora, como no IBGE (não têm `VD5008`).
   Linhas internacionais em PPC ficam pendentes (exigem fator de conversão externo).
 - **T3** — de onde vem a renda: % das pessoas em domicílios que recebem cada fonte, e participação
   de cada fonte no total da renda domiciliar das pessoas de cada grupo.
+- **T4** — décimos nacionais de renda domiciliar per capita: participação de cada raça por décimo, índice
+  de representação e razão de chances de estar no topo/base 10% (como o A5, sobre o anual).
 
 Valores **nominais do ano** (o extrato anual não traz os deflatores CO1/CO2); comparações no tempo
 usam razões, taxas e linhas definidas em salários mínimos do próprio ano.
 
 Uso:
-    python -m src.processing.bloco_t
+    python -m src.processing.bloco_t [--so t1 t2 t3 t4]
 """
 from __future__ import annotations
 
@@ -28,7 +30,7 @@ import duckdb
 import numpy as np
 import pandas as pd
 
-from src.inference import variancia
+from src.inference import precisao, variancia
 from src.inference.saida import salvar_tabela
 from src.processing.agregacoes_pnadc import OUTPUT_DIR, SALARIO_MINIMO_NOMINAL
 from src.processing.sensibilidade_populacao import ANUAL_GLOB, Z95
@@ -176,25 +178,81 @@ def t3(m: pd.DataFrame, ano: int, visita: int) -> pd.DataFrame:
     return out
 
 
+# ----------------------------------------------------------------------------------------- #
+# T4
+# ----------------------------------------------------------------------------------------- #
+def t4(m: pd.DataFrame, ano: int, visita: int) -> list[dict]:
+    """Décimos nacionais de VD5008 (peso empatado no limiar repartido) × raça da pessoa."""
+    y, w, raca = m["renda_pc"].to_numpy(float), m["peso"].to_numpy(float), m["raca"].to_numpy(object)
+    upa, est = m["upa"].to_numpy(), m["estrato"].to_numpy()
+    grupos = ["Branca", "Negra", "Indígena"]
+    pop_share = {g: w[raca == g].sum() / w.sum() for g in RACAS}
+    fracs = {d: pnadc_core.fracao_na_fatia(y, w, d / 10, (d + 1) / 10) for d in range(10)}
+    linhas = []
+    for d, f in fracs.items():
+        wd = w * f
+        for g in RACAS:
+            sel = raca == g
+            z, prob = variancia.influencia_media(f, w, sel)
+            var, _ = variancia.variancia_linearizada(z, upa, est)
+            ep = float(np.sqrt(max(var, 0.0)))
+            share = wd[sel].sum() / wd.sum()
+            linhas.append({"ano": ano, "visita": visita, "decimo": f"D{d + 1:02d}", "raca": g,
+                           "pct_do_decimo": 100 * share, "pct_da_populacao": 100 * pop_share[g],
+                           "indice_representacao": share / pop_share[g],
+                           "prob_no_decimo_pct": 100 * prob, "prob_ic_inferior": 100 * (prob - Z95 * ep),
+                           "prob_ic_superior": 100 * (prob + Z95 * ep), "n": int(sel.sum()),
+                           "n_no_decimo": int((sel & (f > 0)).sum()),
+                           "publicavel": bool(precisao.publicavel((sel & (f > 0)).sum(), ep / prob if prob > 0 else np.nan))})
+    for nome, f in (("topo10", fracs[9]), ("base10", fracs[0])):
+        p, zs = {}, {}
+        for g in grupos:
+            zs[g], p[g] = variancia.influencia_media(f, w, raca == g)
+        for g in ("Negra", "Indígena"):
+            lor = np.log(p[g] / (1 - p[g])) - np.log(p["Branca"] / (1 - p["Branca"]))
+            zl = zs[g] / (p[g] * (1 - p[g])) - zs["Branca"] / (p["Branca"] * (1 - p["Branca"]))
+            var, _ = variancia.variancia_linearizada(zl, upa, est)
+            ep = float(np.sqrt(max(var, 0.0)))
+            linhas.append({"ano": ano, "visita": visita, "decimo": nome, "raca": g,
+                           "prob_grupo_pct": 100 * p[g], "prob_branca_pct": 100 * p["Branca"],
+                           "razao_de_chances": float(np.exp(lor)), "rc_ic_inferior": float(np.exp(lor - Z95 * ep)),
+                           "rc_ic_superior": float(np.exp(lor + Z95 * ep))})
+    return linhas
+
+
 def main() -> None:
+    import argparse
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--so", nargs="*", default=None, help="t1 t2 t3 t4 (padrão: todos)")
+    fazer = set(parser.parse_args().so or ["t1", "t2", "t3", "t4"])
     con = duckdb.connect()
     con.execute("PRAGMA disable_progress_bar")
-    t1s, t2s, t3s = [], [], []
+    t1s, t2s, t3s, t4s = [], [], [], []
     for visita, glob in ANUAL_GLOB.items():
         anos = [r[0] for r in con.execute(f"SELECT DISTINCT ano FROM read_parquet('{glob}', hive_partitioning=1) ORDER BY 1").fetchall()]
         for ano in anos:
             m = carregar_ano(con, glob, int(ano))
-            t1s.append(t1(m, int(ano), visita))
-            t2s.append(t2(m, int(ano), visita))
-            if int(ano) >= ANO_INICIO_FONTES:  # fontes separadas só existem completas desde 2016
+            if "t1" in fazer:
+                t1s.append(t1(m, int(ano), visita))
+            if "t2" in fazer:
+                t2s.append(t2(m, int(ano), visita))
+            if "t3" in fazer and int(ano) >= ANO_INICIO_FONTES:  # fontes separadas só existem completas desde 2016
                 t3s.append(t3(m, int(ano), visita))
+            if "t4" in fazer:
+                t4s += t4(m, int(ano), visita)
             print(f"T {ano} (visita {visita}): {len(m):,} pessoas".replace(",", "."), flush=True)
     meta = dict(insumos="anual_v2", se_metodo=variancia.SE_METODO,
                 nota_renda="Valores NOMINAIS do ano; VD5008 = renda habitual domiciliar per capita")
-    salvar_tabela(pd.concat(t1s, ignore_index=True), OUTPUT_DIR / "t1_renda_domiciliar_per_capita.parquet", **meta)
-    salvar_tabela(pd.concat(t2s, ignore_index=True), OUTPUT_DIR / "t2_pobreza.parquet", **meta)
-    salvar_tabela(pd.concat(t3s, ignore_index=True), OUTPUT_DIR / "t3_fontes_de_renda.parquet",
-                  insumos="anual_v2", nota_renda=meta["nota_renda"])
+    if "t1" in fazer:
+        salvar_tabela(pd.concat(t1s, ignore_index=True), OUTPUT_DIR / "t1_renda_domiciliar_per_capita.parquet", **meta)
+    if "t2" in fazer:
+        salvar_tabela(pd.concat(t2s, ignore_index=True), OUTPUT_DIR / "t2_pobreza.parquet", **meta)
+    if "t3" in fazer:
+        salvar_tabela(pd.concat(t3s, ignore_index=True), OUTPUT_DIR / "t3_fontes_de_renda.parquet",
+                      insumos="anual_v2", nota_renda=meta["nota_renda"])
+    if "t4" in fazer:
+        salvar_tabela(pd.DataFrame(t4s), OUTPUT_DIR / "t4_decimos_renda_domiciliar.parquet", **meta,
+                      regra_supressao=precisao.REGRA_SUPRESSAO)
 
 
 if __name__ == "__main__":
