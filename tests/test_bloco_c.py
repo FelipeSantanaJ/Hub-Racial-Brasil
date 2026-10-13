@@ -92,3 +92,29 @@ def test_wls_design_apenas_igual_ao_completo():
     b2, e2, p2 = C.wls_design(y, X, w, upa, est, apenas=[1])
     assert b2 == pytest.approx(b1) and e2[1] == pytest.approx(e1[1], rel=1e-10)
     assert np.isnan(e2[0]) and (p2[:, 0] == 0).all()
+
+
+def _micro_c6(correlacionado: bool, seed=7, n=20000):
+    rng = np.random.default_rng(seed)
+    estrato = rng.integers(0, 40, n)
+    raca = rng.choice(["Branca", "Negra"], size=n)
+    p_casal = np.where(raca == "Branca", 0.7, 0.4) if correlacionado else np.full(n, 0.55)
+    casal = rng.random(n) < p_casal
+    renda = np.exp(7.5 - 0.3 * (raca == "Negra") + 0.4 * casal + rng.normal(0, 0.5, n))
+    return pd.DataFrame({"peso": rng.uniform(50, 500, n), "upa": estrato * 10 + rng.integers(0, 4, n), "estrato": estrato,
+                         "raca": raca, "sexo": rng.choice(["Homem", "Mulher"], size=n), "idade": rng.integers(25, 60, n),
+                         "instrucao": rng.choice(list("1234567"), size=n), "regiao": rng.choice(list("12345"), size=n),
+                         "em_p1": True, "renda": renda, "chefe": rng.random(n) < 0.5, "em_casal": casal,
+                         "filho_0a5": rng.random(n) < 0.2})
+
+
+def test_c6_hiato_condicional_muda_so_quando_o_controle_se_associa_a_raca():
+    for corr in (False, True):
+        h = pd.DataFrame(C.hiato_condicional_c6(_micro_c6(corr)))
+        mud = h[(h["especificacao"] == "mudança") & (h["sexo"] == "Homem")].iloc[0]
+        com = h[(h["especificacao"] != "mudança") & (h["especificacao"] != "controles básicos") & (h["sexo"] == "Homem")]
+        assert com["coef_negra_ln_renda"].iloc[0] == pytest.approx(-0.3, abs=0.04)  # com casal no modelo, recupera −0,3
+        if corr:
+            assert mud["coef_negra_ln_renda"] > 3 * mud["ep"]  # sem casal, o hiato básico era mais negativo
+        else:
+            assert abs(mud["coef_negra_ln_renda"]) < 3 * mud["ep"]

@@ -9,6 +9,8 @@ domiciliar per capita (PNAD anual, raça × sexo da pessoa).
 - **C3** — Shapley de dois fatores (raça, gênero) da distância HB − mulher negra, com a interação à parte e as duas
   ordens sequenciais; reconciliação com `decomposicao_raca_genero`.
 - **C4** — penalidade da maternidade por raça (filho(a) de 0–5 no domicílio; chave UPA + V1008 + V1014).
+- **C6** — estado conjugal e chefia: associação com Pr(P1), ln renda e horas por raça × sexo; hiato racial
+  condicional com e sem esses controles.
 - **C5** — trabalho doméstico remunerado (`VD4009` 03/04): participação, carteira, renda e Kitagawa do hiato
   entre mulheres.
 
@@ -57,7 +59,9 @@ def micro_c(con, ano: int, tri: int) -> pd.DataFrame:
                      OVER (PARTITION BY m.UPA, m.V1008, m.V1014) AS f_resp,
                  MAX(CASE WHEN m.V2009 <= 5 AND m.V2005 IN ('04','06') THEN 1 ELSE 0 END)
                      OVER (PARTITION BY m.UPA, m.V1008, m.V1014) AS f_conj,
-                 MAX(CASE WHEN m.V2009 <= 5 THEN 1 ELSE 0 END) OVER (PARTITION BY m.UPA, m.V1008, m.V1014) AS c05
+                 MAX(CASE WHEN m.V2009 <= 5 THEN 1 ELSE 0 END) OVER (PARTITION BY m.UPA, m.V1008, m.V1014) AS c05,
+                 MAX(CASE WHEN m.V2005 IN ('02','03') THEN 1 ELSE 0 END)
+                     OVER (PARTITION BY m.UPA, m.V1008, m.V1014) AS conj_dom
           FROM read_parquet('{PARQUET_GLOB}', hive_partitioning = 1) m
           WHERE m.ano = {ano} AND m.trimestre = {tri})
         SELECT {ano} AS ano, {tri} AS trimestre, {RACA_SQL} AS raca,
@@ -68,7 +72,9 @@ def micro_c(con, ano: int, tri: int) -> pd.DataFrame:
                CASE WHEN {pop.REFERENCIA.sql('m')} THEN m.VD4016 * d.deflator_habitual END AS renda,
                m.VD4002 = '1' AS ocupado,
                (m.V2005 = '01' AND m.f_resp = 1) OR (m.V2005 IN ('02','03') AND m.f_conj = 1) AS filho_0a5,
-               m.c05 = 1 AS crianca_0a5_dom, m.V2005 IN ('01','02','03') AS resp_ou_conj
+               m.c05 = 1 AS crianca_0a5_dom, m.V2005 IN ('01','02','03') AS resp_ou_conj,
+               m.V2005 = '01' AS chefe,
+               (m.V2005 = '01' AND m.conj_dom = 1) OR m.V2005 IN ('02','03') AS em_casal, m.V4039 AS horas
         FROM t m
         LEFT JOIN read_parquet('{DEFLATOR_PATH}') d ON m.ano = d.ano AND m.trimestre = d.trimestre AND m.UF = d.UF
         WHERE m.V2009 >= {pop.IDADE_MINIMA_REFERENCIA} AND m.V2010 IN ('1','2','3','4','5') AND m.V2007 IN ('1','2')
@@ -513,10 +519,94 @@ def gerar_c5(con) -> pd.DataFrame:
     return df
 
 
+# ----------------------------------------------------------------------------------------- #
+# C6 — estado conjugal e chefia
+# ----------------------------------------------------------------------------------------- #
+def _dummies_basicas(d: pd.DataFrame) -> np.ndarray:
+    D = pd.get_dummies(pd.DataFrame({"idade": d["idade"].astype(int).astype(str), "i": d["instrucao"].astype(str),
+                                     "r": d["regiao"].astype(str)}), drop_first=True, dtype=float)
+    return D.to_numpy()
+
+
+def associacoes_c6(m: pd.DataFrame) -> list[dict]:
+    """Coeficientes de chefe e em_casal (com filho 0–5 e controles básicos) em Pr(P1), ln renda e horas, por raça × sexo,
+    e a diferença Negra − Branca (mesma amostra, ψ combinados)."""
+    w, upa, est = m["peso"].to_numpy(float), m["upa"].to_numpy(), m["estrato"].to_numpy()
+    y = m["renda"].to_numpy(float)
+    p1 = m["em_p1"].to_numpy(bool) & np.isfinite(y)
+    flags = np.column_stack([m[c].fillna(False).to_numpy(float) for c in ("chefe", "em_casal", "filho_0a5")])
+    X = np.column_stack([np.ones(len(m)), flags, _dummies_basicas(m)])
+    desfechos = {"pr_p1_pp": (100 * p1.astype(float), None),
+                 "ln_renda_p1": (np.log(np.where(p1, y, 1.0)), p1),
+                 "horas_p1": (m["horas"].to_numpy(float), p1)}
+    linhas = []
+    for sexo in SEXOS:
+        for nome, (yy, restr) in desfechos.items():
+            res = {}
+            for r in ("Branca", "Negra"):
+                dom = (m["sexo"] == sexo).to_numpy() & (m["raca"] == r).to_numpy()
+                if restr is not None:
+                    dom &= restr
+                beta, ep, psi = wls_design(yy, X, w, upa, est, dom, apenas=[1, 2])
+                res[r] = (beta, psi)
+                for j, cond in ((1, "chefe"), (2, "em_casal")):
+                    linhas.append({"sexo": sexo, "desfecho": nome, "condicao": cond, "raca": r,
+                                   "estimativa": float(beta[j]), "ep": float(ep[j]), "n": int(dom.sum()),
+                                   "n_condicao": int((dom & (flags[:, j - 1] > 0)).sum())})
+            for j, cond in ((1, "chefe"), (2, "em_casal")):
+                v, _ = variancia.variancia_linearizada(res["Negra"][1][:, j] - res["Branca"][1][:, j], upa, est)
+                e = float(np.sqrt(max(v, 0.0)))
+                linhas.append({"sexo": sexo, "desfecho": nome, "condicao": cond, "raca": "Negra − Branca",
+                               "estimativa": float(res["Negra"][0][j] - res["Branca"][0][j]), "ep": e, "emd_80pct": 2.8 * e})
+    return linhas
+
+
+def hiato_condicional_c6(m: pd.DataFrame) -> list[dict]:
+    """Coeficiente de Negra em ln renda (P1) por sexo: controles básicos × + chefia, casal e filho 0–5."""
+    w, upa, est = m["peso"].to_numpy(float), m["upa"].to_numpy(), m["estrato"].to_numpy()
+    y = m["renda"].to_numpy(float)
+    p1 = m["em_p1"].to_numpy(bool) & np.isfinite(y)
+    neg = (m["raca"] == "Negra").to_numpy(float)
+    basicas = _dummies_basicas(m)
+    flags = np.column_stack([m[c].fillna(False).to_numpy(float) for c in ("chefe", "em_casal", "filho_0a5")])
+    ly = np.log(np.where(p1, y, 1.0))
+    linhas = []
+    for sexo in SEXOS:
+        dom = p1 & (m["sexo"] == sexo).to_numpy()
+        b0, e0, s0 = wls_design(ly, np.column_stack([np.ones(len(m)), neg, basicas]), w, upa, est, dom, apenas=[1])
+        b1, e1, s1 = wls_design(ly, np.column_stack([np.ones(len(m)), neg, flags, basicas]), w, upa, est, dom, apenas=[1])
+        v, _ = variancia.variancia_linearizada(s1[:, 1] - s0[:, 1], upa, est)
+        for esp, b, e in (("controles básicos", b0[1], e0[1]), ("+ chefia, casal, filho 0–5", b1[1], e1[1]),
+                          ("mudança", b1[1] - b0[1], float(np.sqrt(max(v, 0.0))))):
+            linhas.append({"sexo": sexo, "especificacao": esp, "coef_negra_ln_renda": float(b), "ep": float(e),
+                           "pct_do_basico": float(100 * (b1[1] - b0[1]) / b0[1]) if esp == "mudança" else np.nan})
+    return linhas
+
+
+def gerar_c6(con) -> tuple[pd.DataFrame, pd.DataFrame]:
+    a_, h_ = [], []
+    for nome, tris in JANELAS.items():
+        m = pd.concat([micro_c(con, a, t) for a, t in tris], ignore_index=True)
+        m = m[(m["idade"] >= 25) & (m["idade"] <= 59) & m["raca"].isin(["Branca", "Negra"])].reset_index(drop=True)
+        a_ += [{"janela": nome, **x} for x in associacoes_c6(m)]
+        h_ += [{"janela": nome, **x} for x in hiato_condicional_c6(m)]
+        print(f"C6 {nome}", flush=True)
+    a = _ic(pd.DataFrame(a_))
+    a["p_valor"] = 2 * stats.norm.sf(np.abs(a["estimativa"] / a["ep"]))
+    a = multiplicidade.adicionar_fdr(a, ["janela", "sexo"])
+    h = _ic(pd.DataFrame(h_).rename(columns={"coef_negra_ln_renda": "estimativa"}))
+    meta = dict(se_metodo="wls_influencia_linearizacao_estrato_upa",
+                nota="Pessoas 25–59 (Branca, Negra); controles: idade (anos simples), instrução, região; "
+                     "associação, não efeito (endogeneidade)")
+    salvar_tabela(a, OUTPUT_DIR / "c6_conjugal_chefia.parquet", familia_fdr=["janela", "sexo"], **meta)
+    salvar_tabela(h, OUTPUT_DIR / "c6_hiato_condicional.parquet", **meta)
+    return a, h
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--so", nargs="*", default=None, help="c123 anual quantis c4 c5")
-    fazer = set(parser.parse_args().so or ["c123", "anual", "quantis", "c4", "c5"])
+    parser.add_argument("--so", nargs="*", default=None, help="c123 anual quantis c4 c5 c6")
+    fazer = set(parser.parse_args().so or ["c123", "anual", "quantis", "c4", "c5", "c6"])
     con = duckdb.connect()
     con.execute("PRAGMA disable_progress_bar")
     if "c123" in fazer:
@@ -528,6 +618,8 @@ def main() -> None:
         gerar_c1_quantis(con)
     if "c4" in fazer:
         gerar_c4(con)
+    if "c6" in fazer:
+        gerar_c6(con)
     if "c5" in fazer:
         gerar_c5(con)
 

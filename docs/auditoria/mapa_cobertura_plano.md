@@ -67,7 +67,7 @@ técnicas (R11, F4, F6, imagens vazias da árvore) nas pendências da Onda 1 (`o
 | C3 | Já existe | `c123_racaxsexo_celulas` (Shapley, ordens sequenciais; reconciliado com `decomposicao_raca_genero`) | — |
 | C4 | Já existe | `c4_penalidade_maternidade` (UPA + V1008 + V1014; responsáveis/cônjuges; sensibilidade com qualquer criança 0–5) | — |
 | C5 | Já existe | `c5_trabalho_domestico`, `c5_tendencia` | — |
-| C6 | Novo | Chefia/estado conjugal: não feito na Onda 2 (opcional; a chefia aparece no S0.3 e no T1) | — |
+| C6 | Já existe | `c6_conjugal_chefia`, `c6_hiato_condicional` (associação; endogeneidade declarada) | — |
 
 ## Bloco S — Seleção (o recorte "ocupados com renda" distorce o hiato?)
 

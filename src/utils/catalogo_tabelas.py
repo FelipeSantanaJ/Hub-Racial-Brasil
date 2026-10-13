@@ -123,6 +123,8 @@ CATALOGO: list[tuple[str, str, str]] = [
      "V2005 17–19; renda domiciliar per capita (VD5008) por raça × sexo da pessoa", "anual_v2"),
     (r"^c4_penalidade_maternidade$", "Pessoas de 25–44 anos (responsáveis ou cônjuges na definição principal); filho(a) "
      "de 0–5 no domicílio (UPA + V1008 + V1014); janelas 2012 e 2025T3–2026T2", T),
+    (r"^(c6_conjugal_chefia|c6_hiato_condicional)$", "Pessoas de 25–59 anos (Branca, Negra); chefia (V2005 = 01) e "
+     "casal (cônjuge no domicílio); janelas 2012 e 2025T3–2026T2", T),
     (r"^(c5_trabalho_domestico|c5_tendencia)$", "Mulheres 18+ (P1 e todas); trabalho doméstico = VD4009 03/04", T),
     (r"^habitacao_.*$", "Moradores (pessoas) da PNAD Contínua anual, Visita 1, tema Habitação: 2016–2019 e 2022–2025",
      INSUMO_ANUAL_VISITA1_V1),

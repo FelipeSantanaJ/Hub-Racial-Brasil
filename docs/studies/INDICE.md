@@ -30,6 +30,7 @@ de publicação. Estudos entram aqui quando a ficha é criada, não quando o res
 | C3 | Shapley raça × gênero da distância homem branco − mulher negra | C | 2 | Aprovado com ressalvas | [C3/ficha.md](C3/ficha.md) | Onda 2 |
 | C5 | Trabalho doméstico remunerado e o hiato das mulheres | D/C | 2 | Aprovado com ressalvas | [C5/ficha.md](C5/ficha.md) | Onda 2 |
 | C4 | Penalidade da maternidade por raça (filho 0–5 no domicílio) | C/D | 2 | Aprovado com ressalvas | [C4/ficha.md](C4/ficha.md) | Onda 2 |
+| C6 | Estado conjugal e chefia: renda e oferta de trabalho por raça | C | 2 | Aprovado com ressalvas (proposto) | [C6/ficha.md](C6/ficha.md) | Onda 2 |
 
 O que já existe no Hub e a qual pergunta corresponde está em
 [`docs/auditoria/mapa_cobertura_plano.md`](../auditoria/mapa_cobertura_plano.md).

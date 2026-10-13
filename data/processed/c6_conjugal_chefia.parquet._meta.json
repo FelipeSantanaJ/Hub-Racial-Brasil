@@ -1,0 +1,24 @@
+{
+  "esquema": "hub-racial-meta/1",
+  "arquivo": "c6_conjugal_chefia.parquet",
+  "n_linhas": 72,
+  "gerado_em": "2026-10-13T19:14:54.601501+00:00",
+  "codigo": {
+    "commit": "ae255750ed4a6f7ba6d3020362ebb395b2858ef8-modificado",
+    "modulo": "__main__"
+  },
+  "insumos": {
+    "chave": "trimestral_v2",
+    "descricao": "PNAD Contínua trimestral, extrato v2 + deflator IBGE",
+    "hash": "9b64f579fa63981e9237190166d333a9ac546041a4df260d2c67dabf49f1ceda",
+    "n_arquivos": 228
+  },
+  "se_metodo": "wls_influencia_linearizacao_estrato_upa",
+  "populacao": "Pessoas de 25–59 anos (Branca, Negra); chefia (V2005 = 01) e casal (cônjuge no domicílio); janelas 2012 e 2025T3–2026T2",
+  "periodo": null,
+  "familia_fdr": [
+    "janela",
+    "sexo"
+  ],
+  "nota": "Pessoas 25–59 (Branca, Negra); controles: idade (anos simples), instrução, região; associação, não efeito (endogeneidade)"
+}
