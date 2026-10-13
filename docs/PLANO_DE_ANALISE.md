@@ -47,6 +47,11 @@
 4. Carteira assinada = só CLT, com categoria própria para estatutário/militar.
 Os itens 2–4 entram no código já, mas só valem na regeneração única da Onda 1.
 
+**Complemento (13/10/2026, após o PR da Fase 3b):** Ignorado fica **sempre** fora do universo;
+Amarela entra também no escopo `genero` de `extremos`; denominador de `pct_estatutario_militar` =
+empregados 01–07 (aceito). **As análises principais do Hub são sempre Branca × Negra e Indígena**;
+Amarela aparece quando entra no universo, sem ser foco.
+
 ---
 
 ## 0. Como ler este plano

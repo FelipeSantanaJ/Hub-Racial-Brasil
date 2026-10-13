@@ -411,7 +411,7 @@ limiares), 100-150 nas células raça×gênero. Vale a **mesma ressalva de heapi
 documentada para o topo10% dentro-da-raça — renda autodeclarada concentra em valores
 redondos, e o filtro `>= limiar` capturava um pouco mais que 10%/25% exatos. Desde 13/10/2026
 (vale na regeneração da Onda 1), o peso empatado é repartido e `pct_populacao_capturada` dá 10,0/25,0.
-O escopo `brasil` passa a incluir **Amarela** no universo e nas raças reportadas (R10): na prévia de
+Os escopos `brasil` e `genero` passam a incluir **Amarela** no universo e nas raças reportadas (R10): na prévia de
 2026T2, Amarela é 1,45% do topo 10% nacional e a participação Branca cai de 68,2% para 67,3%.
 Ignorado continua fora.
 

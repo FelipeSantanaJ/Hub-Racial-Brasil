@@ -57,7 +57,8 @@ regeneração única da Onda 1**.
   `gerar_perfil_topo10_quartis_pretaparda`, `gerar_perfil_topo10_quartis_indigena`,
   `gerar_extremos_racial` e `gerar_quartis_multi_racial`. `n_topo10`/`n_quartil`/`n_extremo`
   passam a contar quem tem fração > 0. R10: o escopo `brasil` de `extremos_distribuicao_racial`
-  inclui Amarela no universo e nas raças reportadas; Ignorado e o escopo `genero` ficam como estavam.
+  e o escopo `genero` incluem Amarela no universo e nas raças reportadas (escopo `genero` acrescentado
+  por decisão de 13/10/2026, após o PP3). Ignorado fica sempre fora.
 - **Por quê.** Com renda declarada em valores redondos, o corte `>= limiar` capturava de 22% a 31%
   nos quartis e até 12,8% no topo 10%.
 - **Impacto previsto** (prévia 2026T2, sem gravar parquet): o topo 10% passa de 11,5% (Branca) e

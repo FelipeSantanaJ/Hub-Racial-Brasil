@@ -1165,8 +1165,9 @@ def gerar_extremos_racial(con: duckdb.DuckDBPyConnection) -> None:
       grupo, dimensao, categoria, pct_no_extremo.
 
     Peso dos empatados nos limiares repartido (R9): `pct_populacao_capturada` = 10,0. O escopo
-    'brasil' inclui Amarela no universo e na lista de raças (R10, 13/10/2026); Ignorado segue
-    fora. Os escopos 'genero' e os recortes por raça continuam sem Amarela.
+    'brasil' e 'genero' incluem Amarela no universo e na lista de raças (R10; decisão de
+    13/10/2026). Ignorado fica SEMPRE fora. Os recortes 'raca'/'raca_sexo' seguem só com Branca
+    e Negra (foco do Hub: Branca × Negra e Indígena).
     """
     def _fatia(grupo: pd.DataFrame, extremo: str, q: float):
         limiar = pnadc_core.quantil_ponderado(grupo["renda_habitual_real"], grupo["peso"], q)
@@ -1199,7 +1200,7 @@ def gerar_extremos_racial(con: duckdb.DuckDBPyConnection) -> None:
 
             # --- escopo 'genero': limiar dentro de cada gênero ---------------- #
             for sexo in ("Homem", "Mulher"):
-                g = micro[micro["sexo"] == sexo]
+                g = micro_todos[micro_todos["sexo"] == sexo]
                 if len(g) < 100:
                     continue
                 peso_g = g["peso"].sum()
@@ -1207,7 +1208,7 @@ def gerar_extremos_racial(con: duckdb.DuckDBPyConnection) -> None:
                 peso_fs = fatia_s["peso"].sum()
                 if not peso_fs:
                     continue
-                for raca in ("Branca", "Negra", "Indígena"):
+                for raca in ("Branca", "Negra", "Indígena", "Amarela"):
                     distrib.append({
                         "ano": ano, "trimestre": tri, "extremo": extremo,
                         "escopo_limiar": "genero", "grupo_limiar": sexo, "raca_cor": raca,

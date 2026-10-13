@@ -61,8 +61,8 @@ CATALOGO: list[tuple[str, str, str]] = [
     (r"^(gini_por_raca|theil_racial)$", RENDA_TODOS_14_POS + "; Branca, Negra e Indígena (Amarela e Ignorado fora)",
      INSUMO_TRIMESTRAL_V1),
     (r"^extremos_distribuicao_racial$",
-     RENDA_TODOS_14_POS + "; escopo 'brasil' com Branca, Negra, Indígena e Amarela (Amarela desde 13/10/2026, R10; "
-     "vale na regeneração da Onda 1), escopo 'genero' sem Amarela; Ignorado fora. Fatias com o peso empatado no "
+     RENDA_TODOS_14_POS + "; escopos 'brasil' e 'genero' com Branca, Negra, Indígena e Amarela (Amarela desde 13/10/2026, "
+     "R10; vale na regeneração da Onda 1); Ignorado sempre fora. Fatias com o peso empatado no "
      "limiar repartido (R9)", INSUMO_TRIMESTRAL_V1),
     (r"^(perfil_topo10.*|perfil_quartis.*|extremos_.*|quartis_multi_racial)$",
      RENDA_TODOS_14_POS + "; fatias com o peso empatado no limiar repartido (R9, vale na regeneração da Onda 1)",

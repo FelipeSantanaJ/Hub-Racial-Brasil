@@ -77,4 +77,6 @@ def test_extremos_brasil_inclui_amarela(saidas):
     d = saidas["extremos_distribuicao_racial"]
     br = d[d["escopo_limiar"] == "brasil"]
     assert set(br["raca_cor"]) == {"Branca", "Negra", "Indígena", "Amarela"}
-    assert "Amarela" not in set(d.loc[d["escopo_limiar"] == "genero", "raca_cor"])
+    ge = d[d["escopo_limiar"] == "genero"]
+    assert set(ge["raca_cor"]) == {"Branca", "Negra", "Indígena", "Amarela"}
+    assert "Ignorado" not in set(d["raca_cor"])
