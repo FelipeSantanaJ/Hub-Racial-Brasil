@@ -32,6 +32,14 @@
    (piso das tabelas descritivas); cada ficha de estudo declara a sua família conforme a pergunta;
    tendências usam HAC, não FDR sobre trimestres (`src/inference/multiplicidade.py`).
 
+**Decisões do Ponto de parada 2 (13/10/2026; "pode seguir" aceitou as recomendações):**
+1. PR da Fase 2 aprovado.
+2. Regenerar com a população/renda de referência **uma vez só, na Onda 1**, junto com a ficha do
+   Bloco F, o relatório antes × depois e os gráficos. Até lá o pipeline não roda para publicação.
+3. Nessa regeneração, **todas** as tabelas de hiato migram para a população de referência (o Hub não
+   fica com duas populações).
+4. Theil e Gini passam a incluir **Amarela** no total (A4).
+
 ---
 
 ## 0. Como ler este plano
