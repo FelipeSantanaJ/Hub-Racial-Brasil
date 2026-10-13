@@ -6,7 +6,7 @@ gênero, faixa etária e escolaridade, para renda habitual real (deflator oficia
 `src/processing/graficos_fase1.py` a partir dos datasets em `data/processed/*.parquet`.
 Também disponível como apresentação: [Datahub_Racial_Brasil_Fase1.pptx](Datahub_Racial_Brasil_Fase1.pptx).
 
-134 gráficos nesta galeria. O deck em PPTX (`Datahub_Racial_Brasil_Fase1.pptx`) é
+89 gráficos nesta galeria (de 721 imagens em `docs/img`: 540 da árvore `arv_*` e 181 das demais análises; contagem corrigida em 13/10/2026). O deck em PPTX (`Datahub_Racial_Brasil_Fase1.pptx`) é
 organizado como uma **árvore cruzada** de renda por raça (Branca / Negra / Indígena), sem
 repetição de imagem — ver [README](../README.md) e [PLANO.md](PLANO.md) (bloco "Deck em
 árvore"). Os gráficos da árvore (`docs/img/arv_*.png`, gerados por
