@@ -1,0 +1,23 @@
+{
+  "esquema": "hub-racial-meta/1",
+  "arquivo": "b5_taxa_desocupacao.parquet",
+  "n_linhas": 58,
+  "gerado_em": "2026-10-13T18:34:56.366284+00:00",
+  "codigo": {
+    "commit": "22180a1eb4cdf93dfb4cb5f3eb5bf534686271be-modificado",
+    "modulo": "__main__"
+  },
+  "insumos": {
+    "chave": "trimestral_v2",
+    "descricao": "PNAD Contínua trimestral, extrato v2 + deflator IBGE",
+    "hash": "9b64f579fa63981e9237190166d333a9ac546041a4df260d2c67dabf49f1ceda",
+    "n_arquivos": 228
+  },
+  "se_metodo": "sem_inferencia",
+  "populacao": "Pessoas de 14+ na força de trabalho; desocupados ÷ força",
+  "periodo": {
+    "inicio": "2012T1",
+    "fim": "2026T2"
+  },
+  "nota": "Desocupados ÷ força de trabalho, 14+, ponderado (V1028)"
+}

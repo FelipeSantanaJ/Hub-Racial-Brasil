@@ -1,0 +1,21 @@
+{
+  "esquema": "hub-racial-meta/1",
+  "arquivo": "b5_ciclo_tendencia.parquet",
+  "n_linhas": 6,
+  "gerado_em": "2026-10-13T18:34:55.797415+00:00",
+  "codigo": {
+    "commit": "22180a1eb4cdf93dfb4cb5f3eb5bf534686271be-modificado",
+    "modulo": "__main__"
+  },
+  "insumos": {
+    "chave": "trimestral_v2",
+    "descricao": "PNAD Contínua trimestral, extrato v2 + deflator IBGE",
+    "hash": "9b64f579fa63981e9237190166d333a9ac546041a4df260d2c67dabf49f1ceda",
+    "n_arquivos": 228
+  },
+  "se_metodo": "ewc_lazarus_lewis_stock_watson; sensibilidades newey_west e gls_ar1",
+  "populacao": "Séries do S1 (P1 e P4, Branca × Negra) + taxa de desocupação (14+, IBGE)",
+  "periodo": null,
+  "familia_fdr": "as 6 séries (BH)",
+  "nota": "hiato % ~ tendência + desocupação (14+, IBGE) + dummy 2020–21 + trimestre; coef em p.p. de hiato por p.p. de desocupação"
+}
