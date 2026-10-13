@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "fonte": "Fonte: IBGE, PNAD Contínua Trimestral (microdados). Elaboração própria."
+    "fonte": "Fonte: IBGE, PNAD Contínua Trimestral (microdados). Renda (quando houver): habitual do trabalho principal, ocupados 18+ com renda > 0, a preços do último trimestre. Elaboração própria."
   },
   "extremos": [
     {
@@ -272,7 +272,7 @@
           "ramo": "—",
           "sub": "Raça (Brasil) · hiato vs. Indígena",
           "titulo": "Hiato de renda — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_raca_hiato_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena — Raça (Brasil) — 2012–2026 (Welch)."
         },
@@ -332,7 +332,7 @@
           "ramo": "—",
           "sub": "Combinada · hiato por sexo · vs. Indígena",
           "titulo": "Hiato de renda por gênero — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_rg_hiato_comb_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena por sexo — 2012–2026 (Welch)."
         },
@@ -350,7 +350,7 @@
           "ramo": "Mulheres",
           "sub": "Mulheres · hiato vs. Indígena",
           "titulo": "Hiato de renda — Mulheres — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_rg_hiato_mulheres_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena — Mulheres — 2012–2026 (Welch)."
         },
@@ -368,7 +368,7 @@
           "ramo": "Homens",
           "sub": "Homens · hiato vs. Indígena",
           "titulo": "Hiato de renda — Homens — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_rg_hiato_homens_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena — Homens — 2012–2026 (Welch)."
         },
@@ -426,15 +426,6 @@
         {
           "tipo": "valor_serie",
           "ramo": "—",
-          "sub": "14-17 anos",
-          "titulo": "Renda média real por raça — 14-17 anos — Brasil",
-          "subtitulo": "R$ reais, a preços do trimestre mais recente (deflator IBGE) · série 2012–2026",
-          "arquivo": "arv_faixa_14_17_serie.png",
-          "legenda": "Renda média real por raça — 14-17 anos — série histórica."
-        },
-        {
-          "tipo": "valor_serie",
-          "ramo": "—",
           "sub": "18-24 anos",
           "titulo": "Renda média real por raça — 18-24 anos — Brasil",
           "subtitulo": "R$ reais, a preços do trimestre mais recente (deflator IBGE) · série 2012–2026",
@@ -482,27 +473,9 @@
           "ramo": "—",
           "sub": "Combinada · hiato por faixa etaria · vs. Indígena",
           "titulo": "Hiato de renda por faixa etaria — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_faixa_hiato_comb_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena por faixa etaria — 2012–2026 (Welch)."
-        },
-        {
-          "tipo": "hiato_serie",
-          "ramo": "—",
-          "sub": "14-17 anos · hiato vs. Negra",
-          "titulo": "Hiato de renda — 14-17 anos — Branca vs. Negra — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre",
-          "arquivo": "arv_faixa_14_17_hiato_serie_ne.png",
-          "legenda": "Hiato de renda Branca vs. Negra — 14-17 anos — 2012–2026 (Welch)."
-        },
-        {
-          "tipo": "hiato_serie",
-          "ramo": "—",
-          "sub": "14-17 anos · hiato vs. Indígena",
-          "titulo": "Hiato de renda — 14-17 anos — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
-          "arquivo": "arv_faixa_14_17_hiato_serie_in.png",
-          "legenda": "Hiato de renda Branca vs. Indígena — 14-17 anos — 2012–2026 (Welch)."
         },
         {
           "tipo": "hiato_serie",
@@ -518,7 +491,7 @@
           "ramo": "—",
           "sub": "18-24 anos · hiato vs. Indígena",
           "titulo": "Hiato de renda — 18-24 anos — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_faixa_18_24_hiato_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena — 18-24 anos — 2012–2026 (Welch)."
         },
@@ -536,7 +509,7 @@
           "ramo": "—",
           "sub": "25-39 anos · hiato vs. Indígena",
           "titulo": "Hiato de renda — 25-39 anos — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_faixa_25_39_hiato_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena — 25-39 anos — 2012–2026 (Welch)."
         },
@@ -554,7 +527,7 @@
           "ramo": "—",
           "sub": "40-59 anos · hiato vs. Indígena",
           "titulo": "Hiato de renda — 40-59 anos — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_faixa_40_59_hiato_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena — 40-59 anos — 2012–2026 (Welch)."
         },
@@ -572,7 +545,7 @@
           "ramo": "—",
           "sub": "60+ anos · hiato vs. Indígena",
           "titulo": "Hiato de renda — 60+ anos — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_faixa_60mais_hiato_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena — 60+ anos — 2012–2026 (Welch)."
         },
@@ -677,7 +650,7 @@
           "ramo": "—",
           "sub": "Combinada · hiato por geracao · vs. Indígena",
           "titulo": "Hiato de renda por geracao — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_geracao_hiato_comb_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena por geracao — 2012–2026 (Welch)."
         },
@@ -695,7 +668,7 @@
           "ramo": "—",
           "sub": "Baby Boomer · hiato vs. Indígena",
           "titulo": "Hiato de renda — Baby Boomer — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_geracao_baby_boomer_hiato_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena — Baby Boomer — 2012–2026 (Welch)."
         },
@@ -713,7 +686,7 @@
           "ramo": "—",
           "sub": "Geração X · hiato vs. Indígena",
           "titulo": "Hiato de renda — Geração X — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_geracao_geracao_x_hiato_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena — Geração X — 2012–2026 (Welch)."
         },
@@ -731,7 +704,7 @@
           "ramo": "—",
           "sub": "Millennial · hiato vs. Indígena",
           "titulo": "Hiato de renda — Millennial — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_geracao_millennial_hiato_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena — Millennial — 2012–2026 (Welch)."
         },
@@ -749,7 +722,7 @@
           "ramo": "—",
           "sub": "Geração Z · hiato vs. Indígena",
           "titulo": "Hiato de renda — Geração Z — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_geracao_geracao_z_hiato_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena — Geração Z — 2012–2026 (Welch)."
         },
@@ -881,7 +854,7 @@
           "ramo": "—",
           "sub": "Combinada · hiato por nivel instrucao · vs. Indígena",
           "titulo": "Hiato de renda por nivel instrucao — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_escol_hiato_comb_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena por nivel instrucao — 2012–2026 (Welch)."
         },
@@ -899,7 +872,7 @@
           "ramo": "—",
           "sub": "Sem instrução · hiato vs. Indígena",
           "titulo": "Hiato de renda — Sem instrução — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_escol_sem_instrucao_hiato_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena — Sem instrução — 2012–2026 (Welch)."
         },
@@ -917,7 +890,7 @@
           "ramo": "—",
           "sub": "Fundamental incompl. · hiato vs. Indígena",
           "titulo": "Hiato de renda — Fundamental incompl. — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_escol_fundamental_incompl_hiato_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena — Fundamental incompl. — 2012–2026 (Welch)."
         },
@@ -935,7 +908,7 @@
           "ramo": "—",
           "sub": "Fundamental compl. · hiato vs. Indígena",
           "titulo": "Hiato de renda — Fundamental compl. — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_escol_fundamental_compl_hiato_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena — Fundamental compl. — 2012–2026 (Welch)."
         },
@@ -953,7 +926,7 @@
           "ramo": "—",
           "sub": "Médio incompl. · hiato vs. Indígena",
           "titulo": "Hiato de renda — Médio incompl. — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_escol_medio_incompl_hiato_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena — Médio incompl. — 2012–2026 (Welch)."
         },
@@ -971,7 +944,7 @@
           "ramo": "—",
           "sub": "Médio compl. · hiato vs. Indígena",
           "titulo": "Hiato de renda — Médio compl. — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_escol_medio_compl_hiato_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena — Médio compl. — 2012–2026 (Welch)."
         },
@@ -989,7 +962,7 @@
           "ramo": "—",
           "sub": "Superior incompl. · hiato vs. Indígena",
           "titulo": "Hiato de renda — Superior incompl. — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_escol_superior_incompl_hiato_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena — Superior incompl. — 2012–2026 (Welch)."
         },
@@ -1007,7 +980,7 @@
           "ramo": "—",
           "sub": "Superior compl. · hiato vs. Indígena",
           "titulo": "Hiato de renda — Superior compl. — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_escol_superior_compl_hiato_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena — Superior compl. — 2012–2026 (Welch)."
         },
@@ -1065,15 +1038,6 @@
         {
           "tipo": "valor_serie",
           "ramo": "Mulheres",
-          "sub": "Mulheres · 14-17 anos",
-          "titulo": "Renda média real por raça — Mulheres, 14-17 anos — Brasil",
-          "subtitulo": "R$ reais, a preços do trimestre mais recente (deflator IBGE) · série 2012–2026",
-          "arquivo": "arv_gfx_mulheres_14_17_serie.png",
-          "legenda": "Renda média real por raça — Mulheres, 14-17 anos — série histórica."
-        },
-        {
-          "tipo": "valor_serie",
-          "ramo": "Mulheres",
           "sub": "Mulheres · 18-24 anos",
           "titulo": "Renda média real por raça — Mulheres, 18-24 anos — Brasil",
           "subtitulo": "R$ reais, a preços do trimestre mais recente (deflator IBGE) · série 2012–2026",
@@ -1121,27 +1085,9 @@
           "ramo": "Mulheres",
           "sub": "Mulheres · hiato por faixa etaria · vs. Indígena",
           "titulo": "Hiato por faixa etaria — Mulheres — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_gfx_mulheres_hiato_comb_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena por faixa etaria — 2012–2026 (Welch)."
-        },
-        {
-          "tipo": "hiato_serie",
-          "ramo": "Mulheres",
-          "sub": "Mulheres · 14-17 anos · hiato vs. Negra",
-          "titulo": "Hiato de renda — Mulheres · 14-17 anos — Branca vs. Negra — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre",
-          "arquivo": "arv_gfx_mulheres_14_17_hiato_serie_ne.png",
-          "legenda": "Hiato de renda Branca vs. Negra — Mulheres · 14-17 anos — 2012–2026 (Welch)."
-        },
-        {
-          "tipo": "hiato_serie",
-          "ramo": "Mulheres",
-          "sub": "Mulheres · 14-17 anos · hiato vs. Indígena",
-          "titulo": "Hiato de renda — Mulheres · 14-17 anos — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
-          "arquivo": "arv_gfx_mulheres_14_17_hiato_serie_in.png",
-          "legenda": "Hiato de renda Branca vs. Indígena — Mulheres · 14-17 anos — 2012–2026 (Welch)."
         },
         {
           "tipo": "hiato_serie",
@@ -1157,7 +1103,7 @@
           "ramo": "Mulheres",
           "sub": "Mulheres · 18-24 anos · hiato vs. Indígena",
           "titulo": "Hiato de renda — Mulheres · 18-24 anos — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_gfx_mulheres_18_24_hiato_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena — Mulheres · 18-24 anos — 2012–2026 (Welch)."
         },
@@ -1175,7 +1121,7 @@
           "ramo": "Mulheres",
           "sub": "Mulheres · 25-39 anos · hiato vs. Indígena",
           "titulo": "Hiato de renda — Mulheres · 25-39 anos — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_gfx_mulheres_25_39_hiato_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena — Mulheres · 25-39 anos — 2012–2026 (Welch)."
         },
@@ -1193,7 +1139,7 @@
           "ramo": "Mulheres",
           "sub": "Mulheres · 40-59 anos · hiato vs. Indígena",
           "titulo": "Hiato de renda — Mulheres · 40-59 anos — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_gfx_mulheres_40_59_hiato_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena — Mulheres · 40-59 anos — 2012–2026 (Welch)."
         },
@@ -1211,7 +1157,7 @@
           "ramo": "Mulheres",
           "sub": "Mulheres · 60+ anos · hiato vs. Indígena",
           "titulo": "Hiato de renda — Mulheres · 60+ anos — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_gfx_mulheres_60mais_hiato_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena — Mulheres · 60+ anos — 2012–2026 (Welch)."
         },
@@ -1263,15 +1209,6 @@
         {
           "tipo": "valor_serie",
           "ramo": "Homens",
-          "sub": "Homens · 14-17 anos",
-          "titulo": "Renda média real por raça — Homens, 14-17 anos — Brasil",
-          "subtitulo": "R$ reais, a preços do trimestre mais recente (deflator IBGE) · série 2012–2026",
-          "arquivo": "arv_gfx_homens_14_17_serie.png",
-          "legenda": "Renda média real por raça — Homens, 14-17 anos — série histórica."
-        },
-        {
-          "tipo": "valor_serie",
-          "ramo": "Homens",
           "sub": "Homens · 18-24 anos",
           "titulo": "Renda média real por raça — Homens, 18-24 anos — Brasil",
           "subtitulo": "R$ reais, a preços do trimestre mais recente (deflator IBGE) · série 2012–2026",
@@ -1319,27 +1256,9 @@
           "ramo": "Homens",
           "sub": "Homens · hiato por faixa etaria · vs. Indígena",
           "titulo": "Hiato por faixa etaria — Homens — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_gfx_homens_hiato_comb_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena por faixa etaria — 2012–2026 (Welch)."
-        },
-        {
-          "tipo": "hiato_serie",
-          "ramo": "Homens",
-          "sub": "Homens · 14-17 anos · hiato vs. Negra",
-          "titulo": "Hiato de renda — Homens · 14-17 anos — Branca vs. Negra — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre",
-          "arquivo": "arv_gfx_homens_14_17_hiato_serie_ne.png",
-          "legenda": "Hiato de renda Branca vs. Negra — Homens · 14-17 anos — 2012–2026 (Welch)."
-        },
-        {
-          "tipo": "hiato_serie",
-          "ramo": "Homens",
-          "sub": "Homens · 14-17 anos · hiato vs. Indígena",
-          "titulo": "Hiato de renda — Homens · 14-17 anos — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
-          "arquivo": "arv_gfx_homens_14_17_hiato_serie_in.png",
-          "legenda": "Hiato de renda Branca vs. Indígena — Homens · 14-17 anos — 2012–2026 (Welch)."
         },
         {
           "tipo": "hiato_serie",
@@ -1355,7 +1274,7 @@
           "ramo": "Homens",
           "sub": "Homens · 18-24 anos · hiato vs. Indígena",
           "titulo": "Hiato de renda — Homens · 18-24 anos — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_gfx_homens_18_24_hiato_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena — Homens · 18-24 anos — 2012–2026 (Welch)."
         },
@@ -1373,7 +1292,7 @@
           "ramo": "Homens",
           "sub": "Homens · 25-39 anos · hiato vs. Indígena",
           "titulo": "Hiato de renda — Homens · 25-39 anos — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_gfx_homens_25_39_hiato_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena — Homens · 25-39 anos — 2012–2026 (Welch)."
         },
@@ -1391,7 +1310,7 @@
           "ramo": "Homens",
           "sub": "Homens · 40-59 anos · hiato vs. Indígena",
           "titulo": "Hiato de renda — Homens · 40-59 anos — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_gfx_homens_40_59_hiato_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena — Homens · 40-59 anos — 2012–2026 (Welch)."
         },
@@ -1409,7 +1328,7 @@
           "ramo": "Homens",
           "sub": "Homens · 60+ anos · hiato vs. Indígena",
           "titulo": "Hiato de renda — Homens · 60+ anos — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_gfx_homens_60mais_hiato_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena — Homens · 60+ anos — 2012–2026 (Welch)."
         },
@@ -1514,7 +1433,7 @@
           "ramo": "Mulheres",
           "sub": "Mulheres · hiato por geracao · vs. Indígena",
           "titulo": "Hiato por geracao — Mulheres — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_gge_mulheres_hiato_comb_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena por geracao — 2012–2026 (Welch)."
         },
@@ -1532,7 +1451,7 @@
           "ramo": "Mulheres",
           "sub": "Mulheres · Baby Boomer · hiato vs. Indígena",
           "titulo": "Hiato de renda — Mulheres · Baby Boomer — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_gge_mulheres_baby_boomer_hiato_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena — Mulheres · Baby Boomer — 2012–2026 (Welch)."
         },
@@ -1550,7 +1469,7 @@
           "ramo": "Mulheres",
           "sub": "Mulheres · Geração X · hiato vs. Indígena",
           "titulo": "Hiato de renda — Mulheres · Geração X — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_gge_mulheres_geracao_x_hiato_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena — Mulheres · Geração X — 2012–2026 (Welch)."
         },
@@ -1568,7 +1487,7 @@
           "ramo": "Mulheres",
           "sub": "Mulheres · Millennial · hiato vs. Indígena",
           "titulo": "Hiato de renda — Mulheres · Millennial — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_gge_mulheres_millennial_hiato_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena — Mulheres · Millennial — 2012–2026 (Welch)."
         },
@@ -1586,7 +1505,7 @@
           "ramo": "Mulheres",
           "sub": "Mulheres · Geração Z · hiato vs. Indígena",
           "titulo": "Hiato de renda — Mulheres · Geração Z — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_gge_mulheres_geracao_z_hiato_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena — Mulheres · Geração Z — 2012–2026 (Welch)."
         },
@@ -1685,7 +1604,7 @@
           "ramo": "Homens",
           "sub": "Homens · hiato por geracao · vs. Indígena",
           "titulo": "Hiato por geracao — Homens — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_gge_homens_hiato_comb_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena por geracao — 2012–2026 (Welch)."
         },
@@ -1703,7 +1622,7 @@
           "ramo": "Homens",
           "sub": "Homens · Baby Boomer · hiato vs. Indígena",
           "titulo": "Hiato de renda — Homens · Baby Boomer — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_gge_homens_baby_boomer_hiato_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena — Homens · Baby Boomer — 2012–2026 (Welch)."
         },
@@ -1721,7 +1640,7 @@
           "ramo": "Homens",
           "sub": "Homens · Geração X · hiato vs. Indígena",
           "titulo": "Hiato de renda — Homens · Geração X — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_gge_homens_geracao_x_hiato_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena — Homens · Geração X — 2012–2026 (Welch)."
         },
@@ -1739,7 +1658,7 @@
           "ramo": "Homens",
           "sub": "Homens · Millennial · hiato vs. Indígena",
           "titulo": "Hiato de renda — Homens · Millennial — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_gge_homens_millennial_hiato_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena — Homens · Millennial — 2012–2026 (Welch)."
         },
@@ -1757,7 +1676,7 @@
           "ramo": "Homens",
           "sub": "Homens · Geração Z · hiato vs. Indígena",
           "titulo": "Hiato de renda — Homens · Geração Z — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_gge_homens_geracao_z_hiato_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena — Homens · Geração Z — 2012–2026 (Welch)."
         },
@@ -1889,7 +1808,7 @@
           "ramo": "Mulheres",
           "sub": "Mulheres · hiato por nivel instrucao · vs. Indígena",
           "titulo": "Hiato por nivel instrucao — Mulheres — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_ges_mulheres_hiato_comb_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena por nivel instrucao — 2012–2026 (Welch)."
         },
@@ -1907,7 +1826,7 @@
           "ramo": "Mulheres",
           "sub": "Mulheres · Sem instrução · hiato vs. Indígena",
           "titulo": "Hiato de renda — Mulheres · Sem instrução — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_ges_mulheres_sem_instrucao_hiato_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena — Mulheres · Sem instrução — 2012–2026 (Welch)."
         },
@@ -1925,7 +1844,7 @@
           "ramo": "Mulheres",
           "sub": "Mulheres · Fundamental incompl. · hiato vs. Indígena",
           "titulo": "Hiato de renda — Mulheres · Fundamental incompl. — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_ges_mulheres_fundamental_incompl_hiato_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena — Mulheres · Fundamental incompl. — 2012–2026 (Welch)."
         },
@@ -1943,7 +1862,7 @@
           "ramo": "Mulheres",
           "sub": "Mulheres · Fundamental compl. · hiato vs. Indígena",
           "titulo": "Hiato de renda — Mulheres · Fundamental compl. — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_ges_mulheres_fundamental_compl_hiato_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena — Mulheres · Fundamental compl. — 2012–2026 (Welch)."
         },
@@ -1961,7 +1880,7 @@
           "ramo": "Mulheres",
           "sub": "Mulheres · Médio incompl. · hiato vs. Indígena",
           "titulo": "Hiato de renda — Mulheres · Médio incompl. — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_ges_mulheres_medio_incompl_hiato_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena — Mulheres · Médio incompl. — 2012–2026 (Welch)."
         },
@@ -1979,7 +1898,7 @@
           "ramo": "Mulheres",
           "sub": "Mulheres · Médio compl. · hiato vs. Indígena",
           "titulo": "Hiato de renda — Mulheres · Médio compl. — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_ges_mulheres_medio_compl_hiato_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena — Mulheres · Médio compl. — 2012–2026 (Welch)."
         },
@@ -1997,7 +1916,7 @@
           "ramo": "Mulheres",
           "sub": "Mulheres · Superior incompl. · hiato vs. Indígena",
           "titulo": "Hiato de renda — Mulheres · Superior incompl. — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_ges_mulheres_superior_incompl_hiato_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena — Mulheres · Superior incompl. — 2012–2026 (Welch)."
         },
@@ -2015,7 +1934,7 @@
           "ramo": "Mulheres",
           "sub": "Mulheres · Superior compl. · hiato vs. Indígena",
           "titulo": "Hiato de renda — Mulheres · Superior compl. — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_ges_mulheres_superior_compl_hiato_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena — Mulheres · Superior compl. — 2012–2026 (Welch)."
         },
@@ -2141,7 +2060,7 @@
           "ramo": "Homens",
           "sub": "Homens · hiato por nivel instrucao · vs. Indígena",
           "titulo": "Hiato por nivel instrucao — Homens — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_ges_homens_hiato_comb_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena por nivel instrucao — 2012–2026 (Welch)."
         },
@@ -2159,7 +2078,7 @@
           "ramo": "Homens",
           "sub": "Homens · Sem instrução · hiato vs. Indígena",
           "titulo": "Hiato de renda — Homens · Sem instrução — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_ges_homens_sem_instrucao_hiato_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena — Homens · Sem instrução — 2012–2026 (Welch)."
         },
@@ -2177,7 +2096,7 @@
           "ramo": "Homens",
           "sub": "Homens · Fundamental incompl. · hiato vs. Indígena",
           "titulo": "Hiato de renda — Homens · Fundamental incompl. — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_ges_homens_fundamental_incompl_hiato_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena — Homens · Fundamental incompl. — 2012–2026 (Welch)."
         },
@@ -2195,7 +2114,7 @@
           "ramo": "Homens",
           "sub": "Homens · Fundamental compl. · hiato vs. Indígena",
           "titulo": "Hiato de renda — Homens · Fundamental compl. — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_ges_homens_fundamental_compl_hiato_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena — Homens · Fundamental compl. — 2012–2026 (Welch)."
         },
@@ -2213,7 +2132,7 @@
           "ramo": "Homens",
           "sub": "Homens · Médio incompl. · hiato vs. Indígena",
           "titulo": "Hiato de renda — Homens · Médio incompl. — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_ges_homens_medio_incompl_hiato_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena — Homens · Médio incompl. — 2012–2026 (Welch)."
         },
@@ -2231,7 +2150,7 @@
           "ramo": "Homens",
           "sub": "Homens · Médio compl. · hiato vs. Indígena",
           "titulo": "Hiato de renda — Homens · Médio compl. — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_ges_homens_medio_compl_hiato_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena — Homens · Médio compl. — 2012–2026 (Welch)."
         },
@@ -2249,7 +2168,7 @@
           "ramo": "Homens",
           "sub": "Homens · Superior incompl. · hiato vs. Indígena",
           "titulo": "Hiato de renda — Homens · Superior incompl. — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_ges_homens_superior_incompl_hiato_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena — Homens · Superior incompl. — 2012–2026 (Welch)."
         },
@@ -2267,7 +2186,7 @@
           "ramo": "Homens",
           "sub": "Homens · Superior compl. · hiato vs. Indígena",
           "titulo": "Hiato de renda — Homens · Superior compl. — Branca vs. Indígena — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel 4 trim., amostra pequena)",
+          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · série de Indígena suavizada (média móvel centrada de 4 trimestres, amostra pequena)",
           "arquivo": "arv_ges_homens_superior_compl_hiato_serie_in.png",
           "legenda": "Hiato de renda Branca vs. Indígena — Homens · Superior compl. — 2012–2026 (Welch)."
         },
@@ -2295,132 +2214,6 @@
       "item": 9,
       "titulo": "Raça × Gênero × Faixa Etária × Escolaridade",
       "folhas": [
-        {
-          "tipo": "valor_serie",
-          "ramo": "Mulheres · 14-17 anos",
-          "sub": "Mulheres · 14-17 anos · Sem instrução",
-          "titulo": "Renda média real por raça — Mulheres, 14-17 anos, Sem instrução — Brasil",
-          "subtitulo": "R$ reais, a preços do trimestre mais recente (deflator IBGE) · série 2012–2026",
-          "arquivo": "arv_gfe_mulheres_14_17_sem_instrucao_serie.png",
-          "legenda": "Renda média real por raça — Mulheres, 14-17 anos, Sem instrução — série histórica."
-        },
-        {
-          "tipo": "hiato_serie",
-          "ramo": "Mulheres · 14-17 anos",
-          "sub": "Mulheres · 14-17 anos · Sem instrução · hiato",
-          "titulo": "Hiato de renda — Mulheres, 14-17 anos, Sem instrução — Branca vs. Negra — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · (Indígena por célula sem amostra — ver heatmaps do item)",
-          "arquivo": "arv_gfe_mulheres_14_17_sem_instrucao_hiato_serie.png",
-          "legenda": "Hiato Branca vs. Negra — Mulheres, 14-17 anos, Sem instrução — 2012–2026 (Welch)."
-        },
-        {
-          "tipo": "valor_serie",
-          "ramo": "Mulheres · 14-17 anos",
-          "sub": "Mulheres · 14-17 anos · Fundamental incompl.",
-          "titulo": "Renda média real por raça — Mulheres, 14-17 anos, Fundamental incompl. — Brasil",
-          "subtitulo": "R$ reais, a preços do trimestre mais recente (deflator IBGE) · série 2012–2026",
-          "arquivo": "arv_gfe_mulheres_14_17_fundamental_incompl_serie.png",
-          "legenda": "Renda média real por raça — Mulheres, 14-17 anos, Fundamental incompl. — série histórica."
-        },
-        {
-          "tipo": "hiato_serie",
-          "ramo": "Mulheres · 14-17 anos",
-          "sub": "Mulheres · 14-17 anos · Fundamental incompl. · hiato",
-          "titulo": "Hiato de renda — Mulheres, 14-17 anos, Fundamental incompl. — Branca vs. Negra — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · (Indígena por célula sem amostra — ver heatmaps do item)",
-          "arquivo": "arv_gfe_mulheres_14_17_fundamental_incompl_hiato_serie.png",
-          "legenda": "Hiato Branca vs. Negra — Mulheres, 14-17 anos, Fundamental incompl. — 2012–2026 (Welch)."
-        },
-        {
-          "tipo": "valor_serie",
-          "ramo": "Mulheres · 14-17 anos",
-          "sub": "Mulheres · 14-17 anos · Fundamental compl.",
-          "titulo": "Renda média real por raça — Mulheres, 14-17 anos, Fundamental compl. — Brasil",
-          "subtitulo": "R$ reais, a preços do trimestre mais recente (deflator IBGE) · série 2012–2026",
-          "arquivo": "arv_gfe_mulheres_14_17_fundamental_compl_serie.png",
-          "legenda": "Renda média real por raça — Mulheres, 14-17 anos, Fundamental compl. — série histórica."
-        },
-        {
-          "tipo": "hiato_serie",
-          "ramo": "Mulheres · 14-17 anos",
-          "sub": "Mulheres · 14-17 anos · Fundamental compl. · hiato",
-          "titulo": "Hiato de renda — Mulheres, 14-17 anos, Fundamental compl. — Branca vs. Negra — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · (Indígena por célula sem amostra — ver heatmaps do item)",
-          "arquivo": "arv_gfe_mulheres_14_17_fundamental_compl_hiato_serie.png",
-          "legenda": "Hiato Branca vs. Negra — Mulheres, 14-17 anos, Fundamental compl. — 2012–2026 (Welch)."
-        },
-        {
-          "tipo": "valor_serie",
-          "ramo": "Mulheres · 14-17 anos",
-          "sub": "Mulheres · 14-17 anos · Médio incompl.",
-          "titulo": "Renda média real por raça — Mulheres, 14-17 anos, Médio incompl. — Brasil",
-          "subtitulo": "R$ reais, a preços do trimestre mais recente (deflator IBGE) · série 2012–2026",
-          "arquivo": "arv_gfe_mulheres_14_17_medio_incompl_serie.png",
-          "legenda": "Renda média real por raça — Mulheres, 14-17 anos, Médio incompl. — série histórica."
-        },
-        {
-          "tipo": "hiato_serie",
-          "ramo": "Mulheres · 14-17 anos",
-          "sub": "Mulheres · 14-17 anos · Médio incompl. · hiato",
-          "titulo": "Hiato de renda — Mulheres, 14-17 anos, Médio incompl. — Branca vs. Negra — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · (Indígena por célula sem amostra — ver heatmaps do item)",
-          "arquivo": "arv_gfe_mulheres_14_17_medio_incompl_hiato_serie.png",
-          "legenda": "Hiato Branca vs. Negra — Mulheres, 14-17 anos, Médio incompl. — 2012–2026 (Welch)."
-        },
-        {
-          "tipo": "valor_serie",
-          "ramo": "Mulheres · 14-17 anos",
-          "sub": "Mulheres · 14-17 anos · Médio compl.",
-          "titulo": "Renda média real por raça — Mulheres, 14-17 anos, Médio compl. — Brasil",
-          "subtitulo": "R$ reais, a preços do trimestre mais recente (deflator IBGE) · série 2012–2026",
-          "arquivo": "arv_gfe_mulheres_14_17_medio_compl_serie.png",
-          "legenda": "Renda média real por raça — Mulheres, 14-17 anos, Médio compl. — série histórica."
-        },
-        {
-          "tipo": "hiato_serie",
-          "ramo": "Mulheres · 14-17 anos",
-          "sub": "Mulheres · 14-17 anos · Médio compl. · hiato",
-          "titulo": "Hiato de renda — Mulheres, 14-17 anos, Médio compl. — Branca vs. Negra — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · (Indígena por célula sem amostra — ver heatmaps do item)",
-          "arquivo": "arv_gfe_mulheres_14_17_medio_compl_hiato_serie.png",
-          "legenda": "Hiato Branca vs. Negra — Mulheres, 14-17 anos, Médio compl. — 2012–2026 (Welch)."
-        },
-        {
-          "tipo": "valor_serie",
-          "ramo": "Mulheres · 14-17 anos",
-          "sub": "Mulheres · 14-17 anos · Superior incompl.",
-          "titulo": "Renda média real por raça — Mulheres, 14-17 anos, Superior incompl. — Brasil",
-          "subtitulo": "R$ reais, a preços do trimestre mais recente (deflator IBGE) · série 2012–2026",
-          "arquivo": "arv_gfe_mulheres_14_17_superior_incompl_serie.png",
-          "legenda": "Renda média real por raça — Mulheres, 14-17 anos, Superior incompl. — série histórica."
-        },
-        {
-          "tipo": "hiato_serie",
-          "ramo": "Mulheres · 14-17 anos",
-          "sub": "Mulheres · 14-17 anos · Superior incompl. · hiato",
-          "titulo": "Hiato de renda — Mulheres, 14-17 anos, Superior incompl. — Branca vs. Negra — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · (Indígena por célula sem amostra — ver heatmaps do item)",
-          "arquivo": "arv_gfe_mulheres_14_17_superior_incompl_hiato_serie.png",
-          "legenda": "Hiato Branca vs. Negra — Mulheres, 14-17 anos, Superior incompl. — 2012–2026 (Welch)."
-        },
-        {
-          "tipo": "valor_serie",
-          "ramo": "Mulheres · 14-17 anos",
-          "sub": "Mulheres · 14-17 anos · Superior compl.",
-          "titulo": "Renda média real por raça — Mulheres, 14-17 anos, Superior compl. — Brasil",
-          "subtitulo": "R$ reais, a preços do trimestre mais recente (deflator IBGE) · série 2012–2026",
-          "arquivo": "arv_gfe_mulheres_14_17_superior_compl_serie.png",
-          "legenda": "Renda média real por raça — Mulheres, 14-17 anos, Superior compl. — série histórica."
-        },
-        {
-          "tipo": "hiato_serie",
-          "ramo": "Mulheres · 14-17 anos",
-          "sub": "Mulheres · 14-17 anos · Superior compl. · hiato",
-          "titulo": "Hiato de renda — Mulheres, 14-17 anos, Superior compl. — Branca vs. Negra — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · (Indígena por célula sem amostra — ver heatmaps do item)",
-          "arquivo": "arv_gfe_mulheres_14_17_superior_compl_hiato_serie.png",
-          "legenda": "Hiato Branca vs. Negra — Mulheres, 14-17 anos, Superior compl. — 2012–2026 (Welch)."
-        },
         {
           "tipo": "valor_serie",
           "ramo": "Mulheres · 18-24 anos",
@@ -2924,132 +2717,6 @@
           "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · (Indígena por célula sem amostra — ver heatmaps do item)",
           "arquivo": "arv_gfe_mulheres_60mais_superior_compl_hiato_serie.png",
           "legenda": "Hiato Branca vs. Negra — Mulheres, 60+ anos, Superior compl. — 2012–2026 (Welch)."
-        },
-        {
-          "tipo": "valor_serie",
-          "ramo": "Homens · 14-17 anos",
-          "sub": "Homens · 14-17 anos · Sem instrução",
-          "titulo": "Renda média real por raça — Homens, 14-17 anos, Sem instrução — Brasil",
-          "subtitulo": "R$ reais, a preços do trimestre mais recente (deflator IBGE) · série 2012–2026",
-          "arquivo": "arv_gfe_homens_14_17_sem_instrucao_serie.png",
-          "legenda": "Renda média real por raça — Homens, 14-17 anos, Sem instrução — série histórica."
-        },
-        {
-          "tipo": "hiato_serie",
-          "ramo": "Homens · 14-17 anos",
-          "sub": "Homens · 14-17 anos · Sem instrução · hiato",
-          "titulo": "Hiato de renda — Homens, 14-17 anos, Sem instrução — Branca vs. Negra — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · (Indígena por célula sem amostra — ver heatmaps do item)",
-          "arquivo": "arv_gfe_homens_14_17_sem_instrucao_hiato_serie.png",
-          "legenda": "Hiato Branca vs. Negra — Homens, 14-17 anos, Sem instrução — 2012–2026 (Welch)."
-        },
-        {
-          "tipo": "valor_serie",
-          "ramo": "Homens · 14-17 anos",
-          "sub": "Homens · 14-17 anos · Fundamental incompl.",
-          "titulo": "Renda média real por raça — Homens, 14-17 anos, Fundamental incompl. — Brasil",
-          "subtitulo": "R$ reais, a preços do trimestre mais recente (deflator IBGE) · série 2012–2026",
-          "arquivo": "arv_gfe_homens_14_17_fundamental_incompl_serie.png",
-          "legenda": "Renda média real por raça — Homens, 14-17 anos, Fundamental incompl. — série histórica."
-        },
-        {
-          "tipo": "hiato_serie",
-          "ramo": "Homens · 14-17 anos",
-          "sub": "Homens · 14-17 anos · Fundamental incompl. · hiato",
-          "titulo": "Hiato de renda — Homens, 14-17 anos, Fundamental incompl. — Branca vs. Negra — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · (Indígena por célula sem amostra — ver heatmaps do item)",
-          "arquivo": "arv_gfe_homens_14_17_fundamental_incompl_hiato_serie.png",
-          "legenda": "Hiato Branca vs. Negra — Homens, 14-17 anos, Fundamental incompl. — 2012–2026 (Welch)."
-        },
-        {
-          "tipo": "valor_serie",
-          "ramo": "Homens · 14-17 anos",
-          "sub": "Homens · 14-17 anos · Fundamental compl.",
-          "titulo": "Renda média real por raça — Homens, 14-17 anos, Fundamental compl. — Brasil",
-          "subtitulo": "R$ reais, a preços do trimestre mais recente (deflator IBGE) · série 2012–2026",
-          "arquivo": "arv_gfe_homens_14_17_fundamental_compl_serie.png",
-          "legenda": "Renda média real por raça — Homens, 14-17 anos, Fundamental compl. — série histórica."
-        },
-        {
-          "tipo": "hiato_serie",
-          "ramo": "Homens · 14-17 anos",
-          "sub": "Homens · 14-17 anos · Fundamental compl. · hiato",
-          "titulo": "Hiato de renda — Homens, 14-17 anos, Fundamental compl. — Branca vs. Negra — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · (Indígena por célula sem amostra — ver heatmaps do item)",
-          "arquivo": "arv_gfe_homens_14_17_fundamental_compl_hiato_serie.png",
-          "legenda": "Hiato Branca vs. Negra — Homens, 14-17 anos, Fundamental compl. — 2012–2026 (Welch)."
-        },
-        {
-          "tipo": "valor_serie",
-          "ramo": "Homens · 14-17 anos",
-          "sub": "Homens · 14-17 anos · Médio incompl.",
-          "titulo": "Renda média real por raça — Homens, 14-17 anos, Médio incompl. — Brasil",
-          "subtitulo": "R$ reais, a preços do trimestre mais recente (deflator IBGE) · série 2012–2026",
-          "arquivo": "arv_gfe_homens_14_17_medio_incompl_serie.png",
-          "legenda": "Renda média real por raça — Homens, 14-17 anos, Médio incompl. — série histórica."
-        },
-        {
-          "tipo": "hiato_serie",
-          "ramo": "Homens · 14-17 anos",
-          "sub": "Homens · 14-17 anos · Médio incompl. · hiato",
-          "titulo": "Hiato de renda — Homens, 14-17 anos, Médio incompl. — Branca vs. Negra — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · (Indígena por célula sem amostra — ver heatmaps do item)",
-          "arquivo": "arv_gfe_homens_14_17_medio_incompl_hiato_serie.png",
-          "legenda": "Hiato Branca vs. Negra — Homens, 14-17 anos, Médio incompl. — 2012–2026 (Welch)."
-        },
-        {
-          "tipo": "valor_serie",
-          "ramo": "Homens · 14-17 anos",
-          "sub": "Homens · 14-17 anos · Médio compl.",
-          "titulo": "Renda média real por raça — Homens, 14-17 anos, Médio compl. — Brasil",
-          "subtitulo": "R$ reais, a preços do trimestre mais recente (deflator IBGE) · série 2012–2026",
-          "arquivo": "arv_gfe_homens_14_17_medio_compl_serie.png",
-          "legenda": "Renda média real por raça — Homens, 14-17 anos, Médio compl. — série histórica."
-        },
-        {
-          "tipo": "hiato_serie",
-          "ramo": "Homens · 14-17 anos",
-          "sub": "Homens · 14-17 anos · Médio compl. · hiato",
-          "titulo": "Hiato de renda — Homens, 14-17 anos, Médio compl. — Branca vs. Negra — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · (Indígena por célula sem amostra — ver heatmaps do item)",
-          "arquivo": "arv_gfe_homens_14_17_medio_compl_hiato_serie.png",
-          "legenda": "Hiato Branca vs. Negra — Homens, 14-17 anos, Médio compl. — 2012–2026 (Welch)."
-        },
-        {
-          "tipo": "valor_serie",
-          "ramo": "Homens · 14-17 anos",
-          "sub": "Homens · 14-17 anos · Superior incompl.",
-          "titulo": "Renda média real por raça — Homens, 14-17 anos, Superior incompl. — Brasil",
-          "subtitulo": "R$ reais, a preços do trimestre mais recente (deflator IBGE) · série 2012–2026",
-          "arquivo": "arv_gfe_homens_14_17_superior_incompl_serie.png",
-          "legenda": "Renda média real por raça — Homens, 14-17 anos, Superior incompl. — série histórica."
-        },
-        {
-          "tipo": "hiato_serie",
-          "ramo": "Homens · 14-17 anos",
-          "sub": "Homens · 14-17 anos · Superior incompl. · hiato",
-          "titulo": "Hiato de renda — Homens, 14-17 anos, Superior incompl. — Branca vs. Negra — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · (Indígena por célula sem amostra — ver heatmaps do item)",
-          "arquivo": "arv_gfe_homens_14_17_superior_incompl_hiato_serie.png",
-          "legenda": "Hiato Branca vs. Negra — Homens, 14-17 anos, Superior incompl. — 2012–2026 (Welch)."
-        },
-        {
-          "tipo": "valor_serie",
-          "ramo": "Homens · 14-17 anos",
-          "sub": "Homens · 14-17 anos · Superior compl.",
-          "titulo": "Renda média real por raça — Homens, 14-17 anos, Superior compl. — Brasil",
-          "subtitulo": "R$ reais, a preços do trimestre mais recente (deflator IBGE) · série 2012–2026",
-          "arquivo": "arv_gfe_homens_14_17_superior_compl_serie.png",
-          "legenda": "Renda média real por raça — Homens, 14-17 anos, Superior compl. — série histórica."
-        },
-        {
-          "tipo": "hiato_serie",
-          "ramo": "Homens · 14-17 anos",
-          "sub": "Homens · 14-17 anos · Superior compl. · hiato",
-          "titulo": "Hiato de renda — Homens, 14-17 anos, Superior compl. — Branca vs. Negra — Brasil",
-          "subtitulo": "hiato = renda média Branca − renda média do grupo, % relativo ao grupo · Welch trimestre a trimestre · (Indígena por célula sem amostra — ver heatmaps do item)",
-          "arquivo": "arv_gfe_homens_14_17_superior_compl_hiato_serie.png",
-          "legenda": "Hiato Branca vs. Negra — Homens, 14-17 anos, Superior compl. — 2012–2026 (Welch)."
         },
         {
           "tipo": "valor_serie",
@@ -5200,7 +4867,7 @@
           "ramo": "—",
           "sub": "Hiato de renda Branca vs. Negra — projeção linear da tendência",
           "titulo": "Hiato de renda Branca vs. Negra — projeção linear da tendência",
-          "subtitulo": "extrapolação simples da reta de tendência até o hiato zerar · tendência 2012–2026: fecharia por volta de 2104 (~78 anos) · tendência 2016–2026 (pós-recessão): fecharia por volta de 2073 (~47 anos)",
+          "subtitulo": "extrapolação simples da reta de tendência até o hiato zerar · tendência 2012–2026: fecharia por volta de 2109 (~83 anos) · tendência 2016–2026 (pós-recessão): fecharia por volta de 2078 (~52 anos)",
           "arquivo": "apr_convergencia.png",
           "legenda": "NÃO é previsão — tendências não são garantia (a série tem quebras estruturais e pode estagnar). Cenário ilustrativo do ritmo recente."
         },
@@ -5254,7 +4921,7 @@
           "ramo": "—",
           "sub": "Decomposição de Oaxaca-Blinder do hiato Branca vs. Negra — ano a ano",
           "titulo": "Decomposição de Oaxaca-Blinder do hiato Branca vs. Negra — ano a ano",
-          "subtitulo": "controles: faixa etária + escolaridade + ocupação · parcela explicada por composição vs. não-explicada (retorno diferente = proxy de discriminação)",
+          "subtitulo": "controles: faixa etária + escolaridade + ocupação · parcela explicada por composição vs. não-explicada (não explicada = parte não associada às covariáveis incluídas)",
           "arquivo": "apr_oaxaca_temporal.png",
           "legenda": "A parte não-explicada está caindo conforme a escolaridade de negros sobe, ou fica travada?"
         },
