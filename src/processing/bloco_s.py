@@ -379,9 +379,6 @@ def gerar_s14(con) -> pd.DataFrame:
 # S1.5 — a seleção mudou no tempo?
 # ----------------------------------------------------------------------------------------- #
 def gerar_s15(con) -> tuple[pd.DataFrame, pd.DataFrame]:
-    from scipy import stats
-
-    from src.inference import multiplicidade, tendencia
     from src.processing.sensibilidade_populacao import _micro_trimestre, efeitos_marginais_entrada
     series = []
     # (a) diferença de participação em P1 (S0.1)
@@ -426,32 +423,70 @@ def gerar_s15(con) -> tuple[pd.DataFrame, pd.DataFrame]:
                                     "sexo": s, "ano": x["ano"], "trimestre": 1, "valor": x["efeito_marginal_pp"],
                                     "ic_inferior": x["ic_inferior"], "ic_superior": x["ic_superior"]}))
     serie = pd.concat(series, ignore_index=True)
-    # episódios com HAC
+    salvar_tabela(serie, OUTPUT_DIR / "s15_selecao_no_tempo.parquet",
+                  nota="Séries: (a) S0.1, (b) S1.1, (c) S0.2 por ano (4 trimestres; 2026 = 2)")
+    return serie, episodios_s15(serie)
+
+
+def episodios_anuais(x: pd.DataFrame, episodios: dict) -> pd.DataFrame:
+    """Série anual com IC design-based por ano (EMM do S0.2): média simples por episódio e
+    diferença para o primeiro, com EP = √(Σ ep²)/k, tratando os anos como independentes. Com 15
+    pontos a correção EWC teria ν = 2 e variância instável. Aproximação: domicílios em rotação
+    ligam anos vizinhos (covariância positiva ignorada) — declarado na ficha."""
+    from scipy import stats
+
+    from src.inference import tendencia
+    x = x.assign(ep=(x["ic_superior"] - x["ic_inferior"]) / (2 * Z95),
+                 episodio=tendencia.episodio_de(x["ano"], x["trimestre"], episodios)).dropna(subset=["episodio"])
+    nomes = [e for e in episodios if (x["episodio"] == e).any()]
+    agg = {e: (g["valor"].mean(), np.sqrt((g["ep"] ** 2).sum()) / len(g), len(g))
+           for e, g in x.groupby("episodio")}
+    m0, e0, _ = agg[nomes[0]]
+    linhas = []
+    for e in nomes:
+        m, ep_, n = agg[e]
+        dif, ep_d = m - m0, (np.sqrt(ep_**2 + e0**2) if e != nomes[0] else 0.0)
+        linhas.append({"episodio": e, "n_periodos": n, "media": m, "ep": ep_, "dif_vs_referencia": dif,
+                       "ep_dif": ep_d, "dif_ic_inferior": dif - Z95 * ep_d, "dif_ic_superior": dif + Z95 * ep_d,
+                       "p_valor_dif": float(2 * stats.norm.sf(abs(dif / ep_d))) if ep_d > 0 else np.nan,
+                       "referencia": nomes[0], "gl_ewc": np.nan})
+    return pd.DataFrame(linhas)
+
+
+def episodios_s15(serie: pd.DataFrame) -> pd.DataFrame:
+    from scipy import stats
+
+    from src.inference import multiplicidade, tendencia
     eps = []
     for (sr, cmp_, sx), x in serie.groupby(["serie", "comparacao", "sexo"]):
         x = x.sort_values(["ano", "trimestre"])
         anual = sr.startswith("c_")
-        e = tendencia.medias_episodios_hac(x["ano"], x["trimestre"], x["valor"])
+        if anual:
+            e = episodios_anuais(x, tendencia.EPISODIOS_PADRAO)
+            e["metodo_ep"] = "design-based por ano, anos independentes"
+            e["emd_80pct"] = (Z95 + stats.norm.ppf(0.80)) * e["ep_dif"]
+        else:
+            e = tendencia.medias_episodios_hac(x["ano"], x["trimestre"], x["valor"])
+            e["metodo_ep"] = "EWC (t com ν g.l.)"
+            # EMD com 80% de poder e 5% bilateral, na mesma t de Student do IC
+            e["emd_80pct"] = (stats.t.ppf(0.975, e["gl_ewc"]) + stats.t.ppf(0.80, e["gl_ewc"])) * e["ep_dif"]
         e.insert(0, "sexo", sx)
         e.insert(0, "comparacao", cmp_)
         e.insert(0, "serie", sr)
         e.insert(3, "frequencia", "anual" if anual else "trimestral")
-        # EMD com 80% de poder e 5% bilateral, na mesma t de Student do IC
-        e["emd_80pct"] = (stats.t.ppf(0.975, e["gl_ewc"]) + stats.t.ppf(0.80, e["gl_ewc"])) * e["ep_dif"]
         eps.append(e)
     eps = pd.concat(eps, ignore_index=True)
     eps = multiplicidade.adicionar_fdr(eps, ["serie", "comparacao", "sexo"], coluna_p="p_valor_dif")
-    salvar_tabela(serie, OUTPUT_DIR / "s15_selecao_no_tempo.parquet",
-                  nota="Séries: (a) S0.1, (b) S1.1, (c) S0.2 por ano (4 trimestres; 2026 = 2)")
-    salvar_tabela(eps, OUTPUT_DIR / "s15_selecao_episodios.parquet", se_metodo=tendencia.METODO,
+    salvar_tabela(eps, OUTPUT_DIR / "s15_selecao_episodios.parquet",
+                  se_metodo=tendencia.METODO + "; séries anuais: design-based por ano",
                   familia_fdr=["serie", "comparacao", "sexo"], episodios={k: [f"{a}T{t}" for a, t in v]
                                                                          for k, v in tendencia.EPISODIOS_PADRAO.items()})
-    return serie, eps
+    return eps
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--so", nargs="*", default=None, help="s03 s13 s14 s15")
+    parser.add_argument("--so", nargs="*", default=None, help="s03 s13 s14 s15 s15eps")
     fazer = set(parser.parse_args().so or ["s03", "s13", "s14", "s15"])
     con = duckdb.connect()
     con.execute("PRAGMA disable_progress_bar")
@@ -463,6 +498,8 @@ def main() -> None:
         gerar_s14(con)
     if "s15" in fazer:
         gerar_s15(con)
+    elif "s15eps" in fazer:  # refaz só os episódios a partir das séries já gravadas
+        episodios_s15(pd.read_parquet(OUTPUT_DIR / "s15_selecao_no_tempo.parquet"))
 
 
 if __name__ == "__main__":

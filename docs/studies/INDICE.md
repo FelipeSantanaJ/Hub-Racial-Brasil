@@ -18,6 +18,7 @@ de publicação. Estudos entram aqui quando a ficha é criada, não quando o res
 | S0.3 | Quem está fora de P1 é diferente entre os grupos? (perfis) | D | 1 | Aprovado com ressalvas (proposto) | [S0.3/ficha.md](S0.3/ficha.md) | Onda 1, pendências |
 | S1.4 | Margem extensiva × intensiva × renda por hora | C | 1 | Aprovado com ressalvas (proposto) | [S1.4/ficha.md](S1.4/ficha.md) | Onda 1, pendências |
 | S1.3 | Limites do hiato sob suposições sobre quem não é observado | C | 1 | Aprovado com ressalvas (proposto) | [S1.3/ficha.md](S1.3/ficha.md) | Onda 1, pendências |
+| S1.5 | A seleção mudou no tempo (recessão, pandemia)? | D | 1 | Aprovado com ressalvas (proposto) | [S1.5/ficha.md](S1.5/ficha.md) | Onda 1, pendências |
 
 O que já existe no Hub e a qual pergunta corresponde está em
 [`docs/auditoria/mapa_cobertura_plano.md`](../auditoria/mapa_cobertura_plano.md).
