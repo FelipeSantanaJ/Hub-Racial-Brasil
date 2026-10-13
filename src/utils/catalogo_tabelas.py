@@ -60,15 +60,23 @@ CATALOGO: list[tuple[str, str, str]] = [
      RENDA_TODOS_14_POS + " e ocupação informada; log da renda", INSUMO_TRIMESTRAL_V1),
     (r"^(gini_por_raca|theil_racial)$", RENDA_TODOS_14_POS + "; Branca, Negra e Indígena (Amarela e Ignorado fora)",
      INSUMO_TRIMESTRAL_V1),
-    (r"^(perfil_topo10.*|perfil_quartis.*|funcao_quantil_racial|percentil_de_valor_racial|extremos_.*|quartis_multi_racial)$",
-     RENDA_TODOS_14_POS, INSUMO_TRIMESTRAL_V1),
+    (r"^extremos_distribuicao_racial$",
+     RENDA_TODOS_14_POS + "; escopos 'brasil' e 'genero' com Branca, Negra, Indígena e Amarela (Amarela desde 13/10/2026, "
+     "R10; vale na regeneração da Onda 1); Ignorado sempre fora. Fatias com o peso empatado no "
+     "limiar repartido (R9)", INSUMO_TRIMESTRAL_V1),
+    (r"^(perfil_topo10.*|perfil_quartis.*|extremos_.*|quartis_multi_racial)$",
+     RENDA_TODOS_14_POS + "; fatias com o peso empatado no limiar repartido (R9, vale na regeneração da Onda 1)",
+     INSUMO_TRIMESTRAL_V1),
+    (r"^(funcao_quantil_racial|percentil_de_valor_racial)$", RENDA_TODOS_14_POS, INSUMO_TRIMESTRAL_V1),
     (r"^faixas_salario_minimo$", "Ocupados de 14+ anos com rendimento habitual nominal de qualquer trabalho > 0",
      INSUMO_TRIMESTRAL_V1),
     (r"^(renda|renda_.*)$", PESSOAS_14_RENDA, INSUMO_TRIMESTRAL_V1),
     (r"^(escolaridade|alfabetizacao)$", PESSOAS_14, INSUMO_TRIMESTRAL_V1),
     (r"^(ocupacao|desocupacao_por_escolaridade)$", FORCA_14, INSUMO_TRIMESTRAL_V1),
     (r"^desalento_subutilizacao$", "Pessoas de 14+ anos fora da força de trabalho", INSUMO_TRIMESTRAL_V1),
-    (r"^informalidade$", "Ocupados de 14+ anos (carteira: só empregados e militares/estatutários; previdência: todos)",
+    (r"^informalidade$", "Ocupados de 14+ anos. Carteira: só CLT entre empregados privados/domésticos/públicos "
+     "(VD4009 01–06); estatutário/militar entre empregados 01–07; previdência: todos (definição de 13/10/2026, "
+     "R19; vale na regeneração da Onda 1)",
      INSUMO_TRIMESTRAL_V1),
     (r"^horas_trabalhadas$", "Ocupados de 14+ anos com horas habituais (VD4031, todos os trabalhos) informadas",
      INSUMO_TRIMESTRAL_V1),

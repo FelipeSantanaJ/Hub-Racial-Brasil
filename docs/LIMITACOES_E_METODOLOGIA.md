@@ -28,10 +28,43 @@ Autodeclaração indígena é ~0,6% da amostra da PNAD Contínua (ex.: ~2.900 re
 no trimestre mais recente, antes de qualquer segmentação por UF, gênero ou faixa etária).
 Cruzamentos mais finos (ex.: mulheres indígenas de 60+ anos numa UF específica) podem ter
 poucas dezenas de observações — a estimativa ainda é calculada, mas o intervalo de confiança
-é largo. Quando isso importar para uma conclusão, checar `n_amostra` antes de destacar o
-número. O Censo Demográfico (Etapa 2) tem quesito e cobertura dedicados à população indígena
+é largo. Quando isso importar para uma conclusão, checar `publicavel` (regra de supressão,
+seção seguinte) antes de destacar o número; `n_amostra` conta todas as pessoas da célula, não
+só o denominador do indicador. O Censo Demográfico (Etapa 2) tem quesito e cobertura dedicados à população indígena
 (incl. terras indígenas) e deve ser tratado como fonte mais robusta para esse recorte
 especificamente.
+
+## Regra de supressão: n < 30 ou CV > 30% não se publica
+
+Decisão do Ponto de parada 3 (13/10/2026; R8 da auditoria Rodada 2). Está no código desde
+13/10/2026 e **vale a partir da regeneração da Onda 1**: os parquets atuais ainda não têm as
+colunas.
+
+- **Regra.** Uma estimativa de célula é publicável só se tiver **n ≥ 30 observações no
+  denominador do indicador** e **CV ≤ 30%**. Estimativa zero, ou CV indefinido (n < 2), não é
+  publicável.
+- **n do denominador.** `n_amostra = COUNT(*)` conta todas as pessoas da célula, inclusive quem
+  não entra no cálculo (ex.: na renda média, quem não tem renda). Por isso cada indicador ganha
+  o seu `n_<ind>`: `n_renda` (quem tem renda), `n_carteira` (empregados), `n_desocupacao` (força
+  de trabalho), `n_desalento` (fora da força) etc.
+- **CV.** Erro-padrão design-based (linearização de Taylor com Estrato e UPA,
+  `src/inference/variancia.py`) dividido pela estimativa. Nas agregações em SQL, o DuckDB soma
+  Σw·y e Σw por (célula, estrato, UPA) e `src/inference/precisao.py` combina pela mesma fórmula,
+  com a célula como domínio: as UPAs do estrato sem ninguém da célula entram com zero. Em
+  2026T2, a validação contra o cálculo sobre o microdado deu diferença relativa máxima de
+  2×10⁻¹⁵ em 120 células (`docs/auditoria/validacao_cv.json`).
+- **Colunas.** Cada tabela de nível ganha `n_<ind>`, `cv_<ind>` e `publicavel_<ind>` para cada
+  indicador, e `publicavel` (o do indicador principal). **Nenhum valor é apagado**: gráficos e
+  textos filtram por `publicavel`. A regra também fica no `_meta.json` (campo
+  `regra_supressao`).
+- **Tabelas cobertas:** `renda`, `renda_por_escolaridade`, `renda_por_geracao`,
+  `renda_completa`, `renda_completa_geracao`, `renda_multidimensional_faixa`/`_geracao`,
+  `escolaridade` (CV do total ponderado), `ocupacao`, `desocupacao_por_escolaridade`,
+  `informalidade`, `horas_trabalhadas`, `alfabetizacao`, `desalento_subutilizacao`,
+  `sobrequalificacao` e `faixas_salario_minimo`. As tabelas de hiato já trazem IC e p-valor;
+  `hiato_arvore` tem corte próprio de n ≥ 30.
+- **Ordem de grandeza** (`renda`, 2026T2, renda habitual real): passam na regra 78,9% das
+  células do nível Brasil, 64,6% das regionais, 53,2% das de UF e 46,6% das da RM de SP.
 
 ## Geografia: São Paulo sim, ABC Paulista não
 
@@ -42,7 +75,9 @@ especificamente.
 - **Municípios do ABC Paulista individualmente**: **não são identificáveis** na PNAD
   Contínua pública, por confidencialidade — o IBGE só libera o código de Região
   Metropolitana/RIDE (`RM_RIDE`), sem código de município dentro dela. O mais granular
-  possível é "RM São Paulo, não-capital" (`RM_RIDE='35'` e `Capital` nula), que mistura
+  possível é "RM São Paulo - Demais municípios" (`RM_RIDE='35'` e `Capital` nula; rótulo até
+  13/10/2026: "Não-capital (proxy ABC Paulista)", trocado porque a categoria tem os 38 municípios
+  da RM fora a capital, não só o ABC — R18), que mistura
   Santo André/São Bernardo/São Caetano/Diadema/Mauá/Ribeirão Pires/Rio Grande da Serra com
   outras cidades da Grande São Paulo (ex.: Guarulhos, Osasco). Um recorte por município
   específico do ABC só é possível a partir do Censo Demográfico (Etapa 2), que tem código de
@@ -186,18 +221,29 @@ trimestres) para trazer essa coluna — usada na decomposição do hiato racial 
 Decodificação (ver `data/raw/pnadc_extraido/_tmp/dicionario/` pro dicionário completo do
 IBGE):
 
-- **VD4009** (posição na ocupação, detalhada) → `tem_carteira_assinada`: `TRUE` p/
-  empregado privado/doméstico/público COM carteira e militar/servidor estatutário (sempre
-  "protegido"); `FALSE` p/ empregado privado/doméstico/público SEM carteira; `NULL`
-  (não aplicável) p/ empregador, conta-própria e trabalhador familiar auxiliar — o conceito
-  de "carteira assinada" não existe pra essas posições. `pct_com_carteira` em
-  `informalidade.parquet` é calculado só sobre quem tem o conceito aplicável (empregados).
+- **VD4009** (posição na ocupação, detalhada) → `tem_carteira_assinada` e `vinculo_trabalho`.
+  **Mudança de definição em 13/10/2026 (R19; vale na regeneração da Onda 1):**
+  `tem_carteira_assinada` = `TRUE` só para CLT (empregado privado, doméstico ou público COM
+  carteira: 01, 03, 05); `FALSE` para os mesmos SEM carteira (02, 04, 06); `NULL` para
+  militar/servidor estatutário (07), empregador, conta-própria e familiar auxiliar. Antes, 07
+  contava como `TRUE`, no numerador e no denominador. `vinculo_trabalho` traz as seis categorias:
+  CLT, Sem carteira, Estatutário/militar, Empregador, Conta própria, Familiar auxiliar.
+  Em `informalidade.parquet`:
+  - `pct_com_carteira` = CLT ÷ empregados 01–06;
+  - `pct_estatutario_militar` = 07 ÷ empregados 01–07.
+  **Os números publicados caem:** em 2026T2, Branca/Negra/Indígena passam de 75,4/66,5/53,1% para
+  71,7/63,0/48,3%, e a queda média na série é de 3,6 p.p. (Branca), 3,9 p.p. (Negra) e 5,0 p.p.
+  (Indígena). `transicao_informal_formal` mantém o sentido: "formal" em t1 = CLT ou
+  estatutário/militar.
 - **VD4012** (contribuição previdenciária) → `contribui_previdencia`: cobre TODOS os
   ocupados, inclusive conta-própria/empregador — é o indicador mais amplo de proteção
   social, complementar a `tem_carteira_assinada`.
-- **V3001** (alfabetização) e **V3014** (frequência escolar atual): perguntas feitas pra
-  toda a população 14+, não têm a ambiguidade de "sem instrução" (não são código de
-  não-resposta).
+- **V3001** (alfabetização): pergunta feita para toda a população 14+, sem a ambiguidade de
+  "sem instrução" (não é código de não-resposta). **Correção de 13/10/2026 (E11):** este trecho
+  dizia que **V3014** era "frequência escolar atual". `V3014` é "concluiu o curso que
+  frequentou?" e só se aplica a quem frequentou um curso antes; daí a cobertura baixa entre
+  14–17 anos, que fez a frequência escolar ser descartada por engano. Frequência escolar é
+  `V3002` ("frequenta escola ou creche?"), já extraída no extrato v2 e usada no E1 do plano.
 - **VD4003** (força de trabalho potencial) e **VD4005** (desalento): só têm valor definido
   para quem está FORA da força de trabalho (VD4001='2') — dentro da força de trabalho o
   conceito não se aplica e a coluna vem NULL, por desenho.
@@ -233,15 +279,17 @@ tem os dois blocos.
   o P90 cai bem em cima de um valor populoso desses, o filtro `>= limiar` inclui todo mundo
   empatado ali, capturando mais que 10% de fato (checado manualmente: ~11,5% de Branca,
   ~12,8% de Negra no trimestre mais recente). A coluna `pct_populacao_capturada` em
-  `perfil_topo10_racial.parquet` registra o valor real capturado a cada trimestre — não
-  tentamos uma correção de desempate mais sofisticada (fracionar a inclusão de quem está
-  exatamente no limiar) por estar fora do escopo desta etapa.
+  `perfil_topo10_racial.parquet` registra o valor real capturado a cada trimestre.
+  **Correção decidida em 13/10/2026 (R9; vale na regeneração da Onda 1):** o peso de quem está
+  empatado no limiar passa a ser repartido proporcionalmente entre as fatias
+  (`pnadc_core.fracao_na_fatia`), e cada fatia soma exatamente 10% ou 25%. Prévia 2026T2: Superior
+  completo no topo 10% Negra vai de 56,9% para 61,4%, e no topo 10% Branca de 83,0% para 84,3%.
 - **4 quartis por raça** (`perfil_quartis_racial.parquet`): generaliza o "topo 10%" acima —
   em vez de só o P90, calcula P25/P50/P75 dentro de cada raça e classifica cada pessoa em
   Q1-Q4. O topo 10% é o recorte mais estreito; os 4 quartis cobrem a distribuição inteira. Mesma ressalva de heaping do P90 vale aqui: cada quartil
   deveria capturar ~25% da população do grupo, mas pode desviar um pouco (checado no
-  trimestre mais recente: entre 22% e 31% conforme quartil/raça) — mesma coluna de
-  diagnóstico (`pct_populacao_capturada`), sem correção de desempate.
+  trimestre mais recente: entre 22% e 31% conforme quartil/raça). Com a correção de
+  13/10/2026, cada quartil dá 25,0% (`pct_populacao_capturada` fica como checagem).
 
 ## Gini/Theil por raça, setor econômico e sobre-qualificação
 
@@ -275,7 +323,7 @@ tem os dois blocos.
   captura sobre-qualificação em ocupações intermediárias (ex.: alguém com mestrado
   trabalhando em apoio administrativo também seria "sobrequalificado" em um sentido mais
   amplo, mas não entra nesse indicador). Indígena tem amostra pequena aqui (poucas pessoas
-  com Superior completo nesse grupo) — a série fica ruidosa mesmo com média móvel de 4
+  com Superior completo nesse grupo) — a série fica ruidosa mesmo com média móvel centrada de 4
   trimestres, ler com cautela.
 
 ## Matriz de combinações raça × A × B e "só ocupação" isolada
@@ -361,8 +409,11 @@ Universo: ocupados com `renda_habitual_real > 0` (mesmo escopo da decomposição
 do topo10% dentro-da-raça). Amostra mínima antes de calcular um quantil: 200 (escopo com 3
 limiares), 100-150 nas células raça×gênero. Vale a **mesma ressalva de heaping** já
 documentada para o topo10% dentro-da-raça — renda autodeclarada concentra em valores
-redondos, então o filtro `>= limiar` captura um pouco mais que 10%/25% exatos; as tabelas
-gravam `pct_populacao_capturada` como diagnóstico.
+redondos, e o filtro `>= limiar` capturava um pouco mais que 10%/25% exatos. Desde 13/10/2026
+(vale na regeneração da Onda 1), o peso empatado é repartido e `pct_populacao_capturada` dá 10,0/25,0.
+Os escopos `brasil` e `genero` passam a incluir **Amarela** no universo e nas raças reportadas (R10): na prévia de
+2026T2, Amarela é 1,45% do topo 10% nacional e a participação Branca cai de 68,2% para 67,3%.
+Ignorado continua fora.
 
 `gerar_quartis_multi_racial` generaliza `gerar_perfil_quartis_racial` para os recortes
 `raca` (limiar dentro da raça; dimensões sexo/escolaridade/faixa/geração) e `raca_sexo`

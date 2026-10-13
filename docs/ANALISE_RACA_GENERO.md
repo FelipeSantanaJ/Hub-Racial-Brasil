@@ -80,10 +80,22 @@ textual dos achados (sem gráficos/PPTX próprios).
 cobria Homem Branco vs. Mulher Negra) pras nove combinações: Mulher Branca,
 Homem Negro, Mulher Negra, Homem Indígena, Mulher Indígena, Homem Preto, Mulher Preta,
 Homem Pardo, Mulher Pardo — todas vs. Homem Branco, trimestre a trimestre, Brasil.
-Fórmula: `gap_total = efeito_raça + efeito_gênero − interação` (ver docstring da função
-pro detalhe). Achados do trimestre mais recente (2026 T2):
+Fórmula, com HB = renda média do Homem Branco e Y(sexo, raça) = renda média da célula:
 
-| Combinação | Gap vs. Homem Branco | efeito raça | efeito gênero | interação |
+- `gap_total = HB − Y(alvo)`;
+- `efeito_raça = HB − Y(Homem, raça do alvo)`;
+- `efeito_gênero = HB − Y(sexo do alvo, Branca)`;
+- `interação = gap_total − efeito_raça − efeito_gênero`.
+
+Logo **`gap_total = efeito_raça + efeito_gênero + interação`**. A versão anterior deste texto
+trazia "− interação", com o sinal errado (E10). A coluna "Gap" em % é relativa à renda do
+**Homem Branco** (gap_total ÷ HB; HB = R$ 5.370 em 2026 T2). Isso difere do hiato % do resto do
+Hub, que é relativo ao grupo de menor renda. Achados do trimestre mais recente (2026 T2), a
+partir de `decomposicao_raca_genero.parquet` regenerado em 13/10/2026 com a correção do E6. Até
+essa data, a tabela publicada trazia, por erro, efeito gênero de R$ 1.258 e interação de
+−R$ 1.258 nas linhas masculinas; os valores abaixo já estavam certos neste documento.
+
+| Combinação | Gap vs. Homem Branco (% da renda do HB) | efeito raça | efeito gênero | interação |
 |---|---:|---:|---:|---:|
 | Mulher Preta | 55,1% | R$2.379 | R$1.258 | -R$677 |
 | Mulher Negra | 52,6% | R$2.239 | R$1.258 | -R$671 |
@@ -134,8 +146,8 @@ percentual de cada par ao longo dos 58 trimestres:
   projetada indefinidamente) — nunca uma projeção de verdade.
 - **Branca-Indígena é a série mais ruidosa das três** (menor amostra por trimestre):
   o ajuste na série BRUTA tem R²=0,07 (baixo, não confiável isoladamente); numa
-  versão suavizada (média móvel de 4 trimestres, mesmo padrão já usado nos gráficos
-  de Indígena) o R² sobe pra 0,25 — confiável o bastante pra dizer a DIREÇÃO (hiato
+  versão suavizada (média móvel de 4 trimestres para trás; os gráficos de Indígena
+  usam média móvel centrada) o R² sobe pra 0,25 — confiável o bastante pra dizer a DIREÇÃO (hiato
   SUBINDO, não descendo), mas não confiável o bastante pra um número preciso de
   inclinação. Como o hiato está subindo (divergindo), não faz sentido nenhum "anos
   pra zerar" — reportado como tal (branco/NaN), não forçado.
@@ -179,18 +191,19 @@ Dois achados que pedem leitura cuidadosa:
 
 1. **Homens negros/pardos/pretos/indígenas SAEM do desemprego mais rápido que homens
    brancos** (36-38% vs. 33%) — o oposto do que a direção do hiato de renda sugeriria
-   à primeira vista. Não é "situação melhor": condiz com maior rotatividade em
-   trabalhos mais precários/informais (que têm ciclos de entrada/saída mais curtos),
-   não com melhores oportunidades — mesmo cuidado de leitura já aplicado ao Gini por
-   raça (um número "melhor" isoladamente pode refletir um mercado de trabalho pior em
-   outra dimensão, não capturado pela métrica em si).
+   à primeira vista. Não é necessariamente "situação melhor". **Hipótese (não testada
+   aqui):** maior rotatividade em trabalhos mais precários/informais, que têm ciclos de
+   entrada e saída mais curtos. Testá-la exigiria, por exemplo, olhar a duração e a
+   qualidade do emprego de destino (formal/informal, renda), o que esta tabela não faz.
+   Mesmo cuidado de leitura já aplicado ao Gini por raça: um número "melhor" isoladamente
+   pode refletir um mercado de trabalho pior em outra dimensão.
 2. **Em compensação, a transição informal→formal é sistematicamente menor pra todo
    grupo não-branco**, e MENOR AINDA pra Indígena (10,4-10,7%, a mais baixa das
    cinco) — condizente com o hiato de renda e com a literatura de acesso desigual a
-   emprego formal. As duas métricas juntas contam uma história consistente:
+   emprego formal. As duas métricas juntas são **compatíveis** com a hipótese de que
    trabalhadores negros/indígenas circulam mais rápido por empregos (geralmente
-   informais), mas têm mais dificuldade de ATERRISSAR num emprego formal
-   especificamente.
+   informais), mas têm mais dificuldade de ATERRISSAR num emprego formal; não a
+   demonstram.
 
 Mesmo Indígena, que era a preocupação central de amostra nesse item, chegou a
 n=1.451-1.653 desocupados pareados e n=3.913-4.150 informais pareados por sexo (pooled

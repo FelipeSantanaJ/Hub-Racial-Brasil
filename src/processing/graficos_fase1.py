@@ -147,7 +147,7 @@ def _preparar_serie_brasil(renda: pd.DataFrame) -> pd.DataFrame:
 
     # Indígena tem amostra pequena por trimestre (~0,6% da amostra nacional) e a série
     # trimestral bruta é muito ruidosa para mostrar tendência — suaviza com média móvel
-    # de 4 trimestres (ver docs/LIMITACOES_E_METODOLOGIA.md).
+    # centrada de 4 trimestres (ver docs/LIMITACOES_E_METODOLOGIA.md).
     serie["Indígena"] = serie["Indígena"].rolling(4, center=True, min_periods=2).mean()
 
     return serie
@@ -170,7 +170,7 @@ def grafico_renda_por_raca(renda: pd.DataFrame) -> Path:
     linhas = [
         ("Branca", COR_BRANCA),
         ("Negra", COR_NEGRA),
-        ("Indígena (média móvel 4 trim.)", COR_INDIGENA),
+        ("Indígena (média móvel centrada de 4 trimestres)", COR_INDIGENA),
     ]
     colunas_serie = ["Branca", "Negra", "Indígena"]
     for coluna, (_, cor) in zip(colunas_serie, linhas):
@@ -256,7 +256,7 @@ def _serie_por_raca(
     'Negra' em `racas` soma Preta+Parda (ponderado). Filtra
     nivel_geografico='brasil' (se a coluna existir), qualquer `filtro_extra`
     ({coluna: valor}, ex.: {'faixa_etaria': '25-39'}) e `sexo` se informados.
-    `suavizar` é o conjunto de nomes de raça que recebem média móvel de 4
+    `suavizar` é o conjunto de nomes de raça que recebem média móvel centrada de 4
     trimestres (tipicamente Indígena, por causa da amostra pequena).
     """
     r = df.copy()
@@ -1812,7 +1812,7 @@ def grafico_quebra_estrutural(hiato: pd.DataFrame, quebra: pd.DataFrame) -> Path
     return _salvar(fig, "hiato_quebra_estrutural.png")
 
 
-ROTULOS_RACA_SUAVIZADA = {"Branca": "Branca", "Negra": "Negra", "Indígena": "Indígena (média móvel 4 trim.)"}
+ROTULOS_RACA_SUAVIZADA = {"Branca": "Branca", "Negra": "Negra", "Indígena": "Indígena (média móvel centrada de 4 trimestres)"}
 
 
 def grafico_informalidade(inf: pd.DataFrame) -> Path:

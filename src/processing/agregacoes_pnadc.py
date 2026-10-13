@@ -26,6 +26,7 @@ Decisões importantes (ver docs/PLANO.md para o histórico completo):
 Uso:
     python -m src.processing.agregacoes_pnadc
 """
+from dataclasses import dataclass
 from pathlib import Path
 
 import duckdb
@@ -33,6 +34,7 @@ import numpy as np
 import pandas as pd
 import statsmodels.formula.api as smf
 
+from src.inference import precisao
 from src.inference.saida import salvar_com_inferencia, salvar_tabela
 from src.utils import pnadc_core
 from src.utils import populacao as pop
@@ -53,9 +55,9 @@ NIVEIS_GEOGRAFICOS = [
     ("uf", "UF", "TRUE", "UF"),
     ("sp_capital_interior", "localizacao", "UF = '35'", "localizacao"),
     ("rm_sp", "CASE WHEN Capital IS NOT NULL THEN 'RM São Paulo - Capital' "
-              "ELSE 'RM São Paulo - Não-capital (proxy ABC Paulista)' END",
+              "ELSE 'RM São Paulo - Demais municípios' END",
      "RM_RIDE = '35'", "CASE WHEN Capital IS NOT NULL THEN 'RM São Paulo - Capital' "
-                        "ELSE 'RM São Paulo - Não-capital (proxy ABC Paulista)' END"),
+                        "ELSE 'RM São Paulo - Demais municípios' END"),
 ]
 
 CRIAR_BASE = f"""
@@ -137,16 +139,24 @@ CREATE TEMP TABLE base AS
         m.VD4019 * d.deflator_habitual AS renda_habitual_real,
         m.VD4020 * d.deflator_efetivo AS renda_efetiva_real,
 {pop.sql_colunas_criar_base()}
-        -- posição na ocupação com carteira assinada: só definida p/ empregados
-        -- (privado/doméstico/público) e militar/estatutário (sempre "protegido"); NULL
-        -- p/ empregador, conta-própria e familiar auxiliar (o conceito não se aplica).
+        -- carteira assinada (CLT): só definida p/ empregados privados, domésticos e
+        -- públicos (VD4009 01–06); NULL p/ militar/estatutário (07: vínculo protegido, mas
+        -- não é CLT — até 13/10/2026 contava como TRUE; R19/decisão do Ponto de parada 3),
+        -- empregador, conta-própria e familiar auxiliar (o conceito não se aplica).
         -- VD4009 tem 10 categorias e vem ZERO-PADDED ('01'..'10' — mesmo padrão de
         -- VD4011) — checado direto no parquet bruto (values_counts) depois de um bug
         -- em que '1'/'2' sem padding não batia com nada e dava NULL silencioso.
         CASE m.VD4009
-            WHEN '01' THEN TRUE WHEN '03' THEN TRUE WHEN '05' THEN TRUE WHEN '07' THEN TRUE
+            WHEN '01' THEN TRUE WHEN '03' THEN TRUE WHEN '05' THEN TRUE
             WHEN '02' THEN FALSE WHEN '04' THEN FALSE WHEN '06' THEN FALSE
         END AS tem_carteira_assinada,
+        -- vínculo do trabalho principal (VD4009; códigos conferidos no dicionário do IBGE)
+        CASE m.VD4009
+            WHEN '01' THEN 'CLT' WHEN '03' THEN 'CLT' WHEN '05' THEN 'CLT'
+            WHEN '02' THEN 'Sem carteira' WHEN '04' THEN 'Sem carteira' WHEN '06' THEN 'Sem carteira'
+            WHEN '07' THEN 'Estatutário/militar' WHEN '08' THEN 'Empregador'
+            WHEN '09' THEN 'Conta própria' WHEN '10' THEN 'Familiar auxiliar'
+        END AS vinculo_trabalho,
         -- setor de trabalho: Público = empregado público (c/ ou s/ carteira) + militar/
         -- estatutário; Privado = empregado privado/doméstico (c/ ou s/ carteira); NULL
         -- p/ empregador, conta-própria e familiar auxiliar (não é "público" nem
@@ -257,6 +267,101 @@ def _agregar_por_geografia(
     return pd.concat(partes, ignore_index=True)
 
 
+# --------------------------------------------------------------------------------------- #
+# Precisão e regra de supressão das tabelas de nível (R8; Ponto de parada 3, 13/10/2026)
+# --------------------------------------------------------------------------------------- #
+@dataclass(frozen=True)
+class IndicadorPrecisao:
+    """Um indicador publicado numa tabela de nível. `y_sql` é a variável da média/proporção
+    (None ⇒ total ponderado, ex.: população); `dominio_sql` é o DENOMINADOR (quem entra no
+    cálculo). Gera as colunas `n_<nome>`, `cv_<nome>` e `publicavel_<nome>`."""
+    nome: str
+    y_sql: str | None
+    dominio_sql: str
+
+
+def _bool_sql(expr: str) -> str:
+    return f"CASE WHEN {expr} THEN 1.0 ELSE 0.0 END"
+
+
+IND_RENDA = IndicadorPrecisao("renda", "renda_habitual_real", "renda_habitual_real IS NOT NULL")
+NIVEL_BRASIL = [NIVEIS_GEOGRAFICOS[0]]
+RACA_NEGRA_SQL = "CASE WHEN raca_cor IN ('Preta','Parda') THEN 'Negra' ELSE raca_cor END"
+
+
+def _precisao_celulas(con: duckdb.DuckDBPyConnection, indicadores: list[IndicadorPrecisao],
+                      chaves: dict[str, str], niveis=None, por_trimestre: bool = True,
+                      filtro: str = "TRUE", trimestres_sql: str | None = None) -> pd.DataFrame:
+    """n e CV design-based de cada indicador por célula, sem trazer o microdado ao pandas:
+    o DuckDB soma Σw·y, Σw e n por (célula, estrato, UPA) e `precisao.cv_de_totais_upa`
+    combina pela fórmula de `variancia_linearizada` (domínio = célula; universo = todas as
+    pessoas da base no trimestre, ou nos trimestres agrupados quando `por_trimestre=False`).
+
+    chaves: {nome da coluna na saída: expressão SQL} (além de geografia e ano/trimestre).
+    niveis: subconjunto de NIVEIS_GEOGRAFICOS (padrão: todos). trimestres_sql: predicado que
+    restringe os trimestres (tabelas agrupadas). Devolve nivel_geografico, geografia,
+    [ano, trimestre], chaves, n_<ind>, cv_<ind>."""
+    niveis = NIVEIS_GEOGRAFICOS if niveis is None else niveis
+    periodo = trimestres_sql or "TRUE"
+    if por_trimestre:
+        periodos = [(int(a), int(t)) for a, t in con.execute(
+            f"SELECT DISTINCT ano, trimestre FROM base WHERE {periodo} ORDER BY 1, 2").fetchall()]
+    else:
+        periodos = [None]
+    sel_chaves = ", ".join(f"{expr} AS {nome}" for nome, expr in chaves.items())
+    agregados = ", ".join(
+        (f"SUM(peso * ({ind.y_sql})) FILTER (WHERE {ind.dominio_sql}) AS A_{i}, " if ind.y_sql else "")
+        + f"SUM(peso) FILTER (WHERE {ind.dominio_sql}) AS B_{i}, "
+        + f"COUNT(*) FILTER (WHERE {ind.dominio_sql}) AS n_{i}"
+        for i, ind in enumerate(indicadores))
+    partes = []
+    for per in periodos:
+        cond_per = f"ano = {per[0]} AND trimestre = {per[1]}" if per else periodo
+        n_h = con.execute(f"""SELECT estrato, COUNT(DISTINCT upa) AS n_h FROM base
+                              WHERE {cond_per} GROUP BY estrato""").df()
+        for nivel, geo_expr, filtro_geo, _ in niveis:
+            tot = con.execute(f"""
+                SELECT {geo_expr} AS geografia, {sel_chaves}, estrato, upa, {agregados}
+                FROM base WHERE {cond_per} AND {filtro_geo} AND {filtro}
+                GROUP BY ALL""").df()
+            if tot.empty:
+                continue
+            cel_chaves = ["geografia", *chaves]
+            res = None
+            for i, ind in enumerate(indicadores):
+                t = tot[tot[f"n_{i}"] > 0].rename(columns={f"B_{i}": "B", f"n_{i}": "n"})
+                if ind.y_sql:
+                    t = t.rename(columns={f"A_{i}": "A"})
+                r = precisao.cv_de_totais_upa(t, cel_chaves, n_h, tipo="media" if ind.y_sql else "total")
+                r = r[[*cel_chaves, "n", "cv"]].rename(columns={"n": f"n_{ind.nome}", "cv": f"cv_{ind.nome}"})
+                res = r if res is None else res.merge(r, on=cel_chaves, how="outer")
+            res.insert(0, "nivel_geografico", nivel)
+            if per:
+                res["ano"], res["trimestre"] = per
+            partes.append(res)
+    return pd.concat(partes, ignore_index=True)
+
+
+def _anexar_precisao(df: pd.DataFrame, prec: pd.DataFrame, indicadores: list[IndicadorPrecisao]) -> pd.DataFrame:
+    """Junta n/cv à tabela e aplica a regra (`precisao.publicavel`). `publicavel` (sem
+    sufixo) é o do PRIMEIRO indicador da lista, o principal da tabela. Célula sem ninguém
+    no denominador: n = 0, CV indefinido, não publicável. Nenhum valor é apagado."""
+    chaves = [c for c in prec.columns if c in df.columns and not c.startswith(("n_", "cv_"))]
+    for c in ("ano", "trimestre"):
+        if c in chaves:
+            prec[c] = prec[c].astype(df[c].dtype)
+    out = df.merge(prec, on=chaves, how="left", validate="one_to_one")
+    for ind in indicadores:
+        out[f"n_{ind.nome}"] = out[f"n_{ind.nome}"].fillna(0).astype("int64")
+        out[f"publicavel_{ind.nome}"] = precisao.publicavel(out[f"n_{ind.nome}"], out[f"cv_{ind.nome}"])
+    out["publicavel"] = out[f"publicavel_{indicadores[0].nome}"]
+    return out
+
+
+def _chaves(*nomes: str, **exprs: str) -> dict[str, str]:
+    return {**{n: n for n in nomes}, **exprs}
+
+
 def gerar_renda(con: duckdb.DuckDBPyConnection) -> None:
     select_agregado = """
            ano, trimestre, raca_cor, sexo, faixa_etaria,
@@ -275,8 +380,10 @@ def gerar_renda(con: duckdb.DuckDBPyConnection) -> None:
                / NULLIF(SUM(peso) FILTER (WHERE renda_efetiva_real IS NOT NULL), 0)
                AS renda_efetiva_real_media"""
     df = _agregar_por_geografia(con, select_agregado)
+    inds = [IND_RENDA]
+    df = _anexar_precisao(df, _precisao_celulas(con, inds, _chaves("raca_cor", "sexo", "faixa_etaria")), inds)
     destino = OUTPUT_DIR / "renda.parquet"
-    salvar_tabela(df, destino)
+    salvar_tabela(df, destino, regra_supressao=precisao.REGRA_SUPRESSAO)
     print(f"renda.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -297,8 +404,10 @@ def gerar_renda_por_escolaridade(con: duckdb.DuckDBPyConnection) -> None:
         con, select_agregado, group_by_extra="nivel_instrucao", incluir_faixa_etaria=False
     )
     df = df[df["nivel_instrucao"].notna()]
+    inds = [IND_RENDA]
+    df = _anexar_precisao(df, _precisao_celulas(con, inds, _chaves("raca_cor", "sexo", "nivel_instrucao")), inds)
     destino = OUTPUT_DIR / "renda_por_escolaridade.parquet"
-    salvar_tabela(df, destino)
+    salvar_tabela(df, destino, regra_supressao=precisao.REGRA_SUPRESSAO)
     print(f"renda_por_escolaridade.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -317,8 +426,10 @@ def gerar_renda_por_geracao(con: duckdb.DuckDBPyConnection) -> None:
     df = _agregar_por_geografia(
         con, select_agregado, group_by_extra="geracao", incluir_faixa_etaria=False
     )
+    inds = [IND_RENDA]
+    df = _anexar_precisao(df, _precisao_celulas(con, inds, _chaves("raca_cor", "sexo", "geracao")), inds)
     destino = OUTPUT_DIR / "renda_por_geracao.parquet"
-    salvar_tabela(df, destino)
+    salvar_tabela(df, destino, regra_supressao=precisao.REGRA_SUPRESSAO)
     print(f"renda_por_geracao.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -643,6 +754,29 @@ def gerar_decomposicao_oaxaca_blinder_preta_parda(con: duckdb.DuckDBPyConnection
               "residuo_restrito_significativo"]].to_string(index=False), flush=True)
 
 
+QUARTIS = [("Q1 (25% que menos ganham)", 0.0, 0.25), ("Q2", 0.25, 0.50), ("Q3", 0.50, 0.75),
+           ("Q4 (25% que mais ganham)", 0.75, 1.0)]
+
+
+def _fatia_ponderada(grupo: pd.DataFrame, q_inf: float, q_sup: float,
+                     coluna: str = "renda_habitual_real") -> pd.DataFrame:
+    """Linhas de `grupo` na fatia [q_inf, q_sup] da distribuição ponderada de `coluna`, com
+    `peso` trocado pelo peso EFETIVO na fatia (peso × fração; `pnadc_core.fracao_na_fatia`).
+    Quem está empatado no limiar entra com parte do peso, e a fatia soma exatamente
+    (q_sup − q_inf) do peso do grupo (R9; decisão de 13/10/2026). Contagens de linhas (`n_*`)
+    passam a contar quem tem fração > 0."""
+    f = pnadc_core.fracao_na_fatia(grupo[coluna].to_numpy(), grupo["peso"].to_numpy(), q_inf, q_sup)
+    fatia = grupo[f > 0].copy()
+    fatia["peso"] = fatia["peso"].to_numpy() * f[f > 0]
+    return fatia
+
+
+def _quartis_ponderados(grupo: pd.DataFrame):
+    """(rótulo, fatia) dos 4 quartis, com o peso dos empatados nos limiares repartido."""
+    for rotulo, a, b in QUARTIS:
+        yield rotulo, _fatia_ponderada(grupo, a, b)
+
+
 def gerar_perfil_topo10_racial(con: duckdb.DuckDBPyConnection) -> None:
     """Perfil demográfico de quem está no topo 10% de renda DENTRO de cada raça (Branca
     e Negra — Indígena fica de fora, amostra insuficiente pra um quantil confiável por
@@ -658,13 +792,10 @@ def gerar_perfil_topo10_racial(con: duckdb.DuckDBPyConnection) -> None:
     do hiato). Formato longo: uma linha por (trimestre, raça, dimensão, categoria).
 
     Nota sobre "topo 10%": renda autodeclarada tem "heaping" — concentração forte em
-    valores redondos (R$1.000, R$2.000, R$5.000, R$10.000 etc., checado direto no
-    parquet bruto). Quando o limiar do P90 cai bem em cima de um desses valores muito
-    populosos, o filtro `>= limiar` inclui TODO mundo empatado naquele valor, capturando
-    um pouco mais que 10% de fato (no 2026 T2, por exemplo, ~11,5% de Branca e ~12,8% de
-    Negra — checado manualmente). Por isso a função grava `pct_populacao_capturada`
-    (peso do grupo "topo" / peso total do grupo racial naquele trimestre) — use essa
-    coluna pra saber o quão perto de "exatamente 10%" cada linha está de fato.
+    valores redondos (R$1.000, R$2.000, R$5.000, R$10.000 etc.). Até 13/10/2026 o filtro
+    `>= limiar` incluía TODO mundo empatado no P90 e o "topo" capturava 11–12%. Agora o
+    peso dos empatados no limiar é repartido (`_fatia_ponderada`; R9) e
+    `pct_populacao_capturada` dá 10,0 por construção (fica como checagem).
     """
     dimensoes = ["sexo", "faixa_etaria", "geracao", "nivel_instrucao"]
     trimestres = con.execute("SELECT DISTINCT ano, trimestre FROM base ORDER BY ano, trimestre").df()
@@ -690,7 +821,7 @@ def gerar_perfil_topo10_racial(con: duckdb.DuckDBPyConnection) -> None:
                 continue
             peso_grupo = grupo["peso"].sum()
             limiar = pnadc_core.quantil_ponderado(grupo["renda_habitual_real"], grupo["peso"], 0.9)
-            topo = grupo[grupo["renda_habitual_real"] >= limiar]
+            topo = _fatia_ponderada(grupo, 0.9, 1.0)
             peso_topo = topo["peso"].sum()
             if peso_topo == 0:
                 continue
@@ -792,10 +923,9 @@ def gerar_perfil_quartis_racial(con: duckdb.DuckDBPyConnection) -> None:
     "Q1 de Branca" e "Q1 de Negra" não têm o mesmo intervalo de R$, cada um é "os 25% que
     menos ganham dentro do próprio grupo".
 
-    Universo/dimensões/formato: iguais a `gerar_perfil_topo10_racial`. Mesma ressalva de
-    heaping documentada lá — `pct_populacao_capturada` aqui é o peso de cada quartil
-    sobre o total do grupo (deveria ficar perto de 25%, pode desviar um pouco pela mesma
-    razão: renda autodeclarada concentrada em valores redondos).
+    Universo/dimensões/formato: iguais a `gerar_perfil_topo10_racial`. Mesma repartição do
+    peso empatado nos limiares (R9) —
+    `pct_populacao_capturada` (peso do quartil / peso do grupo) dá 25,0 por construção.
     """
     dimensoes = ["sexo", "faixa_etaria", "geracao", "nivel_instrucao"]
     trimestres = con.execute("SELECT DISTINCT ano, trimestre FROM base ORDER BY ano, trimestre").df()
@@ -820,17 +950,7 @@ def gerar_perfil_quartis_racial(con: duckdb.DuckDBPyConnection) -> None:
             if len(grupo) < 200:  # amostra mínima maior — 3 limiares em vez de 1
                 continue
             peso_grupo = grupo["peso"].sum()
-            p25 = pnadc_core.quantil_ponderado(grupo["renda_habitual_real"], grupo["peso"], 0.25)
-            p50 = pnadc_core.quantil_ponderado(grupo["renda_habitual_real"], grupo["peso"], 0.50)
-            p75 = pnadc_core.quantil_ponderado(grupo["renda_habitual_real"], grupo["peso"], 0.75)
-            grupo["quartil"] = np.select(
-                [grupo["renda_habitual_real"] < p25,
-                 grupo["renda_habitual_real"] < p50,
-                 grupo["renda_habitual_real"] < p75],
-                ["Q1 (25% que menos ganham)", "Q2", "Q3"],
-                default="Q4 (25% que mais ganham)",
-            )
-            for quartil, fatia in grupo.groupby("quartil", observed=True):
+            for quartil, fatia in _quartis_ponderados(grupo):
                 peso_fatia = fatia["peso"].sum()
                 if peso_fatia == 0:
                     continue
@@ -882,7 +1002,7 @@ def gerar_perfil_topo10_quartis_pretaparda(con: duckdb.DuckDBPyConnection) -> No
             peso_grupo = grupo["peso"].sum()
 
             limiar = pnadc_core.quantil_ponderado(grupo["renda_habitual_real"], grupo["peso"], 0.9)
-            topo = grupo[grupo["renda_habitual_real"] >= limiar]
+            topo = _fatia_ponderada(grupo, 0.9, 1.0)
             peso_topo = topo["peso"].sum()
             if peso_topo > 0:
                 pct_capturado = 100 * peso_topo / peso_grupo
@@ -896,17 +1016,7 @@ def gerar_perfil_topo10_quartis_pretaparda(con: duckdb.DuckDBPyConnection) -> No
                             "pct_do_topo10": 100 * sub["peso"].sum() / peso_topo,
                         })
 
-            p25 = pnadc_core.quantil_ponderado(grupo["renda_habitual_real"], grupo["peso"], 0.25)
-            p50 = pnadc_core.quantil_ponderado(grupo["renda_habitual_real"], grupo["peso"], 0.50)
-            p75 = pnadc_core.quantil_ponderado(grupo["renda_habitual_real"], grupo["peso"], 0.75)
-            grupo["quartil"] = np.select(
-                [grupo["renda_habitual_real"] < p25,
-                 grupo["renda_habitual_real"] < p50,
-                 grupo["renda_habitual_real"] < p75],
-                ["Q1 (25% que menos ganham)", "Q2", "Q3"],
-                default="Q4 (25% que mais ganham)",
-            )
-            for quartil, fatia in grupo.groupby("quartil", observed=True):
+            for quartil, fatia in _quartis_ponderados(grupo):
                 peso_fatia = fatia["peso"].sum()
                 if peso_fatia == 0:
                     continue
@@ -963,7 +1073,7 @@ def gerar_perfil_topo10_quartis_indigena(con: duckdb.DuckDBPyConnection, n_trime
     peso_grupo = micro["peso"].sum()
 
     limiar = pnadc_core.quantil_ponderado(micro["renda_habitual_real"], micro["peso"], 0.9)
-    topo = micro[micro["renda_habitual_real"] >= limiar]
+    topo = _fatia_ponderada(micro, 0.9, 1.0)
     peso_topo = topo["peso"].sum()
     pct_capturado_topo = 100 * peso_topo / peso_grupo
     for dimensao in dimensoes:
@@ -976,17 +1086,7 @@ def gerar_perfil_topo10_quartis_indigena(con: duckdb.DuckDBPyConnection, n_trime
                 "pct_do_topo10": 100 * sub["peso"].sum() / peso_topo,
             })
 
-    p25 = pnadc_core.quantil_ponderado(micro["renda_habitual_real"], micro["peso"], 0.25)
-    p50 = pnadc_core.quantil_ponderado(micro["renda_habitual_real"], micro["peso"], 0.50)
-    p75 = pnadc_core.quantil_ponderado(micro["renda_habitual_real"], micro["peso"], 0.75)
-    micro["quartil"] = np.select(
-        [micro["renda_habitual_real"] < p25,
-         micro["renda_habitual_real"] < p50,
-         micro["renda_habitual_real"] < p75],
-        ["Q1 (25% que menos ganham)", "Q2", "Q3"],
-        default="Q4 (25% que mais ganham)",
-    )
-    for quartil, fatia in micro.groupby("quartil", observed=True):
+    for quartil, fatia in _quartis_ponderados(micro):
         peso_fatia = fatia["peso"].sum()
         if peso_fatia == 0:
             continue
@@ -1021,15 +1121,16 @@ _GERACOES_VALIDAS = {
 }
 
 
-def _micro_renda_trimestre(con, ano: int, trimestre: int) -> pd.DataFrame:
+def _micro_renda_trimestre(con, ano: int, trimestre: int, incluir_amarela: bool = False) -> pd.DataFrame:
     """Ocupados com renda habitual real > 0 no trimestre, com Negra = Preta+Parda
-    combinadas e Indígena preservada. Colunas demográficas + renda + peso."""
+    combinadas e Indígena preservada (e Amarela, se pedido). Colunas demográficas + renda + peso."""
+    racas = "'Branca', 'Preta', 'Parda', 'Indígena'" + (", 'Amarela'" if incluir_amarela else "")
     micro = con.execute(f"""
         SELECT raca_cor, sexo, faixa_etaria, geracao, nivel_instrucao,
                renda_habitual_real, peso, upa, estrato
         FROM base
         WHERE ano = {ano} AND trimestre = {trimestre}
-          AND raca_cor IN ('Branca', 'Preta', 'Parda', 'Indígena')
+          AND raca_cor IN ({racas})
           AND renda_habitual_real IS NOT NULL AND renda_habitual_real > 0
           AND sexo IS NOT NULL
     """).df()
@@ -1063,30 +1164,32 @@ def gerar_extremos_racial(con: duckdb.DuckDBPyConnection) -> None:
       dentro do topo/base: ano, trimestre, extremo, recorte ('raca'/'raca_sexo'),
       grupo, dimensao, categoria, pct_no_extremo.
 
-    Mesma ressalva de heaping de `gerar_perfil_topo10_racial` — `pct_populacao_capturada`
-    diz o quão perto de 10% exato cada linha ficou.
+    Peso dos empatados nos limiares repartido (R9): `pct_populacao_capturada` = 10,0. O escopo
+    'brasil' e 'genero' incluem Amarela no universo e na lista de raças (R10; decisão de
+    13/10/2026). Ignorado fica SEMPRE fora. Os recortes 'raca'/'raca_sexo' seguem só com Branca
+    e Negra (foco do Hub: Branca × Negra e Indígena).
     """
     def _fatia(grupo: pd.DataFrame, extremo: str, q: float):
         limiar = pnadc_core.quantil_ponderado(grupo["renda_habitual_real"], grupo["peso"], q)
-        fatia = grupo[grupo["renda_habitual_real"] >= limiar] if extremo == "topo10" \
-            else grupo[grupo["renda_habitual_real"] <= limiar]
+        fatia = _fatia_ponderada(grupo, q, 1.0) if extremo == "topo10" else _fatia_ponderada(grupo, 0.0, q)
         return limiar, fatia
 
     trimestres = con.execute("SELECT DISTINCT ano, trimestre FROM base ORDER BY ano, trimestre").df()
     distrib, renda, comp = [], [], []
     for _, row in trimestres.iterrows():
         ano, tri = int(row["ano"]), int(row["trimestre"])
-        micro = _micro_renda_trimestre(con, ano, tri)
+        micro_todos = _micro_renda_trimestre(con, ano, tri, incluir_amarela=True)
+        micro = micro_todos[micro_todos["raca_cor"] != "Amarela"]
         if len(micro) < 200:
             continue
 
         for extremo, q in (("topo10", 0.9), ("base10", 0.1)):
-            # --- escopo 'brasil': limiar único --------------------------------- #
-            peso_tot = micro["peso"].sum()
-            limiar_br, fatia_br = _fatia(micro, extremo, q)
+            # --- escopo 'brasil': limiar único, universo com Amarela (R10) ---- #
+            peso_tot = micro_todos["peso"].sum()
+            limiar_br, fatia_br = _fatia(micro_todos, extremo, q)
             peso_fatia = fatia_br["peso"].sum()
             if peso_fatia:
-                for raca in ("Branca", "Negra", "Indígena"):
+                for raca in ("Branca", "Negra", "Indígena", "Amarela"):
                     distrib.append({
                         "ano": ano, "trimestre": tri, "extremo": extremo,
                         "escopo_limiar": "brasil", "grupo_limiar": "Brasil", "raca_cor": raca,
@@ -1097,7 +1200,7 @@ def gerar_extremos_racial(con: duckdb.DuckDBPyConnection) -> None:
 
             # --- escopo 'genero': limiar dentro de cada gênero ---------------- #
             for sexo in ("Homem", "Mulher"):
-                g = micro[micro["sexo"] == sexo]
+                g = micro_todos[micro_todos["sexo"] == sexo]
                 if len(g) < 100:
                     continue
                 peso_g = g["peso"].sum()
@@ -1105,7 +1208,7 @@ def gerar_extremos_racial(con: duckdb.DuckDBPyConnection) -> None:
                 peso_fs = fatia_s["peso"].sum()
                 if not peso_fs:
                     continue
-                for raca in ("Branca", "Negra", "Indígena"):
+                for raca in ("Branca", "Negra", "Indígena", "Amarela"):
                     distrib.append({
                         "ano": ano, "trimestre": tri, "extremo": extremo,
                         "escopo_limiar": "genero", "grupo_limiar": sexo, "raca_cor": raca,
@@ -1170,8 +1273,8 @@ def gerar_quartis_multi_racial(con: duckdb.DuckDBPyConnection) -> None:
       "quartil por raça × gênero", "…× escolaridade", "…× faixa etária".
 
     Formato longo: ano, trimestre, recorte, grupo, quartil, dimensao, categoria,
-    pct_do_quartil, pct_populacao_capturada. Brasil, 2012-2026. Mesma ressalva de heaping
-    de `gerar_perfil_quartis_racial`.
+    pct_do_quartil, pct_populacao_capturada. Brasil, 2012-2026. Mesma repartição do peso
+    empatado nos limiares de `gerar_perfil_quartis_racial` (R9).
     """
     trimestres = con.execute("SELECT DISTINCT ano, trimestre FROM base ORDER BY ano, trimestre").df()
     resultados = []
@@ -1193,15 +1296,7 @@ def gerar_quartis_multi_racial(con: duckdb.DuckDBPyConnection) -> None:
                 continue
             g = g.copy()
             peso_g = g["peso"].sum()
-            p25 = pnadc_core.quantil_ponderado(g["renda_habitual_real"], g["peso"], 0.25)
-            p50 = pnadc_core.quantil_ponderado(g["renda_habitual_real"], g["peso"], 0.50)
-            p75 = pnadc_core.quantil_ponderado(g["renda_habitual_real"], g["peso"], 0.75)
-            g["quartil"] = np.select(
-                [g["renda_habitual_real"] < p25, g["renda_habitual_real"] < p50,
-                 g["renda_habitual_real"] < p75],
-                ["Q1 (25% que menos ganham)", "Q2", "Q3"], default="Q4 (25% que mais ganham)",
-            )
-            for quartil, fatia in g.groupby("quartil", observed=True):
+            for quartil, fatia in _quartis_ponderados(g):
                 peso_q = fatia["peso"].sum()
                 if not peso_q:
                     continue
@@ -1758,8 +1853,8 @@ def gerar_ritmo_convergencia() -> None:
 
     Branca-Indígena é a série mais ruidosa das três (menor amostra por trimestre) —
     ajusta a tendência TANTO na série bruta quanto numa versão suavizada (média móvel
-    de 4 trimestres, mesmo padrão já usado nos gráficos de série temporal de Indígena
-    em `graficos_fase1.py`) e compara o R² das duas: se mesmo suavizada o R² continuar
+    de 4 trimestres PARA TRÁS, `rolling(4, min_periods=4)`; os gráficos de Indígena em
+    `graficos_fase1.py` usam média móvel CENTRADA) e compara o R² das duas: se mesmo suavizada o R² continuar
     muito baixo, marca a série como `tendencia_confiavel=False` e NÃO reporta um "anos
     pra zerar" pra ela — segue a regra do projeto de não forçar uma leitura de uma
     série ruidosa demais.
@@ -1846,24 +1941,39 @@ def gerar_ritmo_convergencia() -> None:
 
 
 def gerar_informalidade(con: duckdb.DuckDBPyConnection) -> None:
-    """% com carteira assinada (entre empregados) e % contribuinte de previdência
-    (entre TODOS os ocupados, cobre também conta-própria/empregador) por raça x gênero
-    x faixa etária — ver decodificação de VD4009/VD4012 em
-    docs/LIMITACOES_E_METODOLOGIA.md."""
+    """% com carteira assinada, % estatutário/militar e % contribuinte de previdência por
+    raça x gênero x faixa etária — ver decodificação de VD4009/VD4012 em
+    docs/LIMITACOES_E_METODOLOGIA.md.
+
+    - `pct_com_carteira`: só CLT (VD4009 01, 03, 05) entre os empregados privados, domésticos
+      e públicos (01–06). Até 13/10/2026 militar/estatutário (07) contava como "com carteira",
+      no numerador e no denominador (R19; decisão do Ponto de parada 3).
+    - `pct_estatutario_militar`: militar/estatutário (07) entre todos os empregados (01–07).
+    - `pct_contribui_previdencia`: entre TODOS os ocupados (cobre também conta-própria e
+      empregador)."""
     select_agregado = """
            ano, trimestre, raca_cor, sexo, faixa_etaria,
            COUNT(*) AS n_amostra,
            SUM(peso) AS populacao_estimada,
            SUM(peso) FILTER (WHERE tem_carteira_assinada IS NOT NULL) AS pop_empregados,
+           SUM(peso) FILTER (WHERE vinculo_trabalho = 'Estatutário/militar') AS pop_estatutario_militar,
            100.0 * SUM(peso) FILTER (WHERE tem_carteira_assinada)
                / NULLIF(SUM(peso) FILTER (WHERE tem_carteira_assinada IS NOT NULL), 0)
                AS pct_com_carteira,
+           100.0 * SUM(peso) FILTER (WHERE vinculo_trabalho = 'Estatutário/militar')
+               / NULLIF(SUM(peso) FILTER (WHERE vinculo_trabalho IN ('CLT', 'Sem carteira', 'Estatutário/militar')), 0)
+               AS pct_estatutario_militar,
            100.0 * SUM(peso) FILTER (WHERE contribui_previdencia)
                / NULLIF(SUM(peso) FILTER (WHERE contribui_previdencia IS NOT NULL), 0)
                AS pct_contribui_previdencia"""
     df = _agregar_por_geografia(con, select_agregado)
+    inds = [IndicadorPrecisao("carteira", _bool_sql("tem_carteira_assinada"), "tem_carteira_assinada IS NOT NULL"),
+            IndicadorPrecisao("estatutario_militar", _bool_sql("vinculo_trabalho = 'Estatutário/militar'"),
+                              "vinculo_trabalho IN ('CLT', 'Sem carteira', 'Estatutário/militar')"),
+            IndicadorPrecisao("previdencia", _bool_sql("contribui_previdencia"), "contribui_previdencia IS NOT NULL")]
+    df = _anexar_precisao(df, _precisao_celulas(con, inds, _chaves("raca_cor", "sexo", "faixa_etaria")), inds)
     destino = OUTPUT_DIR / "informalidade.parquet"
-    salvar_tabela(df, destino)
+    salvar_tabela(df, destino, regra_supressao=precisao.REGRA_SUPRESSAO)
     print(f"informalidade.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -1885,8 +1995,12 @@ def gerar_horas_trabalhadas(con: duckdb.DuckDBPyConnection) -> None:
                                             AND horas_habituais_todos_trabalhos > 0), 0)
                AS renda_por_hora_real_media"""
     df = _agregar_por_geografia(con, select_agregado)
+    inds = [IndicadorPrecisao("horas", "horas_habituais_todos_trabalhos", "horas_habituais_todos_trabalhos IS NOT NULL"),
+            IndicadorPrecisao("renda_hora", "renda_habitual_real / (horas_habituais_todos_trabalhos * 4.345)",
+                              "renda_habitual_real IS NOT NULL AND horas_habituais_todos_trabalhos > 0")]
+    df = _anexar_precisao(df, _precisao_celulas(con, inds, _chaves("raca_cor", "sexo", "faixa_etaria")), inds)
     destino = OUTPUT_DIR / "horas_trabalhadas.parquet"
-    salvar_tabela(df, destino)
+    salvar_tabela(df, destino, regra_supressao=precisao.REGRA_SUPRESSAO)
     print(f"horas_trabalhadas.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -1896,14 +2010,12 @@ def gerar_alfabetizacao(con: duckdb.DuckDBPyConnection) -> None:
     residual em cohorts mais velhas — complementa nivel_instrucao (que só mostra o
     nível já CONCLUÍDO).
 
-    NÃO inclui frequência escolar (V3014): checado direto no parquet bruto e a
-    cobertura de V3014 pra população 14-17 anos é de só ~6-8% em VÁRIOS trimestres
-    (2018 a 2026), não os ~95% de V3001 nem os ~20% que uma rotação padrão de painel
-    (1 de 5 grupos por trimestre) explicaria — não conseguimos confirmar se é uma
-    subamostra aleatória (estimativa válida, só com IC mais largo) ou um recorte
-    enviesado (ex.: só quem não trabalha). Descartado
-    até investigar a regra de coleta exata do IBGE pra essa variável especificamente —
-    ver docs/LIMITACOES_E_METODOLOGIA.md."""
+    NÃO inclui frequência escolar. Correção de 13/10/2026 (E11 da auditoria Rodada 2): este
+    docstring tratava `V3014` como frequência escolar e concluía, pela cobertura de ~6–8%
+    entre 14–17 anos, que o indicador era inviável. `V3014` é "concluiu o curso que
+    frequentou" e só se aplica a quem frequentou um curso antes; a cobertura baixa é
+    esperada. Frequência escolar é `V3002` ("frequenta escola?"), já extraída no extrato v2
+    (E1 do plano de análise usa `V3002`)."""
     query = """
         SELECT 'brasil' AS nivel_geografico, 'Brasil' AS geografia,
                ano, trimestre, raca_cor, sexo, faixa_etaria,
@@ -1916,8 +2028,11 @@ def gerar_alfabetizacao(con: duckdb.DuckDBPyConnection) -> None:
         GROUP BY ano, trimestre, raca_cor, sexo, faixa_etaria
     """
     df = con.execute(query).df()
+    inds = [IndicadorPrecisao("alfabetizado", _bool_sql("alfabetizado"), "alfabetizado IS NOT NULL")]
+    prec = _precisao_celulas(con, inds, _chaves("raca_cor", "sexo", "faixa_etaria"), niveis=NIVEL_BRASIL)
+    df = _anexar_precisao(df, prec, inds)
     destino = OUTPUT_DIR / "alfabetizacao.parquet"
-    salvar_tabela(df, destino)
+    salvar_tabela(df, destino, regra_supressao=precisao.REGRA_SUPRESSAO)
     print(f"alfabetizacao.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -1938,8 +2053,12 @@ def gerar_desalento_subutilizacao(con: duckdb.DuckDBPyConnection) -> None:
                / NULLIF(SUM(peso) FILTER (WHERE forca_trabalho = '2'), 0)
                AS pct_desalento"""
     df = _agregar_por_geografia(con, select_agregado)
+    inds = [IndicadorPrecisao("desalento", _bool_sql("COALESCE(desalentado, FALSE)"), "forca_trabalho = '2'"),
+            IndicadorPrecisao("forca_potencial", _bool_sql("forca_trabalho_potencial"),
+                              "forca_trabalho_potencial IS NOT NULL")]
+    df = _anexar_precisao(df, _precisao_celulas(con, inds, _chaves("raca_cor", "sexo", "faixa_etaria")), inds)
     destino = OUTPUT_DIR / "desalento_subutilizacao.parquet"
-    salvar_tabela(df, destino)
+    salvar_tabela(df, destino, regra_supressao=precisao.REGRA_SUPRESSAO)
     print(f"desalento_subutilizacao.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -1961,8 +2080,11 @@ def gerar_sobrequalificacao(con: duckdb.DuckDBPyConnection) -> None:
                                              AND grupamento_ocupacional IS NOT NULL), 0)
                AS pct_sobrequalificado"""
     df = _agregar_por_geografia(con, select_agregado, incluir_faixa_etaria=False)
+    inds = [IndicadorPrecisao("sobrequalificado", _bool_sql("grupamento_ocupacional = 'Ocupações elementares'"),
+                              "nivel_instrucao = 'Superior completo' AND grupamento_ocupacional IS NOT NULL")]
+    df = _anexar_precisao(df, _precisao_celulas(con, inds, _chaves("raca_cor", "sexo")), inds)
     destino = OUTPUT_DIR / "sobrequalificacao.parquet"
-    salvar_tabela(df, destino)
+    salvar_tabela(df, destino, regra_supressao=precisao.REGRA_SUPRESSAO)
     print(f"sobrequalificacao.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -2437,8 +2559,15 @@ def gerar_renda_multidimensional_faixa(con: duckdb.DuckDBPyConnection, n_trimest
         GROUP BY raca_cor, sexo, faixa_etaria, nivel_instrucao, grupamento_ocupacional"""
     df = con.execute(query).df()
     df = df[df["nivel_instrucao"].notna()]
+    inds = [IND_RENDA]
+    ultimos = ("(ano, trimestre) IN (SELECT ano, trimestre FROM (SELECT DISTINCT ano, trimestre FROM base "
+               f"ORDER BY ano DESC, trimestre DESC LIMIT {n_trimestres}))")
+    prec = _precisao_celulas(con, inds, _chaves("raca_cor", "sexo", "faixa_etaria", "nivel_instrucao", "grupamento_ocupacional"),
+                             niveis=NIVEL_BRASIL, por_trimestre=False,
+                             filtro="grupamento_ocupacional IS NOT NULL", trimestres_sql=ultimos)
+    df = _anexar_precisao(df, prec.drop(columns=["nivel_geografico", "geografia"]), inds)
     destino = OUTPUT_DIR / "renda_multidimensional_faixa.parquet"
-    salvar_tabela(df, destino)
+    salvar_tabela(df, destino, regra_supressao=precisao.REGRA_SUPRESSAO)
     print(f"renda_multidimensional_faixa.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -2464,8 +2593,15 @@ def gerar_renda_multidimensional_geracao(con: duckdb.DuckDBPyConnection, n_trime
         GROUP BY raca_cor, sexo, geracao, nivel_instrucao, grupamento_ocupacional"""
     df = con.execute(query).df()
     df = df[df["nivel_instrucao"].notna()]
+    inds = [IND_RENDA]
+    ultimos = ("(ano, trimestre) IN (SELECT ano, trimestre FROM (SELECT DISTINCT ano, trimestre FROM base "
+               f"ORDER BY ano DESC, trimestre DESC LIMIT {n_trimestres}))")
+    prec = _precisao_celulas(con, inds, _chaves("raca_cor", "sexo", "geracao", "nivel_instrucao", "grupamento_ocupacional"),
+                             niveis=NIVEL_BRASIL, por_trimestre=False,
+                             filtro="grupamento_ocupacional IS NOT NULL", trimestres_sql=ultimos)
+    df = _anexar_precisao(df, prec.drop(columns=["nivel_geografico", "geografia"]), inds)
     destino = OUTPUT_DIR / "renda_multidimensional_geracao.parquet"
-    salvar_tabela(df, destino)
+    salvar_tabela(df, destino, regra_supressao=precisao.REGRA_SUPRESSAO)
     print(f"renda_multidimensional_geracao.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -2487,8 +2623,10 @@ def gerar_renda_completa(con: duckdb.DuckDBPyConnection) -> None:
         GROUP BY ano, trimestre, raca_cor, sexo, faixa_etaria, nivel_instrucao"""
     df = con.execute(query).df()
     df = df[df["nivel_instrucao"].notna()]
+    inds = [IND_RENDA]
+    df = _anexar_precisao(df, _precisao_celulas(con, inds, _chaves("raca_cor", "sexo", "faixa_etaria", "nivel_instrucao"), niveis=NIVEL_BRASIL), inds)
     destino = OUTPUT_DIR / "renda_completa.parquet"
-    salvar_tabela(df, destino)
+    salvar_tabela(df, destino, regra_supressao=precisao.REGRA_SUPRESSAO)
     print(f"renda_completa.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -2511,8 +2649,10 @@ def gerar_renda_completa_geracao(con: duckdb.DuckDBPyConnection) -> None:
         GROUP BY ano, trimestre, raca_cor, sexo, geracao, nivel_instrucao"""
     df = con.execute(query).df()
     df = df[df["nivel_instrucao"].notna()]
+    inds = [IND_RENDA]
+    df = _anexar_precisao(df, _precisao_celulas(con, inds, _chaves("raca_cor", "sexo", "geracao", "nivel_instrucao"), niveis=NIVEL_BRASIL), inds)
     destino = OUTPUT_DIR / "renda_completa_geracao.parquet"
-    salvar_tabela(df, destino)
+    salvar_tabela(df, destino, regra_supressao=precisao.REGRA_SUPRESSAO)
     print(f"renda_completa_geracao.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -2523,8 +2663,11 @@ def gerar_escolaridade(con: duckdb.DuckDBPyConnection) -> None:
            SUM(peso) AS populacao_estimada"""
     df = _agregar_por_geografia(con, select_agregado, group_by_extra="nivel_instrucao")
     df = df[df["nivel_instrucao"].notna()]
+    inds = [IndicadorPrecisao("populacao", None, "TRUE")]
+    prec = _precisao_celulas(con, inds, _chaves("raca_cor", "sexo", "faixa_etaria", "nivel_instrucao"))
+    df = _anexar_precisao(df, prec, inds)
     destino = OUTPUT_DIR / "escolaridade.parquet"
-    salvar_tabela(df, destino)
+    salvar_tabela(df, destino, regra_supressao=precisao.REGRA_SUPRESSAO)
     print(f"escolaridade.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -2539,8 +2682,10 @@ def gerar_ocupacao(con: duckdb.DuckDBPyConnection) -> None:
                / NULLIF(SUM(peso) FILTER (WHERE forca_trabalho = '1'), 0)
                AS taxa_desocupacao_pct"""
     df = _agregar_por_geografia(con, select_agregado)
+    inds = [IndicadorPrecisao("desocupacao", _bool_sql("condicao_ocupacao = '2'"), "forca_trabalho = '1'")]
+    df = _anexar_precisao(df, _precisao_celulas(con, inds, _chaves("raca_cor", "sexo", "faixa_etaria")), inds)
     destino = OUTPUT_DIR / "ocupacao.parquet"
-    salvar_tabela(df, destino)
+    salvar_tabela(df, destino, regra_supressao=precisao.REGRA_SUPRESSAO)
     print(f"ocupacao.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -2606,7 +2751,12 @@ def gerar_desocupacao_por_escolaridade(con: duckdb.DuckDBPyConnection) -> None:
         GROUP BY 1,2,3,4
     """).df()
     df["taxa_desocupacao_pct"] = 100 * df["pop_desocupados"] / df["pop_forca"]
-    salvar_tabela(df, OUTPUT_DIR / "desocupacao_por_escolaridade.parquet")
+    inds = [IndicadorPrecisao("desocupacao", _bool_sql("condicao_ocupacao = '2'"), "forca_trabalho = '1'")]
+    prec = _precisao_celulas(
+        con, inds, _chaves("nivel_instrucao", raca_cor=RACA_NEGRA_SQL), niveis=NIVEL_BRASIL,
+        filtro="nivel_instrucao IS NOT NULL AND raca_cor IN ('Branca','Preta','Parda','Indígena')")
+    df = _anexar_precisao(df, prec.drop(columns=["nivel_geografico", "geografia"]), inds)
+    salvar_tabela(df, OUTPUT_DIR / "desocupacao_por_escolaridade.parquet", regra_supressao=precisao.REGRA_SUPRESSAO)
     print(f"desocupacao_por_escolaridade.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -2672,7 +2822,17 @@ def gerar_faixas_salario_minimo(con: duckdb.DuckDBPyConnection) -> None:
     df = pd.concat(linhas, ignore_index=True)
     for c in ("ate_1sm", "ate_2sm", "acima_3sm"):
         df[f"pct_{c}"] = 100 * df[c] / df["pop"]
-    salvar_tabela(df, OUTPUT_DIR / "faixas_salario_minimo.parquet")
+    sm = "CASE ano " + " ".join(f"WHEN {a} THEN {v}" for a, v in SALARIO_MINIMO_NOMINAL.items()) + " END"
+    dom = "renda_habitual_nominal IS NOT NULL AND renda_habitual_nominal > 0"
+    inds = [IndicadorPrecisao("ate_1sm", _bool_sql(f"renda_habitual_nominal <= {sm}"), dom),
+            IndicadorPrecisao("ate_2sm", _bool_sql(f"renda_habitual_nominal <= 2 * {sm}"), dom),
+            IndicadorPrecisao("acima_3sm", _bool_sql(f"renda_habitual_nominal > 3 * {sm}"), dom)]
+    prec = _precisao_celulas(
+        con, inds, _chaves(raca_cor=RACA_NEGRA_SQL), niveis=NIVEL_BRASIL,
+        filtro="raca_cor IN ('Branca','Preta','Parda','Indígena')",
+        trimestres_sql=f"ano IN ({', '.join(str(a) for a in SALARIO_MINIMO_NOMINAL)})")
+    df = _anexar_precisao(df, prec.drop(columns=["nivel_geografico", "geografia"]), inds)
+    salvar_tabela(df, OUTPUT_DIR / "faixas_salario_minimo.parquet", regra_supressao=precisao.REGRA_SUPRESSAO)
     print(f"faixas_salario_minimo.parquet: {len(df):,} linhas".replace(",", "."), flush=True)
 
 
@@ -2680,8 +2840,9 @@ def gerar_oaxaca_blinder_temporal(con: duckdb.DuckDBPyConnection) -> None:
     """Oaxaca-Blinder (log-renda, controles faixa etária + escolaridade + ocupação) e
     RIF de P10/P50/P90 — a MESMA decomposição de `gerar_decomposicao_oaxaca_blinder`,
     mas rodada UMA VEZ POR ANO (todos os trimestres do ano agrupados), 2012→2026.
-    Responde: a parcela NÃO-explicada (mesma composição, retorno diferente — proxy de
-    discriminação) está caindo conforme a escolaridade de negros sobe, ou fica travada?
+    Responde: a parcela NÃO-explicada (mesma composição, retorno diferente — parte do hiato
+    não associada às covariáveis incluídas; não é medida de discriminação) está caindo
+    conforme a escolaridade de negros sobe, ou fica travada?
     """
     controles = ["faixa_etaria", "nivel_instrucao", "grupamento_ocupacional"]
     anos = [r[0] for r in con.execute("SELECT DISTINCT ano FROM base ORDER BY ano").fetchall()]
@@ -2771,6 +2932,36 @@ COMBOS_RACA_GENERO = [
 ]
 
 
+def decompor_raca_genero(micro: pd.DataFrame, sexo_t: str, raca_t: str, coluna_renda: str,
+                         peso: str = "peso", n_minimo: int = 30) -> dict | None:
+    """Decomposição ANOVA de 2 fatores do hiato entre Homem Branco (HB) e o grupo-alvo
+    (sexo_t, raca_t), sobre um microdado com colunas `raca_cor`, `sexo`, renda e peso:
+
+        gap_total     = HB − Y(sexo_t, raca_t)
+        efeito_raca   = HB − Y(Homem, raca_t)
+        efeito_genero = HB − Y(sexo_t, Branca)      ← Branca do MESMO sexo do alvo (E6)
+        interacao     = gap_total − efeito_raca − efeito_genero
+
+    Logo gap_total = efeito_raca + efeito_genero + interacao. Devolve None se alguma das
+    células usadas tiver menos de `n_minimo` observações."""
+    def media(raca, sx):
+        g = micro[(micro["raca_cor"] == raca) & (micro["sexo"] == sx)]
+        return pnadc_core.media_ponderada(g[coluna_renda], g[peso]) if len(g) >= n_minimo else np.nan
+
+    hb = media("Branca", "Homem")
+    h_t = media(raca_t, "Homem")
+    b_t = media("Branca", sexo_t)
+    y_t = media(raca_t, sexo_t)
+    if any(pd.isna(x) for x in (hb, h_t, b_t, y_t)):
+        return None
+    gap_total = hb - y_t
+    efeito_raca = hb - h_t
+    efeito_genero = hb - b_t
+    return {"renda_homem_branco": hb, "renda_alvo": y_t, "gap_total": gap_total,
+            "efeito_raca": efeito_raca, "efeito_genero": efeito_genero,
+            "interacao": gap_total - efeito_raca - efeito_genero}
+
+
 def gerar_decomposicao_raca_genero(con: duckdb.DuckDBPyConnection) -> None:
     """Generaliza `gerar_dupla_desvantagem` (que só cobria Homem Branco vs. Mulher
     Negra) pras NOVE combinações, todas vs. Homem Branco (referência): as cinco
@@ -2786,8 +2977,10 @@ def gerar_decomposicao_raca_genero(con: duckdb.DuckDBPyConnection) -> None:
         interacao     = gap_total − efeito_raca − efeito_genero
 
     Quando sexo_t=Homem (Homem Negro/Preto/Pardo/Indígena), efeito_genero e interação
-    saem 0 por construção — é só o efeito de raça puro contra a referência, comportamento
-    esperado, não um bug.
+    saem 0 por construção — é só o efeito de raça puro contra a referência. Até 13/10/2026
+    o código usava sempre Mulher Branca no termo de gênero e dava efeito_genero = R$ 1.258 e
+    interacao = −R$ 1.258 nessas linhas (E6 da auditoria Rodada 2); o cálculo agora está em
+    `decompor_raca_genero`, coberto por teste.
 
     Amostra checada antes de escrever esta função: mesmo Indígena x sexo, Brasil,
     trimestre a trimestre, tem n mínimo de 136 (min histórico, 2012-2026) — série
@@ -2812,29 +3005,14 @@ def gerar_decomposicao_raca_genero(con: duckdb.DuckDBPyConnection) -> None:
         micro_negra = micro.copy()
         micro_negra["raca_cor"] = micro_negra["raca_cor"].replace({"Preta": "Negra", "Parda": "Negra"})
 
-        def celula(base_df, raca, sx):
-            return base_df[(base_df["raca_cor"] == raca) & (base_df["sexo"] == sx)]
-
-        def media(base_df, raca, sx):
-            g = celula(base_df, raca, sx)
-            return pnadc_core.media_ponderada(g["renda_habitual_real"], g["peso"]) if len(g) >= n_minimo else np.nan
-
-        hb = media(micro, "Branca", "Homem")
-        if pd.isna(hb):
-            continue
-
         for sexo_t, raca_t in COMBOS_RACA_GENERO:
             base_df = micro_negra if raca_t == "Negra" else micro
-            h_t = media(base_df, raca_t, "Homem")
-            mb = media(base_df, "Branca", "Mulher")
-            y_t = media(base_df, raca_t, sexo_t)
-            if any(pd.isna(x) for x in (h_t, mb, y_t)):
+            dec = decompor_raca_genero(base_df, sexo_t, raca_t, "renda_habitual_real", n_minimo=n_minimo)
+            if dec is None:
                 continue
-
-            gap_total = hb - y_t
-            efeito_raca = hb - h_t
-            efeito_genero = hb - mb
-            interacao = gap_total - efeito_raca - efeito_genero
+            hb, y_t = dec["renda_homem_branco"], dec["renda_alvo"]
+            gap_total, efeito_raca = dec["gap_total"], dec["efeito_raca"]
+            efeito_genero, interacao = dec["efeito_genero"], dec["interacao"]
 
             base_df = base_df.copy()
             base_df["grp"] = base_df["raca_cor"] + " · " + base_df["sexo"]
@@ -2963,7 +3141,9 @@ def gerar_transicoes_painel(con: duckdb.DuckDBPyConnection) -> None:
     _tabela_transicao(
         con,
         condicao_t0="b0.tem_carteira_assinada = FALSE",
-        coluna_evento_t1="CASE WHEN b1.tem_carteira_assinada THEN 1 ELSE 0 END",
+        # "formal" em t1 = CLT ou estatutário/militar (mesmo sentido de antes de 13/10/2026,
+        # quando tem_carteira_assinada ainda contava o código 07 como TRUE)
+        coluna_evento_t1="CASE WHEN b1.vinculo_trabalho IN ('CLT', 'Estatutário/militar') THEN 1 ELSE 0 END",
         nome_saida="transicao_informal_formal.parquet",
     )
 

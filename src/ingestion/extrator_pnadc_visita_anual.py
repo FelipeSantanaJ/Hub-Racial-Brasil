@@ -32,6 +32,8 @@ import requests
 from bs4 import BeautifulSoup
 from tqdm.auto import tqdm
 
+from src.ingestion.extrator_pnadc import gravar_fonte, info_remota, ler_fonte
+
 BASE_URL_VISITAS = (
     "https://ftp.ibge.gov.br/Trabalho_e_Rendimento/"
     "Pesquisa_Nacional_por_Amostra_de_Domicilios_continua/Anual/Microdados/Visita"
@@ -237,6 +239,7 @@ def processar_ano(ano: int, variaveis_desejadas: list[str], visita: int = 1) -> 
 
     nome_zip = url_zip.split("/")[-1]
     destino_zip = tmp_dir / nome_zip
+    fonte = info_remota(url_zip)
     baixar_arquivo(url_zip, destino_zip)
 
     pasta_extraida = tmp_dir / f"extraido_{ano}"
@@ -282,6 +285,7 @@ def processar_ano(ano: int, variaveis_desejadas: list[str], visita: int = 1) -> 
         )
         total_linhas += len(bloco)
 
+    gravar_fonte(particao_dir, fonte)
     marcador.write_text(str(total_linhas))
 
     # limpeza dos arquivos brutos do ano para economizar espaço em disco
@@ -305,7 +309,7 @@ def main(anos: list[int], visita: int = 1, pesos_replicados: bool = False) -> No
             status = processar_ano(ano, variaveis, visita)
         except Exception as e:
             status = f"ERRO: {e}"
-        resultados.append({"ano": ano, "status": status})
+        resultados.append({"ano": ano, "status": status, **ler_fonte(output_dir / f"ano={ano}")})
         print(f"{ano}: {status}")
 
     resumo_novo = pd.DataFrame(resultados)

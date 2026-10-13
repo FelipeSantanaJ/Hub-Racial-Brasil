@@ -236,3 +236,54 @@ def test_deflator_ipea_removido():
     """E4: funções de deflator do IPEA (dividiam o nominal) não podem voltar."""
     assert not hasattr(pnadc_core, "aplicar_deflator")
     assert not hasattr(pnadc_core, "carregar_deflator")
+
+
+class TestFracaoNaFatia:
+    """Repartição do peso empatado nos limiares de quantil (R9 da auditoria Rodada 2)."""
+
+    QUARTIS = [(0.0, 0.25), (0.25, 0.50), (0.50, 0.75), (0.75, 1.0)]
+
+    def _renda_com_heaping(self, seed=0, n=5000):
+        rng = np.random.default_rng(seed)
+        valores = np.round(np.exp(rng.normal(7.8, 0.8, size=n)), -2)  # arredondado a R$ 100
+        valores[rng.random(n) < 0.15] = 2000.0  # massa grande num valor redondo
+        return valores, rng.uniform(100, 900, size=n)
+
+    @pytest.mark.parametrize("fatias", [QUARTIS, [(0.0, 0.1), (0.1, 0.9), (0.9, 1.0)]])
+    def test_fatias_somam_100(self, fatias):
+        v, w = self._renda_com_heaping()
+        soma = sum(pnadc_core.fracao_na_fatia(v, w, a, b) for a, b in fatias)
+        assert np.allclose(soma, 1.0)
+        for a, b in fatias:
+            f = pnadc_core.fracao_na_fatia(v, w, a, b)
+            assert (w * f).sum() / w.sum() == pytest.approx(b - a, abs=1e-12)
+
+    def test_massa_empatada_no_limiar(self):
+        """30% do peso em R$ 2.000, ocupando do 60º ao 90º percentil (o P75 cai em cima):
+        cada quartil = 25% exatos, e o corte simples poria 40% no "topo 25%"."""
+        rng = np.random.default_rng(1)
+        v = np.concatenate([rng.uniform(500, 1999, 600), np.full(300, 2000.0), rng.uniform(2001, 9000, 100)])
+        w = np.ones_like(v)
+        for a, b in self.QUARTIS:
+            f = pnadc_core.fracao_na_fatia(v, w, a, b)
+            assert (w * f).sum() / w.sum() == pytest.approx(b - a, abs=1e-12)
+        empatados = pnadc_core.fracao_na_fatia(v, w, 0.75, 1.0)[v == 2000.0]
+        assert np.allclose(empatados, empatados[0])  # mesma fração para todos os empatados
+        p75 = pnadc_core.quantil_ponderado(v, w, 0.75)
+        assert w[v >= p75].sum() / w.sum() == pytest.approx(0.40)  # corte simples
+
+    def test_sem_empates_igual_ao_corte_simples(self):
+        """Sem empates, só a observação que contém o limiar pode ficar fracionada."""
+        rng = np.random.default_rng(2)
+        v = rng.permutation(np.arange(1, 1001, dtype=float))
+        w = rng.uniform(1, 3, size=1000)
+        f = pnadc_core.fracao_na_fatia(v, w, 0.9, 1.0)
+        simples = (v >= pnadc_core.quantil_ponderado(v, w, 0.9)).astype(float)
+        assert ((f > 0) & (f < 1)).sum() <= 1
+        assert (f != simples).sum() <= 1
+
+    def test_sem_empates_limiar_entre_observacoes(self):
+        """100 valores de peso 1: o P90 cai entre a 90ª e a 91ª; topo = as 10 maiores."""
+        v = np.arange(1, 101, dtype=float)
+        f = pnadc_core.fracao_na_fatia(v, np.ones(100), 0.9, 1.0)
+        assert f.tolist() == [0.0] * 90 + [1.0] * 10

@@ -5,6 +5,126 @@ calculá-lo: data, o quê, por quê, impacto. Mais recente primeiro.
 
 ---
 
+## 13/10/2026 — Etapa 2, Fase 3b: correções da Rodada 2 (branch `auditoria/fase3b-correcoes`)
+
+Origem: `docs/auditoria/rodada2.md` e decisões do Ponto de parada 3 (13/10/2026). Só o item 1
+(E6) **já vale** nos parquets; os itens 2–4 estão no código e testados, mas **só valem na
+regeneração única da Onda 1**.
+
+### 1. E6 — decomposição raça × gênero com alvo masculino — **JÁ VALE (tabela regenerada)**
+
+- **O quê.** `gerar_decomposicao_raca_genero` usava sempre Mulher Branca no termo de gênero
+  (`mb = media(base_df, "Branca", "Mulher")`). Agora usa a Branca do mesmo sexo do alvo; o
+  cálculo saiu para `decompor_raca_genero` (função pura, `tests/test_decomposicao_raca_genero.py`).
+- **Por quê.** Com alvo masculino, `efeito_genero` = HB − Y(Homem, Branca) = 0 por definição; a
+  tabela publicada trazia R$ 1.258 (2026T2) e a `interacao` compensava com −R$ 1.258.
+- **Impacto medido** (`docs/auditoria/antes_depois_e6.json`; cópia anterior em
+  `data/processed/_legado/pre_e6_138151e/`, local): mudam **só** `efeito_genero` e `interacao`
+  das **232 linhas masculinas** (diferença máxima R$ 1.489); `gap_total`, `efeito_raca`, rendas,
+  p-valores e as 290 linhas femininas ficam idênticos (|dif| ≤ 3×10⁻¹²). A soma
+  `gap_total = efeito_raca + efeito_genero + interacao` fecha nas 522 linhas.
+- Regenerada com `python -m src.auditoria.regenerar_tabela gerar_decomposicao_raca_genero`, que
+  materializa a `CRIAR_BASE` e chama só esse gerador (a função usa `renda_habitual_real`, que a
+  troca de população não afeta).
+
+### 2. Regra de supressão (R8) — **no código; vale na regeneração da Onda 1**
+
+- **O quê.** As tabelas de nível ganham, para cada indicador, `n_<ind>` (n do DENOMINADOR),
+  `cv_<ind>` (CV design-based) e `publicavel_<ind>`, mais `publicavel` (indicador principal).
+  Regra: **n ≥ 30 e CV ≤ 30%**; estimativa zero ou CV indefinido ⇒ não publicável. Nenhum valor é
+  apagado. A regra vai no `_meta.json` (`regra_supressao`). Tabelas: `renda`, `renda_por_*`,
+  `renda_completa*`, `renda_multidimensional_*`, `escolaridade`, `ocupacao`,
+  `desocupacao_por_escolaridade`, `informalidade`, `horas_trabalhadas`, `alfabetizacao`,
+  `desalento_subutilizacao`, `sobrequalificacao`, `faixas_salario_minimo`.
+- **Como.** `src/inference/precisao.py` combina totais por (célula, estrato, UPA) somados no
+  DuckDB pela fórmula de `variancia_linearizada` (domínio = célula). Validação em 2026T2
+  (`python -m src.auditoria.validacao_cv`; `docs/auditoria/validacao_cv.json`): diferença relativa
+  máxima **2×10⁻¹⁵** contra `erro_padrao_media_design` sobre o microdado, em 120 células (renda
+  média, proporção com carteira e total ponderado).
+- **Por quê.** `n_amostra = COUNT(*)` conta quem não entra no indicador e não havia regra: 12%
+  das células nacionais e 40% das de UF de `renda.parquet` tinham n < 30.
+- **Impacto previsto.** Só colunas novas; nenhum número muda. Em `renda` 2026T2, passam na regra
+  78,9% das células do Brasil, 64,6% das regionais, 53,2% das de UF e 46,6% das da RM de SP. O
+  golden-file de `renda` foi regerado (intencional): as 13 colunas antigas ficam idênticas e
+  entram 4 colunas novas.
+
+### 3. Valores redondos nos limiares de quantil (R9) e Amarela em `extremos` (R10) — **no código; vale na regeneração da Onda 1**
+
+- **O quê.** `pnadc_core.fracao_na_fatia` dá a cada observação a fração do seu peso que cai na
+  fatia [q_inf, q_sup] da distribuição ponderada, e reparte o peso de quem está empatado no limiar.
+  Cada fatia soma **exatamente** 10% (topo/base) ou 25% (quartis). Usada (via `_fatia_ponderada` /
+  `_quartis_ponderados`) em `gerar_perfil_topo10_racial`, `gerar_perfil_quartis_racial`,
+  `gerar_perfil_topo10_quartis_pretaparda`, `gerar_perfil_topo10_quartis_indigena`,
+  `gerar_extremos_racial` e `gerar_quartis_multi_racial`. `n_topo10`/`n_quartil`/`n_extremo`
+  passam a contar quem tem fração > 0. R10: o escopo `brasil` de `extremos_distribuicao_racial`
+  e o escopo `genero` incluem Amarela no universo e nas raças reportadas (escopo `genero` acrescentado
+  por decisão de 13/10/2026, após o PP3). Ignorado fica sempre fora.
+- **Por quê.** Com renda declarada em valores redondos, o corte `>= limiar` capturava de 22% a 31%
+  nos quartis e até 12,8% no topo 10%.
+- **Impacto previsto** (prévia 2026T2, sem gravar parquet): o topo 10% passa de 11,5% (Branca) e
+  12,8% (Negra) de captura para 10,0%. Os quartis Negra passam de 23,6/23,2/22,4/30,9% para 25% cada.
+  Superior completo no topo 10%: Negra 56,9% → 61,4%; Branca 83,0% → 84,3%. No topo 10% nacional,
+  a participação Branca vai de 67,3% (antes, sem Amarela, corte simples) para 67,3% (com Amarela e
+  repartição): os dois efeitos se compensam (−0,9 p.p. de Amarela, +0,9 p.p. da repartição). Amarela
+  = 1,45%. **Números do `ANALISE_FASE1.md` sobre o topo e os quartis mudam na Onda 1.**
+- Testes: `TestFracaoNaFatia` (soma = 100%; sem empates, igual ao corte simples salvo a observação
+  que contém o limiar; massa empatada ⇒ fatias exatas) e `tests/test_heaping_tabelas.py`
+  (geradores sobre sintético com 20% em R$ 3.000: captura = 10/25 exatos; composições somam 100).
+
+### 4. Carteira assinada = só CLT (R19/E8) — **no código; vale na regeneração da Onda 1**
+
+- **O quê.** Na `CRIAR_BASE`, `tem_carteira_assinada` = TRUE só para VD4009 01/03/05, FALSE para
+  02/04/06 e NULL para o resto. Até aqui o 07 (militar/estatutário) era TRUE. Nova coluna
+  `vinculo_trabalho` (CLT, Sem carteira, Estatutário/militar, Empregador, Conta própria, Familiar
+  auxiliar; códigos conferidos no dicionário do IBGE). `gerar_informalidade` mantém
+  `pct_com_carteira`, agora CLT ÷ empregados 01–06, e ganha `pop_estatutario_militar` e
+  `pct_estatutario_militar` (07 ÷ empregados 01–07). `transicao_informal_formal` passa a usar
+  `vinculo_trabalho IN ('CLT', 'Estatutário/militar')` no evento de t1, o que mantém o resultado
+  idêntico ao atual.
+- **Por quê.** "Com carteira" incluía quem não tem carteira (estatutário), e o número publicado
+  (75,4/66,5/53,2) não era o da CLT.
+- **Impacto previsto** (prévia sem gravar parquet, Brasil, 14+): em 2026T2, Branca/Negra/Indígena
+  passam de **75,4/66,5/53,1%** para **71,7/63,0/48,3%** (estatutário/militar: 13,0/9,7/9,3% dos
+  empregados). Na série 2012–2026 a queda média é de −3,56 p.p. (Branca; −2,98 a −4,08), −3,92 p.p.
+  (Negra; −3,52 a −4,93) e −5,04 p.p. (Indígena; −3,21 a −8,57). A diferença Branca–Negra em
+  2026T2 vai de 8,9 para 8,7 p.p. A definição antiga recalculada reproduz o parquet publicado.
+- Teste: `tests/test_carteira.py`.
+
+### 5. Textos, rótulos e registro da extração — **sem mudar números**
+
+- **E7/E8** (`ANALISE_FASE1.md`): o desalento passa a ser descrito com os valores do parquet e o
+  denominador explícito (2,0/4,5/4,1% para Branca/Negra/Indígena, 2026T2). A carteira passa a
+  75,4/66,5/53,1%, com o denominador explícito e uma nota sobre a nova definição (item 4).
+- **E9** (`ANALISE_CAUSAL_COTAS.md` §2–3): reescrito como exploratório, com estado **Bloqueado até
+  o B4b**. Cada p citado vem com o p ajustado (`did_p_valor_bh`) na mesma frase. O texto diz agora
+  que são 40 testes de DiD (5 + 35) e que 0 sobrevivem ao FDR, e inclui os dois p < 0,05 de
+  participação no Centro-Oeste (Negra p = 0,021 e Parda p = 0,011; p_BH = 0,348). Sai o argumento
+  "diluído ⇒ efeito real maior".
+- **E10/C8** (`ANALISE_RACA_GENERO.md`): a fórmula fica `gap = raça + gênero + interação`, a base
+  do % é a renda do Homem Branco e a tabela foi conferida contra o parquet regenerado no item 1. A
+  "maior rotatividade" passa a ser hipótese explícita.
+- **E11**: a docstring de `gerar_alfabetizacao`, o `LIMITACOES…` e o `ANALISE_FASE1.md` diziam que
+  `V3014` era frequência escolar. `V3014` é "concluiu o curso que frequentou"; frequência escolar
+  é `V3002`.
+- **C6**: "proxy de discriminação" sai das docstrings de `decomposicao_oaxaca_blinder` e
+  `gerar_oaxaca_blinder_temporal` e do subtítulo em `graficos_aprofundamentos.py`. O resíduo passa
+  a ser "parte não associada às covariáveis incluídas".
+- **C7** (`ANALISE_FASE1.md`): faixas pelo mínimo e máximo dos parquets. Regional: Sudeste
+  61,6–85,9%, Sul 40,1–54,0%. Setor: Público 42,0–59,7%, Privado 54,6–68,0%; o Público fica abaixo
+  do Privado nos 58 trimestres.
+- **R18**: o rótulo `rm_sp` passa a "RM São Paulo - Demais municípios". Nenhum gráfico filtra por
+  ele; os parquets mantêm o rótulo antigo até a regeneração da Onda 1.
+- **R13**: os rótulos de gráfico (`graficos_fase1.py`, `graficos_arvore.py`) e os textos dizem
+  "média móvel centrada de 4 trimestres". Vale nos próximos gráficos; `docs/arvore_manifest.json`
+  é gerado junto com as imagens e só muda com elas. O ritmo de convergência usa média móvel
+  para trás (não centrada), e o `ANALISE_RACA_GENERO.md` dizia que era "o mesmo padrão" dos
+  gráficos: corrigido.
+- **R15**: os dois extratores fazem HEAD no zip e gravam `_fonte.json` na partição (nome do zip,
+  URL, `Last-Modified`, tamanho), e o `_resumo_extracao.csv` passa a ter essas colunas. Nada foi
+  baixado; as partições atuais não têm o arquivo (colunas vazias até a próxima extração).
+
+---
+
 ## 13/10/2026 — Etapa 2, Fase 2 (branch `auditoria/fase2-infra`)
 
 ### População e renda de referência em código (Bloco F) — **implementado, NÃO regenerado**
