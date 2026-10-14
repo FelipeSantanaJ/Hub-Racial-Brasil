@@ -52,7 +52,7 @@ técnicas (R11, F4, F6, imagens vazias da árvore) nas pendências da Onda 1 (`o
 | ID | Estado | Onde | Por quê |
 |---|---|---|---|
 | B1 | Já existe | `b1_tendencia_hiato`, `b1_degraus_hiato`; `ritmo_convergencia_hiatos` e `quebra_estrutural` refeitos com EP EWC (Onda 2) | — |
-| B2 | Já existe | `b2_decomposicao_tempo` (reclassificação Preta/Parda + JMP de médias), `b2_composicao_racial_coortes`. RIF no tempo fica no D1.3 (Onda 3) | — |
+| B2 | Já existe | `b2_decomposicao_tempo` (reclassificação Preta/Parda + JMP de médias), `b2_composicao_racial_coortes`. RIF por janela no D1.3 (Onda 3) | — |
 | B3 | Já existe | `b3_hiato_quantis_serie`, `b3_tendencia_quantis`, `b3_quantis_janelas` | — |
 | B4 | Já existe | `b4_mesma_idade_coortes`, `b4_celulas_idade_ano`, `b4_apc` (restrição de Deaton-Paxson declarada; sensibilidade AC) | — |
 | B5 | Já existe | `b5_ciclo_tendencia`, `b5_taxa_desocupacao` | — |
@@ -96,34 +96,34 @@ técnicas (R11, F4, F6, imagens vazias da árvore) nas pendências da Onda 1 (`o
 
 | ID | Estado | Onde | Por quê |
 |---|---|---|---|
-| D1.1 | Existe, precisa refazer | `decomposicao_oaxaca_blinder*` (3 especificações: idade, instrução, ocupação), `decomposicao_hiato_ocupacional` | `pop`, `esp` (R5: faltam região, sexo, horas, informalidade, setor, posição) |
-| D1.2 | Novo | Gelbach/Shapley: nada | — |
-| D1.3 | Existe, precisa refazer | RIF por quantil (gráfico `oaxaca_blinder_quantis.png`; função `rif_quantil`) | `esp` (R4: banda/heaping) |
-| D1.4 | Novo | Oster/Cinelli-Hazlett: nada | — |
-| D2.1 | Existe, precisa refazer | Contribuição de instrução nas especificações do OB | `pop`, `esp` |
-| D2.2 | Existe, precisa refazer | `renda_por_escolaridade`, `hiato_escolaridade_*` (hiato por nível); sem interação raça × nível em regressão | `pop`, `esp` |
-| D2.3 | Novo | RIF por nível: nada | — |
-| D2.4 | Existe, precisa refazer | `sobrequalificacao` (Superior completo em ocupação de menor nível) | `pop`; NÃO VERIFICADO o índice usado |
+| D1.1 | Já existe (Onda 3) | `d1_aninhada` (E0–E8: idade, sexo, instrução, território, horas, vínculo, ocupação, atividade; janelas + série anual), `d1_ob_reimers`. As antigas `decomposicao_oaxaca_blinder*` e `decomposicao_hiato_ocupacional` ficam para comparação | — |
+| D1.2 | Já existe (Onda 3) | `d1_contribuicao_blocos` (Gelbach com EP que inclui a incerteza de β; Shapley sobre 8 blocos), `d1_mudanca_janelas` | — |
+| D1.3 | Já existe (Onda 3) | `d1_rif_ob` (P10–P90, bandas × 0,5/1/2, bootstrap Rao-Wu na banda × 1) | — |
+| D1.4 | Já existe (Onda 3) | `d1_sensibilidade_omitidas` (Oster; Cinelli-Hazlett RV e limites por bloco) | — |
+| D2.1 | Já existe (Onda 3) | Contribuição da instrução no D1 | — |
+| D2.2 | Já existe (Onda 3) | `d2_hiato_por_nivel` (hiato bruto e condicional por nível de VD3004; BH) | — |
+| D2.3 | Já existe (Onda 3) | `d2_quantis_nivel` (P10/P50/P90 dentro do nível; bootstrap Rao-Wu) | — |
+| D2.4 | Já existe (Onda 3) | `d2_sobrequalificacao` (três definições; Gelbach entre diplomados). A antiga `sobrequalificacao` usa só o grupo 09 | — |
 | D2.5 | — | Remete ao Bloco E | — |
-| D3.1 | Existe, precisa refazer | Contribuição de ocupação no OB | `pop`, `esp` |
-| D3.2 | Existe, precisa refazer | `segregacao_ocupacional*`, `segregacao_setorial*` (Duncan); falta índice de entropia | `met` |
-| D3.3 | Novo | OB com FE de CBO 4 dígitos: `V4010` extraída na v2, nada calculado | — |
-| D3.4 | Existe, precisa refazer | OB tem especificação com e sem ocupação; falta o enquadramento de mediador por escrito | `esp` |
+| D3.1 | Já existe (Onda 3) | Contribuição da ocupação no D1 | — |
+| D3.2 | Já existe (Onda 3) | `d3_segregacao` (Duncan e Theil H; grupamento e CBO-4; benchmark aleatório; série anual) | — |
+| D3.3 | Já existe (Onda 3) | `d3_hiato_dentro_ocupacao` (efeitos fixos de CBO de 4 dígitos) | — |
+| D3.4 | Já existe (Onda 3) | Fichas D1 e D3 (E6 × E8 × CBO-4; texto sobre mediação) | — |
 | D3.5 | Bloqueado por dado | Dentro da firma exige RAIS identificada (sem vínculo institucional). Só literatura | — |
-| D4.1 | Novo | Decomposição entre/dentro de região: nada | — |
-| D4.2 | Existe, precisa refazer | `hiato_regional` (região), `hiato_regional_pretaparda` (UF, Preta × Parda). Falta Branca × Negra por UF | `pop`, `met` |
-| D4.3 | Existe, precisa refazer | `hiato_capital_interior`; urbano/rural (`V1022`) na base, sem tabela | `pop` |
+| D4.1 | Já existe (Onda 3) | `d4_territorio` (Kitagawa entre/dentro de UF) | — |
+| D4.2 | Já existe (Onda 3) | `d4_territorio` (Branca × Negra por UF, bruto e condicional, BH entre as 27; correlação com % negra) | — |
+| D4.3 | Já existe (Onda 3) | `d4_territorio` (tipo de área V1023 e situação V1022, com e sem território) | — |
 | D4.4 | Bloqueado por dado | Segregação residencial exige Censo 2022 (GovBR) | — |
-| D5.1 | Existe, precisa refazer | `horas_trabalhadas`; horas do trabalho principal (`V4039`) só na v2 | `pop`, `met` |
-| D5.2 | Existe, precisa refazer | `hiato_formal_informal`, `hiato_setor_publico_privado`, `informalidade` | `pop` |
-| D5.3 | Novo | Logit multinomial/DFL: nada | — |
+| D5.1 | Já existe | Contribuição das horas no D1; S1.4 (renda por hora) | — |
+| D5.2 | Já existe (Onda 3) | Contribuição do vínculo no D1; `hiato_formal_informal`, `hiato_setor_publico_privado`, `informalidade` | — |
+| D5.3 | Já existe (Onda 3) | `d5_posicao_ocupacao` (MQO linear por posição e previdência, bruto e condicional; por nível) | DFL não feito (`met`) |
 | D5.4 | Bloqueado por dado (parcial) | Literatura + RAIS/CAGED públicos; RAIS identificada fora de alcance | — |
-| D6.1 | Existe, precisa refazer | `renda_por_geracao`, `renda_completa_geracao` | `pop` |
-| D6.2 | Existe, precisa refazer | `hiato_faixa_etaria_historico_*`, `hiato_por_geracao` | `pop` |
-| D7.1 | Novo | Ver C4–C6 | — |
-| D8.1 | Novo | Faixa do resíduo (Oster): nada | — |
-| D8.2 | Bloqueado por dado | RAIS identificada; só literatura de auditoria | — |
-| D8.3 | Novo | Texto de conclusão do bloco | — |
+| D6.1 | Já existe (Onda 3) | `d6_hiato_idade` (perfil idade-renda por raça) | — |
+| D6.2 | Já existe (Onda 3) | `d6_hiato_idade` (hiato bruto e condicional por faixa; 50–59 − 25–29); coortes no B4 | — |
+| D7.1 | Já existe (Onda 2) | C4–C6 (maternidade, chefia, estado conjugal) | — |
+| D8.1 | Já existe (Onda 3) | Ficha D8 (faixa do resíduo a partir do D1, D2, D3, D4) | — |
+| D8.2 | Bloqueado por dado | RAIS identificada; literatura de auditoria NÃO VERIFICADA nesta onda | — |
+| D8.3 | Já existe (Onda 3) | Ficha D8 (texto de conclusão do bloco) | — |
 
 ## Bloco E — Educação
 

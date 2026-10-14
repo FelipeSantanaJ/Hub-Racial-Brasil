@@ -31,6 +31,13 @@ de publicação. Estudos entram aqui quando a ficha é criada, não quando o res
 | C5 | Trabalho doméstico remunerado e o hiato das mulheres | D/C | 2 | Aprovado com ressalvas | [C5/ficha.md](C5/ficha.md) | Onda 2 |
 | C4 | Penalidade da maternidade por raça (filho 0–5 no domicílio) | C/D | 2 | Aprovado com ressalvas | [C4/ficha.md](C4/ficha.md) | Onda 2 |
 | C6 | Estado conjugal e chefia: renda e oferta de trabalho por raça | C | 2 | Aprovado com ressalvas | [C6/ficha.md](C6/ficha.md) | Onda 2 |
+| D1 | Quanto do hiato está associado a diferenças observáveis (aninhadas, Gelbach, Shapley, RIF-OB, sensibilidade) | C | 3 | Aprovado com ressalvas (proposto) | [D1/ficha.md](D1/ficha.md) | Onda 3 |
+| D2 | Mesma educação, renda diferente? (hiato por nível, quantis, sobrequalificação) | C/D | 3 | Aprovado com ressalvas (proposto) | [D2/ficha.md](D2/ficha.md) | Onda 3 |
+| D3 | Ocupação: segregação e hiato dentro da mesma CBO | D/C | 3 | Aprovado com ressalvas (proposto) | [D3/ficha.md](D3/ficha.md) | Onda 3 |
+| D4 | Território: composição entre UFs, hiato por UF e tipo de área | C/D | 3 | Aprovado com ressalvas (proposto) | [D4/ficha.md](D4/ficha.md) | Onda 3 |
+| D5 | Posição na ocupação e informalidade com a mesma instrução | C | 3 | Aprovado com ressalvas (proposto) | [D5/ficha.md](D5/ficha.md) | Onda 3 |
+| D6 | Idade: o hiato cresce ao longo da vida? | D/C | 3 | Aprovado com ressalvas (proposto) | [D6/ficha.md](D6/ficha.md) | Onda 3 |
+| D8 | O resíduo: faixa plausível e o que concluir | C/M | 3 | Aprovado com ressalvas (proposto) | [D8/ficha.md](D8/ficha.md) | Onda 3 |
 
 O que já existe no Hub e a qual pergunta corresponde está em
 [`docs/auditoria/mapa_cobertura_plano.md`](../auditoria/mapa_cobertura_plano.md).
