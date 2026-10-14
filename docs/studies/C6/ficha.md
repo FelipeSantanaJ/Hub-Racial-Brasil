@@ -5,8 +5,8 @@
 | ID no plano | `C6` (`docs/PLANO_DE_ANALISE.md`, Bloco C) |
 | Onda | 2 (feito depois do ponto de parada, por decisão do Felipe em 13/10/2026) |
 | Responsável | Felipe Santana (execução: Claude Code) |
-| Criada em / atualizada em | 2026-10-13 / 2026-10-13 |
-| Estado de publicação | **Aprovado com ressalvas** (proposto) |
+| Criada em / atualizada em | 2026-10-13 / 2026-10-14 |
+| Estado de publicação | **Aprovado com ressalvas** (aprovado pelo Felipe em 14/10/2026) |
 | PR | `onda2/b-c` |
 
 > Seções 1–9 escritas **antes** de rodar (13/10/2026).

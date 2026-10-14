@@ -7,6 +7,9 @@ calculá-lo: data, o quê, por quê, impacto. Mais recente primeiro.
 
 ## 13/10/2026 — Onda 2: Blocos B e C (branch `onda2/b-c`)
 
+- **Decisões do Felipe (14/10/2026):** ficha C6 aprovada com ressalvas; PRs #8 e #9 liberados para mesclagem; Onda 3
+  autorizada. Nenhum número muda.
+
 - **Decisões do Felipe (13/10/2026, depois do PR #9):** fichas B1–B6 e C1–C5 aprovadas com ressalvas; EWC aceito;
   a leitura "degrau em 2022, sem tendência contínua" passa a ser a principal do Hub (README e deck); C6 feito
   (ficha proposta); gráficos das Ondas 1 e 2 no deck publicado (seção "Leitura principal", 18 slides; 635 no total).
