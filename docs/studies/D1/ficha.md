@@ -6,7 +6,7 @@
 | Onda | 3 |
 | Responsável | Felipe Santana (execução: Claude Code) |
 | Criada em / atualizada em | 2026-10-14 / 2026-10-14 |
-| Estado de publicação | **Proposto** |
+| Estado de publicação | **Aprovado com ressalvas** (proposto; aguarda o Felipe) |
 | PR | `onda3/d` |
 
 > Seções 1–9 escritas **antes** de rodar (14/10/2026). Substitui, como referência do Hub, as tabelas
@@ -110,3 +110,132 @@ PNAD Contínua trimestral v2 (`data/raw/pnadc_extraido_v2`): `V2009`, `V2007`, `
   `VD3004` de forma conhecida (a confirmar).
 - **Reclassificação racial** (B2): as janelas comparam composições raciais diferentes; o B2 mostrou efeito pequeno na
   média.
+
+## 10. Resultados
+
+Tabelas: `d1_aninhada`, `d1_contribuicao_blocos`, `d1_mudanca_janelas`, `d1_ob_reimers`, `d1_rif_ob`,
+`d1_sensibilidade_omitidas`, `d1_extensiva_p1` (`src/processing/bloco_d.py`). Log-pontos (lp) de ln renda; IC 95%.
+
+**Correção feita antes de ler os resultados.** Na primeira rodada, Gelbach e Shapley de vínculo e atividade
+explodiram (±2,5 lp, com sinais opostos): a dummy "serviços domésticos" da atividade (`VD4010` = 11) é idêntica a
+"doméstico" da posição (`VD4009` 03/04). O coeficiente total não muda, mas a divisão entre os dois blocos fica
+indeterminada. `montar_x` passou a retirar toda coluna que é combinação linear das anteriores (na ordem dos blocos);
+em todas as amostras só saiu `atividade:11` — o trabalho doméstico fica no bloco vínculo.
+
+**D1.1 — especificações aninhadas, Branca × Negra**
+
+| Especificação | 2012 | 2025T3–2026T2 |
+|---|---|---|
+| E0 hiato bruto | 0,464 (0,450–0,478) | 0,427 (0,415–0,439) |
+| E3 + idade, sexo, instrução | 0,242 | 0,237 |
+| E4 + território | 0,133 | 0,133 |
+| E6 + horas, vínculo | 0,114 | 0,113 |
+| **E8 completa** | **0,101 (0,096–0,106)** | **0,094 (0,089–0,100)** |
+| Parte associada às covariáveis (E8) | 78,2% | 77,9% |
+
+Branca × Indígena (n = 4.299 indígenas na janela recente): bruto 0,481 (0,403–0,559) → E8 0,125 (0,077–0,174).
+
+**D1.2 — contribuição de cada bloco (Gelbach; Shapley entre colchetes), Branca × Negra, 2025T3–2026T2**
+
+| Bloco | lp (IC 95%) | % do bruto | Shapley | 2012 (Gelbach) |
+|---|---|---|---|---|
+| Instrução | 0,089 (0,086–0,093) | 20,9% | [0,090] | 0,129 (27,7%) |
+| Território | 0,084 (0,080–0,087) | 19,6% | [0,087] | 0,100 (21,5%) |
+| Ocupação (grupamento) | 0,082 (0,078–0,085) | 19,1% | [0,076] | 0,063 (13,6%) |
+| Vínculo (posição, previdência) | 0,059 (0,057–0,062) | 13,8% | [0,052] | 0,061 (13,1%) |
+| Horas | 0,020 (0,018–0,022) | 4,6% | [0,011] | 0,014 |
+| Idade | 0,008 | 1,8% | [0,005] | 0,008 |
+| Sexo | −0,008 | −1,9% | [−0,003] | −0,011 |
+| Atividade | −0,000 | 0,0% | [0,015] | 0,001 |
+| **Parte não associada (E8)** | **0,094** | **22,1%** | | 0,101 |
+
+Gelbach e Shapley dão a mesma ordem; somam exatamente bruto − E8. Indígena, janela recente (Gelbach): território
+0,087, vínculo 0,081, instrução 0,079, ocupação 0,066, horas 0,036 (IC de ±0,02 a 0,03).
+
+**Mudança 2012 → 2025T3–2026T2** (EP com a covariância das UPAs comuns às duas janelas): hiato bruto −0,037
+(−0,056 a −0,017); contribuição da instrução **−0,039 (−0,046 a −0,032)**; território −0,016 (−0,022 a −0,009);
+ocupação **+0,019 (+0,014 a +0,024)**; horas +0,006; vínculo −0,002 (n.s.); **E8 −0,007 (−0,015 a +0,001)**.
+Na série anual (2º trimestres), a contribuição da instrução cai de forma contínua (0,130 em 2012 → 0,090 em 2021 e
+estável depois), enquanto o hiato bruto fica parado até 2021 (0,46–0,47) e cai em degrau em 2022 (0,446 → 0,423,
+como no B1); a E8 oscila entre 0,089 e 0,103 sem tendência.
+
+**D1.4 / D8.1 — sensibilidade a variáveis omitidas** (Branca × Negra, E8; janela recente, 2012 entre parênteses)
+
+| Medida | Valor |
+|---|---|
+| Oster: δ que zeraria o coeficiente (R²max = 1,3 R̃ = 0,74) | **0,85** (0,82) |
+| Oster: δ que zeraria (R²max = 1) | 0,33 (0,34) |
+| Cinelli-Hazlett: RV (q = 1) | 7,0% (7,3%) |
+| Omitida 1× tão forte quanto instrução → coeficiente | 0,058 (0,046) |
+| Omitida 2× instrução | 0,022 (−0,011) |
+| Omitida 3× instrução | −0,015 (−0,069) |
+| Omitida 1× tão forte quanto território | −0,051 (cruza zero) |
+
+(Coeficiente expresso como hiato Branca − Negra; negativo = o hiato condicional desaparece.)
+
+**Lado P4 — diferença de Pr(estar em P1) entre adultos 18+, Branca − Negra (p.p.), janela recente:** bruta 2,1
+(1,7–2,5); com idade e sexo 5,7; + instrução 1,5 (1,2–1,8); + território **−1,1 (−1,4 a −0,8)**. Gelbach: instrução
++3,3, território +3,0, idade −2,7 (pessoas negras são mais jovens, idades de maior ocupação), sexo −0,4. Em 2012:
+bruta 2,5; completa −1,1.
+
+**Leitura das hipóteses**
+
+- **H1 (instrução é o maior bloco):** confirmada para Branca × Negra nas duas janelas, mas na recente por margem
+  pequena — instrução − território 0,006 (0,001–0,010); instrução − ocupação 0,008 (0,004–0,011). Na prática,
+  instrução, território e ocupação pesam quase igual (≈ 20% do hiato cada). Para Branca × Indígena: **não
+  distinguível** (instrução − território −0,008; −0,037 a 0,020).
+- **H2 (alocação no mercado ≥ instrução):** refutada em 2012 (vínculo + ocupação + atividade − instrução = −0,005;
+  −0,009 a −0,000) e **confirmada em 2025–26** (+0,051; 0,047 a 0,055): o peso relativo passou da instrução para a
+  ocupação.
+- **H3 (território ≥ 15%):** confirmada (19,6%; 21,5% em 2012).
+- **H4 (a queda veio das características, não da parte não associada):** confirmada pelo critério pré-registrado (E8
+  não muda; a contribuição da instrução cai). Mas a série mostra um descompasso: a convergência educacional foi
+  gradual desde 2012 e não reduziu o hiato bruto até 2021; o degrau de 2022 aparece sobretudo em vínculo, ocupação e
+  horas (recomposição do mercado depois da pandemia) — leitura descritiva, sem IC ano a ano.
+- **H6 (fragilidade a omitidas):** **confirmada** pelo critério fixado: δ de Oster < 1. Uma variável omitida tão
+  forte quanto o território eliminaria a parte não associada; uma tão forte quanto a instrução a reduziria de 0,094
+  para 0,058. Ou seja: a parte não associada (~9 lp, ~10% de renda) **não é robusta** a omitidas da mesma ordem das
+  observadas — nem para concluir que existe, nem que é zero.
+- **H5 (teto de vidro × piso pegajoso):** **nenhuma das duas é afirmada** — a ordem entre P90 e P10 da parte não
+  associada inverte com a banda do kernel (critério pré-registrado: estável nas três bandas). O que é estável: a parte
+  não associada no P90 é maior que na mediana nas duas janelas; na janela recente também no P10 (forma de "U").
+
+**OB de dois termos (Reimers, E8)** — Branca × Negra: parte não associada 0,096 (0,090–0,102) na janela recente e
+0,106 (0,100–0,111) em 2012, coerente com o coeficiente da E8 (0,094 e 0,101). Branca × Indígena: 0,148
+(0,084–0,212) e 0,098 (0,026–0,169).
+
+**D1.3 — RIF-OB por quantil, Branca × Negra** (lp; banda de Silverman × 0,5 / × 1 / × 2; IC do bootstrap só na
+banda × 1)
+
+| Quantil | Hiato bruto | Parte não associada 2025T3–2026T2 | Parte não associada 2012 |
+|---|---|---|---|
+| P10 | 0,724 (2012: 0,642) | 0,45 / **0,41** / 0,40 | −0,39 / −0,14 / 0,21 (instável) |
+| P25 | 0,135 (2012: 0,147) | −0,07 / **−0,05** / −0,02 | −0,05 / −0,04 / −0,04 |
+| P50 | 0,376 (2012: 0,333) | 0,11 / **0,14** / 0,11 | −0,03 / 0,01 / 0,03 |
+| P75 | 0,496 (2012: 0,511) | 0,37 / **0,30** / 0,22 | 0,28 / 0,24 / 0,16 |
+| P90 | 0,669 (2012: 0,671) | 0,51 / **0,44** / 0,34 | 0,28 / 0,29 / 0,24 |
+
+**Ressalva forte (R4):** o P25 dos dois grupos cai no salário mínimo — o hiato bruto ali é pequeno porque o piso legal
+comprime a distribuição, não porque haja igualdade. Em massas de probabilidade a densidade estimada depende da banda
+e o bootstrap de quantis fica preso aos valores redondos: os IC da banda × 1 (ex.: P90 0,436–0,467) **subestimam** a
+incerteza e não devem ser citados sozinhos. A conclusão por quantil é só a que sobrevive às três bandas.
+
+## 11. Afirmações permitidas
+
+- "Entre ocupados com renda, cerca de 78% da diferença de renda (em log) entre pessoas brancas e negras está associada
+  a diferenças de instrução, território, ocupação, vínculo e horas (2025–26). Instrução, território e ocupação pesam
+  cerca de um quinto cada."
+- "Desde 2012, a diferença de instrução passou a responder por menos do hiato (de 28% para 21%) e a de ocupação por
+  mais (de 14% para 19%)."
+- "Sobra uma parte de cerca de 9 log-pontos (≈ 10% de renda) não associada às covariáveis incluídas. Ela não é
+  robusta: uma variável omitida tão associada à raça e à renda quanto o território a eliminaria."
+- "Entre todos os adultos, a menor ocupação de pessoas negras (2 p.p.) desaparece — e se inverte — quando se comparam
+  pessoas com a mesma idade, sexo, instrução e lugar."
+
+## 12. Afirmações proibidas
+
+- "X% do hiato é discriminação" ou "os 9 log-pontos restantes são discriminação" (R5; D8.3).
+- "A educação explica o hiato" no sentido causal; "a ocupação explica" sem dizer que é mediadora (D3.4).
+- "A desigualdade racial é maior no topo" (teto de vidro) ou "na base" (piso pegajoso) como resultado do D1.3.
+- Citar os IC do RIF-OB sem as três bandas e a ressalva de heaping.
+- Comparar o tamanho da parte não associada entre Negra e Indígena (IC do Indígena ≈ ±0,06).

@@ -126,6 +126,18 @@ CATALOGO: list[tuple[str, str, str]] = [
     (r"^(c6_conjugal_chefia|c6_hiato_condicional)$", "Pessoas de 25–59 anos (Branca, Negra); chefia (V2005 = 01) e "
      "casal (cônjuge no domicílio); janelas 2012 e 2025T3–2026T2", T),
     (r"^(c5_trabalho_domestico|c5_tendencia)$", "Mulheres 18+ (P1 e todas); trabalho doméstico = VD4009 03/04", T),
+    # --- Onda 3: Bloco D (src/processing/bloco_d.py) ---
+    (r"^(d1_aninhada|d1_contribuicao_blocos|d1_mudanca_janelas|d1_ob_reimers|d1_rif_ob)$",
+     P1 + "; Branca, Negra (Preta+Parda) e Indígena; com horas habituais (V4039) > 0; ln da renda real", T),
+    (r"^d1_sensibilidade_omitidas$", P1 + "; Branca e Negra; especificação completa (E8)", T),
+    (r"^d1_extensiva_p1$", "Pessoas 18+ (Branca, Negra, Indígena); desfecho = estar em P1 (" + pop.DESCRICAO_POPULACAO_REFERENCIA + ")", T),
+    (r"^(d2_hiato_por_nivel|d2_quantis_nivel|d2_sobrequalificacao)$",
+     P1 + "; Branca, Negra e Indígena (quantis: Branca × Negra); sobrequalificação = Superior completo (VD3004 = 7)", T),
+    (r"^d3_segregacao$", P1 + "; Branca × Negra; ocupação por grupamento (VD4011) e CBO 4 dígitos (V4010, sem ignorados)", T),
+    (r"^d3_hiato_dentro_ocupacao$", P1 + "; Branca, Negra e Indígena; controles da E8 do D1 e efeitos fixos de CBO 4 dígitos", T),
+    (r"^d4_territorio$", P1 + "; Branca × Negra; por UF, tipo de área (V1023) e situação (V1022)", T),
+    (r"^d5_posicao_ocupacao$", P1 + "; Branca, Negra e Indígena; posição (VD4009) e previdência (VD4012)", T),
+    (r"^d6_hiato_idade$", P1 + "; Branca, Negra e Indígena; faixas etárias de 5 anos", T),
     (r"^habitacao_.*$", "Moradores (pessoas) da PNAD Contínua anual, Visita 1, tema Habitação: 2016–2019 e 2022–2025",
      INSUMO_ANUAL_VISITA1_V1),
     (r"^deflator_ibge$", "Não se aplica (deflatores oficiais do IBGE por UF × trimestre)", "ibge_deflator"),
