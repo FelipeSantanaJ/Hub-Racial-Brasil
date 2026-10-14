@@ -112,7 +112,7 @@ gravam `peso_<ind>` (Σ pesos de quem entra no indicador), o peso certo para com
 
 `SALARIO_MINIMO_NOMINAL[2026]` = **R$ 1.621** desde 13/10/2026 (antes, R$ 1.630, "valor anunciado", nunca
 verificado). Evidência interna: em 2026T2, 12,7% das pessoas com renda do trabalho principal declaram exatamente
-R$ 1.621, contra 0,06% em R$ 1.630 (o mesmo padrão de R$ 1.518 em 2025). Fonte oficial: **a confirmar**. Afeta
+R$ 1.621, contra 0,06% em R$ 1.630 (o mesmo padrão de R$ 1.518 em 2025). Valor **confirmado pelo Felipe em 13/10/2026**. Afeta
 `faixas_salario_minimo` (2026: até −0,4 p.p.).
 
 ## Rupturas e mudanças conhecidas que afetam comparabilidade histórica

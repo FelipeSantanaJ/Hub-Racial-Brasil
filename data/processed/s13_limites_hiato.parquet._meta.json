@@ -1,0 +1,21 @@
+{
+  "esquema": "hub-racial-meta/1",
+  "arquivo": "s13_limites_hiato.parquet",
+  "n_linhas": 48,
+  "gerado_em": "2026-10-13T17:47:15.882993+00:00",
+  "codigo": {
+    "commit": "2219b86ef613f5beb3b9df026d98c7f4da5670d0-modificado",
+    "modulo": "__main__"
+  },
+  "insumos": {
+    "chave": "trimestral_v2",
+    "descricao": "PNAD Contínua trimestral, extrato v2 + deflator IBGE",
+    "hash": "9b64f579fa63981e9237190166d333a9ac546041a4df260d2c67dabf49f1ceda",
+    "n_arquivos": 228
+  },
+  "se_metodo": "bootstrap_rao_wu_estrato_upa_200",
+  "populacao": "Pessoas 18+ (Ignorado fora); renda potencial de quem está fora de P1 limitada por suposições explícitas; renda observada = Rendimento mensal habitual do trabalho principal (VD4016), deflacionado pelo deflator habitual do IBGE",
+  "periodo": null,
+  "ic": "Imbens-Manski sobre os limites (a confirmar: Imbens & Manski 2004)",
+  "nota": "Renda real VD4016 (deflator habitual); 4 visitas empilhadas por janela; y_max = P99 nacional de P1"
+}

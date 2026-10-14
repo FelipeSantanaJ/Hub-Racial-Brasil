@@ -226,6 +226,51 @@ def gerar_heaping(con) -> pd.DataFrame:
     return df
 
 
+FAIXAS_NOMINAIS = [(0, 1000, "a: < R$ 1.000"), (1000, 2000, "b: R$ 1.000–1.999"), (2000, 5000, "c: R$ 2.000–4.999"),
+                   (5000, 10000, "d: R$ 5.000–9.999"), (10000, None, "e: R$ 10.000+")]
+
+
+def gerar_heaping_faixas(con) -> pd.DataFrame:
+    """F4 (pendência): o % de rendas múltiplas de R$ 1.000 dobrou de 2012 a 2026. Esta tabela separa
+    composição (mais gente em faixas nominais altas, onde o arredondamento cai em milhares) de
+    comportamento (arredondar mais dentro da mesma faixa): % em cada faixa NOMINAL fixa e, dentro
+    dela, % múltiplo de 1.000, de 100 e arredondado a 1 ou 2 algarismos significativos.
+    2º trimestres; Branca, Negra (Preta+Parda) e Total."""
+    casos = " ".join(f"WHEN m.VD4016 >= {lo}" + (f" AND m.VD4016 < {hi}" if hi else "") + f" THEN '{r}'"
+                     for lo, hi, r in FAIXAS_NOMINAIS)
+    sig = lambda k: (f"(m.VD4016 / POWER(10, FLOOR(LOG10(m.VD4016)) - {k}) "  # noqa: E731
+                     f"= ROUND(m.VD4016 / POWER(10, FLOOR(LOG10(m.VD4016)) - {k})))")
+    df = con.execute(f"""
+        WITH b AS (
+          SELECT m.ano, CASE WHEN m.V2010 = '1' THEN 'Branca' WHEN m.V2010 IN ('2','4') THEN 'Negra' END AS raca,
+                 CASE {casos} END AS faixa_nominal, m.V1028 AS w, m.VD4016 % 1000 = 0 AS m1000,
+                 m.VD4016 % 100 = 0 AS m100, {sig(0)} AS sig1, {sig(1)} AS sig2
+          FROM read_parquet('{PARQUET_GLOB}', hive_partitioning = 1) m
+          WHERE m.trimestre = 2 AND {pop.REFERENCIA.sql('m')} AND m.V2010 IN ('1','2','4')),
+        g AS (SELECT * FROM b UNION ALL SELECT ano, 'Total', faixa_nominal, w, m1000, m100, sig1, sig2 FROM b)
+        SELECT ano, raca, faixa_nominal, COUNT(*) AS n,
+               100 * SUM(w) / SUM(SUM(w)) OVER (PARTITION BY ano, raca) AS pct_pessoas_na_faixa,
+               100 * COALESCE(SUM(w) FILTER (WHERE m1000), 0) / SUM(w) AS pct_multiplo_1000,
+               100 * COALESCE(SUM(w) FILTER (WHERE m100), 0) / SUM(w) AS pct_multiplo_100,
+               100 * COALESCE(SUM(w) FILTER (WHERE sig1), 0) / SUM(w) AS pct_1_algarismo_significativo,
+               100 * COALESCE(SUM(w) FILTER (WHERE sig2), 0) / SUM(w) AS pct_ate_2_algarismos_significativos
+        FROM g GROUP BY ano, raca, faixa_nominal ORDER BY 1, 2, 3""").df()
+    salvar_tabela(df, OUTPUT_DIR / "heaping_renda_faixas.parquet",
+                  nota="Renda NOMINAL do trabalho principal; faixas nominais fixas; 2º trimestres")
+    return df
+
+
+def decomposicao_heaping(df: pd.DataFrame, ano0: int, ano1: int, raca: str = "Total") -> dict:
+    """Shift-share do % múltiplo de 1.000 entre dois anos: Σ s_f·r_f, com s = % na faixa, r = %
+    múltiplo de 1.000 na faixa. Composição = Σ (s1 − s0)·r0; comportamento = Σ s1·(r1 − r0)."""
+    x = df[df["raca"] == raca].pivot_table(index="faixa_nominal", columns="ano",
+                                           values=["pct_pessoas_na_faixa", "pct_multiplo_1000"])
+    s0, s1 = x["pct_pessoas_na_faixa"][ano0] / 100, x["pct_pessoas_na_faixa"][ano1] / 100
+    r0, r1 = x["pct_multiplo_1000"][ano0], x["pct_multiplo_1000"][ano1]
+    return {"total_inicial": float((s0 * r0).sum()), "total_final": float((s1 * r1).sum()),
+            "efeito_composicao_pp": float(((s1 - s0) * r0).sum()), "efeito_dentro_da_faixa_pp": float((s1 * (r1 - r0)).sum())}
+
+
 # ----------------------------------------------------------------------------------------- #
 # S0.2: probabilidade de estar em P1, controlando idade, escolaridade, região e sexo
 # ----------------------------------------------------------------------------------------- #
@@ -325,9 +370,9 @@ def gerar_sensibilidade_anual(con) -> pd.DataFrame:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--so", nargs="*", default=None, help="trimestral, anual, composicao, heaping, selecao")
+    parser.add_argument("--so", nargs="*", default=None, help="trimestral, anual, composicao, heaping, heaping_faixas, selecao")
     args = parser.parse_args()
-    fazer = set(args.so or ["trimestral", "anual", "composicao", "heaping", "selecao"])
+    fazer = set(args.so or ["trimestral", "anual", "composicao", "heaping", "heaping_faixas", "selecao"])
     con = duckdb.connect()
     con.execute("PRAGMA disable_progress_bar")
     if "trimestral" in fazer:
@@ -338,6 +383,8 @@ def main() -> None:
         gerar_composicao_racial_declarada(con)
     if "heaping" in fazer:
         gerar_heaping(con)
+    if "heaping_faixas" in fazer:
+        gerar_heaping_faixas(con)
     if "selecao" in fazer:
         gerar_selecao_entrada(con, {"2012": [(2012, t) for t in (1, 2, 3, 4)],
                                     "2025T3-2026T2": [(2025, 3), (2025, 4), (2026, 1), (2026, 2)]})

@@ -58,8 +58,9 @@ significativos (z entre 19,5 e 37,2) — o hiato caiu de 74,2% (2012 T1) para 65
 hiato % é **relativo à renda média Negra** (Branca ganha ~66% a mais; Negra ganha ~60% da
 renda Branca). **População:** ocupados de 18+ com renda habitual do trabalho principal > 0 (desde a
 Onda 1, 13/10/2026); com todos os adultos (não ocupados = 0) o hiato fica maior, sobretudo entre
-mulheres — ver [`docs/studies/S1/ficha.md`](docs/studies/S1/ficha.md). *A banda de IC do hiato % no
-gráfico divide o IC absoluto pela média Negra e ignora a incerteza do denominador (R11, pendente).*
+mulheres — ver [`docs/studies/S1/ficha.md`](docs/studies/S1/ficha.md). A banda de IC do hiato % usa o método
+delta (desde as pendências da Onda 1). Os gráficos de série marcam a recessão de 2015–16, a pandemia (coleta por
+telefone, 2020–21) e a mudança do questionário de educação no 4º trimestre de 2015.
 
 ### O hiato depende de quem você olha (Onda 1)
 
@@ -70,7 +71,15 @@ ganham pessoas brancas. Contando **todos os adultos** (quem não está ocupado e
 mais entre mulheres (+17,5 p.p. em média). Pela **renda do domicílio por pessoa**, todas as idades, o hiato era de
 99% em 2012 e de 82% em 2025, e 29% das pessoas negras viviam abaixo de meio salário mínimo por pessoa (15% das
 brancas). Uma pessoa negra ocupada tem um terço da chance de uma pessoa branca de estar entre os 10% que mais
-ganham. Fichas: [`docs/studies`](docs/studies/INDICE.md) (F, S0, S1, T, A).
+ganham. Fichas: [`docs/studies`](docs/studies/INDICE.md) (F, S0, S1, T, A, e S0.3, S1.3–S1.5, T4).
+
+Quase 9 de cada 10 partes do hiato de renda do trabalho por adulto vêm da **renda por hora**; entre mulheres, 15%
+vêm de estar menos ocupadas com renda ([S1.4](docs/studies/S1.4/ficha.md)). Essa desvantagem de ocupação cresceu na
+recessão de 2015–16, foi máxima em 2017–19 e voltou ao nível de 2012–14 depois de 2022 ([S1.5](docs/studies/S1.5/ficha.md)).
+Sem nenhuma suposição sobre quem não trabalha, nem o sinal do hiato "potencial" é identificado; supondo que essas
+pessoas ganhariam entre o P10 e a média do próprio grupo, ele fica entre 24% e 136% ([S1.3](docs/studies/S1.3/ficha.md)).
+Na renda domiciliar per capita, a chance de uma pessoa negra estar entre os 10% mais ricos é cerca de um quarto da
+de uma pessoa branca, sem mudança desde 2012 ([T4](docs/studies/T4/ficha.md)).
 
 ![Pobreza por raça](docs/img/onda1_t2_pobreza_meio_sm.png)
 
@@ -140,10 +149,11 @@ P58 da distribuição de Branca (pouco acima da mediana), mas no P77 da distribu
 ganha quem está em cada percentil —, os 10% mais pobres entre os brancos ganham R$1.500,
 contra R$766 entre os 10% mais pobres dos negros (2026 T2).
 
-**687 imagens em `docs/img`** (503 da árvore `arv_*` + 184 das demais análises, 5 delas da Onda 1 `onda1_*`; contagem de 13/10/2026, sem as séries de renda 14–17, que ficam fora das análises; a galeria
+**687 imagens em `docs/img`** (500 da árvore `arv_*` + 187 das demais análises, 8 delas da Onda 1 `onda1_*`; contagem de 13/10/2026, sem as séries de renda 14–17, que ficam fora das análises, e sem as 3 células da árvore sem amostra, suprimidas; a galeria
 narrada em `docs/ANALISE_FASE1.md` usa 87 delas). O deck em PPTX
-([docs/Datahub_Racial_Brasil_Fase1.pptx](docs/Datahub_Racial_Brasil_Fase1.pptx), 620
-slides; eram 657 até a Onda 1, que tirou as 37 folhas de renda 14–17) é organizado como uma **árvore cruzada** de renda por raça (Branca /
+([docs/Datahub_Racial_Brasil_Fase1.pptx](docs/Datahub_Racial_Brasil_Fase1.pptx), 617
+slides; eram 657 até a Onda 1, que tirou as 37 folhas de renda 14–17, e 620 até as pendências da Onda 1, que
+suprimiram 3 folhas sem amostra) é organizado como uma **árvore cruzada** de renda por raça (Branca /
 Negra=Preta+Parda / Indígena): 11 itens — Raça; ×Gênero; ×Faixa Etária; ×Geração;
 ×Escolaridade; e os cruzamentos até Raça×Gênero×[Faixa|Geração]×Escolaridade. Cada folha de
 renda traz a série histórica (2012-2026); cada folha de hiato compara Branca vs. Negra e
@@ -220,6 +230,10 @@ python -m src.processing.apresentacao_final       # deck publicado: grava docs/D
                                                   # renomear para docs/Datahub_Racial_Brasil_Fase1.pptx
 # (apresentacao_fase1 gera um deck antigo, em outro formato; NÃO sobrescreve o publicado à toa)
 python -m src.processing.sensibilidade_populacao  # Onda 1: Blocos S e F (sensibilidade P1–P5, composição, heaping)
+python -m src.processing.bloco_t                  # Onda 1: Bloco T (T1–T4, PNAD anual)
+python -m src.processing.bloco_a                  # Onda 1: Bloco A (A2–A7)
+python -m src.processing.bloco_s                  # Onda 1, pendências: S0.3, S1.3, S1.4, S1.5
+python -m src.processing.graficos_onda1           # gráficos dos estudos da Onda 1 (docs/img/onda1_*)
 ```
 
 Testes (rodam sem microdados, com dados sintéticos; também no CI a cada push):

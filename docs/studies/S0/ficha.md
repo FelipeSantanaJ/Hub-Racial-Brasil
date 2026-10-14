@@ -2,11 +2,11 @@
 
 | Campo | Valor |
 |---|---|
-| ID no plano | `S0.1`, `S0.2` (`docs/PLANO_DE_ANALISE.md`, Bloco S). `S0.3` (perfis de quem está fora): **não feito** nesta rodada |
+| ID no plano | `S0.1`, `S0.2` (`docs/PLANO_DE_ANALISE.md`, Bloco S). `S0.3` (perfis de quem está fora): ficha própria em [`S0.3`](../S0.3/ficha.md) |
 | Onda | 1 |
 | Responsável | Felipe Santana (execução: Claude Code) |
 | Criada em / atualizada em | 2026-10-13 / 2026-10-13 |
-| Estado de publicação | **Aprovado com ressalvas** (proposto; aguarda o Ponto de parada da Onda 1) |
+| Estado de publicação | **Aprovado com ressalvas** (aprovado pelo Felipe em 13/10/2026) |
 | PR | Onda 1 (`onda1/regeneracao`) |
 
 ## 1. Pergunta

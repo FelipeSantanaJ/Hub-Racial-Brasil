@@ -1,0 +1,23 @@
+{
+  "esquema": "hub-racial-meta/1",
+  "arquivo": "s14_margens_intensiva_extensiva.parquet",
+  "n_linhas": 232,
+  "gerado_em": "2026-10-13T17:40:37.928768+00:00",
+  "codigo": {
+    "commit": "2219b86ef613f5beb3b9df026d98c7f4da5670d0-modificado",
+    "modulo": "__main__"
+  },
+  "insumos": {
+    "chave": "trimestral_v2",
+    "descricao": "PNAD Contínua trimestral, extrato v2 + deflator IBGE",
+    "hash": "9b64f579fa63981e9237190166d333a9ac546041a4df260d2c67dabf49f1ceda",
+    "n_arquivos": 228
+  },
+  "se_metodo": "linearizacao_taylor_estrato_upa",
+  "populacao": "NÃO DOCUMENTADA (conferir o gerador e acrescentar ao catálogo)",
+  "periodo": {
+    "inicio": "2012T1",
+    "fim": "2026T2"
+  },
+  "nota": "Identidade: ln_renda_por_adulto = ln_pr_p1 + ln_horas + ln_renda_hora (diferença Branca − grupo)"
+}

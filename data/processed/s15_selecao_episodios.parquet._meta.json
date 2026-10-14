@@ -1,0 +1,46 @@
+{
+  "esquema": "hub-racial-meta/1",
+  "arquivo": "s15_selecao_episodios.parquet",
+  "n_linhas": 90,
+  "gerado_em": "2026-10-13T17:51:16.375674+00:00",
+  "codigo": {
+    "commit": "7bae2e2f1579ccec6c27653ff466527366708167-modificado",
+    "modulo": "__main__"
+  },
+  "insumos": {
+    "chave": "trimestral_v2",
+    "descricao": "PNAD Contínua trimestral, extrato v2 + deflator IBGE",
+    "hash": "9b64f579fa63981e9237190166d333a9ac546041a4df260d2c67dabf49f1ceda",
+    "n_arquivos": 228
+  },
+  "se_metodo": "ewc_lazarus_lewis_stock_watson; sensibilidades newey_west e gls_ar1; séries anuais: design-based por ano",
+  "populacao": "Séries do S0.1, S0.2 (refeito por ano) e S1.1; pessoas 18+",
+  "periodo": null,
+  "familia_fdr": [
+    "serie",
+    "comparacao",
+    "sexo"
+  ],
+  "episodios": {
+    "2012–2014 (antes da recessão)": [
+      "2012T1",
+      "2014T4"
+    ],
+    "2015–2016 (recessão)": [
+      "2015T1",
+      "2016T4"
+    ],
+    "2017–2019 (recuperação lenta)": [
+      "2017T1",
+      "2019T4"
+    ],
+    "2020–2021 (pandemia; coleta por telefone)": [
+      "2020T1",
+      "2021T4"
+    ],
+    "2022–2026 (pós-pandemia)": [
+      "2022T1",
+      "2026T4"
+    ]
+  }
+}

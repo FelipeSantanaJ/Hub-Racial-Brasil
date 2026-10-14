@@ -19,7 +19,7 @@ import pandas as pd
 from matplotlib.patches import Patch
 
 from src.processing import graficos_fase1 as g
-from src.processing.graficos_arvore import _salvar_bare, _placeholder, MANIFESTO, PROCESSED, FONTE
+from src.processing.graficos_arvore import _salvar_bare, _placeholder, so_folhas_com_imagem, MANIFESTO, PROCESSED, FONTE
 
 Q_ORDEM = ["Q1 (25% que menos ganham)", "Q2", "Q3", "Q4 (25% que mais ganham)"]
 Q_CURTO = {"Q1 (25% que menos ganham)": "Q1", "Q2": "Q2", "Q3": "Q3", "Q4 (25% que mais ganham)": "Q4"}
@@ -237,7 +237,7 @@ def construir(dados):
                 f"limiares P25/P50/P75 dentro de cada grupo ({rot_rec}) · {qq}",
                 arq, legenda)
 
-    return [{"item": "D", "titulo": "Topo 10%, base 10% e quartis (limiares Brasil / gênero / raça×gênero)", "folhas": folhas}]
+    return so_folhas_com_imagem([{"item": "D", "titulo": "Topo 10%, base 10% e quartis (limiares Brasil / gênero / raça×gênero)", "folhas": folhas}])
 
 
 def main():

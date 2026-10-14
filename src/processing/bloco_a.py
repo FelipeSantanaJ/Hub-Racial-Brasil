@@ -42,9 +42,11 @@ RACA_SQL = """CASE m.V2010 WHEN '1' THEN 'Branca' WHEN '2' THEN 'Negra' WHEN '4'
                            WHEN '5' THEN 'Indígena' WHEN '3' THEN 'Amarela' END"""
 
 
-def micro_p1(con, ano: int, tri: int) -> pd.DataFrame:
+def micro_p1(con, ano: int, tri: int, separar_preta_parda: bool = False) -> pd.DataFrame:
+    raca_sql = RACA_SQL.replace("WHEN '2' THEN 'Negra' WHEN '4' THEN 'Negra'",
+                                "WHEN '2' THEN 'Preta' WHEN '4' THEN 'Parda'") if separar_preta_parda else RACA_SQL
     return con.execute(f"""
-        SELECT {RACA_SQL} AS raca, m.V1028 AS peso, m.UPA AS upa, m.Estrato AS estrato,
+        SELECT {raca_sql} AS raca, m.V1028 AS peso, m.UPA AS upa, m.Estrato AS estrato,
                m.VD4016 * d.deflator_habitual AS renda, m.V4039 AS horas
         FROM read_parquet('{PARQUET_GLOB}', hive_partitioning = 1) m
         LEFT JOIN read_parquet('{DEFLATOR_PATH}') d ON m.ano = d.ano AND m.trimestre = d.trimestre AND m.UF = d.UF
@@ -87,6 +89,17 @@ def a2_a7(m: pd.DataFrame, ano: int, tri: int) -> list[dict]:
             d = metricas_hiato(y, w, upa, est, dom & (raca == "Branca"), dom & (raca == g))
             linhas.append({"ano": ano, "trimestre": tri, "conceito": conceito, "comparacao": f"Branca × {g}", **d})
     return linhas
+
+
+def a2_preta_parda(m: pd.DataFrame, ano: int, tri: int) -> dict:
+    """A2 para Preta × Parda (dentro da população negra; R11): hiato % = Preta ÷ Parda − 1, como em
+    `hiato_preta_parda`, com IC por método delta."""
+    raca = m["raca"].to_numpy(object)
+    d = metricas_hiato(m["renda"].to_numpy(float), m["peso"].to_numpy(float), m["upa"].to_numpy(),
+                       m["estrato"].to_numpy(), raca == "Preta", raca == "Parda")
+    d = {k.replace("media_branca", "media_preta").replace("media_grupo", "media_parda")
+          .replace("pct_da_renda_branca", "pct_parda_da_renda_preta"): v for k, v in d.items()}
+    return {"ano": ano, "trimestre": tri, "conceito": "mensal", "comparacao": "Preta × Parda", **d}
 
 
 # ----------------------------------------------------------------------------------------- #
@@ -246,14 +259,18 @@ def a6(m: pd.DataFrame, ano: int, tri: int) -> list[dict]:
 def main() -> None:
     import argparse
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--so", nargs="*", default=None, help="a2 a3 a4 a5 a6 (padrão: todos)")
-    fazer = set(parser.parse_args().so or ["a2", "a3", "a4", "a5", "a6"])
+    parser.add_argument("--so", nargs="*", default=None, help="a2 a2pp a3 a4 a5 a6 (padrão: todos)")
+    fazer = set(parser.parse_args().so or ["a2", "a2pp", "a3", "a4", "a5", "a6"])
     con = duckdb.connect()
     con.execute("PRAGMA disable_progress_bar")
     tris = [(int(a), int(t)) for a, t in con.execute(
         f"SELECT DISTINCT ano, trimestre FROM read_parquet('{PARQUET_GLOB}', hive_partitioning=1) ORDER BY 1, 2").fetchall()]
-    r2, r3, r4, r5, r6 = [], [], [], [], []
+    r2, r2pp, r3, r4, r5, r6 = [], [], [], [], [], []
     for ano, tri in tris:
+        if "a2pp" in fazer:
+            r2pp.append(a2_preta_parda(micro_p1(con, ano, tri, separar_preta_parda=True), ano, tri))
+        if not fazer - {"a2pp"}:
+            continue
         m = micro_p1(con, ano, tri)
         if "a2" in fazer:
             r2 += a2_a7(m, ano, tri)
@@ -268,7 +285,7 @@ def main() -> None:
                 r6 += a6(m, ano, tri)
         print(f"A {ano}T{tri}", flush=True)
     SE = variancia.SE_METODO
-    saidas = [("a2", r2, "a2_metricas_hiato", SE), ("a3", r3, "a3_hiato_quantis", "bootstrap_rao_wu_estrato_upa_200"),
+    saidas = [("a2", r2, "a2_metricas_hiato", SE), ("a2pp", r2pp, "a2_metricas_hiato_preta_parda", SE), ("a3", r3, "a3_hiato_quantis", "bootstrap_rao_wu_estrato_upa_200"),
               ("a4", r4, "a4_desigualdade_decomposicao", None), ("a5", r5, "a5_representacao_decimos", SE),
               ("a6", r6, "a6_dominancia", SE)]
     for chave, dados, nome, se in saidas:

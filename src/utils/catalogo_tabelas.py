@@ -85,14 +85,25 @@ CATALOGO: list[tuple[str, str, str]] = [
      "de referência)", T),
     (r"^composicao_racial_declarada$", "Pessoas 14+, 18+ e população de referência; cor/raça declarada (V2010)", T),
     (r"^heaping_renda$", P1 + "; % com renda nominal múltipla de R$ 100/500/1.000", T),
+    (r"^heaping_renda_faixas$", P1 + "; 2º trimestres; % múltiplo de R$ 1.000/100 e arredondamento a 1–2 algarismos "
+     "significativos dentro de faixas NOMINAIS fixas (F4)", T),
     # --- Onda 1: Bloco A (src/processing/bloco_a.py) ---
+    (r"^a2_metricas_hiato_preta_parda$", P1 + "; Preta × Parda (hiato % = Preta ÷ Parda − 1; R11)", T),
     (r"^(a2_metricas_hiato|a3_hiato_quantis|a4_desigualdade_decomposicao|a5_representacao_decimos|a6_dominancia)$",
      P1 + "; Branca, Negra (Preta+Parda), Indígena e Amarela; Ignorado fora", T),
     # --- Onda 1: Bloco T (src/processing/bloco_t.py) ---
-    (r"^(t1_renda_domiciliar_per_capita|t2_pobreza|t3_fontes_de_renda)$",
+    (r"^(t1_renda_domiciliar_per_capita|t2_pobreza|t3_fontes_de_renda|t4_decimos_renda_domiciliar)$",
      "Todas as pessoas (todas as idades) da PNAD Contínua anual (Visita 1; Visita 5 em 2020–2021), exceto "
      "pensionistas/empregados domésticos e parentes (V2005 17–19); renda domiciliar per capita habitual (VD5008), "
      "valores nominais do ano", "anual_v2"),
+    # --- Onda 1, pendências: Bloco S (src/processing/bloco_s.py) ---
+    (r"^s03_perfil_fora_populacao_referencia$", "Pessoas 18+ (Ignorado fora), por condição (P1, ocupado sem renda, "
+     "desocupado, fora da força); 4 trimestres empilhados por janela (2012; 2025T3–2026T2)", T),
+    (r"^s13_limites_hiato$", "Pessoas 18+ (Ignorado fora); renda potencial de quem está fora de P1 limitada por "
+     "suposições explícitas; renda observada = " + pop.DESCRICAO_RENDA_REFERENCIA, T),
+    (r"^s14_margens_intensiva_extensiva$", "Pessoas 18+ (Ignorado fora); renda do trabalho principal por adulto "
+     "(fora de P1 = 0) = Pr(P1) × horas habituais (V4039) × renda por hora", T),
+    (r"^(s15_selecao_no_tempo|s15_selecao_episodios)$", "Séries do S0.1, S0.2 (refeito por ano) e S1.1; pessoas 18+", T),
     (r"^habitacao_.*$", "Moradores (pessoas) da PNAD Contínua anual, Visita 1, tema Habitação: 2016–2019 e 2022–2025",
      INSUMO_ANUAL_VISITA1_V1),
     (r"^deflator_ibge$", "Não se aplica (deflatores oficiais do IBGE por UF × trimestre)", "ibge_deflator"),

@@ -72,6 +72,37 @@ def _rodape(fig, nota: str = "Fonte: IBGE, PNAD Contínua Trimestral. Renda: tra
     fig.text(0.01, 0.01, nota, fontsize=8, color=TINTA_MUTED)
 
 
+QUEBRAS_SERIE = {  # F6 (Bloco F): o que cada marca significa — ficha docs/studies/F
+    "recessao": ("2015-01-01", "2016-12-31", "recessão"),
+    "pandemia": ("2020-01-01", "2021-12-31", "pandemia\n(telefone)"),
+    "questionario_educacao": ("2015-10-01", None, "4T15"),
+}
+
+
+def marcar_quebras(ax, eixo: str = "data", rotulos: bool = True) -> None:
+    """F6: marca as quebras de série num gráfico de série temporal — recessão 2015–16 (hachura),
+    pandemia / coleta por telefone 2020–21 (faixa cinza; Visita 5 no anual) e a mudança do
+    questionário de educação no 4º trimestre de 2015 (linha pontilhada). `eixo="ano"` para eixos
+    numéricos em anos (séries anuais)."""
+    def x(s: str, fim: bool = False):
+        d = pd.Timestamp(s)
+        if eixo == "data":
+            return d
+        return d.year + (d.dayofyear / 365.25 if fim else (d.month - 1) / 12) - 0.5
+    r0, r1, r_rot = QUEBRAS_SERIE["recessao"]
+    p0, p1, p_rot = QUEBRAS_SERIE["pandemia"]
+    q0, _, q_rot = QUEBRAS_SERIE["questionario_educacao"]
+    ax.axvspan(x(r0), x(r1, True), facecolor="none", edgecolor=GRADE, hatch="////", linewidth=0, zorder=0)
+    ax.axvspan(x(p0), x(p1, True), color=GRADE, alpha=0.6, zorder=0, linewidth=0)
+    ax.axvline(x(q0), color=EIXO, linestyle=":", linewidth=1, zorder=1)
+    if rotulos:
+        tr = ax.get_xaxis_transform()
+        meio = lambda a, b: x(a) + (x(b, True) - x(a)) / 2  # noqa: E731
+        for xx, rot in ((meio(r0, r1), r_rot), (meio(p0, p1), p_rot)):
+            ax.text(xx, 0.995, rot, transform=tr, ha="center", va="top", fontsize=7, color=TINTA_MUTED, zorder=1)
+        ax.text(x(q0), 0.93, f"{q_rot} ", transform=tr, ha="right", va="top", fontsize=7, color=TINTA_MUTED, zorder=1)
+
+
 def _trimestre_mais_recente(df: pd.DataFrame) -> tuple[int, int]:
     """(ano, trimestre) do trimestre mais recente presente no df.
 
@@ -194,7 +225,7 @@ def grafico_renda_por_raca(renda: pd.DataFrame) -> Path:
     ax.set_facecolor(SUPERFICIE)
 
     # faixa sombreada: período de coleta por telefone durante a pandemia (queda de amostra)
-    ax.axvspan(pd.Timestamp("2020-01-01"), pd.Timestamp("2021-12-31"), color=GRADE, alpha=0.6, zorder=0)
+    marcar_quebras(ax)
 
     topo = serie.max().max() * 1.22
     base = serie.min().min() * 0.92
@@ -328,7 +359,7 @@ def _grafico_serie_temporal(
     rotulos = rotulos or {c: c for c in serie.columns}
     formato_eixo_y = formato_eixo_y or (lambda v, _: f"R$ {v:,.0f}".replace(",", "."))
     fig, ax = _novo_eixo(figsize=(11, 5.5))
-    ax.axvspan(pd.Timestamp("2020-01-01"), pd.Timestamp("2021-12-31"), color=GRADE, alpha=0.6, zorder=0)
+    marcar_quebras(ax)
 
     topo = serie.max().max() * 1.22
     if teto_pct:
@@ -419,7 +450,7 @@ def grafico_preta_parda_genero_combinado(renda: pd.DataFrame) -> Path:
     rotulo_sexo = {"Homem": "Homens", "Mulher": "Mulheres"}
 
     fig, ax = _novo_eixo(figsize=(11, 5.5))
-    ax.axvspan(pd.Timestamp("2020-01-01"), pd.Timestamp("2021-12-31"), color=GRADE, alpha=0.6, zorder=0)
+    marcar_quebras(ax)
     topo, base = pivot.max().max() * 1.28, pivot.min().min() * 0.9
     ax.set_ylim(base, topo)
 
@@ -582,7 +613,7 @@ def grafico_renda_por_raca_genero(renda: pd.DataFrame) -> Path:
             pivot[("Indígena", sexo)] = pivot[("Indígena", sexo)].rolling(4, center=True, min_periods=2).mean()
 
     fig, ax = _novo_eixo(figsize=(12, 5.5))
-    ax.axvspan(pd.Timestamp("2020-01-01"), pd.Timestamp("2021-12-31"), color=GRADE, alpha=0.6, zorder=0)
+    marcar_quebras(ax)
 
     topo = pivot.max().max() * 1.28
     base = pivot.min().min() * 0.9
@@ -1051,16 +1082,23 @@ def _preparar_hiato(hiato: pd.DataFrame) -> pd.DataFrame:
     return h.sort_values("data")
 
 
+def _ic_hiato_pct_delta(h: pd.DataFrame, arquivo: str, comparacao: str) -> pd.DataFrame:
+    """IC 95% do hiato % pelo método delta (R11), lido das tabelas A2 (`bloco_a`): o IC do hiato %
+    leva a incerteza do denominador; dividir o IC absoluto pela média do grupo a ignorava."""
+    a = pd.read_parquet(REPO_ROOT / "data" / "processed" / arquivo)
+    a = a[(a["conceito"] == "mensal") & (a["comparacao"] == comparacao)]
+    a = a[["ano", "trimestre", "hiato_percentual_ic_inferior", "hiato_percentual_ic_superior"]].rename(
+        columns={"hiato_percentual_ic_inferior": "ic_inferior_pct", "hiato_percentual_ic_superior": "ic_superior_pct"})
+    return h.merge(a, on=["ano", "trimestre"], how="left")
+
+
 def grafico_hiato_percentual(hiato: pd.DataFrame) -> Path:
     """Hiato de renda Branca vs. Negra em %, série histórica, com banda de intervalo
-    de confiança de 95% (teste de Welch — ver `pnadc_core.tabela_hiatos_significancia`,
-    calculado a partir dos microdados de cada trimestre, não das médias já agregadas)."""
-    h = _preparar_hiato(hiato)
-    h["ic_inferior_pct"] = 100 * h["ic_inferior"] / h["renda_media_negra"]
-    h["ic_superior_pct"] = 100 * h["ic_superior"] / h["renda_media_negra"]
+    de confiança de 95% pelo método delta (`a2_metricas_hiato`; R11)."""
+    h = _ic_hiato_pct_delta(_preparar_hiato(hiato), "a2_metricas_hiato.parquet", "Branca × Negra")
 
     fig, ax = _novo_eixo(figsize=(11, 5.5))
-    ax.axvspan(pd.Timestamp("2020-01-01"), pd.Timestamp("2021-12-31"), color=GRADE, alpha=0.6, zorder=0)
+    marcar_quebras(ax)
     ax.fill_between(h["data"], h["ic_inferior_pct"], h["ic_superior_pct"], color=COR_BRANCA, alpha=0.15, zorder=2)
     ax.plot(h["data"], h["hiato_percentual"], color=COR_BRANCA, linewidth=2.2, solid_capstyle="round", zorder=3)
     ax.axhline(0, color=EIXO, linewidth=1)
@@ -1072,7 +1110,7 @@ def grafico_hiato_percentual(hiato: pd.DataFrame) -> Path:
 
     _titulo(
         ax, "Hiato de renda Branca vs. Negra, em % — Brasil (2012–2026)",
-        "Quanto a mais Branca ganha que Negra · faixa = IC 95% (teste de Welch) · PNAD Contínua Trimestral",
+        "Quanto a mais Branca ganha que Negra · faixa = IC 95% (método delta, design-based) · PNAD Contínua Trimestral",
     )
     ax.yaxis.set_major_formatter(lambda v, _: f"{v:.0f}%")
     ax.xaxis.set_major_locator(mdates.YearLocator(2))
@@ -1089,7 +1127,7 @@ def grafico_hiato_absoluto(hiato: pd.DataFrame) -> Path:
     h = _preparar_hiato(hiato)
 
     fig, ax = _novo_eixo(figsize=(11, 5.5))
-    ax.axvspan(pd.Timestamp("2020-01-01"), pd.Timestamp("2021-12-31"), color=GRADE, alpha=0.6, zorder=0)
+    marcar_quebras(ax)
     ax.fill_between(h["data"], h["ic_inferior"], h["ic_superior"], color=COR_BRANCA, alpha=0.15, zorder=2)
     ax.plot(h["data"], h["hiato_absoluto"], color=COR_BRANCA, linewidth=2.2, solid_capstyle="round", zorder=3)
 
@@ -1117,12 +1155,10 @@ def grafico_hiato_preta_parda_percentual(hpp: pd.DataFrame) -> Path:
     """Hiato de renda Preta vs. Parda, série histórica, com IC 95% (Welch) — espelha
     `grafico_hiato_percentual`, mas DENTRO da população negra (a versão pretaparda da
     combinação "Raça" sozinha, que faltava)."""
-    h = _preparar_hiato(hpp)
-    h["ic_inferior_pct"] = 100 * h["ic_inferior"] / h["renda_media_parda"]
-    h["ic_superior_pct"] = 100 * h["ic_superior"] / h["renda_media_parda"]
+    h = _ic_hiato_pct_delta(_preparar_hiato(hpp), "a2_metricas_hiato_preta_parda.parquet", "Preta × Parda")
 
     fig, ax = _novo_eixo(figsize=(11, 5.5))
-    ax.axvspan(pd.Timestamp("2020-01-01"), pd.Timestamp("2021-12-31"), color=GRADE, alpha=0.6, zorder=0)
+    marcar_quebras(ax)
     ax.fill_between(h["data"], h["ic_inferior_pct"], h["ic_superior_pct"], color=COR_PRETA, alpha=0.15, zorder=2)
     ax.plot(h["data"], h["hiato_percentual"], color=COR_PRETA, linewidth=2.2, solid_capstyle="round", zorder=3)
     ax.axhline(0, color=EIXO, linewidth=1)
@@ -1133,7 +1169,7 @@ def grafico_hiato_preta_parda_percentual(hpp: pd.DataFrame) -> Path:
     )
     _titulo(
         ax, "Hiato de renda Preta vs. Parda, em % — Brasil (2012–2026)",
-        "Quanto a mais/menos Preta ganha que Parda · faixa = IC 95% (teste de Welch) · PNAD Contínua Trimestral",
+        "Quanto a mais/menos Preta ganha que Parda · faixa = IC 95% (método delta) · PNAD Contínua Trimestral",
     )
     ax.yaxis.set_major_formatter(lambda v, _: f"{v:.0f}%")
     ax.xaxis.set_major_locator(mdates.YearLocator(2))
@@ -1174,7 +1210,7 @@ def _grafico_hiato_historico_categoria(
     pivot = pivot[[c for c in categorias_ordem if c in pivot.columns]]
 
     fig, ax = _novo_eixo(figsize=(11, 5.5))
-    ax.axvspan(pd.Timestamp("2020-01-01"), pd.Timestamp("2021-12-31"), color=GRADE, alpha=0.6, zorder=0)
+    marcar_quebras(ax)
     ax.axhline(0, color=EIXO, linewidth=1)
 
     minv, maxv = pivot.min().min(), pivot.max().max()
@@ -1781,7 +1817,7 @@ def grafico_segregacao_ocupacional(seg: pd.DataFrame) -> Path:
     s["indice_pct"] = s["indice_duncan_branca_negra"] * 100
 
     fig, ax = _novo_eixo(figsize=(11, 5.5))
-    ax.axvspan(pd.Timestamp("2020-01-01"), pd.Timestamp("2021-12-31"), color=GRADE, alpha=0.6, zorder=0)
+    marcar_quebras(ax)
     ax.plot(s["data"], s["indice_pct"], color=COR_NEGRA, linewidth=2.2, solid_capstyle="round", zorder=3)
     ax.annotate(
         f"{s['indice_pct'].iloc[-1]:.0f}%", xy=(s["data"].iloc[-1], s["indice_pct"].iloc[-1]),
@@ -1818,7 +1854,7 @@ def grafico_quebra_estrutural(hiato: pd.DataFrame, quebra: pd.DataFrame) -> Path
     topo = h["hiato_percentual"].max() * 1.28
 
     fig, ax = _novo_eixo(figsize=(11.5, 5.8))
-    ax.axvspan(pd.Timestamp("2020-01-01"), pd.Timestamp("2021-12-31"), color=GRADE, alpha=0.6, zorder=0)
+    marcar_quebras(ax)
     ax.plot(h["data"], h["hiato_percentual"], color=COR_BRANCA, linewidth=2.2, solid_capstyle="round", zorder=3)
 
     for _, linha in quebra.iterrows():
@@ -1947,7 +1983,7 @@ def grafico_theil_decomposicao(theil: pd.DataFrame) -> Path:
     t = t.sort_values("data")
 
     fig, ax = _novo_eixo(figsize=(11, 5.5))
-    ax.axvspan(pd.Timestamp("2020-01-01"), pd.Timestamp("2021-12-31"), color=GRADE, alpha=0.6, zorder=0)
+    marcar_quebras(ax)
     ax.stackplot(
         t["data"], t["pct_entre_grupos"], t["pct_dentro_grupos"],
         colors=[COR_NEGRA, COR_BRANCA], alpha=[1.0, 0.3], zorder=3,
@@ -2011,7 +2047,7 @@ def grafico_segregacao_setorial(seg: pd.DataFrame) -> Path:
     s["indice_pct"] = s["indice_duncan_branca_negra"] * 100
 
     fig, ax = _novo_eixo(figsize=(11, 5.5))
-    ax.axvspan(pd.Timestamp("2020-01-01"), pd.Timestamp("2021-12-31"), color=GRADE, alpha=0.6, zorder=0)
+    marcar_quebras(ax)
     ax.plot(s["data"], s["indice_pct"], color=COR_PARDA, linewidth=2.2, solid_capstyle="round", zorder=3)
     ax.annotate(
         f"{s['indice_pct'].iloc[-1]:.0f}%", xy=(s["data"].iloc[-1], s["indice_pct"].iloc[-1]),
