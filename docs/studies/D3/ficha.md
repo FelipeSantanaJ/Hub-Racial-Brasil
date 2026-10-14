@@ -6,7 +6,7 @@
 | Onda | 3 |
 | Responsável | Felipe Santana (execução: Claude Code) |
 | Criada em / atualizada em | 2026-10-14 / 2026-10-14 |
-| Estado de publicação | **Proposto** |
+| Estado de publicação | **Aprovado com ressalvas** (proposto; aguarda o Felipe) |
 | PR | `onda3/d` |
 
 > Seções 1–9 escritas **antes** de rodar (14/10/2026).
@@ -73,3 +73,56 @@ PNAD Contínua trimestral v2: `V4010`, `VD4011`, demais variáveis do D1.
 - **Mediação:** absorver a ocupação "explica" o hiato por um canal que pode ser ele mesmo discriminatório (D3.4).
 - **Dentro da ocupação ≠ mesma firma, mesma função:** sem RAIS identificada (D3.5/D8.2), o hiato dentro da CBO mistura
   firma, setor e função.
+
+## 10. Resultados
+
+Tabelas: `d3_segregacao`, `d3_hiato_dentro_ocupacao`.
+
+**D3.2 — segregação Branca × Negra (P1)**
+
+| | 2012 | 2025T3–2026T2 | Valor esperado sob alocação aleatória (recente) |
+|---|---|---|---|
+| Duncan D, grupamento (10) | 0,170 (EP 0,003) | 0,172 (0,003) | 0,003 |
+| Duncan D, CBO 4 dígitos (~430) | 0,201 (0,003) | 0,196 (0,003) | 0,019 |
+| Theil H, CBO 4 dígitos | 0,051 (0,001) | 0,049 (0,001) | 0,001 |
+| Excesso de D (CBO-4) sobre o aleatório | 0,184 | 0,177 | |
+
+Mudança do excesso de D (CBO-4): −0,007 (EP ≈ 0,004 somando as variâncias das janelas — conservador; IC
+−0,015 a +0,001). Na série anual (2º trimestres), o D da CBO-4 oscila entre 0,19 e 0,21 sem tendência; o excesso cai
+um pouco em 2017–2023 e volta em 2025–26. Cerca de 1 em cada 5 trabalhadores negros (ou brancos) teria de mudar de
+ocupação para igualar as distribuições — e isso não mudou desde 2012.
+
+**D3.3 — hiato condicional com efeitos fixos de CBO de 4 dígitos (Branca × Negra, lp)**
+
+| Especificação | 2012 | 2025T3–2026T2 |
+|---|---|---|
+| E8 sem ocupação | 0,115 | 0,113 |
+| E8 com grupamento (`VD4011`) | 0,101 | 0,094 |
+| E8 com CBO de 4 dígitos | 0,087 (0,082–0,092) | **0,078 (0,072–0,083)** |
+| Razão CBO-4 ÷ grupamento | 0,86 (0,85–0,87) | **0,82 (0,80–0,84)** |
+
+Indígena (janela recente): 0,100 (0,055–0,145) com CBO-4; razão 0,80 (0,70–0,90).
+
+**Leitura das hipóteses**
+
+- **H1 (segregação em queda):** **refutada** — o excesso de segregação não mudou de forma distinguível (−0,007; IC
+  inclui zero), nem na série anual.
+- **H2 × H2':** **vale H2'** — com a ocupação detalhada, o hiato condicional fica em 82% do valor com o grupamento
+  (limiar pré-registrado: 70%). Passar de 10 grupos para ~430 ocupações reduz pouco a parte não associada: o hiato
+  existe **dentro** da mesma ocupação.
+
+**D3.4 — mediação.** Entre E8 sem ocupação (0,113) e com CBO-4 (0,078), a ocupação "explica" 0,035 lp. Esse número é o
+máximo que a ocupação pode absorver; não é neutro, porque a alocação entre ocupações é ela mesma parte do processo
+que se quer entender (contratação, promoção, redes).
+
+## 11. Afirmações permitidas
+
+- "Pessoas brancas e negras seguem tão separadas entre ocupações em 2025–26 quanto em 2012 (índice de dissimilaridade
+  ≈ 0,20 com ~430 ocupações)."
+- "Na mesma ocupação detalhada, com mesma instrução, idade, sexo, lugar, horas e vínculo, a renda de pessoas negras
+  é cerca de 7,5% menor (0,078 lp); essa parte não está associada às covariáveis incluídas."
+
+## 12. Afirmações proibidas
+
+- "Na mesma função, na mesma empresa, negros ganham 7,5% menos" — a CBO-Domiciliar não é a função na firma (sem RAIS).
+- "A segregação não importa" — ela responde por ~19% do hiato (D1); o que não mudou foi o seu nível.

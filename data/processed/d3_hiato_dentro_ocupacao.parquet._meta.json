@@ -1,0 +1,21 @@
+{
+  "esquema": "hub-racial-meta/1",
+  "arquivo": "d3_hiato_dentro_ocupacao.parquet",
+  "n_linhas": 16,
+  "gerado_em": "2026-10-14T04:30:59.841514+00:00",
+  "codigo": {
+    "commit": "18b352e924197af6684e1e8b976306e2885276a3",
+    "modulo": "__main__"
+  },
+  "insumos": {
+    "chave": "trimestral_v2",
+    "descricao": "PNAD Contínua trimestral, extrato v2 + deflator IBGE",
+    "hash": "9b64f579fa63981e9237190166d333a9ac546041a4df260d2c67dabf49f1ceda",
+    "n_arquivos": 228
+  },
+  "se_metodo": "wls_influencia_linearizacao_estrato_upa",
+  "populacao": "Ocupados (VD4002=1) de 18+ anos com rendimento habitual do trabalho principal (VD4016) > 0; renda: Rendimento mensal habitual do trabalho principal (VD4016), deflacionado pelo deflator habitual do IBGE; Branca, Negra e Indígena; controles da E8 do D1 e efeitos fixos de CBO 4 dígitos",
+  "periodo": null,
+  "rotulo_residuo": "parte não associada às covariáveis incluídas (R5)",
+  "nota": "Coeficiente de raça (Branca − grupo, lp) com controles da E8; efeitos fixos de CBO-4 por desvio da média"
+}

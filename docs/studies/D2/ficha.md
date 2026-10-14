@@ -6,7 +6,7 @@
 | Onda | 3 |
 | Responsável | Felipe Santana (execução: Claude Code) |
 | Criada em / atualizada em | 2026-10-14 / 2026-10-14 |
-| Estado de publicação | **Proposto** |
+| Estado de publicação | **Aprovado com ressalvas** (proposto; aguarda o Felipe) |
 | PR | `onda3/d` |
 
 > Seções 1–9 escritas **antes** de rodar (14/10/2026).
@@ -80,3 +80,75 @@ desenho; deflator do IBGE.
 - **Sobrequalificação normativa** (pelo grupamento) é grosseira: técnicos de nível médio (grupo 03) podem exigir
   diploma em algumas carreiras; por isso as três definições.
 - Mudança do questionário de educação em 4T2015 (F6) não afeta as janelas, mas afeta séries.
+
+## 10. Resultados
+
+Tabelas: `d2_hiato_por_nivel`, `d2_quantis_nivel`, `d2_sobrequalificacao` (`src/processing/bloco_d_estrutura.py`).
+Log-pontos (lp) de ln renda; IC 95%.
+
+**D2.2 — hiato Branca × Negra dentro de cada nível, condicional a idade, sexo e território** (bruto entre parênteses)
+
+| Nível | 2012 | 2025T3–2026T2 |
+|---|---|---|
+| Sem instrução | 0,112 (0,301) | 0,149 (0,353) |
+| Fundamental incompleto | 0,115 (0,279) | 0,109 (0,264) |
+| Fundamental completo | 0,116 (0,247) | 0,073 (0,228) |
+| Médio incompleto | 0,107 (0,258) | 0,084 (0,217) |
+| Médio completo | 0,122 (0,234) | 0,100 (0,216) |
+| Superior incompleto | 0,123 (0,184) | 0,077 (0,159) |
+| **Superior completo** | **0,246** (0,322) | **0,237 (0,221–0,253)** (0,314) |
+| Superior − fundamental incompleto | 0,131 (0,109–0,154) | **0,128 (0,107–0,150)** |
+
+Branca × Indígena, superior completo, janela recente: 0,372 (0,212–0,533); diferença para fundamental incompleto
+0,184 (0,008–0,360).
+
+**D2.3 — quantis dentro do nível, Branca × Negra (lp; bootstrap Rao-Wu 200)**
+
+| Nível | Quantil | 2012 | 2025T3–2026T2 |
+|---|---|---|---|
+| Superior completo | P10 | 0,279 (0,251–0,313) | 0,228 (0,228–0,231)* |
+| | P50 | 0,316 | 0,261 (0,242–0,319) |
+| | P90 | 0,443 (0,364–0,470) | **0,406 (0,400–0,448)** |
+| Médio completo / superior incompleto | P10 | 0,186 | 0,482 (0,429–0,568) |
+| | P50 | 0,206 | 0,157 |
+| | P90 | 0,357 | 0,227 (0,220–0,230)* |
+
+\* IC quase nulo = quantil preso num valor redondo (heaping), não precisão.
+
+**D2.4 — sobrequalificação de diplomados (superior completo em P1)**
+
+| Definição | Branca | Negra | Negra − Branca condicional (p.p.) |
+|---|---|---|---|
+| Principal (grupos 04–09), 2025–26 | 24,9% | 31,4% | **+6,1 (5,2–7,0)** |
+| Principal, 2012 | 19,9% | 24,5% | +5,1 (4,1–6,1) |
+| Antiga (só grupo 09), 2025–26 | 1,0% | 2,1% | +1,1 (0,8–1,3) |
+| Estrita (grupos 03–09), 2025–26 | 37,8% | 44,7% | +7,2 (6,2–8,2) |
+
+Gelbach do hiato entre diplomados (bruto 0,314 lp, 2025–26): território 0,057 (18,0%); **sobrequalificação 0,034
+(0,030–0,039; 10,9%)**; idade 0,012; sexo 0,007. Em 2012: sobrequalificação 0,018 (5,7% de 0,322). A sobrequalificação
+aumentou entre os diplomados (das duas raças) e passou a pesar o dobro no hiato entre eles.
+
+**Leitura das hipóteses**
+
+- **H1 (teto de vidro educacional):** **confirmada.** O hiato condicional entre diplomados (0,237) é o dobro do dos
+  demais níveis (0,07–0,15), nas duas janelas; diferença para o fundamental incompleto 0,128 (0,107–0,150). Também
+  para indígenas (0,184; 0,008–0,360).
+- **H2 (mesmo diploma, ocupação inferior):** **em parte.** Negros diplomados estão mais em ocupações abaixo do diploma
+  (+6,1 p.p. condicional, nas três definições), mas o bloco responde por 10,9% do hiato entre diplomados — abaixo do
+  limiar de 20%. A maior parte do hiato entre diplomados fica dentro da mesma faixa de ocupação.
+- **H3 (teto de vidro dentro do diploma):** **confirmada** com ressalva de heaping: entre diplomados, P90 (0,406) >
+  P10 (0,228), IC sem sobreposição, nas duas janelas. Entre os de nível médio o padrão se inverte na janela recente
+  (P10 0,482 — efeito do salário mínimo no P10 de um grupo e não do outro).
+
+## 11. Afirmações permitidas
+
+- "Com o mesmo nível de instrução, idade, sexo e lugar, pessoas negras com diploma superior ganham cerca de 21% menos
+  que pessoas brancas com diploma (0,24 lp); nos demais níveis, cerca de 7% a 14% menos."
+- "31% das pessoas negras com diploma superior trabalham em ocupações que não exigem diploma, contra 25% das brancas."
+
+## 12. Afirmações proibidas
+
+- "O diploma não compensa para negros" (o retorno do diploma em relação a não ter diploma é alto para os dois grupos;
+  o que muda é o hiato relativo).
+- Atribuir o hiato entre diplomados à discriminação: qualidade, curso e instituição não são observados.
+- Citar o IC do P10 de diplomados (heaping).
