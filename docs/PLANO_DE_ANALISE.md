@@ -157,7 +157,7 @@ Sem isso, todo bloco abaixo é frágil. Vale 1–2 semanas e vira a camada "meto
 | C5 | **Trabalho de cuidado e doméstico remunerado:** peso do emprego doméstico na ocupação feminina Negra e seu hiato | D | Participação e renda por posição na ocupação | Informalidade e subdeclaração |
 | C6 | Estado conjugal/chefia do domicílio: efeito sobre a renda e sobre a oferta de trabalho | C | Controles na decomposição | Endogeneidade forte (casar/ter filhos é escolha condicionada) |
 
-**Já existe:** raça × gênero em `ANALISE_RACA_GENERO.md` (a auditar). **Novo:** C2 formal, C3 em Shapley, C4, C5.
+**Já existe:** raça × gênero em `ANALISE_RACA_GENERO.md` (auditado na Onda 2: números de renda conferidos pelo C1/C3; a "interação" da `decomposicao_raca_genero` é −DiD em R$ e uma ordem sequencial, reconciliada com Shapley no C3; ritmo de convergência refeito no B1). **Feito na Onda 2:** C1–C6 (fichas em `docs/studies`).
 
 ---
 

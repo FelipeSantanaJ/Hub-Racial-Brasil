@@ -59,6 +59,17 @@ def comparar(nome: str, antigo: pd.DataFrame, novo: pd.DataFrame) -> dict:
     res = {"arquivo": nome, "linhas_antes": len(antigo), "linhas_depois": len(novo),
            "colunas_novas": sorted(set(novo.columns) - set(antigo.columns)),
            "colunas_removidas": sorted(set(antigo.columns) - set(novo.columns))}
+    if len(novo) > len(antigo):
+        # Linhas acrescentadas (ex.: linhas de pobreza novas no T2): compara só as que já existiam,
+        # casadas pelas colunas-chave não numéricas; as novas ficam contadas à parte.
+        chaves0 = [c for c in antigo.columns if c in novo.columns
+                   and not pd.api.types.is_float_dtype(antigo[c]) and not _eh_inferencia(c)]
+        if chaves0:
+            ka = pd.MultiIndex.from_frame(pd.DataFrame({c: _texto(antigo[c]) for c in chaves0}))
+            kn = pd.MultiIndex.from_frame(pd.DataFrame({c: _texto(novo[c]) for c in chaves0}))
+            manter = kn.isin(ka)
+            res["linhas_novas_fora_da_comparacao"] = int((~manter).sum())
+            novo = novo[manter]
     if len(antigo) != len(novo):
         res["pontos_identicos"] = None
         res["nota"] = "número de linhas mudou: comparação por posição impossível"
@@ -145,7 +156,10 @@ def tabela_markdown(resultados: list[dict]) -> str:
         fdr = (f"{r['significativo_fdr_sim_para_nao']} / {r['significativo_fdr_nao_para_sim']}"
                if "significativo_fdr_sim_para_nao" in r else "—")
         novas = ", ".join(f"`{c}`" for c in r.get("colunas_novas", [])) or "—"
-        linhas.append(f"| `{r['arquivo']}` | {r.get('linhas_depois', '—')} | {pi_txt} | {ep_txt} | {nom} | {fdr} | {novas} |")
+        n_txt = str(r.get("linhas_depois", "—"))
+        if r.get("linhas_novas_fora_da_comparacao"):
+            n_txt += f" ({r['linhas_novas_fora_da_comparacao']} novas, fora da comparação)"
+        linhas.append(f"| `{r['arquivo']}` | {n_txt} | {pi_txt} | {ep_txt} | {nom} | {fdr} | {novas} |")
     linhas.append("")
     linhas.append(f"Outros {silenciosos} parquets sem colunas de inferência: estimativas idênticas e nenhuma coluna nova.")
     return "\n".join(linhas) + "\n"

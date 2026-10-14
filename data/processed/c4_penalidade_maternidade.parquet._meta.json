@@ -1,0 +1,26 @@
+{
+  "esquema": "hub-racial-meta/1",
+  "arquivo": "c4_penalidade_maternidade.parquet",
+  "n_linhas": 190,
+  "gerado_em": "2026-10-13T19:00:51.495259+00:00",
+  "codigo": {
+    "commit": "be8c34d2c9b539fbd20c10903f3895cd96d2d94a-modificado",
+    "modulo": "__main__"
+  },
+  "insumos": {
+    "chave": "trimestral_v2",
+    "descricao": "PNAD Contínua trimestral, extrato v2 + deflator IBGE",
+    "hash": "9b64f579fa63981e9237190166d333a9ac546041a4df260d2c67dabf49f1ceda",
+    "n_arquivos": 228
+  },
+  "se_metodo": "wls_influencia_linearizacao_estrato_upa",
+  "populacao": "Pessoas de 25–44 anos (responsáveis ou cônjuges na definição principal); filho(a) de 0–5 no domicílio (UPA + V1008 + V1014); janelas 2012 e 2025T3–2026T2",
+  "periodo": null,
+  "familia_fdr": [
+    "janela",
+    "faixa_etaria",
+    "definicao",
+    "sexo"
+  ],
+  "nota": "Coeficiente de ter filho(a) 0–5 controlando idade (anos simples), instrução e região; pr_p1_pp em p.p., ln_renda_p1 em log-pontos, renda_por_pessoa_rs em R$ (fora de P1 = 0)"
+}

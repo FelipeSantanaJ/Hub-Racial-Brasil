@@ -2,10 +2,10 @@
   "esquema": "hub-racial-meta/1",
   "arquivo": "quebra_estrutural.parquet",
   "n_linhas": 3,
-  "gerado_em": "2026-10-13T13:08:00.159287+00:00",
+  "gerado_em": "2026-10-13T18:20:29.348650+00:00",
   "codigo": {
-    "commit": "c1202a10fd9cedb6ee7d78647d0188dfd6dea81e",
-    "modulo": "__main__"
+    "commit": "22180a1eb4cdf93dfb4cb5f3eb5bf534686271be-modificado",
+    "modulo": "src.processing.agregacoes_pnadc"
   },
   "insumos": {
     "chave": "derivado",
@@ -13,7 +13,8 @@
     "hash": null,
     "n_arquivos": 0
   },
-  "se_metodo": "ols_iid_sobre_serie_trimestral",
+  "se_metodo": "ewc_lazarus_lewis_stock_watson; sensibilidades newey_west e gls_ar1",
   "populacao": "Série trimestral de hiato_racial / hiato_branca_indigena / hiato_preta_parda",
-  "periodo": null
+  "periodo": null,
+  "familia_fdr": "os 3 eventos (BH); patamar e inclinação combinados por Bonferroni dentro do evento"
 }

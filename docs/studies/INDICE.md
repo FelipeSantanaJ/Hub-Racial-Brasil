@@ -19,6 +19,18 @@ de publicação. Estudos entram aqui quando a ficha é criada, não quando o res
 | S1.4 | Margem extensiva × intensiva × renda por hora | C | 1 | Aprovado com ressalvas | [S1.4/ficha.md](S1.4/ficha.md) | Onda 1, pendências |
 | S1.3 | Limites do hiato sob suposições sobre quem não é observado | C | 1 | Aprovado com ressalvas | [S1.3/ficha.md](S1.3/ficha.md) | Onda 1, pendências |
 | S1.5 | A seleção mudou no tempo (recessão, pandemia)? | D | 1 | Aprovado com ressalvas | [S1.5/ficha.md](S1.5/ficha.md) | Onda 1, pendências |
+| B1 | Tendência 2012–2026 do hiato (EP robusto a autocorrelação, degraus) | D | 2 | Aprovado com ressalvas | [B1/ficha.md](B1/ficha.md) | Onda 2 |
+| B5 | Ciclo × tendência do hiato (desocupação) | D | 2 | Aprovado com ressalvas | [B5/ficha.md](B5/ficha.md) | Onda 2 |
+| B6 | Projeção condicional do ano de paridade (premissas explícitas) | D | 2 | Aprovado com ressalvas | [B6/ficha.md](B6/ficha.md) | Onda 2 |
+| B3 | Convergência por quantil (P10…P90) | D | 2 | Aprovado com ressalvas | [B3/ficha.md](B3/ficha.md) | Onda 2 |
+| B4 | Coortes: mesma idade e idade-período-coorte (Deaton-Paxson) | D/C | 2 | Aprovado com ressalvas | [B4/ficha.md](B4/ficha.md) | Onda 2 |
+| B2 | Mudança do hiato no tempo: reclassificação, composição e retornos (JMP) | C | 2 | Aprovado com ressalvas | [B2/ficha.md](B2/ficha.md) | Onda 2 |
+| C1 | Células raça × sexo: ranking, hiatos, quantis, Theil (P1, P4, domiciliar) | D | 2 | Aprovado com ressalvas | [C1/ficha.md](C1/ficha.md) | Onda 2 |
+| C2 | Interação raça × gênero (DiD e β3 com EP design-based) | D/C | 2 | Aprovado com ressalvas | [C2/ficha.md](C2/ficha.md) | Onda 2 |
+| C3 | Shapley raça × gênero da distância homem branco − mulher negra | C | 2 | Aprovado com ressalvas | [C3/ficha.md](C3/ficha.md) | Onda 2 |
+| C5 | Trabalho doméstico remunerado e o hiato das mulheres | D/C | 2 | Aprovado com ressalvas | [C5/ficha.md](C5/ficha.md) | Onda 2 |
+| C4 | Penalidade da maternidade por raça (filho 0–5 no domicílio) | C/D | 2 | Aprovado com ressalvas | [C4/ficha.md](C4/ficha.md) | Onda 2 |
+| C6 | Estado conjugal e chefia: renda e oferta de trabalho por raça | C | 2 | Aprovado com ressalvas | [C6/ficha.md](C6/ficha.md) | Onda 2 |
 
 O que já existe no Hub e a qual pergunta corresponde está em
 [`docs/auditoria/mapa_cobertura_plano.md`](../auditoria/mapa_cobertura_plano.md).

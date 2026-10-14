@@ -33,7 +33,6 @@ from pathlib import Path
 import duckdb
 import numpy as np
 import pandas as pd
-import statsmodels.formula.api as smf
 
 from src.inference import precisao
 from src.inference.saida import salvar_com_inferencia, salvar_tabela
@@ -42,7 +41,6 @@ from src.utils import populacao as pop
 
 # Inferência que NÃO passa pelo EP corrigido no B1 (12/10/2026) — registrada no _meta.json.
 SE_METODO_WLS_CLUSTER = "wls_statsmodels_cluster_upa"  # Oaxaca-Blinder (coeficiente restrito)
-SE_METODO_OLS_SERIE = "ols_iid_sobre_serie_trimestral"  # sem HAC (R6; Onda 2)
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 # Extrato v2 desde a Onda 1 (13/10/2026): mesmas linhas do v1 e colunas a mais (V4039, V3002…).
@@ -1791,43 +1789,31 @@ EVENTOS_ESTRUTURAIS = {
 
 
 def gerar_quebra_estrutural() -> None:
-    """Testa formalmente se a trajetória do hiato racial (%) muda de patamar/inclinação
-    ao redor de 3 eventos candidatos já apontados como possíveis pontos de inflexão em
-    docs/LIMITACOES_E_METODOLOGIA.md: reforma trabalhista (2017 T3), reforma da
-    previdência (2019 T4) e a recessão de 2015-2016 (2015 T1).
+    """Testa se a trajetória do hiato racial (%) muda de patamar/inclinação ao redor de 3
+    eventos candidatos (reforma trabalhista 2017T3, reforma da previdência 2019T4, recessão
+    2015T1): teste tipo Chow com data conhecida, y = a + b·t + c·D + d·D·(t − t0).
 
-    Método: OLS de hiato_percentual em índice de trimestre + dummy pós-evento +
-    interação (índice x dummy) na série completa de `hiato_racial.parquet`. Testa se a
-    dummy (mudança de patamar) OU a interação (mudança de inclinação) é
-    estatisticamente significativa — equivalente a um teste de Chow simplificado (uma
-    quebra conhecida a priori, não busca por múltiplas quebras como Bai-Perron). Roda
-    DEPOIS de `gerar_hiato_racial` (lê o parquet que ela gera).
+    Desde a Onda 2 (13/10/2026; R6 da auditoria) o EP é **EWC** (`src/inference/tendencia.py`;
+    t com ν = 5 g.l.), não mais OLS i.i.d. — 58 trimestres não são 58 evidências
+    independentes. Os 3 eventos formam uma família (BH). Não é busca por quebras
+    desconhecidas (Bai-Perron) nem controla eventos concorrentes. Roda DEPOIS de
+    `gerar_hiato_racial` (lê o parquet que ela gera).
     """
+    from src.inference import multiplicidade, tendencia
     hiato = pd.read_parquet(OUTPUT_DIR / "hiato_racial.parquet").sort_values(["ano", "trimestre"]).reset_index(drop=True)
-    hiato["indice_trimestre"] = range(len(hiato))
-
     resultados = []
     for nome_evento, (ano_evento, trimestre_evento) in EVENTOS_ESTRUTURAIS.items():
-        hiato["pos_evento"] = (
-            (hiato["ano"] > ano_evento) | ((hiato["ano"] == ano_evento) & (hiato["trimestre"] >= trimestre_evento))
-        ).astype(int)
-        if hiato["pos_evento"].sum() < 4 or (1 - hiato["pos_evento"]).sum() < 4:
-            continue  # evento perto demais da borda da série pra ter poder estatístico
-        modelo = smf.ols("hiato_percentual ~ indice_trimestre * pos_evento", data=hiato).fit()
-        resultados.append({
-            "evento": nome_evento, "ano_evento": ano_evento, "trimestre_evento": trimestre_evento,
-            "coef_mudanca_patamar": modelo.params["pos_evento"],
-            "p_valor_mudanca_patamar": modelo.pvalues["pos_evento"],
-            "coef_mudanca_inclinacao": modelo.params["indice_trimestre:pos_evento"],
-            "p_valor_mudanca_inclinacao": modelo.pvalues["indice_trimestre:pos_evento"],
-            "significativo_a_5pct": bool(
-                (modelo.pvalues["pos_evento"] < 0.05) or (modelo.pvalues["indice_trimestre:pos_evento"] < 0.05)
-            ),
-        })
-
+        q = tendencia.quebra_ewc(hiato["ano"], hiato["trimestre"], hiato["hiato_percentual"], (ano_evento, trimestre_evento))
+        resultados.append({"evento": nome_evento, "ano_evento": ano_evento, "trimestre_evento": trimestre_evento, **q,
+                           "coef_mudanca_inclinacao_pp_por_ano": q["coef_mudanca_inclinacao"]})
     df = pd.DataFrame(resultados)
+    # p mínimo de patamar e inclinação por evento, Bonferroni ×2 dentro do evento; BH entre eventos
+    df["p_valor"] = np.minimum(2 * df[["p_valor_mudanca_patamar", "p_valor_mudanca_inclinacao"]].min(axis=1), 1.0)
+    df = multiplicidade.adicionar_fdr(df, None, coluna_p="p_valor")
+    df["significativo_a_5pct"] = df["significativo_fdr"]
     destino = OUTPUT_DIR / "quebra_estrutural.parquet"
-    salvar_tabela(df, destino, se_metodo=SE_METODO_OLS_SERIE)
+    salvar_tabela(df, destino, se_metodo=tendencia.METODO, familia_fdr="os 3 eventos (BH); patamar e inclinação "
+                  "combinados por Bonferroni dentro do evento")
     print(f"quebra_estrutural.parquet: {len(df)} linhas", flush=True)
     print(df.to_string(index=False), flush=True)
 
@@ -1839,43 +1825,18 @@ PARES_RITMO_CONVERGENCIA = [
 ]
 
 
-def _ajustar_tendencia(serie: pd.DataFrame) -> dict:
-    """OLS de hiato_percentual em índice de trimestre — inclinação em pontos
-    percentuais por trimestre, R² e p-valor da inclinação."""
-    modelo = smf.ols("hiato_percentual ~ indice_trimestre", data=serie).fit()
-    return {
-        "inclinacao_pp_por_trimestre": modelo.params["indice_trimestre"],
-        "p_valor_inclinacao": modelo.pvalues["indice_trimestre"],
-        "r2": modelo.rsquared,
-    }
-
-
 def gerar_ritmo_convergencia() -> None:
-    """Compara o ritmo de convergência do hiato de renda (%) nos TRÊS pares — Branca-
-    Negra, Branca-Indígena, Preta-Parda — ajustando uma tendência linear simples
-    (hiato_percentual ~ índice de trimestre) em cada série histórica já publicada.
-    Roda DEPOIS de `gerar_hiato_racial`, `gerar_hiato_branca_indigena` e
-    `gerar_hiato_preta_parda` (lê os parquets que elas geram).
+    """Ritmo de convergência do hiato de renda (%) nos TRÊS pares — Branca-Negra,
+    Branca-Indígena, Preta-Parda — por tendência linear em cada série publicada.
 
-    Inclinação negativa = hiato caindo ao longo do tempo (convergindo); positiva =
-    hiato subindo (divergindo); perto de zero = estagnado. Reporta também um log-linear
-    (log(hiato_percentual) ~ índice) quando a série é toda positiva, pra capturar
-    convergência proporcional (ex.: "cai X% ao ano", não só "cai X pontos percentuais
-    ao ano") — as duas leituras podem discordar sobre qual série converge mais rápido
-    quando o NÍVEL de partida é muito diferente entre os pares.
-
-    Branca-Indígena é a série mais ruidosa das três (menor amostra por trimestre) —
-    ajusta a tendência TANTO na série bruta quanto numa versão suavizada (média móvel
-    de 4 trimestres PARA TRÁS, `rolling(4, min_periods=4)`; os gráficos de Indígena em
-    `graficos_fase1.py` usam média móvel CENTRADA) e compara o R² das duas: se mesmo suavizada o R² continuar
-    muito baixo, marca a série como `tendencia_confiavel=False` e NÃO reporta um "anos
-    pra zerar" pra ela — segue a regra do projeto de não forçar uma leitura de uma
-    série ruidosa demais.
-
-    "Anos pra zerar no ritmo atual" é só um exercício ILUSTRATIVO de extrapolação
-    ingênua (assume a mesma inclinação linear projetada pra frente indefinidamente,
-    o que quase certamente não vai se sustentar) — nunca uma projeção de verdade.
+    Desde a Onda 2 (13/10/2026; R6 da auditoria; estudo B1): EP **EWC** com Newey-West e GLS
+    AR(1) ao lado (`src/inference/tendencia.py`). `tendencia_confiavel` = os três IC excluem
+    zero (antes: R² ≥ 0,1, critério sem inferência). A versão suavizada de Branca-Indígena
+    saiu (a média móvel cria a autocorrelação que o EP ignorava) e o "anos para zerar" saiu
+    desta tabela: a projeção condicional, com premissas, é o B6 (`bloco_b`). Inclinação em
+    log (% ao ano) só quando a série é toda positiva.
     """
+    from src.inference import tendencia
     resultados = []
     for nome_par, arquivo in PARES_RITMO_CONVERGENCIA:
         caminho = OUTPUT_DIR / arquivo
@@ -1886,71 +1847,27 @@ def gerar_ritmo_convergencia() -> None:
         serie = serie.dropna(subset=["hiato_percentual"])
         if len(serie) < 8:
             continue
-        serie["indice_trimestre"] = range(len(serie))
-
-        linear = _ajustar_tendencia(serie)
-
-        log_linear = {}
+        t = tendencia.tempo_anos(serie["ano"], serie["trimestre"])
+        r = tendencia.tendencia_hac(t, serie["hiato_percentual"])
+        linha = {"par": nome_par, "n_trimestres": len(serie), "hiato_percentual_atual": serie["hiato_percentual"].iloc[-1],
+                 "inclinacao_pp_por_ano": r["inclinacao_por_ano"], "ic_inferior": r["ic_inferior"],
+                 "ic_superior": r["ic_superior"], "ep_ewc": r["ep_ewc"], "p_valor_inclinacao": r["p_valor_ewc"],
+                 "ep_newey_west": r["ep_newey_west"], "inclinacao_gls_ar1": r["inclinacao_gls_ar1"],
+                 "ep_gls_ar1": r["ep_gls_ar1"], "rho_residuos": r["rho_residuos"], "r2": r["r2"],
+                 "ep_iid": r["ep_iid"], "tendencia_confiavel": r["tendencia_confiavel"]}
         if (serie["hiato_percentual"] > 0).all():
-            serie_log = serie.copy()
-            serie_log["hiato_percentual"] = np.log(serie_log["hiato_percentual"])
-            modelo_log = smf.ols("hiato_percentual ~ indice_trimestre", data=serie_log).fit()
-            log_linear = {
-                "inclinacao_pct_por_trimestre_log": 100 * modelo_log.params["indice_trimestre"],
-                "p_valor_inclinacao_log": modelo_log.pvalues["indice_trimestre"],
-                "r2_log": modelo_log.rsquared,
-            }
-
-        suavizada = {}
-        tendencia_confiavel = linear["r2"] >= 0.1
-        inclinacao_para_projecao = linear["inclinacao_pp_por_trimestre"]
-        if nome_par == "Branca-Indígena":
-            serie_suave = serie.copy()
-            serie_suave["hiato_percentual"] = serie_suave["hiato_percentual"].rolling(4, min_periods=4).mean()
-            serie_suave = serie_suave.dropna(subset=["hiato_percentual"])
-            serie_suave["indice_trimestre"] = range(len(serie_suave))
-            ajuste_suave = _ajustar_tendencia(serie_suave)
-            suavizada = {
-                "inclinacao_pp_por_trimestre_suavizada": ajuste_suave["inclinacao_pp_por_trimestre"],
-                "r2_suavizada": ajuste_suave["r2"],
-            }
-            tendencia_confiavel = ajuste_suave["r2"] >= 0.1
-            # se a bruta não é confiável mas a suavizada é, projeta com a inclinação
-            # suavizada (é ela que sustenta o `tendencia_confiavel=True` nesse caso) —
-            # nunca projeta com uma inclinação cujo R² não passou no próprio critério.
-            inclinacao_para_projecao = ajuste_suave["inclinacao_pp_por_trimestre"]
-
-        nivel_atual = serie["hiato_percentual"].iloc[-1]
-        inclinacao_ano = linear["inclinacao_pp_por_trimestre"] * 4
-        # Convergindo pra zero = hiato e inclinação com sinais OPOSTOS (hiato positivo
-        # caindo, OU hiato negativo subindo) — se os dois têm o MESMO sinal, o hiato
-        # está se afastando de zero (divergindo), não faz sentido nenhum "anos pra
-        # zerar" (daria um número negativo sem significado, bug corrigido depois de
-        # notar isso no par Preta-Parda, que tem hiato_percentual_atual negativo).
-        inclinacao_ano_projecao = inclinacao_para_projecao * 4
-        convergindo = (nivel_atual > 0 > inclinacao_ano_projecao) or (nivel_atual < 0 < inclinacao_ano_projecao)
-        if tendencia_confiavel and convergindo:
-            anos_para_zerar = abs(nivel_atual / inclinacao_ano_projecao)
-        else:
-            anos_para_zerar = None
-
-        resultados.append({
-            "par": nome_par, "n_trimestres": len(serie),
-            "hiato_percentual_atual": nivel_atual,
-            "inclinacao_pp_por_trimestre": linear["inclinacao_pp_por_trimestre"],
-            "inclinacao_pp_por_ano": inclinacao_ano,
-            "r2": linear["r2"], "p_valor_inclinacao": linear["p_valor_inclinacao"],
-            **log_linear, **suavizada,
-            "tendencia_confiavel": tendencia_confiavel,
-            "anos_para_zerar_extrapolacao_ingenua": anos_para_zerar,
-        })
+            rl = tendencia.tendencia_hac(t, np.log(serie["hiato_percentual"]))
+            linha.update({"inclinacao_pct_por_ano_log": 100 * rl["inclinacao_por_ano"],
+                          "ic_log_inferior": 100 * rl["ic_inferior"], "ic_log_superior": 100 * rl["ic_superior"],
+                          "tendencia_log_confiavel": rl["tendencia_confiavel"]})
+        resultados.append(linha)
 
     df = pd.DataFrame(resultados)
     destino = OUTPUT_DIR / "ritmo_convergencia_hiatos.parquet"
-    salvar_tabela(df, destino, se_metodo=SE_METODO_OLS_SERIE)
+    salvar_tabela(df, destino, se_metodo=tendencia.METODO)
     print(f"ritmo_convergencia_hiatos.parquet: {len(df)} linhas", flush=True)
-    print(df[["par", "hiato_percentual_atual", "inclinacao_pp_por_ano", "r2",
-              "tendencia_confiavel", "anos_para_zerar_extrapolacao_ingenua"]].to_string(index=False), flush=True)
+    print(df[["par", "hiato_percentual_atual", "inclinacao_pp_por_ano", "ic_inferior", "ic_superior",
+              "tendencia_confiavel"]].to_string(index=False), flush=True)
 
 
 def gerar_informalidade(con: duckdb.DuckDBPyConnection) -> None:

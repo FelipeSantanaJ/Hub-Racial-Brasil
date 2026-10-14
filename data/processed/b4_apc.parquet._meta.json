@@ -1,0 +1,21 @@
+{
+  "esquema": "hub-racial-meta/1",
+  "arquivo": "b4_apc.parquet",
+  "n_linhas": 46,
+  "gerado_em": "2026-10-13T18:27:14.241479+00:00",
+  "codigo": {
+    "commit": "22180a1eb4cdf93dfb4cb5f3eb5bf534686271be-modificado",
+    "modulo": "__main__"
+  },
+  "insumos": {
+    "chave": "trimestral_v2",
+    "descricao": "PNAD Contínua trimestral, extrato v2 + deflator IBGE",
+    "hash": "9b64f579fa63981e9237190166d333a9ac546041a4df260d2c67dabf49f1ceda",
+    "n_arquivos": 228
+  },
+  "se_metodo": "wls_variancias_conhecidas",
+  "populacao": "Ocupados (VD4002=1) de 18+ anos com rendimento habitual do trabalho principal (VD4016) > 0; renda: Rendimento mensal habitual do trabalho principal (VD4016), deflacionado pelo deflator habitual do IBGE; 25–59 anos; Branca × Negra; células ano × idade",
+  "periodo": null,
+  "restricao": "Deaton-Paxson: efeitos de período somam zero e são ortogonais à tendência linear (APC); sensibilidade AC: sem período",
+  "familia_fdr": "efeitos de coorte de cada modelo (BH)"
+}

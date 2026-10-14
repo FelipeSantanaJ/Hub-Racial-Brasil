@@ -20,16 +20,15 @@ O projeto tem **duas árvores**:
 deflator oficial do IBGE, agregações por raça/gênero/faixa etária/geografia), análises
 descritivas, decomposições, distribuição, primeira identificação causal e testes
 automatizados.
-🔧 **Auditoria científica em andamento (out/2026).** A Rodada 1 encontrou um erro no erro-padrão
-(corrigido: ver "O que é validado" abaixo e [docs/auditoria/](docs/auditoria/)). A agenda de
-análises seguinte está em [docs/PLANO_DE_ANALISE.md](docs/PLANO_DE_ANALISE.md).
+🔧 **Auditoria científica e plano de análise em andamento (out/2026).** A Rodada 1 encontrou um erro no
+erro-padrão (corrigido: ver "O que é validado" abaixo e [docs/auditoria/](docs/auditoria/)). Ondas 1 e 2 do
+[plano de análise](docs/PLANO_DE_ANALISE.md) concluídas, com fichas em [docs/studies](docs/studies/INDICE.md).
 ⏳ **Etapas 2 a 6: não iniciadas.** Ver [docs/PLANO.md](docs/PLANO.md).
 
-> **Atenção (13/10/2026):** os gráficos com banda de IC ou asterisco de significância em
-> `docs/img` ainda foram gerados com o erro-padrão antigo e serão regenerados depois da troca
-> da população de referência (lista em
-> [docs/auditoria/graficos_a_regenerar.md](docs/auditoria/graficos_a_regenerar.md)). As
-> estimativas pontuais não mudaram.
+> **Leitura principal (13/10/2026):** o hiato racial de renda caiu de 2012 a 2026, mas **em degrau** (−5 p.p. em
+> 2022), não em tendência contínua; desde 2022 ele está plano. Toda tendência do Hub usa erro-padrão robusto a
+> autocorrelação ([B1](docs/studies/B1/ficha.md)). Os gráficos de `docs/img` foram regenerados na Onda 1 com o
+> erro-padrão corrigido e a população de referência.
 
 ### Renda habitual do trabalho, por raça (2012–2026)
 
@@ -54,7 +53,8 @@ entre pessoas com o mesmo nível de instrução — ele se abre dramaticamente j
 
 Testado trimestre a trimestre a partir dos microdados, com erro-padrão que respeita o desenho
 amostral da PNAD Contínua (Estrato e UPA): os 58 trimestres da série são estatisticamente
-significativos (z entre 19,5 e 37,2) — o hiato caiu de 74,2% (2012 T1) para 65,7% (2026 T2). O
+significativos (z entre 19,5 e 37,2) — o hiato caiu de 74,2% (2012 T1) para 65,7% (2026 T2), quase todo num
+degrau depois da pandemia (2022), sem tendência contínua de queda ([B1](docs/studies/B1/ficha.md)). O
 hiato % é **relativo à renda média Negra** (Branca ganha ~66% a mais; Negra ganha ~60% da
 renda Branca). **População:** ocupados de 18+ com renda habitual do trabalho principal > 0 (desde a
 Onda 1, 13/10/2026); com todos os adultos (não ocupados = 0) o hiato fica maior, sobretudo entre
@@ -70,7 +70,9 @@ Entre quem trabalha e tem renda, o hiato Branca × Negra é de 65,7% (2026 T2): 
 ganham pessoas brancas. Contando **todos os adultos** (quem não está ocupado entra com zero), o hiato sobe, e muito
 mais entre mulheres (+17,5 p.p. em média). Pela **renda do domicílio por pessoa**, todas as idades, o hiato era de
 99% em 2012 e de 82% em 2025, e 29% das pessoas negras viviam abaixo de meio salário mínimo por pessoa (15% das
-brancas). Uma pessoa negra ocupada tem um terço da chance de uma pessoa branca de estar entre os 10% que mais
+brancas). Com a linha internacional de US$ 8,30 por dia (PPC de 2021, convertida para reais), são 32% das pessoas
+negras e 16% das brancas: o mesmo ~2× ([T](docs/studies/T/ficha.md); cálculo do Hub com a renda da PNAD Contínua, não
+a taxa oficial do Banco Mundial). Uma pessoa negra ocupada tem um terço da chance de uma pessoa branca de estar entre os 10% que mais
 ganham. Fichas: [`docs/studies`](docs/studies/INDICE.md) (F, S0, S1, T, A, e S0.3, S1.3–S1.5, T4).
 
 Quase 9 de cada 10 partes do hiato de renda do trabalho por adulto vêm da **renda por hora**; entre mulheres, 15%
@@ -82,6 +84,26 @@ Na renda domiciliar per capita, a chance de uma pessoa negra estar entre os 10% 
 de uma pessoa branca, sem mudança desde 2012 ([T4](docs/studies/T4/ficha.md)).
 
 ![Pobreza por raça](docs/img/onda1_t2_pobreza_meio_sm.png)
+
+### No tempo e por raça × gênero (Onda 2)
+
+![Hiato em degrau](docs/img/onda2_b1_degraus_hiato.png)
+
+O hiato Branca × Negra entre ocupados caiu de 74% (2012) para 66% (2026), mas **em degrau**: com o erro-padrão que
+respeita a autocorrelação da série, a tendência contínua não se distingue de zero e a queda vem de um salto de −5 p.p.
+em 2022; desde então a série está plana ([B1](docs/studies/B1/ficha.md)). Por isso não há "data da igualdade" no
+ritmo recente ([B6](docs/studies/B6/ficha.md)). Entre todos os adultos, o hiato sobe com o desemprego (+1,6 p.p. por
+ponto de desocupação, [B5](docs/studies/B5/ficha.md)). A reclassificação racial existiu (mais pessoas se declaram
+pretas dentro das mesmas gerações), mas não fabricou a convergência ([B2](docs/studies/B2/ficha.md)); na base da
+distribuição o hiato até aumentou ([B3](docs/studies/B3/ficha.md)); quem nasceu depois de 1990 tem hiato menor na
+mesma idade ([B4](docs/studies/B4/ficha.md)).
+
+![Raça e gênero](docs/img/onda2_c3_shapley_raca_genero.png)
+
+Entre ocupados, mulheres negras ganham 47% do que ganham homens brancos; cerca de dois terços dessa distância se
+associam à raça e um terço ao gênero; contando todos os adultos, gênero e raça pesam quase o mesmo
+([C1](docs/studies/C1/ficha.md), [C3](docs/studies/C3/ficha.md)). 14% das mulheres negras ocupadas com renda são
+trabalhadoras domésticas, contra 8% das brancas ([C5](docs/studies/C5/ficha.md)).
 
 ### Quanto do hiato a ocupação explica?
 
@@ -149,10 +171,10 @@ P58 da distribuição de Branca (pouco acima da mediana), mas no P77 da distribu
 ganha quem está em cada percentil —, os 10% mais pobres entre os brancos ganham R$1.500,
 contra R$766 entre os 10% mais pobres dos negros (2026 T2).
 
-**687 imagens em `docs/img`** (500 da árvore `arv_*` + 187 das demais análises, 8 delas da Onda 1 `onda1_*`; contagem de 13/10/2026, sem as séries de renda 14–17, que ficam fora das análises, e sem as 3 células da árvore sem amostra, suprimidas; a galeria
+**694 imagens em `docs/img`** (500 da árvore `arv_*` + 194 das demais análises, 8 da Onda 1 `onda1_*` e 8 da Onda 2 `onda2_*`; contagem de 13/10/2026, sem as séries de renda 14–17, que ficam fora das análises, e sem as 3 células da árvore sem amostra, suprimidas; a galeria
 narrada em `docs/ANALISE_FASE1.md` usa 87 delas). O deck em PPTX
-([docs/Datahub_Racial_Brasil_Fase1.pptx](docs/Datahub_Racial_Brasil_Fase1.pptx), 617
-slides; eram 657 até a Onda 1, que tirou as 37 folhas de renda 14–17, e 620 até as pendências da Onda 1, que
+([docs/Datahub_Racial_Brasil_Fase1.pptx](docs/Datahub_Racial_Brasil_Fase1.pptx), 635
+slides — abre com a leitura principal das Ondas 1 e 2 (18 slides); eram 657 até a Onda 1, que tirou as 37 folhas de renda 14–17, e 620 até as pendências da Onda 1, que
 suprimiram 3 folhas sem amostra) é organizado como uma **árvore cruzada** de renda por raça (Branca /
 Negra=Preta+Parda / Indígena): 11 itens — Raça; ×Gênero; ×Faixa Etária; ×Geração;
 ×Escolaridade; e os cruzamentos até Raça×Gênero×[Faixa|Geração]×Escolaridade. Cada folha de
@@ -234,6 +256,9 @@ python -m src.processing.bloco_t                  # Onda 1: Bloco T (T1–T4, PN
 python -m src.processing.bloco_a                  # Onda 1: Bloco A (A2–A7)
 python -m src.processing.bloco_s                  # Onda 1, pendências: S0.3, S1.3, S1.4, S1.5
 python -m src.processing.graficos_onda1           # gráficos dos estudos da Onda 1 (docs/img/onda1_*)
+python -m src.processing.bloco_b                  # Onda 2: Bloco B (B1–B6)
+python -m src.processing.bloco_c                  # Onda 2: Bloco C (C1–C5)
+python -m src.processing.graficos_onda2           # gráficos dos estudos da Onda 2 (docs/img/onda2_*)
 ```
 
 Testes (rodam sem microdados, com dados sintéticos; também no CI a cada push):

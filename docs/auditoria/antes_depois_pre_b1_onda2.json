@@ -1,0 +1,55 @@
+[
+  {
+    "arquivo": "quebra_estrutural.parquet",
+    "linhas_antes": 3,
+    "linhas_depois": 3,
+    "colunas_novas": [
+      "coef_mudanca_inclinacao_pp_por_ano",
+      "ep_mudanca_inclinacao",
+      "ep_mudanca_patamar",
+      "gl_ewc",
+      "p_valor",
+      "p_valor_bh",
+      "significativo_fdr",
+      "significativo_nominal"
+    ],
+    "colunas_removidas": [],
+    "pontos_identicos": false,
+    "colunas_ponto_diferentes": [
+      "coef_mudanca_patamar",
+      "coef_mudanca_inclinacao"
+    ],
+    "dif_max_abs": 9.26394735491831,
+    "dif_max_rel": 2.9999999999999623
+  },
+  {
+    "arquivo": "ritmo_convergencia_hiatos.parquet",
+    "linhas_antes": 3,
+    "linhas_depois": 3,
+    "colunas_novas": [
+      "ep_ewc",
+      "ep_gls_ar1",
+      "ep_iid",
+      "ep_newey_west",
+      "ic_inferior",
+      "ic_log_inferior",
+      "ic_log_superior",
+      "ic_superior",
+      "inclinacao_gls_ar1",
+      "inclinacao_pct_por_ano_log",
+      "rho_residuos",
+      "tendencia_log_confiavel"
+    ],
+    "colunas_removidas": [
+      "anos_para_zerar_extrapolacao_ingenua",
+      "inclinacao_pct_por_trimestre_log",
+      "inclinacao_pp_por_trimestre",
+      "inclinacao_pp_por_trimestre_suavizada",
+      "p_valor_inclinacao_log",
+      "r2_log",
+      "r2_suavizada"
+    ],
+    "pontos_identicos": null,
+    "nota": "ordem/chave 'tendencia_confiavel' diverge"
+  }
+]

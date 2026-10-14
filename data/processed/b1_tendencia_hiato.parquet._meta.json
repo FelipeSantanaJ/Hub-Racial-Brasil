@@ -1,0 +1,20 @@
+{
+  "esquema": "hub-racial-meta/1",
+  "arquivo": "b1_tendencia_hiato.parquet",
+  "n_linhas": 22,
+  "gerado_em": "2026-10-13T18:34:52.322534+00:00",
+  "codigo": {
+    "commit": "22180a1eb4cdf93dfb4cb5f3eb5bf534686271be-modificado",
+    "modulo": "__main__"
+  },
+  "insumos": {
+    "chave": "derivado",
+    "descricao": "Outras tabelas de data/processed",
+    "hash": null,
+    "n_arquivos": 0
+  },
+  "se_metodo": "ewc_lazarus_lewis_stock_watson; sensibilidades newey_west e gls_ar1",
+  "populacao": "Séries publicadas do hiato: P1 (hiato_racial, hiato_branca_indigena, hiato_preta_parda, a2_*), P4 (sensibilidade_hiato_populacao) e renda domiciliar per capita (t1)",
+  "periodo": null,
+  "nota": "Inclinação por ano; hiato_pct em p.p./ano, log_pontos em log-pontos/ano; desde_2022_* = só 2022–2026"
+}

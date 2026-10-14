@@ -7,7 +7,7 @@
 | Responsável | Felipe Santana (execução: Claude Code) |
 | Criada em / atualizada em | 2026-10-13 / 2026-10-13 |
 | Estado de publicação | **Aprovado com ressalvas** (aprovado pelo Felipe em 13/10/2026) |
-| PR | Onda 1, parte 2 (`onda1/parte2`) |
+| PR | Onda 1, parte 2 (`onda1/parte2`); linhas em PPC na Onda 2 (`onda2/b-c`, PR #9) |
 
 ## 1. Pergunta
 
@@ -36,11 +36,27 @@ transferências e tamanho da família.
 - **Renda:** `VD5008` = renda habitual dos trabalhos + efetiva de outras fontes, do domicílio, ÷ moradores.
   **Nominal do ano** (o extrato não traz os deflatores anuais CO1/CO2).
 - **Linhas de pobreza (por pessoa, por mês):** ¼ salário mínimo (critério de renda do BPC), ½ salário mínimo
-  (baixa renda do CadÚnico), 50% da mediana nacional do ano. Linhas internacionais em PPC: **pendentes**.
+  (baixa renda do CadÚnico), 50% da mediana nacional do ano e, desde a Onda 2, as linhas internacionais do Banco
+  Mundial de **US$ 3,00, 4,20 e 8,30 por pessoa por dia em PPC de 2021** (nota do Banco Mundial de 05/06/2025)
+  convertidas para R$ nominais do ano (ver Método).
 
 ## 5. Método
 
 - Incerteza: linearização Estrato/UPA (médias, FGT, razão de médias por delta). Gini e quantis sem IC nesta versão.
+- **Linhas em PPC** (`src/ingestion/linhas_pobreza_ppc.py` → `data/processed/linhas_pobreza_ppc.parquet`):
+  linha_R$(ano) = US$/dia × PPC_2021 × IPC(ano) ÷ IPC(2021) × 365/12 (por pessoa por mês). PPC_2021 =
+  `PA.NUS.PRVT.PP` de 2021 = **2,4499 R$ por dólar internacional** (consumo final das famílias); IPC =
+  `FP.CPI.TOTL` (2010 = 100; 2021 = 187,117; 2025 = 234,414). Fonte: API v2 do Banco Mundial (WDI), Brasil,
+  acessada em 13/10/2026 (`lastupdated` 2026-10-08). Há IPC para todos os anos de 2012 a 2025; ano sem IPC
+  ficaria sem a linha ("NÃO VERIFICADO"), nunca extrapolado. Valores (R$/pessoa/mês):
+
+  | Linha | 2012 | 2019 | 2021 | 2025 |
+  |---|---|---|---|---|
+  | US$ 3,00 | 134,28 | 199,99 | 223,55 | 280,06 |
+  | US$ 4,20 | 188,00 | 279,99 | 312,97 | 392,08 |
+  | US$ 8,30 | 371,52 | 553,31 | 618,49 | 774,82 |
+
+  Para comparação, ¼ SM em 2025 = R$ 379,50 e ½ SM = R$ 759,00.
 - T3: a renda domiciliar é reconstruída somando, por domicílio, a renda habitual de todos os trabalhos (`VD4019`) e
   as fontes `V5001A2`–`V5008A2`; a mediana da diferença relativa contra a `VD5007` do IBGE é **0** em todos os anos.
 
@@ -68,6 +84,16 @@ H2 seria enfraquecida se o hiato domiciliar não caísse nos anos de transferên
 - Mudança do Bolsa Família (2021 Auxílio Brasil; 2023 novo Bolsa Família) muda o que cada código capta.
 - O responsável pelo domicílio é declarado; domicílios chefiados por mulheres têm composição diferente.
 - Valores nominais: comparar níveis em R$ só dentro do ano.
+- **Linhas internacionais × renda da PNADC.** As taxas do T2 em PPC **não são** as taxas oficiais do Banco Mundial
+  para o Brasil (Poverty and Inequality Platform) e não devem ser apresentadas como tais: (i) o Hub usa `VD5008`
+  (renda **habitual** dos trabalhos + efetiva de outras fontes), nominal do ano, todas as idades, sem pensionistas e
+  domésticos (V2005 17–19); o Banco Mundial harmoniza a renda à sua maneira (conceito exato de renda, tratamento de
+  rendas zero e ajustes: NÃO VERIFICADO); (ii) a conversão usa o IPC nacional médio do ano, sem deflação espacial
+  nem ajuste para o mês de referência da renda; (iii) o fator de PPC é revisado pelo Banco Mundial (os valores
+  mudam a cada atualização do WDI). Use as linhas em PPC para **comparar grupos raciais** e a evolução no tempo
+  dentro do Hub, não para comparar o nível com outras fontes.
+- Rendas zero pesam muito na base: com US$ 3,00, o FGT(1) das pessoas brancas (1,6%) é mais da metade do FGT(0)
+  (2,9%), porque quem tem renda domiciliar zero entra com hiato de pobreza 1.
 
 ## 10. Resultados
 
@@ -98,6 +124,27 @@ Gini total 0,540 (2012) → 0,511 (2025); Theil entre raças ~9–11% do total.
 | 50% da mediana | Branca | 13,7 | 14,6 | 15,1 | 13,9 |
 | | Negra | 31,4 | 32,2 | 31,5 | 28,3 |
 
+**T2 — linhas internacionais (PPC de 2021), % de pessoas abaixo da linha**
+
+| Linha (R$/mês em 2025) | Grupo | 2012 | 2019 | 2021* | 2022 | 2025 (IC 95%) |
+|---|---|---|---|---|---|---|
+| US$ 3,00 (R$ 280) | Branca | 4,7 | 4,5 | 6,6 | 3,8 | 2,9 (2,7–3,1) |
+| | Negra | 12,7 | 12,3 | 15,0 | 9,3 | **5,9** (5,7–6,2) |
+| | Indígena | 15,1 | 17,6 | 16,1 | 8,9 | 8,5 (4,7–12,3) |
+| US$ 4,20 (R$ 392) | Branca | 8,0 | 7,6 | 10,2 | 6,4 | 4,9 (4,7–5,2) |
+| | Negra | 20,5 | 19,4 | 22,5 | 15,6 | **10,7** (10,3–11,0) |
+| | Indígena | 25,4 | 27,2 | 21,8 | 17,5 | 14,1 (10,0–18,2) |
+| US$ 8,30 (R$ 775) | Branca | 24,2 | 22,2 | 26,5 | 21,3 | 16,4 (15,9–17,0) |
+| | Negra | 47,7 | 44,2 | 48,8 | 40,4 | **31,9** (31,4–32,5) |
+| | Indígena | 50,0 | 48,4 | 52,9 | 45,7 | 39,0 (33,6–44,3) |
+| | Total | 36,7 | 34,8 | 39,1 | 32,1 | 25,2 (24,8–25,7) |
+
+Em 2025, a proporção de pessoas negras abaixo da linha é **2,0×** a de brancas com US$ 3,00, 2,2× com US$ 4,20 e
+1,9× com US$ 8,30 — a mesma razão de ~2× das linhas em salário mínimo. Hiato de pobreza (FGT1) com US$ 8,30 em 2025:
+Negra 12,1% (11,9–12,4) × Branca 6,0% (5,7–6,2). Mulheres negras: 33,8% (33,2–34,4) abaixo de US$ 8,30 (homens
+negros 30,1%; mulheres brancas 17,0%). As linhas de US$ 3,00 e 4,20 ficam perto de ¼ SM (abaixo e acima), e a de
+US$ 8,30 perto de ½ SM: o retrato é o mesmo das linhas nacionais.
+
 A pobreza **absoluta** (em salários mínimos) caiu muito desde 2022; a **relativa** (50% da mediana) quase não
 mudou: pessoas negras seguem ~2× mais pobres que brancas. Mulheres negras: 31,0% abaixo de ½ SM em 2025
 (homens negros 27,7%; mulheres brancas 15,3%).
@@ -122,9 +169,13 @@ mudou: pessoas negras seguem ~2× mais pobres que brancas. Mulheres negras: 31,0
 - "29% das pessoas negras viviam com menos de meio salário mínimo por pessoa em 2025, contra 15% das brancas."
 - "Bolsa Família chega a 29% das pessoas negras, mas responde por 4% da renda dos seus domicílios: a renda vem
   sobretudo do trabalho."
+- "Em 2025, 32% das pessoas negras viviam abaixo da linha de US$ 8,30 por dia (PPC de 2021) pelo cálculo do Hub com a
+  renda habitual da PNAD Contínua, contra 16% das brancas."
 
 ## 12. Afirmações proibidas
 
 - "A pobreza acabou caindo por causa do Bolsa Família" (descrição, não causa).
 - Comparar níveis em R$ entre anos (valores nominais).
 - Comparar 2020–21 com os demais anos sem dizer que é a Visita 5 durante a pandemia.
+- Apresentar as taxas em PPC como "a pobreza extrema do Brasil segundo o Banco Mundial" ou compará-las em nível com
+  as da Poverty and Inequality Platform.

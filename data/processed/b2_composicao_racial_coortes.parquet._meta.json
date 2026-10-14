@@ -1,0 +1,23 @@
+{
+  "esquema": "hub-racial-meta/1",
+  "arquivo": "b2_composicao_racial_coortes.parquet",
+  "n_linhas": 135,
+  "gerado_em": "2026-10-13T18:44:50.410724+00:00",
+  "codigo": {
+    "commit": "8a4429c2b16d9caf53d31abb06aee33896d4515e",
+    "modulo": "__main__"
+  },
+  "insumos": {
+    "chave": "trimestral_v2",
+    "descricao": "PNAD Contínua trimestral, extrato v2 + deflator IBGE",
+    "hash": "9b64f579fa63981e9237190166d333a9ac546041a4df260d2c67dabf49f1ceda",
+    "n_arquivos": 228
+  },
+  "se_metodo": "sem_inferencia",
+  "populacao": "Pessoas 18+ dos 2º trimestres, coortes de nascimento 1950–1994",
+  "periodo": {
+    "inicio": "2012",
+    "fim": "2026"
+  },
+  "nota": "2º trimestres; pessoas 18+; coortes de nascimento de 5 anos (1950–1994)"
+}

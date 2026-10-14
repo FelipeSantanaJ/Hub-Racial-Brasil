@@ -47,6 +47,8 @@ INSUMOS = {
     "anual_v2": ("PNAD Contínua anual, Visitas 1 e 5, extrato v2", ["data/raw/pnadc_anual_v2"]),
     "derivado": ("Outras tabelas de data/processed", []),
     "ibge_deflator": ("Planilha de deflatores do IBGE (FTP)", ["data/raw/pnadc_extraido/_tmp/deflatores"]),
+    "wb_ppc_ipc": ("Banco Mundial (WDI, API v2): fator de PPC do consumo privado (PA.NUS.PRVT.PP) e IPC (FP.CPI.TOTL), Brasil",
+                   ["data/raw/externos/wb_PA.NUS.PRVT.PP_BRA.json", "data/raw/externos/wb_FP.CPI.TOTL_BRA.json"]),
 }
 LIMITE_SHA_ARQUIVO = 5 * 1024 * 1024  # arquivos menores que isso entram com sha256 do conteúdo
 

@@ -126,37 +126,22 @@ def construir() -> list[dict]:
                     "Se a curva de uma raça é mais inclinada, cada degrau de escolaridade 'vale' mais R$ pra ela."))
 
     # ---- #11 Quanto tempo até fechar o hiato? --------------------- #
-    hr = pd.read_parquet(P / "hiato_racial.parquet").sort_values(["ano", "trimestre"])
-    hr["t"] = np.arange(len(hr))
-    hr["data"] = _data(hr)
-    fig, ax = plt.subplots(figsize=(11, 4.8), dpi=150)
-    fig.patch.set_facecolor(g.SUPERFICIE)
-    _estilo(ax)
-    ax.plot(hr["data"], hr["hiato_percentual"], color=g.COR_NEGRA, linewidth=2, zorder=3, label="hiato observado")
-    linhas_txt = []
-    for rot, base_ano, cor in [("tendência 2012–2026", 2012, "#3a5a9a"),
-                               ("tendência 2016–2026 (pós-recessão)", 2016, g.TINTA_MUTED)]:
-        sub = hr[hr["ano"] >= base_ano]
-        b1, b0 = np.polyfit(sub["t"], sub["hiato_percentual"], 1)
-        if b1 >= -1e-6:
-            linhas_txt.append(f"{rot}: praticamente sem queda — não converge")
-            continue
-        t_zero = -b0 / b1
-        n_extra = int(t_zero - hr["t"].iloc[-1])
-        datas_ext = pd.date_range(hr["data"].iloc[0], periods=int(t_zero) + 4, freq="QS")
-        y_ext = b0 + b1 * np.arange(len(datas_ext))
-        ax.plot(datas_ext[y_ext > 0], y_ext[y_ext > 0], "--", color=cor, linewidth=1.6, zorder=2)
-        ano_zero = hr["ano"].iloc[-1] + n_extra // 4
-        linhas_txt.append(f"{rot}: fecharia por volta de {ano_zero} (~{max(n_extra, 0) // 4} anos)")
-    ax.axhline(0, color=g.EIXO, linewidth=1)
-    ax.set_ylim(-3, hr["hiato_percentual"].max() * 1.15)
-    ax.yaxis.set_major_formatter(lambda v, _: f"{v:.0f}%")
-    ax.grid(axis="y", color=g.GRADE, linewidth=0.8, zorder=0)
-    _salvar(fig, "apr_convergencia.png")
-    f.append(_folha("grafico", "Hiato de renda Branca vs. Negra — projeção linear da tendência",
-                    "extrapolação simples da reta de tendência até o hiato zerar · " + " · ".join(linhas_txt),
-                    "apr_convergencia.png",
-                    "NÃO é previsão — tendências não são garantia (a série tem quebras estruturais e pode estagnar). Cenário ilustrativo do ritmo recente."))
+    # Desde a Onda 2 (13/10/2026, estudo B6): projeção CONDICIONAL com IC do ritmo (EWC) e duas premissas; a
+    # extrapolação simples sem incerteza que estava aqui saiu (contradizia o B1: a queda foi um degrau em 2022).
+    b6p = P / "b6_projecao_condicional.parquet"
+    if b6p.exists() and (g.OUTPUT_DIR / "onda2_b6_projecao_condicional.png").exists():
+        b6 = pd.read_parquet(b6p)
+        b6 = b6[b6["serie"] == "P1 · Branca × Negra"].set_index("premissa")
+        pa, pb = b6.loc["P-a ritmo linear de todo o período"], b6.loc["P-b ritmo linear desde 2022"]
+        fmt = lambda v: f"{v:+.2f}".replace(".", ",")  # noqa: E731
+        f.append(_folha("grafico", "Hiato Branca vs. Negra — projeção condicional (não é previsão)",
+                        f"se o ritmo de 2012–2026 ({fmt(pa['ritmo_pp_ano'])} p.p./ano) continuar: zero por volta de "
+                        f"{pa['ano_central']:.0f} ({pa['ano_mais_cedo']:.0f}–{pa['ano_mais_tarde']:.0f}); no ritmo desde "
+                        f"2022 ({fmt(pb['ritmo_pp_ano'])} p.p./ano): sem data",
+                        "onda2_b6_projecao_condicional.png",
+                        "A queda de 2012–2026 veio de um degrau em 2022 (B1); desde então a série está plana. "
+                        "Ficha: docs/studies/B6."))
+    (g.OUTPUT_DIR / "apr_convergencia.png").unlink(missing_ok=True)
 
     # ---- #3 Capital vs. Interior --------------------------------- #
     p = P / "hiato_capital_interior.parquet"
