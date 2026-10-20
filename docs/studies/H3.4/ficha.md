@@ -80,11 +80,42 @@ condicional excluir zero.
 
 ## 10. Resultados
 
-<Preenchido depois de rodar.>
+Tabela: `h34_riqueza_imobiliaria` (`src/processing/bloco_integracao.py`, `--so h34`). Aluguel estimado mensal
+(`V8000_DEFLA`, R$ de 15/01/2018; mediana R$ 452) × 12 — o fator de anualização do arquivo é 1 e não anualiza
+(conferido). Moradia própria já paga (V0217 = 1); por pessoa = valor do domicílio ÷ moradores.
+
+| Medida (principal, *cap rate* 5%) | Branca | Negra | Indígena |
+|---|---|---|---|
+| Riqueza imobiliária média por pessoa | R$ 55.085 (52.013–58.156) | R$ 27.199 (26.555–27.842) | R$ 28.305 (22.609–34.001) |
+| Mediana por pessoa | R$ 29.504 | R$ 15.350 | R$ 15.184 |
+| % em moradia própria já paga | 66,6% | 66,6% | 64,8% |
+| Renda disponível per capita média | R$ 2.189 | R$ 1.209 | R$ 1.286 |
+
+| Razão Branca ÷ Negra | Estimativa (IC 95%) |
+|---|---|
+| Riqueza imobiliária, *cap rate* uniforme (4%, 5% ou 6% — a razão não muda) | **2,03** (1,91–2,14) |
+| Riqueza imobiliária, *cap rate* variável 6% → 4% | **2,20** (2,07–2,34) |
+| Renda disponível per capita | **1,81** (1,73–1,89) |
+
+**Envelope da lacuna (razão Branca ÷ Negra): 1,91 a 2,34.** Com a mesma renda (décimo), UF e situação, pessoas negras
+têm **R$ 9.331 a menos** (7.868–10.794; 17% da média branca; *cap rate* 5%); indígenas, R$ 12.383 a menos (22%).
+Incluindo "própria, ainda pagando" (sem descontar a dívida): razão 2,05 e −16%.
+
+**Leitura das hipóteses**
+
+- **H1 (lacuna de riqueza maior que a de renda): confirmada** — razão de riqueza 2,03–2,20 × renda 1,81; o limite
+  inferior do envelope (1,91) fica acima do IC da renda (1,73–1,89).
+- **H2 (some com a mesma renda): refutada** — −17% da média branca no mesmo décimo de renda, UF e situação (IC exclui
+  zero; p-BH < 0,001).
+- **H3 (casa própria comum, valor não): confirmada** — mesma % em casa própria quitada (66,6% × 66,6%), metade do valor.
 
 ## 11. Afirmações permitidas
 
-<Depois de rodar.>
+- "Pessoas brancas e negras moram em casa própria quitada na mesma proporção (67%), mas o valor estimado da moradia
+  por pessoa é cerca de duas vezes maior entre brancos (POF 2017–2018); a diferença na moradia (≈ 2,0–2,2 vezes) é
+  maior que a diferença de renda (1,8 vez)."
+- "Com a mesma renda e no mesmo lugar, pessoas negras têm cerca de 17% menos patrimônio em moradia." Ressalva na mesma
+  tela: só a moradia própria, estimada pelo aluguel que o morador declara; não é a riqueza total.
 
 ## 12. Afirmações proibidas
 
@@ -96,3 +127,4 @@ condicional excluir zero.
 | Data | Quem | O que mudou |
 |---|---|---|
 | 2026-10-20 | Claude Code | criação (seções 1–9 antes de rodar) |
+| 2026-10-20 | Claude Code | resultados (seções 10–11) |

@@ -82,11 +82,48 @@ H3, se a série não tiver degrau significante (EWC) nos anos de crise.
 
 ## 10. Resultados
 
-<Preenchido depois de rodar.>
+Tabelas: `h42_transicoes` e `h42_atrito_tendencia` (`src/processing/bloco_integracao.py`, `--so h42`). 57 pares de
+trimestres consecutivos (2012T1→T2 … 2026T1→T2); nenhum par duplicado na ligação estrita. Pares: 745.827 (T1),
+998.797 (T2), 2.703.631 (T3).
+
+**Desvio do registro prévio (declarado):** a sensibilidade ao atrito usou **ajuste por células** (raça × sexo × 4
+faixas de idade × 3 de instrução × região × situação de trabalho × ano: peso × elegíveis ÷ encontrados), e não um
+logit, por memória (dezenas de milhões de pessoas-trimestre).
+
+| 2012–2026 (p.p.) | Branca | Negra | Negra − Branca bruta | **Negra − Branca com idade, sexo, instrução, UF, ano** |
+|---|---|---|---|---|
+| T1 desocupado → ocupado | 29,9% | 30,9% | +1,0 (0,7 a 1,4) | **+1,1** (0,7 a 1,5) |
+| T2 sem carteira → com carteira | 15,1% | 12,3% | −2,8 (−3,0 a −2,6) | **+0,5** (0,2 a 0,7) |
+| T3 com carteira → perda | 6,6% | 8,0% | +1,3 (1,2 a 1,4) | **+0,18** (0,08 a 0,28) |
+
+Indígenas: T2 10,5% (−4,6 p.p. bruta; −1,0 condicional, IC −2,4 a 0,5); T3 7,9% (+1,3 bruta; +0,3 condicional, IC
+contém zero). Todas as diferenças Negra − Branca têm p-BH < 0,01.
+
+**Atrito:** % dos elegíveis (visita ≤ 4) encontrados na visita seguinte — brancos 80–91%, negros 78–89%, indígenas
+70–88%; a diferença Branca − Negra fica entre 1,6 e 3,6 p.p. (maior em 2014 e 2020). O ajuste por células muda as diferenças
+brutas em no máximo 0,05 p.p.
+
+**Série anual da diferença Negra − Branca (bruta):** T2 foi de −3,8 (2012) a −1,2/−2,4 (2025–26): a desvantagem na
+formalização encolheu (+0,22 p.p. por ano, IC EWC −0,02 a 0,45 — não confiável); degrau de +2,5 p.p. em 2020 (IC 1,5
+a 3,5), na pandemia. T1: tendência −0,13 p.p./ano (−0,20 a −0,06). T3: sem degrau em 2015 (+0,15; −1,4 a 1,8) nem em
+2020 (0,00). Com 15 pontos anuais o EWC tem só 2 g.l.: os IC da série são largos.
+
+**Leitura das hipóteses**
+
+- **H1 (formalização mais difícil): refutada para T2, fraca para T3** — com as mesmas características, negros sem
+  carteira passam para o emprego com carteira um pouco **mais** (+0,5 p.p.) que brancos; na perda da carteira resta
+  +0,18 p.p. (2,4% da taxa branca).
+- **H2 (só composição): quase confirmada** — a desvantagem bruta de −2,8 p.p. em T2 e cerca de 86% da de T3 somem com
+  idade, sexo, instrução, UF e ano.
+- **H3 (mais sensível ao ciclo): refutada** — sem degrau em T3 em 2015–16 nem em 2020.
+- **H4 (atrito seletivo): refutada como fonte de viés** — o atrito difere por raça em 1,6–3,6 p.p., mas o ajuste não muda
+  as diferenças.
 
 ## 11. Afirmações permitidas
 
-<Depois de rodar.>
+- "De um trimestre para o outro, trabalhadores negros sem carteira conseguem carteira assinada menos vezes que brancos
+  (12% × 15%) e perdem a carteira um pouco mais (8,0% × 6,6%); com a mesma idade, sexo, escolaridade e estado, essas
+  diferenças quase desaparecem." Ressalva: associação, não discriminação; erro de classificação entre trimestres.
 
 ## 12. Afirmações proibidas
 
@@ -97,3 +134,4 @@ H3, se a série não tiver degrau significante (EWC) nos anos de crise.
 | Data | Quem | O que mudou |
 |---|---|---|
 | 2026-10-20 | Claude Code | criação (seções 1–9 antes de rodar) |
+| 2026-10-20 | Claude Code | resultados; desvio: atrito por células em vez de logit |

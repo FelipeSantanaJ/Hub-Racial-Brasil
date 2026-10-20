@@ -171,7 +171,7 @@ CATALOGO: list[tuple[str, str, str]] = [
     (r"^d44_segregacao_residencial$", "Universo do Censo 2022: pessoas por cor ou raça em cada setor censitário (setores "
      "com contagem suprimida por sigilo fora e contados); renda média do responsável pelo domicílio no setor",
      "ibge_censo_2022_setores"),
-    (r"^i1_censo_pnadc$", "Pessoas de 18+ em domicílios particulares (Branca, Preta, Amarela, Parda, Indígena): Censo 2022 "
+    (r"^i1_censo_pnadc$", "Pessoas de 20+ (o Censo público só tem faixas de 5 anos) em domicílios particulares (Branca, Preta, Amarela, Parda, Indígena): Censo 2022 "
      "(amostra, acesso público) e PNAD Contínua 2022T3; hiato entre ocupados com renda de todos os trabalhos > 0 "
      "(P1080 / VD4019)", "censo2022_e_pnadc"),
     (r"^h34_riqueza_imobiliaria$", "Moradores da POF 2017–2018 (Branca, Negra, Indígena); valor da moradia própria pelo "

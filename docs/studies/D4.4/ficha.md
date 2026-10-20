@@ -79,11 +79,44 @@ municípios, a "segregação" dentro do município é atribuída ao tamanho dos 
 
 ## 10. Resultados
 
-<Preenchido depois de rodar.>
+Tabela: `d44_segregacao_residencial` (`src/processing/bloco_integracao.py`, `--so d44`). **Conferência:** 203,08 milhões
+de pessoas nos setores (oficial: 203,1 mi); 43,4% brancas, 10,1% pretas, 45,2% pardas (oficial: 43,5 / 10,2 / 45,3).
+41.288 setores (8,8%; 4,05 milhões de pessoas) têm contagem por cor suprimida por sigilo e ficam fora.
+
+| Branca × Negra (todos os setores) | Observado | Esperado por acaso | Observado − acaso |
+|---|---|---|---|
+| Duncan D, setores do país | **0,39** | 0,33 (composição de cada município) | 0,06 |
+| Duncan D dentro do município (média ponderada) | **0,21** | 0,04 | **0,17** |
+| Theil H total · entre municípios · dentro | 0,165 · 0,116 · 0,049 (**70% entre municípios**) | — | — |
+| Isolamento: % de negros no setor da pessoa negra média | 65,5% | — | — |
+| Renda média do responsável no setor: pessoa branca × negra | R$ 3.531 × R$ 2.282 → **+55%** | — | — |
+| Mesma razão, dentro do mesmo município | **+30%** | — | — |
+
+**Por porte (dentro do município):** capitais D 0,28 (renda do setor +70%); ≥ 500 mil não capitais 0,24 (+36%);
+100–500 mil 0,20 (+24%); < 100 mil 0,18 (+10%). Entre as cidades com ≥ 1 milhão de brancos + negros, Salvador tem o
+maior D (0,40), seguida de Porto Alegre (0,37), Campinas (0,35), Belo Horizonte (0,34), Rio (0,32) e São Paulo (0,32);
+Manaus o menor (0,18).
+
+**Sensibilidades:** Branca × Preta D dentro 0,27 (renda +36% dentro do município), Branca × Parda 0,21 (+28%); só
+setores urbanos 0,21; municípios com ≥ 20 setores 0,22 — a leitura não muda.
+
+**Leitura das hipóteses**
+
+- **H1 (moderada, sobretudo entre regiões): confirmada** — D nacional 0,39, dentro do município 0,21, 70% do Theil
+  entre municípios.
+- **H2 (mais nas metrópoles): confirmada** — capitais 0,28 × municípios < 100 mil 0,18 (diferença 0,10).
+- **H3 (bairros mais pobres): confirmada** — +55% no país, +30% dentro do mesmo município (+70% nas capitais).
+- **H4 (escola reflete moradia):** D residencial dentro do município 0,21 × D entre escolas dentro do município 0,26
+  (E7) — próximos, com a escola um pouco mais segregada; unidades diferentes (setor × escola), comparação indicativa.
+- A segregação dentro dos municípios **não é efeito do tamanho dos setores**: D − acaso = 0,17 (regra da seção 8:
+  > 0,05).
 
 ## 11. Afirmações permitidas
 
-<Depois de rodar.>
+- "Dentro da mesma cidade, a renda média dos responsáveis pelos domicílios nos setores censitários onde moram pessoas
+  brancas é 30% maior que nos setores onde moram pessoas negras; nas capitais, 70% maior (Censo 2022)."
+- "A separação residencial entre brancos e negros é moderada (índice de dissimilaridade 0,21 dentro dos municípios),
+  maior nas capitais (0,28) e máxima em Salvador (0,40) entre as grandes cidades."
 
 ## 12. Afirmações proibidas
 
@@ -95,3 +128,4 @@ municípios, a "segregação" dentro do município é atribuída ao tamanho dos 
 | Data | Quem | O que mudou |
 |---|---|---|
 | 2026-10-20 | Claude Code | criação (seções 1–9 antes de rodar) |
+| 2026-10-20 | Claude Code | resultados (seções 10–11) |

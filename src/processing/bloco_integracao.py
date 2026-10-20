@@ -3,8 +3,8 @@
 - **D4.4** — segregação residencial Branca × Negra entre setores censitários (Censo 2022, universo): Duncan nacional e
   dentro do município, Theil H entre/dentro de municípios, isolamento, renda média do responsável no setor
   experimentada por cada grupo, e linha de base aleatória (composição do município nos mesmos setores).
-- **I1** — Censo 2022 (amostra, acesso público) × PNADC 2022T3: composição racial de 18+ e hiato de renda de todos os
-  trabalhos entre ocupados de 18+, Brasil e UF.
+- **I1** — Censo 2022 (amostra, acesso público) × PNADC 2022T3: composição racial de 20+ e hiato de renda de todos os
+  trabalhos entre ocupados de 20+, Brasil e UF (o arquivo público do Censo só traz a idade em faixas de 5 anos).
 - **H3.4** — riqueza imobiliária (moradia própria) pela POF 2017–2018: aluguel estimado × 12 ÷ *cap rate*, por pessoa.
 - **H4.2** — transições trimestrais no painel de 5 visitas da PNADC (ligação por UPA, domicílio, grupo de rotação,
   ordem, sexo e data de nascimento).
@@ -195,11 +195,11 @@ COMPARA = [("Negra", "Branca × Negra"), ("Indígena", "Branca × Indígena"), (
 
 def _estatisticas(raca: np.ndarray, w: np.ndarray, renda: np.ndarray, na_renda: np.ndarray, cl: np.ndarray,
                   est: np.ndarray) -> list[dict]:
-    """Composição de 18+ (todas as linhas) e hiato entre `na_renda`; EP linearizado por conglomerado/estrato."""
+    """Composição de 20+ (todas as linhas) e hiato entre `na_renda`; EP linearizado por conglomerado/estrato."""
     out = []
     for g, cods in RACAS_COD.items():
         z, m = _media_z(np.isin(raca, cods).astype(float) * 100, w, np.ones(len(w), bool))
-        out.append({"bloco": "composição 18+", "medida": f"% {g}", "estimativa": m, "ep": np.sqrt(var_conglomerados(z, cl, est))})
+        out.append({"bloco": "composição 20+", "medida": f"% {g}", "estimativa": m, "ep": np.sqrt(var_conglomerados(z, cl, est))})
     y, ly = renda, np.log(np.where(renda > 0, renda, 1.0))
     zs, ms, zl, ml = {}, {}, {}, {}
     for g, cods in RACAS_COD.items():
@@ -225,7 +225,7 @@ def _censo_i1() -> pd.DataFrame:
                CAST(P0210 AS TINYINT) AS raca, (P0950 = '1' AND TRY_CAST(P1080 AS DOUBLE) > 0) AS ocup_renda,
                CAST(TRY_CAST(P1080 AS DOUBLE) AS FLOAT) AS renda, (MP1080 = '0') AS nao_imputado
         FROM read_parquet('{(PESSOAS / '*.parquet').as_posix()}')
-        WHERE P0130 IN ('01', '05') AND TRY_CAST(P0180 AS INTEGER) >= 18 AND P0210 IN ('1','2','3','4','5')""").df()
+        WHERE P0130 IN ('01', '05') AND P0180 BETWEEN '05' AND '17' AND P0210 IN ('1','2','3','4','5')""").df()
 
 
 def _pnadc_i1() -> pd.DataFrame:
@@ -235,7 +235,7 @@ def _pnadc_i1() -> pd.DataFrame:
                CAST(V1028 AS DOUBLE) AS w, CAST(V2010 AS TINYINT) AS raca, (VD4002 = '1' AND VD4019 > 0) AS ocup_renda,
                CAST(VD4019 AS DOUBLE) AS renda
         FROM read_parquet('{PARQUET_GLOB}', hive_partitioning = 1)
-        WHERE ano = 2022 AND trimestre = 3 AND V2009 >= 18 AND V2010 IN ('1','2','3','4','5')""").df()
+        WHERE ano = 2022 AND trimestre = 3 AND V2009 >= 20 AND V2010 IN ('1','2','3','4','5')""").df()
 
 
 def _p999(renda: np.ndarray, w: np.ndarray, m: np.ndarray) -> float:
@@ -261,7 +261,7 @@ def i1() -> pd.DataFrame:
                 if esp != "principal" and uf != 0:
                     continue
                 for r in _estatisticas(raca[s], w[s], renda[s], m[s], cl[s], est[s]):
-                    if esp != "principal" and r["bloco"] == "composição 18+":
+                    if esp != "principal" and r["bloco"] == "composição 20+":
                         continue
                     linhas.append({"fonte": fonte, "especificacao": esp, "uf": int(uf) if uf else "Brasil", **r})
             print(f"I1 {fonte} {esp}: ok", flush=True)

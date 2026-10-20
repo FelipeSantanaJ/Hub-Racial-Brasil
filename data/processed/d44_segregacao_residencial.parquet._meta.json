@@ -1,0 +1,20 @@
+{
+  "esquema": "hub-racial-meta/1",
+  "arquivo": "d44_segregacao_residencial.parquet",
+  "n_linhas": 84,
+  "gerado_em": "2026-10-20T21:40:59.448805+00:00",
+  "codigo": {
+    "commit": "ea4e10a8e0fa39ec1b7abf534cccef84ac9d1358",
+    "modulo": "__main__"
+  },
+  "insumos": {
+    "chave": "ibge_censo_2022_setores",
+    "descricao": "IBGE, Censo 2022, Agregados por setores (Cor ou raça, Básico, Rendimento do Responsável; baixados em 20/10/2026)",
+    "hash": "5097b43a758aa4c98703b11a485355286f527b244b9defc2aa671b2ae54fceb2",
+    "n_arquivos": 3
+  },
+  "se_metodo": "sem_inferencia",
+  "populacao": "Universo do Censo 2022: pessoas por cor ou raça em cada setor censitário (setores com contagem suprimida por sigilo fora e contados); renda média do responsável pelo domicílio no setor",
+  "periodo": null,
+  "nota": "Universo do Censo 2022 por setor; Negra = preta + parda; linha de base = composição do município"
+}

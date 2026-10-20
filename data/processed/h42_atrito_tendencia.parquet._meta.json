@@ -1,0 +1,23 @@
+{
+  "esquema": "hub-racial-meta/1",
+  "arquivo": "h42_atrito_tendencia.parquet",
+  "n_linhas": 57,
+  "gerado_em": "2026-10-20T22:16:30.955235+00:00",
+  "codigo": {
+    "commit": "ea4e10a8e0fa39ec1b7abf534cccef84ac9d1358-modificado",
+    "modulo": "__main__"
+  },
+  "insumos": {
+    "chave": "trimestral_v2",
+    "descricao": "PNAD Contínua trimestral, extrato v2 + deflator IBGE",
+    "hash": "9b64f579fa63981e9237190166d333a9ac546041a4df260d2c67dabf49f1ceda",
+    "n_arquivos": 228
+  },
+  "se_metodo": "ewc_e_sem_inferencia",
+  "populacao": "Pessoas de 18+ (Branca, Negra, Indígena) observadas em dois trimestres consecutivos do painel da PNAD Contínua (ligação por UPA, domicílio, grupo de rotação, ordem, sexo e nascimento)",
+  "periodo": {
+    "inicio": "2012",
+    "fim": "2026"
+  },
+  "nota": "Atrito = % dos elegíveis (visita ≤ 4) encontrados na visita seguinte; tendência EWC da diferença anual"
+}

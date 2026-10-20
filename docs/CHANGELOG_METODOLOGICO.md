@@ -5,6 +5,32 @@ calculá-lo: data, o quê, por quê, impacto. Mais recente primeiro.
 
 ---
 
+## 20/10/2026 — Onda 6: integração (branch `onda6/integracao`)
+
+- **Autorização:** Onda 6 autorizada pelo Felipe em 20/10/2026 ("está tudo autorizado"), incluindo o Censo 2022.
+- **Fonte nova — Censo 2022:** o "Bloqueado (GovBR)" estava desatualizado. O FTP do IBGE publica os agregados por setor
+  censitário (cor ou raça, básico, rendimento do responsável) e os microdados da amostra de acesso público (só UF;
+  idade em faixas de 5 anos). Baixados em 20/10/2026; extração em `src/ingestion/censo_2022.py`. Totais conferidos
+  (203,08 mi de pessoas; composição por cor igual à oficial em ±0,1 p.p.).
+- **Estudos novos** (fichas commitadas antes de rodar; `src/processing/bloco_integracao.py`):
+  - **D4.4** (antes bloqueado): segregação residencial Branca × Negra — dissimilaridade 0,39 entre setores do país e
+    0,21 dentro do município (0,04 por acaso); 70% do Theil entre municípios; a renda dos setores de pessoas brancas é
+    55% maior (30% dentro do mesmo município; 70% nas capitais). Salvador é a grande cidade mais segregada (0,40).
+  - **I1** (novo): o Censo 2022 confirma o hiato nacional da PNADC (Branca × Negra 69,7% × 66,4% em 2022, diferença
+    +3,3 p.p., IC −1,2 a 7,9) e a composição racial (±0,2 p.p.); por UF a concordância é fraca (correlação 0,59); o
+    hiato Branca × Indígena é 117% no Censo × 40% na PNADC — os números indígenas de renda da PNADC são frágeis.
+    **Desvio:** 18+ → 20+ (idade em faixas no Censo público); uma primeira rodada com a idade lida errado foi
+    descartada antes da interpretação.
+  - **H3.4**: riqueza imobiliária (moradia própria, aluguel estimado da POF): brancos têm 2,0–2,2 vezes a de negros
+    (renda: 1,8 vez), com a mesma % de casa própria quitada (67%); com a mesma renda e lugar, −17%.
+  - **H4.2** (refaz `transicao_*`): com ligação estrita do painel, a desvantagem bruta de negros na formalização
+    (−2,8 p.p.) e ~86% da maior perda de carteira (+1,3 p.p.) somem com idade, sexo, instrução, UF e ano.
+    **Desvio:** atrito ajustado por células em vez de logit (memória).
+- Nenhum número já publicado muda; as tabelas antigas `transicao_desemprego_emprego` e `transicao_informal_formal`
+  passam a remeter ao H4.2.
+
+---
+
 ## 20/10/2026 — Onda 5: Bloco G, políticas e causalidade (branch `onda5/g`)
 
 - **Decisões do Felipe (20/10/2026, "está tudo autorizado"):** fichas G6 e G1 aprovadas com ressalvas; G2, G3, G4 e

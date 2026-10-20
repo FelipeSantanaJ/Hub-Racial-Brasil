@@ -23,7 +23,8 @@ automatizados.
 🔧 **Auditoria científica e plano de análise em andamento (out/2026).** A Rodada 1 encontrou um erro no
 erro-padrão (corrigido: ver "O que é validado" abaixo e [docs/auditoria/](docs/auditoria/)). Ondas 1 a 4 do
 [plano de análise](docs/PLANO_DE_ANALISE.md) concluídas (Onda 4: educação, origem e patrimônio, com PNAD Contínua,
-INEP e POF), com fichas em [docs/studies](docs/studies/INDICE.md); Onda 5 (políticas e causalidade) em andamento.
+INEP e POF), com fichas em [docs/studies](docs/studies/INDICE.md); Onda 5 (políticas: Lei de Cotas e poder estatístico)
+concluída; Onda 6 (integração com o Censo 2022, riqueza imobiliária e transições no emprego) em revisão.
 ⏳ **Etapas 2 a 6: não iniciadas.** Ver [docs/PLANO.md](docs/PLANO.md).
 
 > **Leitura principal (13/10/2026):** o hiato racial de renda caiu de 2012 a 2026, mas **em degrau** (−5 p.p. em

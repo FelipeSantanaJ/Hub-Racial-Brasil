@@ -79,18 +79,58 @@ critério de cada uma.
 
 ## 10. Resultados
 
-<Preenchido depois de rodar.>
+Tabela: `i1_censo_pnadc` (`src/processing/bloco_integracao.py`, `--so i1`). Censo: 21,5 milhões de pessoas na amostra
+pública; pesos somam 203,08 milhões (oficial: 203,1 mi).
+
+**Desvio do registro prévio (declarado):** o arquivo público do Censo traz a idade só em faixas de 5 anos (P0180 é
+categoria: 15–19, 20–24…); "18+" não é recortável. As duas fontes passaram para **20+**. Uma primeira rodada tratou
+P0180 como idade em anos (erro de leitura do layout, meu) e gerou uma composição impossível (18% brancos, 18%
+indígenas); foi descartada antes de qualquer interpretação.
+
+| Brasil, 20+ | Censo 2022 | PNADC 2022T3 | Censo − PNADC (IC 95%) |
+|---|---|---|---|
+| % Branca | 44,1 | 43,9 | +0,2 (−0,2 a 0,6) |
+| % Negra (preta + parda) | 54,9 | 54,8 | +0,1 (−0,3 a 0,5) |
+| % Indígena | 0,48 | 0,43 | +0,05 (0,01 a 0,09) |
+| Renda média de todos os trabalhos — Branca | R$ 3.751 | R$ 3.559 | +R$ 192 |
+| — Negra | R$ 2.211 | R$ 2.139 | +R$ 71 |
+| — Indígena | R$ 1.730 | R$ 2.543 (n = 958) | −R$ 813 |
+| **Hiato Branca × Negra (razão − 1)** | **69,7%** | **66,4%** | **+3,3 p.p. (−1,2 a 7,9)** |
+| Hiato Branca × Negra (ln) | 0,424 | 0,432 | −0,008 (−0,025 a 0,008) |
+| Hiato Branca × Preta / × Parda | 78,5% / 67,5% | 69,2% / 65,6% | +9,3 / +1,8 |
+| **Hiato Branca × Indígena (razão − 1)** | **116,8%** | **40,0%** | **+76,9 p.p. (43 a 111)** |
+
+Renda até o P99,9: hiato Branca × Negra 64,8% (Censo) × 64,0% (PNADC), diferença +0,8. Só renda não imputada no
+Censo: 70,2%. **Correlação entre as 27 UFs** do hiato Branca × Negra: **0,59** (Branca × Indígena: 0,49); nas UFs a
+PNADC tem IC largos (amostra estadual pequena).
+
+**Leitura das hipóteses**
+
+- **H1 (as fontes concordam): confirmada no Brasil, refutada nas UFs** — diferença nacional de 3,3 p.p. (≤ 5:
+  "concordam"), mas a correlação entre UFs (0,59) fica abaixo do limiar pré-registrado de 0,6. Leitura: o hiato
+  nacional da PNADC é validado pelo Censo; hiatos por UF da PNADC num único trimestre não devem ser lidos isoladamente.
+- **H2 (Censo capta mais o topo): compatível** — a diferença cai de 3,3 para 0,8 p.p. ao cortar no P99,9.
+- **H3 (composição antiga na PNADC): refutada** — composição igual em ±0,2 p.p. (os pesos do extrato v2 já estão
+  calibrados após o Censo).
+- **H4 (indígenas diferentes): confirmada** — o Censo mostra um hiato Branca × Indígena de 117%, quase o triplo do da
+  PNADC (40%, com 958 indígenas na amostra). Os números indígenas de renda da PNADC são frágeis.
 
 ## 11. Afirmações permitidas
 
-<Depois de rodar.>
+- "O Censo 2022 confirma o hiato de renda medido pela PNAD Contínua: pessoas brancas ganham cerca de 70% a mais que
+  pessoas negras no trabalho (Censo: 69,7%; PNADC: 66,4%, julho–setembro de 2022)."
+- "Para indígenas, o Censo 2022 mostra uma diferença muito maior que a PNADC: pessoas brancas ganham mais que o dobro
+  (+117%) do que indígenas ganham; a PNADC, com amostra pequena de indígenas, subestima essa diferença."
 
 ## 12. Afirmações proibidas
 
 - "O Censo prova que a PNADC está errada" (ou o contrário).
+- Citar o hiato Branca × Indígena da PNADC sem a comparação com o Censo 2022.
+- Comparar hiatos por UF da PNADC de um único trimestre como se fossem precisos.
 
 ## 13. Revisão
 
 | Data | Quem | O que mudou |
 |---|---|---|
 | 2026-10-20 | Claude Code | criação (seções 1–9 antes de rodar) |
+| 2026-10-20 | Claude Code | resultados; desvio: 18+ → 20+ (idade em faixas no Censo público) |

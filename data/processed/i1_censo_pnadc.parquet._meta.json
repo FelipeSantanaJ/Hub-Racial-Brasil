@@ -1,0 +1,21 @@
+{
+  "esquema": "hub-racial-meta/1",
+  "arquivo": "i1_censo_pnadc.parquet",
+  "n_linhas": 1738,
+  "gerado_em": "2026-10-20T21:50:12.379503+00:00",
+  "codigo": {
+    "commit": "ea4e10a8e0fa39ec1b7abf534cccef84ac9d1358-modificado",
+    "modulo": "__main__"
+  },
+  "insumos": {
+    "chave": "censo2022_e_pnadc",
+    "descricao": "IBGE, Censo 2022 (microdados da amostra, acesso público; baixados em 20/10/2026) e PNAD Contínua trimestral, extrato v2",
+    "hash": "399960a9525594d98918acbc6e638b276966c6fbd4ac5eef48468de3bc70ee09",
+    "n_arquivos": 254
+  },
+  "se_metodo": "linearizacao_domicilio_uf_censo_e_estrato_upa_pnadc",
+  "populacao": "Pessoas de 20+ (o Censo público só tem faixas de 5 anos) em domicílios particulares (Branca, Preta, Amarela, Parda, Indígena): Censo 2022 (amostra, acesso público) e PNAD Contínua 2022T3; hiato entre ocupados com renda de todos os trabalhos > 0 (P1080 / VD4019)",
+  "periodo": null,
+  "familia_fdr": null,
+  "nota": "Censo: EP aproximado (domicílio como conglomerado, UF como estrato); renda de todos os trabalhos"
+}

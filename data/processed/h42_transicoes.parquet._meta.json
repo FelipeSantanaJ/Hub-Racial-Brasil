@@ -1,0 +1,21 @@
+{
+  "esquema": "hub-racial-meta/1",
+  "arquivo": "h42_transicoes.parquet",
+  "n_linhas": 261,
+  "gerado_em": "2026-10-20T22:16:23.106765+00:00",
+  "codigo": {
+    "commit": "ea4e10a8e0fa39ec1b7abf534cccef84ac9d1358-modificado",
+    "modulo": "__main__"
+  },
+  "insumos": {
+    "chave": "trimestral_v2",
+    "descricao": "PNAD Contínua trimestral, extrato v2 + deflator IBGE",
+    "hash": "9b64f579fa63981e9237190166d333a9ac546041a4df260d2c67dabf49f1ceda",
+    "n_arquivos": 228
+  },
+  "se_metodo": "linearizacao_estrato_upa",
+  "populacao": "Pessoas de 18+ (Branca, Negra, Indígena) observadas em dois trimestres consecutivos do painel da PNAD Contínua (ligação por UPA, domicílio, grupo de rotação, ordem, sexo e nascimento)",
+  "periodo": null,
+  "familia_fdr": null,
+  "nota": "Pares de trimestres consecutivos; ligação UPA+V1008+V1014+V2003+sexo+nascimento"
+}
