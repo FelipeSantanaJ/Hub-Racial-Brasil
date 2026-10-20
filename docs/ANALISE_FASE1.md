@@ -103,6 +103,12 @@ ocupação por si só (uma única variável) já explica quase tanto quanto idad
 JUNTAS (que levam a 31%). Ocupação é, isoladamente, um dos fatores mais explicativos do hiato
 que temos nesta base.
 
+> **Atualização da Onda 3 (20/10/2026).** Esta seção usa a decomposição antiga (3 controles: idade, instrução,
+> ocupação). A referência do Hub passou a ser o [D1](studies/D1/ficha.md): com 8 blocos (inclui território, sexo,
+> horas, vínculo e atividade) a parte não associada às covariáveis é 0,094 log-pontos (≈ 10% de renda) e **não é
+> robusta** a variáveis omitidas ([D8](studies/D8/ficha.md)); por quantil, a ordem entre base e topo depende da banda
+> do kernel, então "piso pegajoso" e "teto de vidro" não são afirmados.
+
 **Mesma pergunta, com teste de significância formal** — regressão (Oaxaca-Blinder):
 
 ![Decomposição de Oaxaca-Blinder](img/oaxaca_blinder_decomposicao.png)
@@ -114,9 +120,9 @@ e agora **com teste de significância** (p < 0,001, não é ruído amostral).
 
 ![Hiato residual por quantil](img/oaxaca_blinder_quantis.png)
 
-O resíduo não é uniforme ao longo da distribuição de renda: menor na mediana (~15%), mas
-maior tanto na base (P10, ~35% — "piso pegajoso") quanto no topo (P90, ~34% — "teto de
-vidro", coerente com o hiato que se abre no Superior completo).
+Na especificação antiga, o resíduo é menor na mediana (~15%) que na base (P10, ~35%) e no topo (P90, ~34%). No D1
+(Onda 3) a forma em "U" reaparece na janela recente, mas qual extremo é maior muda com a banda do kernel (heaping no
+salário mínimo): o Hub **não** afirma "piso pegajoso" nem "teto de vidro".
 
 A mesma barra "só ocupação" aqui: explica **40% do hiato** de log-renda, com significância
 formal (p < 0,001) — um pouco menos que os 52% que idade+escolaridade+ocupação juntas

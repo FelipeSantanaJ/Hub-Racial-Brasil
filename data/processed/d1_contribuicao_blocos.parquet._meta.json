@@ -1,0 +1,21 @@
+{
+  "esquema": "hub-racial-meta/1",
+  "arquivo": "d1_contribuicao_blocos.parquet",
+  "n_linhas": 576,
+  "gerado_em": "2026-10-14T03:45:41.107124+00:00",
+  "codigo": {
+    "commit": "a651cd093ff8e2c830445c9febbbf0c08fb932cf-modificado",
+    "modulo": "__main__"
+  },
+  "insumos": {
+    "chave": "trimestral_v2",
+    "descricao": "PNAD Contínua trimestral, extrato v2 + deflator IBGE",
+    "hash": "9b64f579fa63981e9237190166d333a9ac546041a4df260d2c67dabf49f1ceda",
+    "n_arquivos": 228
+  },
+  "se_metodo": "wls_influencia_linearizacao_estrato_upa",
+  "populacao": "Ocupados (VD4002=1) de 18+ anos com rendimento habitual do trabalho principal (VD4016) > 0; renda: Rendimento mensal habitual do trabalho principal (VD4016), deflacionado pelo deflator habitual do IBGE; Branca, Negra (Preta+Parda) e Indígena; com horas habituais (V4039) > 0; ln da renda real",
+  "periodo": null,
+  "rotulo_residuo": "parte não associada às covariáveis incluídas (nunca 'discriminação'; regra R5)",
+  "nota": "Gelbach (com incerteza de β) e Shapley; contribuição > 0 = bloco associado a parte do hiato"
+}

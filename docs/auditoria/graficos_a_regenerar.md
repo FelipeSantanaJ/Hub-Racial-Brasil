@@ -33,7 +33,7 @@ entram aqui.
 
 | Gerador | Imagem | Motivo |
 |---|---|---|
-| `graficos_fase1.py:1654-1663` `grafico_oaxaca_blinder_decomposicao` | `oaxaca_blinder_decomposicao.png`, `decomposicao_hiato_ocupacional.png` | p-valor do WLS cluster por UPA (não usa o EP corrigido); rótulo do resíduo precisa seguir a regra R5 (Onda 3) |
+| `graficos_fase1.py:1654-1663` `grafico_oaxaca_blinder_decomposicao` | `oaxaca_blinder_decomposicao.png`, `decomposicao_hiato_ocupacional.png` | p-valor do WLS cluster por UPA (não usa o EP corrigido); rótulo do resíduo precisa seguir a regra R5. **Onda 3:** a referência passa a ser o D1 (`onda3_d1_*.png`); o gráfico antigo fica só para comparação e saiu do README |
 | `graficos_fase1.py:1689` `grafico_oaxaca_blinder_quantis` | `oaxaca_blinder_quantis.png` | Idem; RIF sem sensibilidade de banda (R4) |
 | `graficos_fase1.py:1793` `grafico_quebra_estrutural` | `hiato_quebra_estrutural.png` | OLS i.i.d. sobre a série (R6, sem HAC) |
 | `graficos_causal_cotas.py` (coortes) | `causal_cohortes_universitaria_{negra,indigena}.png` | Desenho A (R2): reespecificação na Onda 5 |

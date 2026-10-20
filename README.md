@@ -21,7 +21,7 @@ deflator oficial do IBGE, agregações por raça/gênero/faixa etária/geografia
 descritivas, decomposições, distribuição, primeira identificação causal e testes
 automatizados.
 🔧 **Auditoria científica e plano de análise em andamento (out/2026).** A Rodada 1 encontrou um erro no
-erro-padrão (corrigido: ver "O que é validado" abaixo e [docs/auditoria/](docs/auditoria/)). Ondas 1 e 2 do
+erro-padrão (corrigido: ver "O que é validado" abaixo e [docs/auditoria/](docs/auditoria/)). Ondas 1, 2 e 3 do
 [plano de análise](docs/PLANO_DE_ANALISE.md) concluídas, com fichas em [docs/studies](docs/studies/INDICE.md).
 ⏳ **Etapas 2 a 6: não iniciadas.** Ver [docs/PLANO.md](docs/PLANO.md).
 
@@ -105,29 +105,31 @@ associam à raça e um terço ao gênero; contando todos os adultos, gênero e r
 ([C1](docs/studies/C1/ficha.md), [C3](docs/studies/C3/ficha.md)). 14% das mulheres negras ocupadas com renda são
 trabalhadoras domésticas, contra 8% das brancas ([C5](docs/studies/C5/ficha.md)).
 
-### Quanto do hiato a ocupação explica?
+### Por que a diferença existe? (Onda 3)
 
-![Decomposição do hiato por ocupação](docs/img/decomposicao_hiato_ocupacional.png)
+![Contribuições ao hiato](docs/img/onda3_d1_contribuicoes.png)
 
-Controlando por idade, escolaridade e ocupação (mesma categoria ocupacional), o hiato bruto
-de 66% cai para 25% — mas não desaparece. Boa parte do hiato racial de renda não se explica
-por "estar em ocupações diferentes". Confirmado por um segundo método (regressão de
-Oaxaca-Blinder, com teste de significância formal — p < 0,001): resíduo de +22,8% (coeficiente
-restrito, controlando por idade, instrução e ocupação), perto da padronização direta acima
-(24,7%; são estimandos diferentes). O resíduo é a parte **não associada às covariáveis
-incluídas**: não é medida de discriminação e não inclui região, horas trabalhadas, sexo ou
-informalidade, que serão adicionados na Onda 3 do plano. E ocupação SOZINHA (sem nem controlar
-idade/escolaridade) já explica quase tanto quanto as duas juntas — hiato cai de 66% pra 34%
-só com essa variável. Dentro de **cada** categoria ocupacional, aliás, Branca ganha mais que
-Negra — o hiato não é só "estar em ocupações diferentes".
+Comparando pessoas ocupadas com a mesma idade, sexo, instrução, lugar, horas, vínculo, ocupação e atividade, o hiato
+de renda Branca × Negra (0,43 log-pontos em 2025–26) cai para 0,09: cerca de **78% do hiato está associado a essas
+diferenças**. Instrução, território e ocupação pesam quase igual (≈ 20% cada); desde 2012 a instrução perdeu peso
+(28% → 21%) e a ocupação ganhou (14% → 19%) ([D1](docs/studies/D1/ficha.md)). Essas diferenças são, em boa parte,
+resultado de desigualdades anteriores — "associado" não quer dizer "explicado" no sentido de justificado.
 
-### O hiato residual é maior no topo E na base da distribuição de renda
+![Hiato aninhado no tempo](docs/img/onda3_d1_serie_aninhada.png)
 
-![Hiato residual por quantil](docs/img/oaxaca_blinder_quantis.png)
+O que sobra (≈ 10% de renda) é a parte **não associada às covariáveis incluídas** — não é medida de discriminação.
+Ela ficou parada desde 2012, existe nas 27 UFs e dentro da mesma ocupação detalhada (CBO de 4 dígitos, [D3](docs/studies/D3/ficha.md)),
+e é o dobro entre pessoas com diploma superior ([D2](docs/studies/D2/ficha.md)). Mas não é robusta: uma variável
+omitida tão relevante quanto o território a eliminaria ([D8](docs/studies/D8/ficha.md)). Pessoas brancas e negras
+seguem tão separadas entre ocupações quanto em 2012; com a mesma instrução e o mesmo lugar, pessoas negras não têm
+menos carteira assinada, mas são empregadoras 2,4 p.p. menos ([D5](docs/studies/D5/ficha.md)); para indígenas, a
+barreira à formalidade persiste com os controles. Dentro da mesma UF, o hiato é maior na capital ([D4](docs/studies/D4/ficha.md))
+e cresce até os 35 anos, ficando estável depois ([D6](docs/studies/D6/ficha.md)).
 
-Decomposição por RIF (Firpo-Fortin-Lemieux): o hiato que sobra depois de controlar
-idade/escolaridade/ocupação tem formato em U — menor na mediana (~15%), maior na base
-(~35%, "piso pegajoso") e no topo (~34%, "teto de vidro").
+As tabelas antigas (`decomposicao_oaxaca_blinder*`, `decomposicao_hiato_ocupacional` e o gráfico de RIF por quantil)
+continuam publicadas para comparação, mas a referência do Hub passa a ser o D1. A forma em "U" do resíduo por quantil
+(maior na base e no topo que na mediana) aparece na janela recente, mas qual extremo é maior depende da banda do
+kernel — o Hub não afirma nem "teto de vidro" nem "piso pegajoso" ([D1](docs/studies/D1/ficha.md), D1.3).
 
 ### O topo 10% dos negros ficou muito mais escolarizado — mas o hiato lá em cima persiste
 
@@ -283,7 +285,7 @@ Para conferir que uma regeneração não mudou estimativas pontuais:
 | Multiplicidade | `significativo_fdr` (Benjamini-Hochberg por família) em toda tabela com p-valor | `src/inference/multiplicidade.py` |
 | Funções estatísticas | Testes automatizados, inclusive golden-file da pipeline e guarda contra a fórmula antiga | `tests/`, CI |
 | Desenhos causais (cotas) | **Não validados**: resultados exploratórios; nenhum teste do Desenho B sobrevive à correção de multiplicidade | `docs/auditoria/rodada1.md` (R2, R3) |
-| Decomposição Oaxaca-Blinder | Implementação correta; **especificação insuficiente** (faltam região, horas, sexo, informalidade) | R5 da auditoria |
+| Decomposição do hiato | Refeita na Onda 3 ([D1](docs/studies/D1/ficha.md)): 8 blocos, Gelbach/Shapley, sensibilidade a omitidas; o OB antigo (3 controles) fica só para comparação | R5 da auditoria; D1, D8 |
 | Gráficos com IC/asterisco | **Desatualizados** até a regeneração | `docs/auditoria/graficos_a_regenerar.md` |
 
 ## Limitações conhecidas

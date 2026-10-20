@@ -5,6 +5,35 @@ calculá-lo: data, o quê, por quê, impacto. Mais recente primeiro.
 
 ---
 
+## 14/10/2026 — Onda 3: Bloco D (branch `onda3/d`)
+
+- **Decisões do Felipe (20/10/2026, "pode seguir"):** fichas D1–D6 e D8 aprovadas com ressalvas; leitura do D8
+  adotada (a parte não associada fica entre 0 e ~9 log-pontos e não é robusta a omitidas); gráficos `onda3_*` no deck
+  publicado; textos antigos que citavam o resíduo do OB de 3 controles (≈ 23%) e "piso pegajoso / teto de vidro"
+  passam a remeter ao D1; PR #10 liberado; Onda 4 autorizada.
+
+- **Estudos novos** (fichas D1–D6 com hipóteses escritas e commitadas antes de rodar; D8 de síntese;
+  `src/processing/bloco_d.py`, `bloco_d_estrutura.py`, `graficos_onda3.py`). D7 fica coberto por C4–C6.
+- **Decomposição de referência do Hub passa a ser o D1** (E0–E8 com idade, sexo, instrução, território, horas,
+  vínculo, ocupação e atividade; Gelbach e Shapley; OB de Reimers; RIF-OB; Oster e Cinelli-Hazlett). As tabelas
+  `decomposicao_oaxaca_blinder*` e `decomposicao_hiato_ocupacional` (3 controles) **não mudam** e ficam para
+  comparação; saíram do README. Nenhum número já publicado muda.
+- **Erro encontrado e corrigido antes de ler os resultados:** a dummy de atividade "serviços domésticos" (`VD4010` = 11)
+  é idêntica à posição "doméstico" (`VD4009` 03/04); com as duas, Gelbach/Shapley de vínculo e atividade davam ±2,5 lp
+  com sinais opostos. Colunas colineares agora saem na ordem dos blocos (`bloco_d.montar_x`).
+- **Desvio declarado do registro prévio (D4.3):** a comparação capital × interior e urbano × rural ganhou uma
+  especificação com território depois da primeira rodada (sem ela, a comparação mistura UFs). As duas estão na tabela.
+- **Principais achados (Branca × Negra, ocupados com renda, 2025T3–2026T2):** ~78% do hiato (0,427 lp) associado às
+  covariáveis; instrução, território e ocupação ≈ 20% cada; desde 2012 a instrução perdeu peso (28% → 21%) e a ocupação
+  ganhou (14% → 19%); parte não associada 0,094 lp, parada desde 2012 e **frágil** a omitidas (Oster δ = 0,85); hiato
+  condicional dos diplomados é o dobro dos demais níveis; segregação ocupacional parada (Duncan ≈ 0,20 com CBO-4);
+  82% do hiato condicional persiste dentro da mesma CBO-4; 28% do hiato nacional é composição entre UFs; com os
+  controles, pessoas negras não têm menos carteira, mas são empregadoras 2,4 p.p. menos; indígenas seguem com menos
+  carteira e previdência.
+- Gráficos novos: `onda3_d1_contribuicoes.png`, `onda3_d1_serie_aninhada.png` (README e, desde 20/10, deck publicado: seção "Leitura principal (Ondas 1 a 3)", 638 slides; legendas do OB antigo remetem ao D1).
+
+---
+
 ## 13/10/2026 — Onda 2: Blocos B e C (branch `onda2/b-c`)
 
 - **Decisões do Felipe (14/10/2026):** ficha C6 aprovada com ressalvas; PRs #8 e #9 liberados para mesclagem; Onda 3
