@@ -31,6 +31,7 @@ from src.processing.agregacoes_pnadc import DEFLATOR_PATH, OUTPUT_DIR, PARQUET_G
 from src.utils import populacao as pop
 
 Z_EMD = stats.norm.ppf(0.975) + stats.norm.ppf(0.80)  # ≈ 2,80
+Z95_ = 1.959963984540054
 GRADE_RHO = (0.0, 0.5, 0.8)
 SEMENTE = 20261020
 
@@ -553,10 +554,60 @@ def gerar_g4() -> None:
                                           "wild bootstrap; ep = CR1 por UF (só registro)")
 
 
+# ========================================================================================================= #
+# G1 — sensibilidade de Rambachan–Roth (magnitudes relativas), análise POSTERIOR ao pré-registro
+# ========================================================================================================= #
+GRADE_MBAR = (0.0, 0.1, 0.2, 0.25, 0.5, 1.0, 2.0)
+
+
+def rr_magnitudes_relativas(delta_pre: dict[int, float], theta: float, ep: float, horizontes: list[int],
+                            mbar: float) -> dict:
+    """Versão conservadora e simplificada de Rambachan & Roth (2023, *Review of Economic Studies*), restrição de
+    magnitudes relativas: a violação de tendências paralelas entre anos consecutivos depois da base é no máximo
+    M̄ × a maior variação entre anos consecutivos antes da base (Δmax, tratada como conhecida). O viés do efeito no
+    horizonte h fica limitado por M̄·Δmax·h; para a média de vários horizontes, por M̄·Δmax·média(h). IC robusto =
+    [θ − viés − 1,96·ep, θ + viés + 1,96·ep] (mais largo que o FLCI do artigo; não incorpora a incerteza de Δmax)."""
+    anos = sorted(delta_pre)
+    serie = [delta_pre[a] for a in anos] + [0.0]
+    dmax = float(max(abs(b - a) for a, b in zip(serie[:-1], serie[1:])))
+    vies = mbar * dmax * float(np.mean(horizontes))
+    return {"M_barra": mbar, "delta_max_pre": dmax, "vies_maximo": vies,
+            "ic_inferior": theta - vies - Z95_ * ep, "ic_superior": theta + vies + Z95_ * ep}
+
+
+def gerar_g1_rr() -> pd.DataFrame:
+    g1 = pd.read_parquet(OUTPUT_DIR / "g1_cotas_federais.parquet")
+    x = g1[g1["especificacao"] == "principal"]
+    linhas = []
+    for y in ("Y1", "Y1b"):
+        s = x[x["desfecho"] == y]
+        pre = {int(a): float(s.loc[s["periodo"] == str(a), "estimativa"].iloc[0]) for a in (2009, 2010, 2011)}
+        for jan, anos in JANELAS_G1.items():
+            j = s[s["periodo"] == jan].iloc[0]
+            hor = [a - BASE for a in anos]
+            for mb in GRADE_MBAR:
+                linhas.append({"desfecho": y, "periodo": jan, "estimativa": float(j["estimativa"]), "ep": float(j["ep"]),
+                               **rr_magnitudes_relativas(pre, float(j["estimativa"]), float(j["ep"]), hor, mb)})
+            lo0 = float(j["estimativa"]) - Z95_ * float(j["ep"])
+            hi0 = float(j["estimativa"]) + Z95_ * float(j["ep"])
+            dmax = linhas[-1]["delta_max_pre"]
+            quebra = (max(lo0, -hi0) / (dmax * float(np.mean(hor)))) if (lo0 > 0 or hi0 < 0) else 0.0
+            linhas.append({"desfecho": y, "periodo": jan, "estimativa": float(j["estimativa"]), "ep": float(j["ep"]),
+                           "M_barra": np.nan, "delta_max_pre": dmax, "M_barra_de_ruptura": quebra})
+    df = pd.DataFrame(linhas)
+    salvar_tabela(df, OUTPUT_DIR / "g1_sensibilidade_rr.parquet", se_metodo="rambachan_roth_magnitudes_relativas_conservador",
+                  nota="Análise posterior ao pré-registro; IC conservador (Δmax tratado como conhecido); M̄ de ruptura = "
+                       "menor M̄ com IC contendo zero")
+    return df
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--so", nargs="*", default=None, help="g6 g1 g4")
+    parser.add_argument("--so", nargs="*", default=None, help="g6 g1 g4 g1rr")
     fazer = set(parser.parse_args().so or ["g6", "g1", "g4"])
+    if fazer == {"g1rr"}:
+        print(gerar_g1_rr().round(2).to_string())
+        return
     if "g6" in fazer:
         emd = gerar_g6()
     else:

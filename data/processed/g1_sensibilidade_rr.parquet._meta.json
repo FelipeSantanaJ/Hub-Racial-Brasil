@@ -1,0 +1,20 @@
+{
+  "esquema": "hub-racial-meta/1",
+  "arquivo": "g1_sensibilidade_rr.parquet",
+  "n_linhas": 48,
+  "gerado_em": "2026-10-20T22:44:20.452181+00:00",
+  "codigo": {
+    "commit": "822740c610fe4aa2ccefe709fe4f7b15dcaff446-modificado",
+    "modulo": "__main__"
+  },
+  "insumos": {
+    "chave": "inep_censo_superior_2009_2023",
+    "descricao": "INEP, Microdados do Censo da Educação Superior 2009–2023 (cursos; 2009–2013 e 2015–2022 baixados em 20/10/2026 com autorização do Felipe)",
+    "hash": "d70c9d284b0caf1837f37e479700fba4bf90455c6b761acf80583af793a32020",
+    "n_arquivos": 15
+  },
+  "se_metodo": "rambachan_roth_magnitudes_relativas_conservador",
+  "populacao": "Não se aplica (sensibilidade de Rambachan–Roth sobre os coeficientes do g1_cotas_federais)",
+  "periodo": null,
+  "nota": "Análise posterior ao pré-registro; IC conservador (Δmax tratado como conhecido); M̄ de ruptura = menor M̄ com IC contendo zero"
+}

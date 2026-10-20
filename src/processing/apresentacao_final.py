@@ -1,5 +1,5 @@
 """Deck final da Etapa 1 — junta:
-  0. Leitura principal das Ondas 1 a 4 (estudos com ficha em docs/studies) — `ONDAS`
+  0. Leitura principal das Ondas 1 a 6 (estudos com ficha em docs/studies) — `ONDAS`
   1. Árvore cruzada de renda por raça (itens 1-10) — `manifesto['arvore']`
   2. Topo 10% / base 10% / quartis com limiares Brasil / gênero / raça×gênero — `manifesto['extremos']`
   3. Ponteiro pra tabela de crescimento (arquivo à parte)
@@ -124,6 +124,13 @@ ONDAS = [
         ("onda4_h2_residuo_com_origem.png", "Incluir a escolaridade e a renda dos pais reduz em 42% (IC 30–53%) a parte não associada do D1 entre jovens (H2)."),
         ("onda4_h3_patrimonio_condicional.png", "Com a mesma renda e lugar, negros têm menos dos 7 bens (automóvel −8,8 p.p.) e menos casa quitada (−4,7; H3, H3.2)."),
      ]),
+    ("Integração: Censo 2022, riqueza e transições (Onda 6)",
+     "Censo 2022 (universo e amostra), POF e painel da PNAD Contínua. Fichas D4.4, I1, H3.4, H4.2.", [
+        ("onda6_i1_censo_pnadc.png", "O Censo 2022 confirma o hiato da PNADC (70% × 66%); para indígenas o Censo mostra +117% — a PNADC subestima (I1)."),
+        ("onda6_d44_segregacao_renda_setor.png", "Dentro da mesma cidade, setores de brancos têm renda 30% maior; nas capitais, 70%. Segregação 0,21 (0,28 nas capitais; D4.4)."),
+        ("onda6_h34_riqueza_imobiliaria.png", "Mesma % de casa própria quitada, mas o valor por pessoa é 2,0–2,2 vezes maior entre brancos (renda: 1,8; H3.4)."),
+        ("onda6_h42_transicoes.png", "Negros sem carteira obtêm carteira menos (12% × 15%) e perdem mais; com as mesmas características, quase some (H4.2)."),
+     ]),
     ("Raça × gênero (Onda 2, Bloco C)", "Fichas C1–C6.", [
         ("onda2_c1_celulas_pct_homem_branco.png", "Entre ocupados, mulheres negras ganham 47% do que ganham homens brancos; entre todos os adultos, 32% (C1)."),
         ("onda2_c3_shapley_raca_genero.png", "Da distância homem branco − mulher negra entre ocupados, ~2/3 se associam a raça e ~1/3 a gênero (Shapley; C3)."),
@@ -134,6 +141,10 @@ ONDAS = [
 
 
 FONTE_ONDA4 = {
+    "onda6_i1_censo_pnadc.png": "Fonte: IBGE, Censo 2022 (amostra, acesso público) e PNAD Contínua 2022T3. Elaboração própria.",
+    "onda6_d44_segregacao_renda_setor.png": "Fonte: IBGE, Censo 2022, Agregados por setores censitários. Elaboração própria.",
+    "onda6_h34_riqueza_imobiliaria.png": "Fonte: IBGE, POF 2017–2018 (aluguel estimado). Elaboração própria.",
+    "onda6_h42_transicoes.png": "Fonte: IBGE, PNAD Contínua 2012–2026 (painel de 5 visitas). Elaboração própria.",
     "onda4_e1_conclusao_por_idade.png": "Fonte: IBGE, PNAD Contínua Trimestral (2012 e 2025T3–2026T2). Elaboração própria.",
     "onda4_e3_saeb_inse_escola.png": "Fonte: INEP, microdados do SAEB 2023. Elaboração própria.",
     "onda4_e7_infraestrutura_municipio.png": "Fonte: INEP, Censo Escolar 2024. Elaboração própria.",
@@ -146,8 +157,8 @@ FONTE_ANUAL = ("Fonte: IBGE, PNAD Contínua anual (Visita 1; Visita 5 em 2020–
 
 
 def secao_ondas(prs, n):
-    A.slide_divisor(prs, "Leitura principal (Ondas 1 a 4)",
-                    "Estudos com ficha, hipóteses escritas antes de rodar e IC design-based (docs/studies).")
+    A.slide_divisor(prs, "Leitura principal (Ondas 1 a 6)",
+                    "Estudos com ficha, hipóteses escritas antes de rodar e IC design-based (docs/studies). Onda 5 (Lei de Cotas): sem efeito afirmável (ficha G1).")
     n += 1
     for titulo, nota, imgs in ONDAS:
         A.slide_subdivisor(prs, titulo)
