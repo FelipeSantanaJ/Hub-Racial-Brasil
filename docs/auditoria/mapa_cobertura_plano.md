@@ -129,11 +129,11 @@ técnicas (R11, F4, F6, imagens vazias da árvore) nas pendências da Onda 1 (`o
 
 | ID | Estado | Onde | Por quê |
 |---|---|---|---|
-| E1 | Novo | `V3002`, `V3003A`, `V3006` extraídas na v2; nenhuma tabela. Quebra em 4T2015 | — |
-| E2 | Novo (parcial bloqueado) | PNADC: possível. Censo Escolar por aluno com raça: só SEDAP (fora de alcance); público simplificado: NÃO VERIFICADO se traz raça agregada por escola | — |
+| E1 | Já existe (Onda 4) | `e1_escolarizacao_idade` (frequência, etapa adequada, atraso, conclusão por idade simples; V3003/V3003A harmonizados) | atraso dentro do fundamental (`V3006`) não feito |
+| E2 | Já existe, parte PNADC (Onda 4; funil em `e1_escolarizacao_idade`) | PNADC: feito. Censo Escolar por aluno com raça: só SEDAP (fora de alcance); público simplificado: NÃO VERIFICADO se traz raça agregada por escola | — |
 | E3 | Novo (parcial bloqueado) | SAEB público (694 MB, 2023); raça no SAEB público: NÃO VERIFICADO | — |
-| E4 | Existe, precisa refazer | Rede pública/privada (`V3002A`, desde 4T2015) extraída na v2; nada calculado | — |
-| E5 | Novo | Ligação filhos–pais via `V2005` (extraída); viés de corresidência a quantificar | — |
+| E4 | Já existe, parte PNADC (Onda 4) | `e4_rede_escola` (rede por etapa e raça; condicional a lugar e escolaridade/renda dos pais; composição da graduação) | tipo de escola fino: Censo Escolar |
+| E5 | Já existe (Onda 4) | Ficha H1 (`h1_transmissao_educacional`, `h1_corresidencia`) | — |
 | E6 | Bloqueado por dado (parcial) | Censo da Educação Superior por aluno com raça/cota: só SEDAP. Agregados públicos por curso: possível, NÃO VERIFICADO | — |
 | E7 | Bloqueado por dado | Território fino: Censo 2022 / Censo Escolar por escola | — |
 | E8 | Novo | Só literatura (`M`) | — |
@@ -153,11 +153,11 @@ técnicas (R11, F4, F6, imagens vazias da árvore) nas pendências da Onda 1 (`o
 
 | ID | Estado | Onde | Por quê |
 |---|---|---|---|
-| H1.1–H1.4 | Novo | `V2005` + escolaridade (`VD3004`) dos moradores permitem a ligação; nada calculado. Suplemento de mobilidade só na PNAD antiga de 2014 | — |
-| H2.1–H2.4 | Novo | Depende de H1 e D1 | — |
-| H3.1 | Existe, precisa refazer | `habitacao_hiato_racial*` (`imovel_proprio`, de `S01017`), Visita 1, 2016–2019/2022–2025 | `esp` (unidade é pessoa; população não é a de referência; lacuna 2020–21 agora coberta pela Visita 5 extraída) |
+| H1.1–H1.4 | Já existe (Onda 4) | `h1_transmissao_educacional`, `h1_corresidencia` (viés de corresidência medido). Suplemento de mobilidade só na PNAD antiga de 2014 | — |
+| H2.1–H2.4 | Já existe (Onda 4) | `h2_origem_renda` (E8 com e sem origem; Gelbach; elasticidade proxy), `h2_mobilidade_quintis` | — |
+| H3.1 | Já existe (Onda 4) | `h3_patrimonio_proxy` (bruto e no mesmo décimo de renda, UF e situação; 2016–2019/2022–2025; a Visita 5 não tem `S01017`). A antiga `habitacao_hiato_racial*` fica para comparação | — |
 | H3.2 | Novo | POF: não baixada | — |
-| H3.3 | Novo | `V5007A` (aluguel) e `V5008A` (aplicações) extraídos na v2; nada calculado | — |
+| H3.3 | Já existe (Onda 4) | `h3_patrimonio_proxy` (aluguel e aplicações de adultos 18+, bruto e condicional) e T3 (domicílios) | — |
 | H3.4 | Bloqueado por dado | Riqueza: IR/RAIS não acessíveis; só proxy | — |
 | H4.1 | Existe, precisa refazer | Igual a D6.1/B4 | `pop` |
 | H4.2 | Existe, precisa refazer | `transicao_desemprego_emprego`, `transicao_informal_formal` (painel de 5 visitas, pooled) | `esp` (atrito; sem série) |

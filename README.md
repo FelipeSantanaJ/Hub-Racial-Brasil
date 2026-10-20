@@ -22,7 +22,8 @@ descritivas, decomposições, distribuição, primeira identificação causal e 
 automatizados.
 🔧 **Auditoria científica e plano de análise em andamento (out/2026).** A Rodada 1 encontrou um erro no
 erro-padrão (corrigido: ver "O que é validado" abaixo e [docs/auditoria/](docs/auditoria/)). Ondas 1, 2 e 3 do
-[plano de análise](docs/PLANO_DE_ANALISE.md) concluídas, com fichas em [docs/studies](docs/studies/INDICE.md).
+[plano de análise](docs/PLANO_DE_ANALISE.md) concluídas; Onda 4 (educação e origem): parte da PNAD
+Contínua concluída, com fichas em [docs/studies](docs/studies/INDICE.md).
 ⏳ **Etapas 2 a 6: não iniciadas.** Ver [docs/PLANO.md](docs/PLANO.md).
 
 > **Leitura principal (13/10/2026):** o hiato racial de renda caiu de 2012 a 2026, mas **em degrau** (−5 p.p. em
@@ -130,6 +131,18 @@ As tabelas antigas (`decomposicao_oaxaca_blinder*`, `decomposicao_hiato_ocupacio
 continuam publicadas para comparação, mas a referência do Hub passa a ser o D1. A forma em "U" do resíduo por quantil
 (maior na base e no topo que na mediana) aparece na janela recente, mas qual extremo é maior depende da banda do
 kernel — o Hub não afirma nem "teto de vidro" nem "piso pegajoso" ([D1](docs/studies/D1/ficha.md), D1.3).
+
+### Educação e origem (Onda 4, parte com a PNAD Contínua)
+
+Até os 14 anos, crianças brancas e negras frequentam a escola na mesma proporção; aos 15, 10% a mais das brancas já
+estão no ensino médio. Desde 2012, a diferença de ensino médio completo aos 19 anos caiu de 21 para 13 pontos, mas a
+de diploma superior aos 25–29 **aumentou**, de 15 para 19 pontos ([E1](docs/studies/E1/ficha.md)). Entre jovens que
+moram com os pais, cerca de metade da diferença em ter diploma está associada à escolaridade dos pais — e entre filhos
+de pais com diploma, 65% dos brancos e 49% dos negros têm diploma ([H1](docs/studies/H1/ficha.md)). Comparar filhos de
+pais com a mesma escolaridade e renda reduz em cerca de 40% a parte do hiato de renda não associada às características
+observáveis ([H2](docs/studies/H2/ficha.md)). Com a mesma renda e no mesmo lugar, pessoas negras moram menos em casa
+própria quitada e recebem menos aluguel e rendimentos de aplicações ([H3](docs/studies/H3/ficha.md)). Tudo o que usa
+a origem vale só para quem mora com os pais (viés de corresidência medido nas fichas).
 
 ### O topo 10% dos negros ficou muito mais escolarizado — mas o hiato lá em cima persiste
 

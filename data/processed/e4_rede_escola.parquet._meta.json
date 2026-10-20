@@ -1,0 +1,24 @@
+{
+  "esquema": "hub-racial-meta/1",
+  "arquivo": "e4_rede_escola.parquet",
+  "n_linhas": 142,
+  "gerado_em": "2026-10-20T16:27:59.815315+00:00",
+  "codigo": {
+    "commit": "4af95aa5883d08bacda536480f2c8713174c3625-modificado",
+    "modulo": "__main__"
+  },
+  "insumos": {
+    "chave": "trimestral_v2",
+    "descricao": "PNAD Contínua trimestral, extrato v2 + deflator IBGE",
+    "hash": "9b64f579fa63981e9237190166d333a9ac546041a4df260d2c67dabf49f1ceda",
+    "n_arquivos": 228
+  },
+  "se_metodo": "wls_influencia_linearizacao_estrato_upa",
+  "populacao": "Pessoas que frequentam pré-escola, fundamental, médio regular ou graduação (V3002 = 1), Branca, Negra, Indígena; rede (V3002A, desde 2016)",
+  "periodo": null,
+  "familia_fdr": [
+    "periodo",
+    "medida"
+  ],
+  "nota": "Rede privada = V3002A 1; condicional por MQO linear; escolaridade dos pais só para corresidentes"
+}

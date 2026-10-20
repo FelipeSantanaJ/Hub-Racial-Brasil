@@ -38,6 +38,11 @@ de publicação. Estudos entram aqui quando a ficha é criada, não quando o res
 | D5 | Posição na ocupação e informalidade com a mesma instrução | C | 3 | Aprovado com ressalvas | [D5/ficha.md](D5/ficha.md) | Onda 3 |
 | D6 | Idade: o hiato cresce ao longo da vida? | D/C | 3 | Aprovado com ressalvas | [D6/ficha.md](D6/ficha.md) | Onda 3 |
 | D8 | O resíduo: faixa plausível e o que concluir | C/M | 3 | Aprovado com ressalvas | [D8/ficha.md](D8/ficha.md) | Onda 3 |
+| E1 | Em que idade e transição o hiato educacional aparece (frequência, etapa, conclusão) | D | 4 | Aprovado com ressalvas | [E1/ficha.md](E1/ficha.md) | Onda 4 |
+| E4 | Rede pública × privada por raça | D/C | 4 | Aprovado com ressalvas | [E4/ficha.md](E4/ficha.md) | Onda 4 |
+| H1 | Transmissão educacional pais → filhos e viés de corresidência | C | 4 | Aprovado com ressalvas | [H1/ficha.md](H1/ficha.md) | Onda 4 |
+| H2 | Mesma origem, mesma renda? Resíduo do D1 com e sem origem | C | 4 | Aprovado com ressalvas | [H2/ficha.md](H2/ficha.md) | Onda 4 |
+| H3 | Patrimônio por proxy: casa própria e rendas de capital | D/C | 4 | Aprovado com ressalvas | [H3/ficha.md](H3/ficha.md) | Onda 4 |
 
 O que já existe no Hub e a qual pergunta corresponde está em
 [`docs/auditoria/mapa_cobertura_plano.md`](../auditoria/mapa_cobertura_plano.md).
