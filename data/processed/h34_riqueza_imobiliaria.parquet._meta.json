@@ -1,0 +1,23 @@
+{
+  "esquema": "hub-racial-meta/1",
+  "arquivo": "h34_riqueza_imobiliaria.parquet",
+  "n_linhas": 94,
+  "gerado_em": "2026-10-20T21:41:15.823057+00:00",
+  "codigo": {
+    "commit": "ea4e10a8e0fa39ec1b7abf534cccef84ac9d1358",
+    "modulo": "__main__"
+  },
+  "insumos": {
+    "chave": "ibge_pof_2017_18",
+    "descricao": "IBGE, Microdados da POF 2017–2018 (baixados em 20/10/2026)",
+    "hash": "b8642433a62a170f51a4b74a551e6d15f3b7b95a0d6a2630b0812e8d725f6862",
+    "n_arquivos": 1
+  },
+  "se_metodo": "wls_influencia_linearizacao_estrato_upa",
+  "populacao": "Moradores da POF 2017–2018 (Branca, Negra, Indígena); valor da moradia própria pelo aluguel estimado, dividido pelos moradores do domicílio",
+  "periodo": null,
+  "familia_fdr": [
+    "cap_rate"
+  ],
+  "nota": "Aluguel estimado mensal (V8000_DEFLA, R$ jan/2018) × 12 ÷ cap rate; por pessoa do domicílio"
+}

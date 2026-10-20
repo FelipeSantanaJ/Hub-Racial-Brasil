@@ -113,7 +113,7 @@ técnicas (R11, F4, F6, imagens vazias da árvore) nas pendências da Onda 1 (`o
 | D4.1 | Já existe (Onda 3) | `d4_territorio` (Kitagawa entre/dentro de UF) | — |
 | D4.2 | Já existe (Onda 3) | `d4_territorio` (Branca × Negra por UF, bruto e condicional, BH entre as 27; correlação com % negra) | — |
 | D4.3 | Já existe (Onda 3) | `d4_territorio` (tipo de área V1023 e situação V1022, com e sem território) | — |
-| D4.4 | Bloqueado por dado | Segregação residencial exige Censo 2022 (GovBR) | — |
+| D4.4 | Feito (Onda 6, parte descritiva) | `d44_segregacao_residencial` (Censo 2022, setores) | mecanismo (`M`) fora de alcance |
 | D5.1 | Já existe | Contribuição das horas no D1; S1.4 (renda por hora) | — |
 | D5.2 | Já existe (Onda 3) | Contribuição do vínculo no D1; `hiato_formal_informal`, `hiato_setor_publico_privado`, `informalidade` | — |
 | D5.3 | Já existe (Onda 3) | `d5_posicao_ocupacao` (MQO linear por posição e previdência, bruto e condicional; por nível) | DFL não feito (`met`) |
@@ -158,9 +158,9 @@ técnicas (R11, F4, F6, imagens vazias da árvore) nas pendências da Onda 1 (`o
 | H3.1 | Já existe (Onda 4) | `h3_patrimonio_proxy` (bruto e no mesmo décimo de renda, UF e situação; 2016–2019/2022–2025; a Visita 5 não tem `S01017`). A antiga `habitacao_hiato_racial*` fica para comparação | — |
 | H3.2 | Já existe (Onda 4) | `h32_pof_bens` (POF 2017–2018: bens duráveis no mesmo décimo de renda) | — |
 | H3.3 | Já existe (Onda 4) | `h3_patrimonio_proxy` (aluguel e aplicações de adultos 18+, bruto e condicional) e T3 (domicílios) | — |
-| H3.4 | Bloqueado por dado | Riqueza: IR/RAIS não acessíveis; só proxy | — |
+| H3.4 | Feito como proxy (Onda 6) | `h34_riqueza_imobiliaria` (moradia própria pela POF); riqueza total segue sem dado | — |
 | H4.1 | Existe, precisa refazer | Igual a D6.1/B4 | `pop` |
-| H4.2 | Existe, precisa refazer | `transicao_desemprego_emprego`, `transicao_informal_formal` (painel de 5 visitas, pooled) | `esp` (atrito; sem série) |
+| H4.2 | Feito (Onda 6) | `h42_transicoes`, `h42_atrito_tendencia` (ligação estrita, atrito, série anual); substitui `transicao_*` | — |
 
 ## Resumo
 
@@ -180,3 +180,5 @@ Censo Escolar simplificado e no Painel Estatístico de Pessoal.
 > O resumo acima é o retrato da Fase 2 (13/10/2026); o estado de cada pergunta é atualizado na própria linha. Onda 5
 > (20/10/2026): G1 e G6 feitos; G2, G3 e G5 bloqueados por dado; G4 bloqueado por poder. Painel Estatístico de
 > Pessoal: sem cor/raça segundo o IPEA (2021) — ver ficha G3.
+> Onda 6 (20/10/2026): D4.4, H3.4 (proxy) e H4.2 feitos; I1 (Censo 2022 × PNADC) novo; Censo 2022 deixou de ser
+> "Bloqueado" (agregados por setor e amostra pública no FTP do IBGE).

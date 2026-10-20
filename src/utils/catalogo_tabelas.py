@@ -167,6 +167,17 @@ CATALOGO: list[tuple[str, str, str]] = [
      "ingressantes de 2012)", "inep_censo_superior_2009_2023"),
     (r"^g4_salario_minimo$", P1 + "; Branca × Negra; painel UF × trimestre 2012T1–2026T2", T),
     (r"^g6_emd$", "Não se aplica (efeito mínimo detectável por simulação; insumos do G1 e do G4)", "g_misto"),
+    # --- Onda 6: integração (src/processing/bloco_integracao.py) ---
+    (r"^d44_segregacao_residencial$", "Universo do Censo 2022: pessoas por cor ou raça em cada setor censitário (setores "
+     "com contagem suprimida por sigilo fora e contados); renda média do responsável pelo domicílio no setor",
+     "ibge_censo_2022_setores"),
+    (r"^i1_censo_pnadc$", "Pessoas de 20+ (o Censo público só tem faixas de 5 anos) em domicílios particulares (Branca, Preta, Amarela, Parda, Indígena): Censo 2022 "
+     "(amostra, acesso público) e PNAD Contínua 2022T3; hiato entre ocupados com renda de todos os trabalhos > 0 "
+     "(P1080 / VD4019)", "censo2022_e_pnadc"),
+    (r"^h34_riqueza_imobiliaria$", "Moradores da POF 2017–2018 (Branca, Negra, Indígena); valor da moradia própria pelo "
+     "aluguel estimado, dividido pelos moradores do domicílio", "ibge_pof_2017_18"),
+    (r"^(h42_transicoes|h42_atrito_tendencia)$", "Pessoas de 18+ (Branca, Negra, Indígena) observadas em dois trimestres "
+     "consecutivos do painel da PNAD Contínua (ligação por UPA, domicílio, grupo de rotação, ordem, sexo e nascimento)", T),
     (r"^habitacao_.*$", "Moradores (pessoas) da PNAD Contínua anual, Visita 1, tema Habitação: 2016–2019 e 2022–2025",
      INSUMO_ANUAL_VISITA1_V1),
     (r"^deflator_ibge$", "Não se aplica (deflatores oficiais do IBGE por UF × trimestre)", "ibge_deflator"),
