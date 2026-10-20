@@ -5,6 +5,23 @@ calculá-lo: data, o quê, por quê, impacto. Mais recente primeiro.
 
 ---
 
+## 20/10/2026 — Onda 5: Bloco G, políticas e causalidade (branch `onda5/g`)
+
+- **Decisões do Felipe (20/10/2026):** Onda 5 autorizada; download do Censo da Educação Superior 2009–2023 autorizado
+  (2009–2013 e 2015–2022 baixados; extração por instituição em `src/ingestion/censo_superior_painel.py`).
+- **Fichas G1–G6 commitadas antes de rodar** (desenho, efeitos plausíveis e regra "só roda o que tiver poder").
+- **G6 (EMD):** G1 detecta efeitos ≥ 8,5 p.p. na % negra entre declarados (roda com ressalva); G4 (salário mínimo) tem
+  EMD de β entre 1,45 e 3,4 — não detectaria nem o repasse integral (β = −1) → **não estimado**.
+- **G1 (Lei 12.711):** event study com 73 federais sem reserva própria × 40 estaduais/municipais. A % negra entre
+  declarados sobe +9,0 p.p. (IC 3,0 a 15,1) em 2016–2019, mas a % sem cor declarada cai 22,5 p.p. e a versão
+  conservadora (não declarados como negros) não sobe (−5,0; −20,7 a 10,6): pela regra pré-registrada, **a ficha não
+  afirma efeito** — não dá para separar o efeito da lei da melhora do registro de cor que ela mesma provocou. Substitui
+  o desenho antigo com coortes da PNADC (`did_cotas_universitarias*`, R2), que segue sem uso.
+- **G2, G3, G5: Bloqueado por dado** (aluno ligado à RAIS, cor/raça do SIAPE e CadÚnico não são públicos; G3 verificado
+  na nota técnica do IPEA de 2021). Nenhum número já publicado muda.
+
+---
+
 ## 20/10/2026 — Onda 4, parte 2: INEP e POF (branch `onda4/inep-pof`)
 
 - **Decisões do Felipe (20/10/2026):** fichas E3, E6, E7 e H3.2 aprovadas com ressalvas; PR #12 liberado para

@@ -6,7 +6,7 @@
 | Onda | 5 |
 | Responsável | Felipe Santana (execução: Claude Code) |
 | Criada em / atualizada em | 2026-10-20 / 2026-10-20 |
-| Estado de publicação | **Aprovado com ressalvas** (proposto; aguarda o Felipe) |
+| Estado de publicação | **Bloqueado** (por poder estatístico; proposto, aguarda o Felipe) |
 | PR | `onda5/g` |
 
 > Seções 1–9 escritas **antes** de rodar (20/10/2026). O plano manda apresentar como `C`: a identificação por
@@ -86,11 +86,19 @@ de renda baixa.
 
 ## 10. Resultados
 
-<Preenchido depois de rodar (só se o G6 indicar poder).>
+**Não estimado (regra pré-registrada; ficha G6).** EMD de β = 1,45 (ρ = 0) a 3,4 (ρ = 0,8; ρ estimado 0,51 → 2,3):
+maior que 1, ou seja, o desenho não detectaria nem o repasse integral do mínimo a quem ganha até 1 SM. A exposição
+diferencial E_u varia pouco entre UFs (DP 0,033) e o hiato por UF × trimestre é ruidoso. O código do estimador
+(`bloco_g.g4_estimar`, *wild cluster bootstrap* de Webb) fica pronto e testado com dado simulado, mas não foi aplicado
+ao dado real. Estado: **Bloqueado por poder** (proposto).
+
+Caminhos que poderiam dar poder (decisão do Felipe, não feitos): exposição por microrregião/estrato (mais unidades,
+mais ruído); período 2002–2015 com a PNAD anual (valorização forte do mínimo; outra pesquisa, fora do escopo atual).
 
 ## 11. Afirmações permitidas
 
-<Depois de rodar.>
+- "O Hub não consegue medir, com a PNAD Contínua por UF, se a valorização do salário mínimo reduziu o hiato racial:
+  o desenho não tem poder estatístico para isso (ficha G6)."
 
 ## 12. Afirmações proibidas
 

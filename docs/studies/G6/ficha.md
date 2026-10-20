@@ -76,11 +76,27 @@ O EMD é um cálculo, não um teste: "refutar" aqui é a simulação não reprod
 
 ## 10. Resultados
 
-<Preenchido depois de calcular.>
+Tabela: `g6_emd` (`src/processing/bloco_g.py`, `--so g6`). EMD = 2,80 × DP do estimador sob efeito nulo.
+
+| Desenho · desfecho | ρ estimado | DP (ρ = 0 / 0,5 / 0,8) | EMD pior caso | Decisão (regra pré-registrada) |
+|---|---|---|---|---|
+| G1 · Y1 (% negra entre declarados) | −0,31 | 2,83 / 3,05 / 2,73 p.p. | **8,5 p.p.** | **roda**, mas só detecta efeitos ≥ 8,5 p.p. (2 < EMD ≤ 10) |
+| G1 · Y1b (não declarados como negros) | −0,23 | 5,97 / 6,45 / 5,78 p.p. | 18,1 p.p. | sem poder (informativo) |
+| G1 · Y2 (% de escola pública) | −0,45 | 5,44 / 5,87 / 5,26 p.p. | 16,4 p.p. | sem poder (informativo) |
+| G4 · β (hiato × exposição × ln SM) | 0,51 | 0,52 / 0,82 / 1,22 | **3,4** (1,45 com ρ = 0) | **não roda**: nem o repasse integral (β = −1) seria detectado |
+
+- G1: 113 instituições (73 tratadas, 40 controles), 2009–2023. O ρ estimado com 4 anos é negativo (viés de Nickell,
+  ≈ −1/3 com T = 4), por isso vale a grade com ρ ≥ 0.
+- **Conferência de implementação (seção 8):** a simulação (2.000 painéis) reproduz o DP analítico com diferença
+  ≤ 5% em todos os casos (critério: ±25%).
+- G4: a exposição E_u varia pouco entre as 27 UFs (DP 0,033) e o hiato por UF × trimestre tem ruído amostral e
+  autocorrelação altos — o regressor quase não tem variação própria depois dos efeitos fixos.
 
 ## 11. Afirmações permitidas
 
-<Depois de calcular.>
+- "Com o Censo da Educação Superior por instituição, o desenho do G1 só detectaria um efeito da Lei de Cotas de pelo
+  menos ~8,5 pontos percentuais na proporção de ingressantes negros das federais; o desenho do salário mínimo (G4) não
+  tem poder para detectar nem o repasse integral, e por isso não foi estimado."
 
 ## 12. Afirmações proibidas
 

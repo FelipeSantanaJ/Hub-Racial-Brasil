@@ -142,12 +142,12 @@ técnicas (R11, F4, F6, imagens vazias da árvore) nas pendências da Onda 1 (`o
 
 | ID | Estado | Onde | Por quê |
 |---|---|---|---|
-| G1 | Existe, precisa refazer | Desenho A: `did_cotas_universitarias*`, `painel_cohortes_superior_completo*`, `docs/ANALISE_CAUSAL_COTAS.md`. Dado administrativo por aluno fora de alcance (SEDAP) | `esp` (R2: células i.i.d., coorte × período, EMD ausente) |
-| G2 | Existe, precisa refazer | `mecanismo_renda_cohortes_cotas` (correlacional) | `esp` |
-| G3 | Existe, precisa refazer | Desenho B: `did_cotas_servico_publico*`. **0 de 40 testes sobrevivem ao FDR**; `ANALISE_CAUSAL_COTAS.md` §2–3 reescrito como exploratório em 13/10/2026 (E9), estado **Bloqueado até o B4b**. Painel de Pessoal: raça/cor NÃO VERIFICADA | `esp` (R3) |
-| G4 | Novo | Salário mínimo (bite index): nada | — |
-| G5 | Bloqueado por dado | CadÚnico (acesso restrito) | — |
-| G6 | Novo | EMD por desenho: nada | — |
+| G1 | Feito (Onda 5) | `g1_cotas_federais`, `g1_series_grupos` (Censo da Educação Superior 2009–2023 por instituição; event study + Callaway–Sant'Anna). Efeito não separável do artefato de declaração (ficha G1) | substitui o desenho A (`did_cotas_universitarias*`) |
+| G2 | Bloqueado por dado | aluno ligado à RAIS (restrito) | ficha G2 |
+| G3 | Bloqueado por dado | cor/raça do SIAPE não pública; PEP sem cor/raça (IPEA 2021) | ficha G3 |
+| G4 | Bloqueado por poder | EMD de β 1,45–3,4 > 1 (ficha G6); estimador pronto (`bloco_g.g4_estimar`) e não aplicado | ficha G4 |
+| G5 | Bloqueado por dado | CadÚnico (acesso restrito); T3 cobre a contabilidade | ficha G5 |
+| G6 | Feito (Onda 5) | `g6_emd` (EMD por simulação AR(1)) | ficha G6 |
 
 ## Bloco H — Origem social, mobilidade e patrimônio
 
@@ -176,3 +176,7 @@ técnicas (R11, F4, F6, imagens vazias da árvore) nas pendências da Onda 1 (`o
 Contagem feita por script sobre as linhas das tabelas acima (H1.1–H1.4 e H2.1–H2.4 contadas como 4
 cada). Itens com **NÃO VERIFICADO**: `sobrequalificacao` (índice usado), raça/cor no SAEB público, no
 Censo Escolar simplificado e no Painel Estatístico de Pessoal.
+
+> O resumo acima é o retrato da Fase 2 (13/10/2026); o estado de cada pergunta é atualizado na própria linha. Onda 5
+> (20/10/2026): G1 e G6 feitos; G2, G3 e G5 bloqueados por dado; G4 bloqueado por poder. Painel Estatístico de
+> Pessoal: sem cor/raça segundo o IPEA (2021) — ver ficha G3.
