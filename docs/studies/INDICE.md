@@ -47,9 +47,9 @@ de publicação. Estudos entram aqui quando a ficha é criada, não quando o res
 | E6 | Ensino superior: composição, reserva de vagas, conclusão | D | 4 | Aprovado com ressalvas | [E6/ficha.md](E6/ficha.md) | Onda 4 (INEP) |
 | E7 | Segregação entre escolas e infraestrutura | D | 4 | Aprovado com ressalvas | [E7/ficha.md](E7/ficha.md) | Onda 4 (INEP) |
 | H3.2 | Bens duráveis com a mesma renda (POF) | D/C | 4 | Aprovado com ressalvas | [H3.2/ficha.md](H3.2/ficha.md) | Onda 4 (POF) |
-| G6 | Poder estatístico: EMD de cada desenho do Bloco G | pré-requisito | 5 | Aprovado com ressalvas (proposto) | [G6/ficha.md](G6/ficha.md) | Onda 5 |
-| G1 | Lei 12.711 (cotas): ingresso negro nas federais (event study, Censo Superior 2009–2023) | Q | 5 | Aprovado com ressalvas (proposto) | [G1/ficha.md](G1/ficha.md) | Onda 5 |
-| G4 | Salário mínimo × hiato por exposição regional (bite) | C | 5 | Bloqueado (por poder; proposto) | [G4/ficha.md](G4/ficha.md) | Onda 5 |
+| G6 | Poder estatístico: EMD de cada desenho do Bloco G | pré-requisito | 5 | Aprovado com ressalvas | [G6/ficha.md](G6/ficha.md) | Onda 5 |
+| G1 | Lei 12.711 (cotas): ingresso negro nas federais (event study, Censo Superior 2009–2023) | Q | 5 | Aprovado com ressalvas | [G1/ficha.md](G1/ficha.md) | Onda 5 |
+| G4 | Salário mínimo × hiato por exposição regional (bite) | C | 5 | Bloqueado (por poder) | [G4/ficha.md](G4/ficha.md) | Onda 5 |
 | G3 | Lei 12.990 e o funcionalismo federal | Q | 5 | Bloqueado (por dado) | [G3/ficha.md](G3/ficha.md) | Onda 5 |
 | G2 | Cotas → conclusão e renda | Q | 5 | Bloqueado (por dado) | [G2/ficha.md](G2/ficha.md) | Onda 5 |
 | G5 | Transferências e o hiato | Q | 5 | Bloqueado (por dado) | [G5/ficha.md](G5/ficha.md) | Onda 5 |

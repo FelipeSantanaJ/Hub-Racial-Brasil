@@ -6,7 +6,7 @@
 | Onda | 5 |
 | Responsável | Felipe Santana (execução: Claude Code) |
 | Criada em / atualizada em | 2026-10-20 / 2026-10-20 |
-| Estado de publicação | **Aprovado com ressalvas** (proposto; aguarda o Felipe) |
+| Estado de publicação | **Aprovado com ressalvas** (aprovado pelo Felipe em 20/10/2026) |
 | PR | `onda5/g` |
 
 > Seções 1–9 escritas **antes** de calcular o EMD e antes de estimar qualquer efeito (20/10/2026). Critério de saída

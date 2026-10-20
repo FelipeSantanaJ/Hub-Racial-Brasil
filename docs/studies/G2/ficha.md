@@ -6,7 +6,7 @@
 | Onda | 5 |
 | Responsável | Felipe Santana (execução: Claude Code) |
 | Criada em / atualizada em | 2026-10-20 / 2026-10-20 |
-| Estado de publicação | **Bloqueado** (por dado) |
+| Estado de publicação | **Bloqueado** (por dado; aprovado pelo Felipe em 20/10/2026) |
 | PR | `onda5/g` |
 
 ## 1. Pergunta

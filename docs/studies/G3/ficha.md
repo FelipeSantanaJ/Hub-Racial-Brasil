@@ -6,7 +6,7 @@
 | Onda | 5 |
 | Responsável | Felipe Santana (execução: Claude Code) |
 | Criada em / atualizada em | 2026-10-20 / 2026-10-20 |
-| Estado de publicação | **Bloqueado** (por dado) |
+| Estado de publicação | **Bloqueado** (por dado; aprovado pelo Felipe em 20/10/2026) |
 | PR | `onda5/g` |
 
 ## 1. Pergunta
@@ -60,8 +60,12 @@ federal) sem grupo de comparação natural.
 
 ## 10. Resultados
 
-Nenhum. **Caminho para destravar (decisão do Felipe):** pedido via Lei de Acesso à Informação ao Ministério da Gestão
-de tabela agregada de ingressantes por ano × cor/raça × órgão/carreira (fluxo, não estoque), 2008–2025.
+Nenhum. **Caminho para destravar — PENDENTE (decisão do Felipe em 20/10/2026: não pedir agora; verificar em outro
+momento):** pedido via Lei de Acesso à Informação (Fala.BR) ao Ministério da Gestão e da Inovação em Serviços
+Públicos de tabela agregada de **ingressantes** do Executivo federal por ano de ingresso × cor/raça × órgão/carreira ×
+forma de ingresso (concurso com/sem reserva), 2008–2025 (fluxo, não estoque de ativos). Antes de pedir, conferir se o
+Painel Estatístico de Pessoal passou a trazer cor/raça depois de 2021 (NÃO VERIFICADO). Registrado também em
+`docs/PLANO_DE_ANALISE.md` ("Ainda abertos", item 5).
 
 ## 11. Afirmações permitidas
 

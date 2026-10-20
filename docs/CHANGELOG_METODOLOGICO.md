@@ -7,6 +7,9 @@ calculá-lo: data, o quê, por quê, impacto. Mais recente primeiro.
 
 ## 20/10/2026 — Onda 5: Bloco G, políticas e causalidade (branch `onda5/g`)
 
+- **Decisões do Felipe (20/10/2026, "está tudo autorizado"):** fichas G6 e G1 aprovadas com ressalvas; G2, G3, G4 e
+  G5 aprovadas como Bloqueado; PRs #13 e #14 liberados; Onda 6 autorizada. Pedido via LAI para o G3: não agora,
+  registrado como pendência (PLANO_DE_ANALISE, "Ainda abertos", item 5).
 - **Decisões do Felipe (20/10/2026):** Onda 5 autorizada; download do Censo da Educação Superior 2009–2023 autorizado
   (2009–2013 e 2015–2022 baixados; extração por instituição em `src/ingestion/censo_superior_painel.py`).
 - **Fichas G1–G6 commitadas antes de rodar** (desenho, efeitos plausíveis e regra "só roda o que tiver poder").
