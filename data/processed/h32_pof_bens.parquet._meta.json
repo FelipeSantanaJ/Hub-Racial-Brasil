@@ -1,0 +1,24 @@
+{
+  "esquema": "hub-racial-meta/1",
+  "arquivo": "h32_pof_bens.parquet",
+  "n_linhas": 56,
+  "gerado_em": "2026-10-20T17:32:01.789037+00:00",
+  "codigo": {
+    "commit": "f7eedc9f02e11ccacd0de8ea45c9eeb757415af7-modificado",
+    "modulo": "__main__"
+  },
+  "insumos": {
+    "chave": "ibge_pof_2017_18",
+    "descricao": "IBGE, Microdados da POF 2017–2018 (baixados em 20/10/2026)",
+    "hash": "b8642433a62a170f51a4b74a551e6d15f3b7b95a0d6a2630b0812e8d725f6862",
+    "n_arquivos": 1
+  },
+  "se_metodo": "wls_influencia_linearizacao_estrato_upa",
+  "populacao": "Moradores da POF 2017–2018 (Branca, Negra, Indígena); bens duráveis da unidade de consumo",
+  "periodo": null,
+  "familia_fdr": [
+    "raca",
+    "medida"
+  ],
+  "nota": "% de pessoas em UC com o bem; MQO linear; décimos de RENDA_DISP_PC"
+}

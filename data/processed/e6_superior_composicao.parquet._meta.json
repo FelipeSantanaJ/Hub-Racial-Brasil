@@ -1,0 +1,23 @@
+{
+  "esquema": "hub-racial-meta/1",
+  "arquivo": "e6_superior_composicao.parquet",
+  "n_linhas": 164,
+  "gerado_em": "2026-10-20T17:22:15.283205+00:00",
+  "codigo": {
+    "commit": "f7eedc9f02e11ccacd0de8ea45c9eeb757415af7-modificado",
+    "modulo": "__main__"
+  },
+  "insumos": {
+    "chave": "inep_censo_superior",
+    "descricao": "INEP, Microdados do Censo da Educação Superior 2014 e 2023 (cursos; baixados em 20/10/2026)",
+    "hash": "0548b7e96264c57de6159c8f210d8384a2ac93ed4b9631bf21eaf62b7929ca04",
+    "n_arquivos": 2
+  },
+  "se_metodo": "sem_inferencia",
+  "populacao": "Cursos de graduação do Censo da Educação Superior 2014 e 2023: ingressantes, matriculados e concluintes por cor/raça (não declarada à parte)",
+  "periodo": {
+    "inicio": "2014",
+    "fim": "2023"
+  },
+  "nota": "Contagens do censo; % negra entre declarados e limites (não declarados como não negros / negros)"
+}

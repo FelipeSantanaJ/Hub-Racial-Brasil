@@ -49,3 +49,27 @@ def test_padronizacao_pela_origem_zera_diferenca_que_e_so_de_origem():
     esperado = 100 * np.mean([(i == "7") and (o != "7") or (i == "5" and o in ("2", "3"))
                               for i, o in zip(m[m.raca == "Branca"].instrucao, m[m.raca == "Branca"].educ_pais)])
     assert mob == pytest.approx(esperado)
+
+
+def test_theil_entre_e_dentro_somam_e_casos_extremos():
+    from src.processing.bloco_eh_externos import _theil_entre_dentro
+    # dois municípios: no 1 só brancos, no 2 só negros -> toda a segregação é entre municípios
+    b = np.array([10.0, 10.0, 0.0, 0.0])
+    n = np.array([0.0, 0.0, 10.0, 10.0])
+    r = _theil_entre_dentro(b, n, np.array([1, 1, 2, 2]))
+    assert r["H_total"] == pytest.approx(1.0) and r["pct_entre"] == pytest.approx(100.0)
+    # mesmo município, escolas segregadas -> toda dentro
+    r = _theil_entre_dentro(np.array([10.0, 0.0]), np.array([0.0, 10.0]), np.array([1, 1]))
+    assert r["H_entre_municipios"] == pytest.approx(0.0, abs=1e-12) and r["H_total"] == pytest.approx(1.0)
+    assert r["H_entre_municipios"] + r["H_dentro_municipios"] == pytest.approx(r["H_total"])
+
+
+def test_composicao_superior_com_nao_declarados():
+    from src.processing.bloco_eh_externos import _composicao
+    g = pd.DataFrame({f"QT_{k}{s}": [v] for k in ("ING", "MAT", "CONC")
+                      for s, v in (("", 100), ("_BRANCA", 30), ("_PRETA", 10), ("_PARDA", 30), ("_AMARELA", 0),
+                                   ("_INDIGENA", 0), ("_CORND", 30))})
+    r = _composicao(g, {"ano": 1})[0]
+    assert r["pct_nao_declarada"] == pytest.approx(30)
+    assert r["pct_negra_entre_declarados"] == pytest.approx(100 * 40 / 70)
+    assert r["pct_negra_limite_inferior"] == pytest.approx(40) and r["pct_negra_limite_superior"] == pytest.approx(70)

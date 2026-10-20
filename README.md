@@ -144,6 +144,13 @@ observáveis ([H2](docs/studies/H2/ficha.md)). Com a mesma renda e no mesmo luga
 própria quitada e recebem menos aluguel e rendimentos de aplicações ([H3](docs/studies/H3/ficha.md)). Tudo o que usa
 a origem vale só para quem mora com os pais (viés de corresidência medido nas fichas).
 
+Com dados do INEP e da POF: no 9º ano, estudantes negros têm proficiência 0,4 desvio-padrão abaixo dos brancos no SAEB,
+e entre um terço e metade disso persiste com o mesmo nível socioeconômico e na mesma escola ([E3](docs/studies/E3/ficha.md));
+metade dos ingressantes das federais é negra, mas em Medicina são 32% ([E6](docs/studies/E6/ficha.md)); na rede pública
+do mesmo município, alunos brancos e negros estudam em escolas com a mesma infraestrutura — a diferença nacional vem de
+onde moram ([E7](docs/studies/E7/ficha.md)); e, com a mesma renda, pessoas negras têm menos carro e computador em casa
+([H3.2](docs/studies/H3.2/ficha.md)).
+
 ### O topo 10% dos negros ficou muito mais escolarizado — mas o hiato lá em cima persiste
 
 ![Topo 10% por escolaridade](docs/img/topo10_escolaridade.png)
