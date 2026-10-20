@@ -24,7 +24,8 @@ automatizados.
 erro-padrão (corrigido: ver "O que é validado" abaixo e [docs/auditoria/](docs/auditoria/)). Ondas 1 a 4 do
 [plano de análise](docs/PLANO_DE_ANALISE.md) concluídas (Onda 4: educação, origem e patrimônio, com PNAD Contínua,
 INEP e POF), com fichas em [docs/studies](docs/studies/INDICE.md); Onda 5 (políticas: Lei de Cotas e poder estatístico)
-concluída; Onda 6 (integração com o Censo 2022, riqueza imobiliária e transições no emprego) em revisão.
+concluída; Onda 6 (integração com o Censo 2022, riqueza imobiliária e transições no emprego) concluída. O que
+ficou fora do plano está em [docs/PROXIMOS_PASSOS.md](docs/PROXIMOS_PASSOS.md).
 ⏳ **Etapas 2 a 6: não iniciadas.** Ver [docs/PLANO.md](docs/PLANO.md).
 
 > **Leitura principal (13/10/2026):** o hiato racial de renda caiu de 2012 a 2026, mas **em degrau** (−5 p.p. em
@@ -163,6 +164,33 @@ onde moram ([E7](docs/studies/E7/ficha.md)); e, com a mesma renda, pessoas negra
 ![Infraestrutura das escolas](docs/img/onda4_e7_infraestrutura_municipio.png)
 
 ![Patrimônio com a mesma renda](docs/img/onda4_h3_patrimonio_condicional.png)
+
+### Censo 2022, riqueza e trabalho (Onda 6)
+
+![Censo × PNADC](docs/img/onda6_i1_censo_pnadc.png)
+
+O Censo 2022 confirma o hiato medido pela PNAD Contínua: pessoas brancas ganham cerca de 70% a mais que pessoas negras
+no trabalho (Censo: 69,7%; PNADC: 66,4%). Para indígenas, o Censo mostra uma diferença bem maior (+117%) que a PNADC,
+cuja amostra de indígenas é pequena ([I1](docs/studies/I1/ficha.md)).
+
+![Segregação e renda do setor](docs/img/onda6_d44_segregacao_renda_setor.png)
+
+Dentro da mesma cidade, a renda média dos responsáveis nos setores censitários onde moram pessoas brancas é 30% maior
+que nos setores onde moram pessoas negras; nas capitais, 70% maior ([D4.4](docs/studies/D4.4/ficha.md)).
+
+![Riqueza imobiliária](docs/img/onda6_h34_riqueza_imobiliaria.png)
+
+Pessoas brancas e negras moram em casa própria quitada na mesma proporção, mas o valor estimado da moradia por pessoa é
+cerca de duas vezes maior entre brancos — diferença maior que a de renda ([H3.4](docs/studies/H3.4/ficha.md); só a
+moradia, não a riqueza total).
+
+![Transições na carteira](docs/img/onda6_h42_transicoes.png)
+
+De um trimestre para o outro, trabalhadores negros sem carteira conseguem carteira assinada menos vezes e perdem a
+carteira um pouco mais; com as mesmas características, essas diferenças quase somem ([H4.2](docs/studies/H4.2/ficha.md)).
+
+A Lei de Cotas (Onda 5, [G1](docs/studies/G1/ficha.md)) não tem efeito afirmável com os dados públicos: a proporção de
+negros nas federais subiu junto com o registro de cor que a própria lei exigiu, e não dá para separar os dois.
 
 ### O topo 10% dos negros ficou muito mais escolarizado — mas o hiato lá em cima persiste
 

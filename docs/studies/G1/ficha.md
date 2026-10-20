@@ -157,6 +157,24 @@ tratadas caiu de 55,5 (2012) para 15,1 (2016) e 6,0 (2023); no controle, de 44,9
 - **H4 (deslocamento):** não identificável aqui (ressalva mantida).
 - **Primeiro estágio (Y2) sem poder** (EMD 16 p.p.; procedência escolar mal preenchida, ausente em 2009).
 
+### 10b. Análise posterior (NÃO pré-registrada, 20/10/2026): Rambachan–Roth, magnitudes relativas
+
+Pedida depois dos resultados (decisão do Felipe, 20/10/2026). Tabela `g1_sensibilidade_rr` (`bloco_g --so g1rr`).
+Pergunta: quanto as tendências de federais e controles poderiam divergir depois de 2012 — em múltiplos M̄ da maior
+variação anual da diferença antes da lei (Δmax = 2,85 p.p. em Y1, entre 2011 e 2012) — antes que o IC inclua zero?
+Versão **conservadora e simplificada** de Rambachan & Roth (2023, *Review of Economic Studies*): Δmax tratado como
+conhecido e viés acumulado M̄·Δmax·h somado ao IC (o FLCI do artigo é mais estreito; o pacote `HonestDiD` não foi usado).
+
+| Y1 · % negra entre declarados | Estimativa | IC com M̄ = 0,25 | IC com M̄ = 1 | **M̄ de ruptura** |
+|---|---|---|---|---|
+| 2013–2015 | +11,4 | 4,2 a 18,7 | −0,1 a 23,0 | **0,98** |
+| 2016–2019 (parâmetro principal) | +9,0 | −1,0 a 19,0 | −12,7 a 30,8 | **0,19** |
+| 2020–2023 | +1,5 | −11,2 a 14,2 | — | 0 (IC já contém zero) |
+
+**Leitura:** o salto de 2013–2015 resiste a violações de tendência do tamanho da maior variação pré-lei; o efeito de
+2016–2019 não resiste nem a um quinto dela. Reforça a seção 10: não há efeito afirmável em 2016–2019. Y1b (conservador)
+tem IC contendo zero já com M̄ = 0.
+
 ## 11. Afirmações permitidas
 
 - "Com dados por instituição do Censo da Educação Superior, não é possível separar o efeito da Lei de Cotas sobre a
@@ -181,3 +199,4 @@ tratadas caiu de 55,5 (2012) para 15,1 (2016) e 6,0 (2023); no controle, de 44,9
 |---|---|---|
 | 2026-10-20 | Claude Code | criação (seções 1–9 antes de rodar) |
 | 2026-10-20 | Claude Code | resultados (seções 10–12) depois do G6 |
+| 2026-10-20 | Claude Code | 10b: Rambachan–Roth (posterior, não pré-registrada) |

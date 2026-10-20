@@ -165,6 +165,8 @@ CATALOGO: list[tuple[str, str, str]] = [
      "étnica antes de 2013; controles = estaduais e municipais sem reserva étnica antes de 2013", "inep_censo_superior_2009_2023"),
     (r"^g1_series_grupos$", "Mesmas instituições do g1_cotas_federais; médias anuais por grupo (ponderadas pelos "
      "ingressantes de 2012)", "inep_censo_superior_2009_2023"),
+    (r"^g1_sensibilidade_rr$", "Não se aplica (sensibilidade de Rambachan–Roth sobre os coeficientes do g1_cotas_federais)",
+     "inep_censo_superior_2009_2023"),
     (r"^g4_salario_minimo$", P1 + "; Branca × Negra; painel UF × trimestre 2012T1–2026T2", T),
     (r"^g6_emd$", "Não se aplica (efeito mínimo detectável por simulação; insumos do G1 e do G4)", "g_misto"),
     # --- Onda 6: integração (src/processing/bloco_integracao.py) ---

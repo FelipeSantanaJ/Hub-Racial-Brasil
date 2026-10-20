@@ -78,3 +78,12 @@ def test_g4_recupera_beta():
     assert r["beta"] == pytest.approx(-1.0, abs=4 * r["ep_cr1"])
     assert r["p_wild"] < 0.05
     assert r["ic_inferior"] <= -1.0 <= r["ic_superior"] or abs(r["beta"] + 1) < 4 * r["ep_cr1"]
+
+
+def test_rr_magnitudes_relativas():
+    r = G.rr_magnitudes_relativas({2009: 3.0, 2010: 2.0, 2011: 1.0}, theta=10.0, ep=1.0, horizontes=[4, 5, 6, 7], mbar=1.0)
+    assert r["delta_max_pre"] == 1.0
+    assert r["vies_maximo"] == 5.5
+    assert r["ic_inferior"] == pytest.approx(10 - 5.5 - 1.96, abs=0.01)
+    r0 = G.rr_magnitudes_relativas({2009: 3.0, 2010: 2.0, 2011: 1.0}, 10.0, 1.0, [4, 5, 6, 7], 0.0)
+    assert r0["ic_inferior"] == pytest.approx(10 - 1.96, abs=0.01)
