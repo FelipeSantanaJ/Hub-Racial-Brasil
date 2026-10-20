@@ -159,6 +159,14 @@ CATALOGO: list[tuple[str, str, str]] = [
      "por cor/raça (não declarada à parte)", "inep_censo_escolar_2024"),
     (r"^h32_pof_bens$", "Moradores da POF 2017–2018 (Branca, Negra, Indígena); bens duráveis da unidade de consumo",
      "ibge_pof_2017_18"),
+    # --- Onda 5: Bloco G (src/processing/bloco_g.py) ---
+    (r"^g1_cotas_federais$", "Instituições públicas (federais, estaduais, municipais) com ≥ 30 ingressantes em cursos "
+     "presenciais de graduação em todos os anos 2009–2023 (Censo da Educação Superior); tratadas = federais sem reserva "
+     "étnica antes de 2013; controles = estaduais e municipais sem reserva étnica antes de 2013", "inep_censo_superior_2009_2023"),
+    (r"^g1_series_grupos$", "Mesmas instituições do g1_cotas_federais; médias anuais por grupo (ponderadas pelos "
+     "ingressantes de 2012)", "inep_censo_superior_2009_2023"),
+    (r"^g4_salario_minimo$", P1 + "; Branca × Negra; painel UF × trimestre 2012T1–2026T2", T),
+    (r"^g6_emd$", "Não se aplica (efeito mínimo detectável por simulação; insumos do G1 e do G4)", "g_misto"),
     (r"^habitacao_.*$", "Moradores (pessoas) da PNAD Contínua anual, Visita 1, tema Habitação: 2016–2019 e 2022–2025",
      INSUMO_ANUAL_VISITA1_V1),
     (r"^deflator_ibge$", "Não se aplica (deflatores oficiais do IBGE por UF × trimestre)", "ibge_deflator"),

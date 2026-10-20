@@ -429,3 +429,4 @@ Dentro da Onda 4, **H1 e E5 compartilham a mesma base** (ligação filhos–pais
 2. Acesso a RAIS identificada, Painel de Pessoal e microdados INEP; custo de obtenção.
 3. Existência de módulo de mobilidade social na PNAD/PNADC (para H).
 4. ~~Limite mínimo de amostra por célula para raça × gênero × Indígena/Amarela (definir regra de supressão).~~ **Fechado em 13/10/2026 (Ponto de parada 3):** n < 30 no denominador do indicador **ou** CV design-based > 30% ⇒ não publica; valores mantidos com a coluna `publicavel` (`src/inference/precisao.py`; `docs/LIMITACOES_E_METODOLOGIA.md`). Revisar no Bloco F.
+5. **Pendente (20/10/2026, G3):** pedido via Lei de Acesso à Informação de ingressantes do Executivo federal por ano × cor/raça × órgão/carreira (2008–2025), para destravar a avaliação da Lei 12.990. O Felipe decidiu não pedir agora; verificar em outro momento (ficha `docs/studies/G3`).

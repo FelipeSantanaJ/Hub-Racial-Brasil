@@ -1,0 +1,20 @@
+{
+  "esquema": "hub-racial-meta/1",
+  "arquivo": "g6_emd.parquet",
+  "n_linhas": 13,
+  "gerado_em": "2026-10-20T19:21:45.181967+00:00",
+  "codigo": {
+    "commit": "cc24b070f5a13d6b259fb944c0082a857e35804c",
+    "modulo": "__main__"
+  },
+  "insumos": {
+    "chave": "g_misto",
+    "descricao": "PNAD Contínua trimestral, extrato v2 + deflator IBGE e Censo da Educação Superior 2009–2023",
+    "hash": "3fc0f53d6454be13333320de182327b059f7f1fa973cb653287fba80182ec740",
+    "n_arquivos": 243
+  },
+  "se_metodo": "simulacao_ar1",
+  "populacao": "Não se aplica (efeito mínimo detectável por simulação; insumos do G1 e do G4)",
+  "periodo": null,
+  "nota": "EMD = 2,80 × DP do estimador sob efeito nulo; G1: σ e ρ só de 2009–2012; pior caso da grade de ρ"
+}

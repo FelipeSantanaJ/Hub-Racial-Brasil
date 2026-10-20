@@ -54,6 +54,13 @@ INSUMOS = {
     "inep_censo_superior": ("INEP, Microdados do Censo da Educação Superior 2014 e 2023 (cursos; baixados em 20/10/2026)",
                             ["data/raw/externos/inep/microdados_censo_da_educacao_superior_2014.zip",
                              "data/raw/externos/inep/microdados_censo_da_educacao_superior_2023.zip"]),
+    "inep_censo_superior_2009_2023": ("INEP, Microdados do Censo da Educação Superior 2009–2023 (cursos; 2009–2013 e "
+                                      "2015–2022 baixados em 20/10/2026 com autorização do Felipe)",
+                                      [f"data/raw/externos/inep/microdados_censo_da_educacao_superior_{a}.zip"
+                                       for a in range(2009, 2024)]),
+    "g_misto": ("PNAD Contínua trimestral, extrato v2 + deflator IBGE e Censo da Educação Superior 2009–2023",
+                ["data/raw/pnadc_extraido_v2/parquet", "data/processed/deflator_ibge.parquet"]
+                + [f"data/raw/externos/inep/microdados_censo_da_educacao_superior_{a}.zip" for a in range(2009, 2024)]),
     "ibge_pof_2017_18": ("IBGE, Microdados da POF 2017–2018 (baixados em 20/10/2026)",
                          ["data/raw/externos/pof_2017_18/Dados_20230713.zip"]),
     "wb_ppc_ipc": ("Banco Mundial (WDI, API v2): fator de PPC do consumo privado (PA.NUS.PRVT.PP) e IPC (FP.CPI.TOTL), Brasil",

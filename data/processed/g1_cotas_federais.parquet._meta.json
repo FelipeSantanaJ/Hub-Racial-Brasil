@@ -1,0 +1,23 @@
+{
+  "esquema": "hub-racial-meta/1",
+  "arquivo": "g1_cotas_federais.parquet",
+  "n_linhas": 308,
+  "gerado_em": "2026-10-20T20:14:36.672975+00:00",
+  "codigo": {
+    "commit": "cc24b070f5a13d6b259fb944c0082a857e35804c",
+    "modulo": "__main__"
+  },
+  "insumos": {
+    "chave": "inep_censo_superior_2009_2023",
+    "descricao": "INEP, Microdados do Censo da Educação Superior 2009–2023 (cursos; 2009–2013 e 2015–2022 baixados em 20/10/2026 com autorização do Felipe)",
+    "hash": "d70c9d284b0caf1837f37e479700fba4bf90455c6b761acf80583af793a32020",
+    "n_arquivos": 15
+  },
+  "se_metodo": "cr1_instituicao_e_bootstrap_instituicao",
+  "populacao": "Instituições públicas (federais, estaduais, municipais) com ≥ 30 ingressantes em cursos presenciais de graduação em todos os anos 2009–2023 (Censo da Educação Superior); tratadas = federais sem reserva étnica antes de 2013; controles = estaduais e municipais sem reserva étnica antes de 2013",
+  "periodo": null,
+  "familia_fdr": [
+    "familia_fdr"
+  ],
+  "nota": "δ em p.p. relativos a 2012; ep = maior entre CR1 e bootstrap (999) nas janelas"
+}
