@@ -58,6 +58,13 @@ INSUMOS = {
                                       "2015–2022 baixados em 20/10/2026 com autorização do Felipe)",
                                       [f"data/raw/externos/inep/microdados_censo_da_educacao_superior_{a}.zip"
                                        for a in range(2009, 2024)]),
+    "ibge_censo_2022_setores": ("IBGE, Censo 2022, Agregados por setores (Cor ou raça, Básico, Rendimento do Responsável; "
+                                "baixados em 20/10/2026)",
+                                ["data/raw/externos/censo_2022/Agregados_por_setores_cor_ou_raca_BR.zip",
+                                 "data/raw/externos/censo_2022/Agregados_por_setores_basico_BR_20260520.zip",
+                                 "data/raw/externos/censo_2022/Agregados_por_setores_renda_responsavel_BR_20260508_csv.zip"]),
+    "censo2022_e_pnadc": ("IBGE, Censo 2022 (microdados da amostra, acesso público; baixados em 20/10/2026) e PNAD Contínua "
+                          "trimestral, extrato v2", ["data/raw/externos/censo_2022/microdados", "data/raw/pnadc_extraido_v2/parquet"]),
     "g_misto": ("PNAD Contínua trimestral, extrato v2 + deflator IBGE e Censo da Educação Superior 2009–2023",
                 ["data/raw/pnadc_extraido_v2/parquet", "data/processed/deflator_ibge.parquet"]
                 + [f"data/raw/externos/inep/microdados_censo_da_educacao_superior_{a}.zip" for a in range(2009, 2024)]),
