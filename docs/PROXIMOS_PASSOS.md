@@ -25,8 +25,8 @@ Os microdados públicos só identificam a UF e trazem a idade em faixas de 5 ano
 município, a segregação combinada com renda individual e indígenas por território exigem o arquivo de **acesso
 controlado** do IBGE (o layout "acesso Controlado" está publicado no FTP do IBGE, em
 `Microdados_e_Areas_de_Ponderacao/Documentacao/Layout e dicionário/`; não foi baixado). O acesso é por
-pedido ao IBGE em ambiente restrito (Sala de Acesso a Dados Restritos, *a confirmar* o procedimento atual). Decisão:
-pedir ou não.
+pedido ao IBGE em ambiente restrito (Sala de Acesso a Dados Restritos, *a confirmar* o procedimento atual).
+**Decisão do Felipe (20/10/2026): não pedir; fica só registrado.**
 
 ## 3. Feito depois do plano (20/10/2026)
 
@@ -34,7 +34,9 @@ pedir ou não.
   efeito de 2016–2019 não resiste a violações de tendência maiores que 0,19 × a maior variação pré-lei.
 - **Gráficos da Onda 6** no deck publicado (650 slides).
 
-## 4. Ideias que ficaram fora do plano (sem decisão)
+## 4. Ideias que ficaram fora do plano
+
+**Decisão do Felipe (20/10/2026): nada desta lista será feito por enquanto; fica só registrado.**
 
 - **G1 com o FLCI exato** de Rambachan–Roth (pacote `HonestDiD`, em R) — mais estreito que a versão conservadora.
 - **POF 2024–2025** quando o IBGE publicar (*a confirmar* data): refazer H3.2 e H3.4 e ter série de riqueza.

@@ -7,6 +7,8 @@ calculá-lo: data, o quê, por quê, impacto. Mais recente primeiro.
 
 ## 20/10/2026 — Depois do plano: gráficos da Onda 6 e Rambachan–Roth no G1 (branch `pos-plano/graficos-onda6-g1`)
 
+- **Decisões do Felipe (20/10/2026):** PR #16 liberado; Censo 2022 com acesso controlado não será pedido; LAI do G3 e
+  ideias de `docs/PROXIMOS_PASSOS.md` ficam só registradas, sem execução por enquanto.
 - **Gráficos da Onda 6** (`graficos_onda6.py`) no deck publicado: seção "Integração (Onda 6)"; divisor "Leitura
   principal (Ondas 1 a 6)" com a nota de que a Onda 5 não tem efeito afirmável. Deck: 650 slides.
 - **G1 — Rambachan–Roth** (magnitudes relativas, versão conservadora; **análise posterior, não pré-registrada**): M̄ de
