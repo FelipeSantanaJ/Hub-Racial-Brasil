@@ -130,12 +130,12 @@ técnicas (R11, F4, F6, imagens vazias da árvore) nas pendências da Onda 1 (`o
 | ID | Estado | Onde | Por quê |
 |---|---|---|---|
 | E1 | Já existe (Onda 4) | `e1_escolarizacao_idade` (frequência, etapa adequada, atraso, conclusão por idade simples; V3003/V3003A harmonizados) | atraso dentro do fundamental (`V3006`) não feito |
-| E2 | Já existe, parte PNADC (Onda 4; funil em `e1_escolarizacao_idade`) | PNADC: feito. Censo Escolar por aluno com raça: só SEDAP (fora de alcance); público simplificado: NÃO VERIFICADO se traz raça agregada por escola | — |
-| E3 | Novo (parcial bloqueado) | SAEB público (694 MB, 2023); raça no SAEB público: NÃO VERIFICADO | — |
+| E2 | Já existe (Onda 4) | Funil PNADC em `e1_escolarizacao_idade`; Censo Escolar público é por escola (matrículas por cor/raça, sem aluno): `e7_escolas_segregacao` | progressão/evasão por aluno com raça só via SEDAP |
+| E3 | Já existe (Onda 4) | `e3_saeb_proficiencia` (SAEB 2023 traz cor/raça do aluno, INSE e proficiência; bruto, + INSE, dentro da escola) | — |
 | E4 | Já existe, parte PNADC (Onda 4) | `e4_rede_escola` (rede por etapa e raça; condicional a lugar e escolaridade/renda dos pais; composição da graduação) | tipo de escola fino: Censo Escolar |
 | E5 | Já existe (Onda 4) | Ficha H1 (`h1_transmissao_educacional`, `h1_corresidencia`) | — |
-| E6 | Bloqueado por dado (parcial) | Censo da Educação Superior por aluno com raça/cota: só SEDAP. Agregados públicos por curso: possível, NÃO VERIFICADO | — |
-| E7 | Bloqueado por dado | Território fino: Censo 2022 / Censo Escolar por escola | — |
+| E6 | Já existe, descritivo (Onda 4) | `e6_superior_composicao` (Censo da Educação Superior 2014 e 2023, por curso: ingresso, matrícula, conclusão por cor/raça; reserva de vagas). Por aluno: só SEDAP | desenho causal: G1 |
+| E7 | Já existe (Onda 4) | `e7_escolas_segregacao` (Censo Escolar 2024: segregação entre escolas, infraestrutura dentro do município) | bairro: Censo 2022 |
 | E8 | Novo | Só literatura (`M`) | — |
 
 ## Bloco G — Políticas e causalidade
@@ -156,7 +156,7 @@ técnicas (R11, F4, F6, imagens vazias da árvore) nas pendências da Onda 1 (`o
 | H1.1–H1.4 | Já existe (Onda 4) | `h1_transmissao_educacional`, `h1_corresidencia` (viés de corresidência medido). Suplemento de mobilidade só na PNAD antiga de 2014 | — |
 | H2.1–H2.4 | Já existe (Onda 4) | `h2_origem_renda` (E8 com e sem origem; Gelbach; elasticidade proxy), `h2_mobilidade_quintis` | — |
 | H3.1 | Já existe (Onda 4) | `h3_patrimonio_proxy` (bruto e no mesmo décimo de renda, UF e situação; 2016–2019/2022–2025; a Visita 5 não tem `S01017`). A antiga `habitacao_hiato_racial*` fica para comparação | — |
-| H3.2 | Novo | POF: não baixada | — |
+| H3.2 | Já existe (Onda 4) | `h32_pof_bens` (POF 2017–2018: bens duráveis no mesmo décimo de renda) | — |
 | H3.3 | Já existe (Onda 4) | `h3_patrimonio_proxy` (aluguel e aplicações de adultos 18+, bruto e condicional) e T3 (domicílios) | — |
 | H3.4 | Bloqueado por dado | Riqueza: IR/RAIS não acessíveis; só proxy | — |
 | H4.1 | Existe, precisa refazer | Igual a D6.1/B4 | `pop` |

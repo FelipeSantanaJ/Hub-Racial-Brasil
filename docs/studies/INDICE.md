@@ -43,6 +43,10 @@ de publicação. Estudos entram aqui quando a ficha é criada, não quando o res
 | H1 | Transmissão educacional pais → filhos e viés de corresidência | C | 4 | Aprovado com ressalvas | [H1/ficha.md](H1/ficha.md) | Onda 4 |
 | H2 | Mesma origem, mesma renda? Resíduo do D1 com e sem origem | C | 4 | Aprovado com ressalvas | [H2/ficha.md](H2/ficha.md) | Onda 4 |
 | H3 | Patrimônio por proxy: casa própria e rendas de capital | D/C | 4 | Aprovado com ressalvas | [H3/ficha.md](H3/ficha.md) | Onda 4 |
+| E3 | Aprendizado no SAEB por raça, com o mesmo INSE e dentro da escola | D/C | 4 | Aprovado com ressalvas (proposto) | [E3/ficha.md](E3/ficha.md) | Onda 4 (INEP) |
+| E6 | Ensino superior: composição, reserva de vagas, conclusão | D | 4 | Aprovado com ressalvas (proposto) | [E6/ficha.md](E6/ficha.md) | Onda 4 (INEP) |
+| E7 | Segregação entre escolas e infraestrutura | D | 4 | Aprovado com ressalvas (proposto) | [E7/ficha.md](E7/ficha.md) | Onda 4 (INEP) |
+| H3.2 | Bens duráveis com a mesma renda (POF) | D/C | 4 | Aprovado com ressalvas (proposto) | [H3.2/ficha.md](H3.2/ficha.md) | Onda 4 (POF) |
 
 O que já existe no Hub e a qual pergunta corresponde está em
 [`docs/auditoria/mapa_cobertura_plano.md`](../auditoria/mapa_cobertura_plano.md).

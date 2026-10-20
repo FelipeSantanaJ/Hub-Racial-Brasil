@@ -1,0 +1,25 @@
+{
+  "esquema": "hub-racial-meta/1",
+  "arquivo": "e3_saeb_proficiencia.parquet",
+  "n_linhas": 192,
+  "gerado_em": "2026-10-20T18:02:11.048662+00:00",
+  "codigo": {
+    "commit": "f7eedc9f02e11ccacd0de8ea45c9eeb757415af7-modificado",
+    "modulo": "__main__"
+  },
+  "insumos": {
+    "chave": "inep_saeb_2023",
+    "descricao": "INEP, Microdados do SAEB 2023 (alunos; baixado em 20/10/2026)",
+    "hash": "1bf0bf297115e75f8ff33e704915fe58410a041b96a817eb819c851943c3940b",
+    "n_arquivos": 1
+  },
+  "se_metodo": "wls_influencia_linearizacao_estrato_escola",
+  "populacao": "Estudantes do 5º e 9º anos do fundamental e da 3ª/4ª série do médio com proficiência válida no SAEB 2023; cor/raça autodeclarada no questionário (TX_RESP_Q04)",
+  "periodo": null,
+  "familia_fdr": [
+    "serie",
+    "disciplina",
+    "especificacao"
+  ],
+  "nota": "Proficiência na escala SAEB; diferenças Branca − grupo em pontos e em DP da série; escola = conglomerado"
+}

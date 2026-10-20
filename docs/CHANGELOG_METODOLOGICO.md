@@ -5,6 +5,26 @@ calculá-lo: data, o quê, por quê, impacto. Mais recente primeiro.
 
 ---
 
+## 20/10/2026 — Onda 4, parte 2: INEP e POF (branch `onda4/inep-pof`)
+
+- **Fontes novas (download autorizado pelo Felipe em 20/10/2026):** SAEB 2023, Censo Escolar 2024, Censo da Educação
+  Superior 2014 e 2023 (INEP) e POF 2017–2018 (IBGE), em `data/raw/externos/` (não versionado); extração das colunas
+  usadas em `src/ingestion/externos_educacao.py`. Totais conferidos com os números oficiais (ingressantes, matrículas,
+  população da POF). Nenhum número já publicado muda.
+- **Estudos novos:** E3 (SAEB), E6 (ensino superior), E7 (escolas), H3.2 (bens duráveis), com fichas commitadas antes de
+  rodar (`src/processing/bloco_eh_externos.py`).
+- **Erro corrigido antes de ler os resultados:** 0,2–0,4% dos alunos do SAEB têm proficiência válida e peso vazio; na
+  primeira rodada isso anulou médias e desvios-padrão (as regressões não foram afetadas). Esses registros saem e são
+  contados (`n_sem_proficiencia_ou_peso`).
+- **Principais achados:** no 9º ano, estudantes negros têm proficiência 0,42 DP abaixo dos brancos; com o mesmo INSE e na
+  mesma escola, 0,14–0,21 DP; a diferença cresce do 5º ao 9º ano (E3). Metade dos ingressantes federais presenciais é
+  negra e 18% entram pela reserva étnica; Medicina tem 32% de negros × 45% na graduação (E6). Segregação entre escolas:
+  Duncan 0,51 (0,26 dentro do município); na rede pública do mesmo município, a infraestrutura das escolas de brancos e
+  de negros é igual (E7). Com a mesma renda e lugar, negros têm menos de todos os 7 bens duráveis (automóvel −8,8 p.p.)
+  (H3.2).
+
+---
+
 ## 20/10/2026 — Onda 4, parte PNADC: Blocos E e H (branch `onda4/e-h`)
 
 - **Decisões do Felipe (20/10/2026, "pode seguir"):** fichas E1, E4, H1, H2 e H3 aprovadas com ressalvas; download de

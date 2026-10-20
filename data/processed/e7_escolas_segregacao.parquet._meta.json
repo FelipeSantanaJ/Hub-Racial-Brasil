@@ -1,0 +1,20 @@
+{
+  "esquema": "hub-racial-meta/1",
+  "arquivo": "e7_escolas_segregacao.parquet",
+  "n_linhas": 32,
+  "gerado_em": "2026-10-20T17:31:45.914173+00:00",
+  "codigo": {
+    "commit": "f7eedc9f02e11ccacd0de8ea45c9eeb757415af7-modificado",
+    "modulo": "__main__"
+  },
+  "insumos": {
+    "chave": "inep_censo_escolar_2024",
+    "descricao": "INEP, Microdados do Censo Escolar 2024 (escolas; baixado em 20/10/2026)",
+    "hash": "48825b603bafd347d12692532c9b2e912b9c8da3af5097c9683bff2acf2403a6",
+    "n_arquivos": 1
+  },
+  "se_metodo": "sem_inferencia",
+  "populacao": "Escolas em atividade com matrícula na educação básica, Censo Escolar 2024; matrículas por cor/raça (não declarada à parte)",
+  "periodo": null,
+  "nota": "Matrículas da educação básica; Negra = preta + parda; diferenças em p.p. de matrículas"
+}

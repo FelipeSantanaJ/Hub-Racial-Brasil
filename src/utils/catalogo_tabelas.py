@@ -150,6 +150,15 @@ CATALOGO: list[tuple[str, str, str]] = [
     (r"^h3_patrimonio_proxy$", "PNAD Contínua anual (Visita 1; Visita 5 em 2020–2021 só para rendas de capital), exceto "
      "V2005 17–19; condição do domicílio (S01017) por pessoa e rendas de aluguel/aplicações (V5007A/V5008A) de adultos 18+",
      "anual_v2"),
+    # --- Onda 4, parte 2: INEP e POF (src/processing/bloco_eh_externos.py) ---
+    (r"^e3_saeb_proficiencia$", "Estudantes do 5º e 9º anos do fundamental e da 3ª/4ª série do médio com proficiência "
+     "válida no SAEB 2023; cor/raça autodeclarada no questionário (TX_RESP_Q04)", "inep_saeb_2023"),
+    (r"^e6_superior_composicao$", "Cursos de graduação do Censo da Educação Superior 2014 e 2023: ingressantes, "
+     "matriculados e concluintes por cor/raça (não declarada à parte)", "inep_censo_superior"),
+    (r"^e7_escolas_segregacao$", "Escolas em atividade com matrícula na educação básica, Censo Escolar 2024; matrículas "
+     "por cor/raça (não declarada à parte)", "inep_censo_escolar_2024"),
+    (r"^h32_pof_bens$", "Moradores da POF 2017–2018 (Branca, Negra, Indígena); bens duráveis da unidade de consumo",
+     "ibge_pof_2017_18"),
     (r"^habitacao_.*$", "Moradores (pessoas) da PNAD Contínua anual, Visita 1, tema Habitação: 2016–2019 e 2022–2025",
      INSUMO_ANUAL_VISITA1_V1),
     (r"^deflator_ibge$", "Não se aplica (deflatores oficiais do IBGE por UF × trimestre)", "ibge_deflator"),
