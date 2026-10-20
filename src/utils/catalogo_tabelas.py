@@ -138,6 +138,18 @@ CATALOGO: list[tuple[str, str, str]] = [
     (r"^d4_territorio$", P1 + "; Branca × Negra; por UF, tipo de área (V1023) e situação (V1022)", T),
     (r"^d5_posicao_ocupacao$", P1 + "; Branca, Negra e Indígena; posição (VD4009) e previdência (VD4012)", T),
     (r"^d6_hiato_idade$", P1 + "; Branca, Negra e Indígena; faixas etárias de 5 anos", T),
+    # --- Onda 4: Blocos E e H, parte PNADC (src/processing/bloco_eh.py) ---
+    (r"^e1_escolarizacao_idade$", "Pessoas de 5 a 29 anos (Branca, Negra, Indígena; todas, não só P1); frequência, etapa "
+     "adequada (V3003 até 2015, V3003A desde 2016, harmonizados) e conclusão (VD3004)", T),
+    (r"^e4_rede_escola$", "Pessoas que frequentam pré-escola, fundamental, médio regular ou graduação (V3002 = 1), "
+     "Branca, Negra, Indígena; rede (V3002A, desde 2016)", T),
+    (r"^(h1_transmissao_educacional|h1_corresidencia)$", "Pessoas de 18 a 29 anos (Branca, Negra, Indígena); origem = "
+     "maior VD3004 do responsável/cônjuge para filhos(as) e enteados(as) corresidentes (V2005 04/05/06)", T),
+    (r"^(h2_origem_renda|h2_mobilidade_quintis)$", "Filhos(as) e enteados(as) corresidentes de 18 a 29 anos em P1 (" +
+     pop.DESCRICAO_POPULACAO_REFERENCIA + "), Branca × Negra; origem = escolaridade e renda do trabalho dos pais", T),
+    (r"^h3_patrimonio_proxy$", "PNAD Contínua anual (Visita 1; Visita 5 em 2020–2021 só para rendas de capital), exceto "
+     "V2005 17–19; condição do domicílio (S01017) por pessoa e rendas de aluguel/aplicações (V5007A/V5008A) de adultos 18+",
+     "anual_v2"),
     (r"^habitacao_.*$", "Moradores (pessoas) da PNAD Contínua anual, Visita 1, tema Habitação: 2016–2019 e 2022–2025",
      INSUMO_ANUAL_VISITA1_V1),
     (r"^deflator_ibge$", "Não se aplica (deflatores oficiais do IBGE por UF × trimestre)", "ibge_deflator"),

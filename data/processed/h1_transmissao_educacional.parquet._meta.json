@@ -1,0 +1,21 @@
+{
+  "esquema": "hub-racial-meta/1",
+  "arquivo": "h1_transmissao_educacional.parquet",
+  "n_linhas": 193,
+  "gerado_em": "2026-10-20T16:15:34.185447+00:00",
+  "codigo": {
+    "commit": "4af95aa5883d08bacda536480f2c8713174c3625-modificado",
+    "modulo": "__main__"
+  },
+  "insumos": {
+    "chave": "trimestral_v2",
+    "descricao": "PNAD Contínua trimestral, extrato v2 + deflator IBGE",
+    "hash": "9b64f579fa63981e9237190166d333a9ac546041a4df260d2c67dabf49f1ceda",
+    "n_arquivos": 228
+  },
+  "se_metodo": "linearizacao_taylor_estrato_upa",
+  "populacao": "Pessoas de 18 a 29 anos (Branca, Negra, Indígena); origem = maior VD3004 do responsável/cônjuge para filhos(as) e enteados(as) corresidentes (V2005 04/05/06)",
+  "periodo": null,
+  "declaracao": "associação entre origem observada e destino; não efeito causal da origem; amostra restrita a quem mora com os pais",
+  "nota": "p.p.; origem = maior VD3004 de responsável/cônjuge em 4 grupos"
+}

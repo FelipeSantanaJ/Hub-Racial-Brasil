@@ -6,7 +6,7 @@
 | Onda | 4 |
 | Responsável | Felipe Santana (execução: Claude Code) |
 | Criada em / atualizada em | 2026-10-20 / 2026-10-20 |
-| Estado de publicação | **Proposto** |
+| Estado de publicação | **Aprovado com ressalvas** (proposto; aguarda o Felipe) |
 | PR | `onda4/e-h` |
 
 > Seções 1–9 escritas **antes** de rodar (20/10/2026).
@@ -64,3 +64,41 @@ condicional em casa própria quitada for negativa para negros com IC excluindo z
 - Renda de aluguel e de aplicações é muito subdeclarada nas pesquisas domiciliares (a confirmar).
 - `S01017` só na Visita 1 (sem 2020–21).
 - A unidade é a pessoa (cada morador herda a condição do domicílio).
+
+## 10. Resultados
+
+Tabela: `h3_patrimonio_proxy` (PNADC anual; 2016–2019 e 2022–2025 para casa própria, 2016–2025 para rendas de
+capital). p.p.; IC 95%.
+
+| Indicador | Ano | Negra − Branca bruta | Mesmo décimo de renda, UF e situação |
+|---|---|---|---|
+| Casa própria quitada | 2016 | +0,8 (0,0–1,6) | −2,8 (−3,6 a −2,0) |
+| | **2025** | −0,5 (n.s.) | **−4,7 (−5,5 a −4,0)** |
+| Casa própria (quitada ou pagando) | 2025 | −3,5 | −4,7 (−5,4 a −4,0) |
+| Alugada | 2025 | +1,6 | **+4,2 (3,5–4,8)** |
+| Cedida | 2025 | +1,9 | +0,5 |
+| Recebe aluguel (18+) | 2025 | −2,2 (Branca 3,7%, Negra 1,5%) | −0,9 (−1,1 a −0,7) |
+| Recebe aplicações/outros (18+) | 2025 | −1,6 | −0,4 (−0,6 a −0,2) |
+| **Recebe aluguel ou aplicações (18+)** | 2025 | −3,5 (Branca 5,8%, Negra 2,4%) | **−1,2 (−1,4 a −0,9)** |
+
+Indígena − Branca (2025, condicional): casa própria quitada −8,5 (−13,0 a −3,9); alugada +7,2.
+
+**Leitura das hipóteses**
+
+- **H1 (desvantagem de patrimônio além da renda):** **confirmada** — com a mesma renda domiciliar por pessoa, a mesma UF e
+  a mesma situação, pessoas negras moram menos em casa própria quitada (−4,7 p.p.) e recebem menos rendas de capital
+  (−1,2 p.p., cerca de um quinto da taxa dos brancos, 5,8%). A desvantagem condicional em casa própria **aumentou** desde
+  2016 (−2,8 → −4,7).
+- **H2 (casa própria não discrimina):** **refutada** na forma condicional. A igualdade **bruta** em casa própria (≈ 0)
+  esconde que negros moram mais em UFs e situações (interior, rural) com mais casa própria e renda menor.
+
+## 11. Afirmações permitidas
+
+- "Com a mesma renda por pessoa e no mesmo lugar, pessoas negras moram menos em casa própria quitada (−5 p.p.) e mais
+  em casa alugada (+4 p.p.) que pessoas brancas (2025)."
+- "Entre adultos, 5,8% das pessoas brancas e 2,4% das negras recebem aluguel ou rendimentos de aplicações."
+
+## 12. Afirmações proibidas
+
+- "A diferença de riqueza é de X%" (o Hub não mede patrimônio; H3.4).
+- "Negros têm tanta casa própria quanto brancos" sem a comparação condicional.

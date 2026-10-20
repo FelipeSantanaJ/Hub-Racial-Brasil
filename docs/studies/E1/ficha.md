@@ -6,7 +6,7 @@
 | Onda | 4 |
 | Responsável | Felipe Santana (execução: Claude Code) |
 | Criada em / atualizada em | 2026-10-20 / 2026-10-20 |
-| Estado de publicação | **Proposto** |
+| Estado de publicação | **Aprovado com ressalvas** (proposto; aguarda o Felipe) |
 | PR | `onda4/e-h` |
 
 > Seções 1–9 escritas **antes** de rodar (20/10/2026).
@@ -79,3 +79,57 @@ PNAD Contínua trimestral v2: `V2009`, `V2010`, `V3002`, `V3003` (2012–4T2015)
 - **Reclassificação racial** (B2): a composição de quem se declara negro muda entre as janelas.
 - EJA mistura idades; aparece como etapa abaixo da adequada para quem tem 15–24.
 - 2020–21 (pandemia, telefone) fora das janelas e marcado na série.
+
+## 10. Resultados
+
+Tabela: `e1_escolarizacao_idade` (`src/processing/bloco_eh.py`). Diferenças Branca − grupo em p.p.; IC 95%.
+
+**Frequência e etapa adequada, Branca − Negra, por idade**
+
+| Idade | Frequenta 2012 | Frequenta 2025–26 | Etapa adequada 2012 | Etapa adequada 2025–26 |
+|---|---|---|---|---|
+| 6–14 | 0,6 | 0,0 | 1,1 | −0,1 |
+| 14 | 1,7 | 0,3 | 2,0 | 0,4 |
+| **15** | 1,8 | 1,1 | **18,2** (16,5–19,9) | **10,0** (8,1–11,9) |
+| 16 | 3,5 | 0,6 | 17,2 | 6,5 |
+| 18–24 | 6,9 | **11,8** (10,8–12,8) | 13,1 | 14,0 |
+| 25–29 | 3,2 | 4,6 | — | — |
+
+**Conclusão de etapas** (% e diferença Branca − Negra)
+
+| Indicador | 2012 Branca / Negra | Dif. 2012 | 2025–26 Branca / Negra | Dif. 2025–26 | Mudança |
+|---|---|---|---|---|---|
+| Fundamental completo aos 16 | 76,3 / 59,2 | 17,1 | 90,2 / 83,2 | 7,0 (5,6–8,4) | — |
+| Médio completo aos 19 | 61,4 / 41,0 | 20,5 | 81,1 / 68,3 | 12,8 (10,9–14,7) | **−7,7 (−10,3 a −5,2)** |
+| Médio completo aos 25–29 | 70,7 / 52,1 | 18,6 | 85,1 / 73,0 | 12,1 (11,2–13,0) | −6,5 (−7,8 a −5,2) |
+| Superior completo aos 25–29 | 23,1 / 7,6 | 15,4 | 34,8 / 16,3 | **18,5 (17,3–19,7)** | **+3,1 (+1,5 a +4,6)** |
+
+Branca − Indígena, janela recente: médio aos 19 14,9 (5,0–24,8); superior aos 25–29 22,8 (16,3–29,3).
+Fora da escola sem médio completo aos 25–29: 17,0 p.p. a mais para negros em 2012, 11,6 em 2025–26.
+
+**Limitação do indicador (descoberta ao ler os resultados):** "etapa adequada" conta o fundamental como adequado até os
+14 anos, então o atraso **dentro** do fundamental só aparece aos 15. A diferença de etapa adequada "nasce" aos 15 por
+construção; o atraso pode vir de antes. Medi-lo exige a série (`V3006`), não feito nesta onda.
+
+**Leitura das hipóteses**
+
+- **H1 (a diferença nasce no fim do fundamental/médio):** **confirmada** — frequência quase igual até os 14 (≤ 1,7 p.p. em
+  2012, ≤ 0,3 em 2025–26) e diferença de etapa adequada de 10 p.p. aos 15 (18 em 2012), com a ressalva acima.
+- **H2 (a diferença nasce cedo):** **refutada** para frequência e etapa — nenhuma diferença > 5 p.p. antes dos 10 anos
+  (o maior valor foi 4,6 aos 6 anos em 2012; −1,7 em 2025–26).
+- **H3 (convergência na básica, não no superior):** **confirmada, e mais forte:** a diferença de médio completo caiu
+  7,7 p.p., e a de superior completo **aumentou** 3,1 p.p. — os dois grupos ganharam diploma, os brancos mais.
+- Aos 18–24, a diferença de **frequência** cresceu (6,9 → 11,8 p.p.): a desigualdade se deslocou para a entrada no
+  superior.
+
+## 11. Afirmações permitidas
+
+- "Até os 14 anos, crianças brancas e negras frequentam a escola na mesma proporção; aos 15, 10% a mais das brancas
+  já estão no ensino médio (2025–26)."
+- "A diferença no ensino médio completo aos 19 anos caiu de 21 para 13 pontos desde 2012; a de diploma superior aos
+  25–29 aumentou, de 15 para 19 pontos."
+
+## 12. Afirmações proibidas
+
+- "A desigualdade educacional só começa aos 15 anos" (o indicador não vê atraso dentro do fundamental).
+- Tratar as idades como trajetória de uma mesma geração.

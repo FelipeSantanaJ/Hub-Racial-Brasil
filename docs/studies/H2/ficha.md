@@ -6,7 +6,7 @@
 | Onda | 4 |
 | Responsável | Felipe Santana (execução: Claude Code) |
 | Criada em / atualizada em | 2026-10-20 / 2026-10-20 |
-| Estado de publicação | **Proposto** |
+| Estado de publicação | **Aprovado com ressalvas** (proposto; aguarda o Felipe) |
 | PR | `onda4/e-h` |
 
 > Seções 1–9 escritas **antes** de rodar (20/10/2026).
@@ -72,3 +72,56 @@ filho; deflator do IBGE.
 - **Renda dos pais contemporânea** (e só do trabalho): não é a renda da infância; viés de atenuação na elasticidade.
 - Pais aposentados ou fora do mercado têm renda do trabalho zero (indicador separado).
 - Controlar origem é controlar um mediador anterior; não é "eliminar a discriminação".
+
+## 10. Resultados
+
+Tabelas: `h2_origem_renda`, `h2_mobilidade_quintis`. ln renda (log-pontos), IC 95%.
+
+**H2.1 / H2.2 — hiato condicional (Branca × Negra), 18–29 anos em P1**
+
+| Especificação | 2012 | 2025T3–2026T2 |
+|---|---|---|
+| E8 (controles do D1), todos de 18–29 | 0,069 (0,062–0,076) | 0,047 (0,038–0,056) |
+| E8, só corresidentes | 0,067 | 0,048 (0,036–0,060) |
+| **E8 + origem, corresidentes** | 0,045 | **0,028 (0,017–0,040)** |
+| Mudança ao incluir a origem | −0,022 (−0,024 a −0,019); **−32%** | −0,020 (−0,024 a −0,016); **−42% (−53% a −30%)** |
+
+Gelbach com o bloco origem (corresidentes, janela recente; hiato bruto 0,232): território 0,053 (23%), **origem 0,051
+(22%; 0,046–0,056)**, vínculo 0,034, instrução 0,030, ocupação 0,029. A E8 da subamostra corresidente (0,048) é
+praticamente igual à de todos os jovens (0,047): a seleção por corresidência quase não muda a parte não associada.
+
+**H2.3 — elasticidade *proxy*** (ln renda do filho × ln renda do trabalho dos pais): Branca 0,219 (0,203–0,235), Negra
+0,281 (0,266–0,296); diferença +0,062 (0,040–0,083). Em 2012: 0,242 × 0,283.
+
+**H2.4 — quintis** (renda do trabalho dos pais × renda do filho, corresidentes, janela recente)
+
+| Pais no quintil | Filho no quintil | Branca | Negra | Negra − Branca |
+|---|---|---|---|---|
+| 1 (base) | 5 (topo) | 8,2% | 5,5% | **−2,7 (−4,3 a −1,2)** |
+| 1 | 1 | 30,4% | 40,9% | +10,5 (7,5–13,5) |
+| 5 (topo) | 5 | 43,3% | 34,3% | −9,0 (−12,4 a −5,6) |
+| 3 | 5 | 22,1% | 14,1% | −8,0 |
+
+**Leitura das hipóteses**
+
+- **H1 (parte do resíduo é herança):** **confirmada** — incluir a origem reduz a parte não associada do D1 em 42%
+  (IC 30% a 53%) entre jovens que moram com os pais (32% em 2012).
+- **H2 (o resíduo não é origem):** **refutada.**
+- **H3 (mobilidade do topo desigual):** **confirmada** — partindo dos 20% de baixo, 5,5% dos jovens negros chegam aos
+  20% de cima, contra 8,2% dos brancos; e no topo, a permanência é menor para negros (34% × 43%).
+- **Critério de saída da Onda 4 (H2.2):** o resíduo do D1, para jovens de 18–29, cai de 0,048 para 0,028 lp ao incluir
+  escolaridade e renda dos pais — parte do que o D1 chama de "não associado" era origem não observada. Para adultos
+  mais velhos (fora de casa) não é possível repetir.
+
+## 11. Afirmações permitidas
+
+- "Entre jovens que moram com os pais, comparar filhos de pais com a mesma escolaridade e renda reduz em cerca de 40% a
+  parte do hiato de renda que não está associada às características observáveis; ainda sobra ≈ 3%."
+- "Entre filhos de famílias dos 20% de menor renda, 5,5% dos jovens negros chegam aos 20% de maior renda, contra 8,2%
+  dos brancos."
+
+## 12. Afirmações proibidas
+
+- "A herança familiar explica 40% da discriminação" (o resíduo não é discriminação; a origem é associação).
+- Extrapolar para adultos acima de 29 anos ou para quem não mora com os pais.
+- Ler a elasticidade como mobilidade intergeracional "verdadeira" (renda dos pais contemporânea, só do trabalho).

@@ -1,0 +1,28 @@
+{
+  "esquema": "hub-racial-meta/1",
+  "arquivo": "h3_patrimonio_proxy.parquet",
+  "n_linhas": 434,
+  "gerado_em": "2026-10-20T16:22:01.543545+00:00",
+  "codigo": {
+    "commit": "4af95aa5883d08bacda536480f2c8713174c3625-modificado",
+    "modulo": "__main__"
+  },
+  "insumos": {
+    "chave": "anual_v2",
+    "descricao": "PNAD Contínua anual, Visitas 1 e 5, extrato v2",
+    "hash": "27d6da89b515f8a7725534eb72c33059af69f15f2827b5f00f759695714ee107",
+    "n_arquivos": 63
+  },
+  "se_metodo": "wls_influencia_linearizacao_estrato_upa",
+  "populacao": "PNAD Contínua anual (Visita 1; Visita 5 em 2020–2021 só para rendas de capital), exceto V2005 17–19; condição do domicílio (S01017) por pessoa e rendas de aluguel/aplicações (V5007A/V5008A) de adultos 18+",
+  "periodo": {
+    "inicio": "2016",
+    "fim": "2025"
+  },
+  "familia_fdr": [
+    "ano",
+    "raca",
+    "medida"
+  ],
+  "nota": "Condição do domicílio por pessoa (Visita 1); rendas de capital de adultos 18+; décimos de VD5008 por limiar (peso empatado vai para o décimo de baixo)"
+}

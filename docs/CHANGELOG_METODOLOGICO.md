@@ -5,6 +5,26 @@ calculá-lo: data, o quê, por quê, impacto. Mais recente primeiro.
 
 ---
 
+## 20/10/2026 — Onda 4, parte PNADC: Blocos E e H (branch `onda4/e-h`)
+
+- **Estudos novos** (fichas E1, E4, H1, H2, H3 com hipóteses commitadas antes de rodar; `src/processing/bloco_eh.py`).
+  SAEB, Censo Escolar, Censo da Educação Superior e POF (E3, E6, H3.2, parte de E2/E4) **não feitos**: exigem baixar
+  fontes externas, sem autorização ainda. Nenhum número já publicado muda.
+- **Ligação filho–pais** (Bloco H): filhos e enteados (`V2005` 04/05/06) ligados ao responsável e ao cônjuge do mesmo
+  domicílio e trimestre; viés de corresidência medido em toda tabela de origem.
+- **Etapas escolares:** `V3003` (até 4T2015) e `V3003A` (desde 2016) harmonizados para fundamental, médio e superior
+  regulares (conferido pela idade média de cada código; a confirmar contra o dicionário).
+- **Desvio declarado (E4):** especificação com renda dos pais acrescentada depois da primeira rodada (sensibilidade).
+- **Principais achados (Branca × Negra):** frequência escolar igual até os 14 anos; aos 15, 10 p.p. a mais de brancos já
+  no médio; a diferença de médio completo aos 19 caiu 7,7 p.p. desde 2012 e a de diploma superior aos 25–29 **subiu**
+  3,1 p.p. (E1); metade da diferença de acesso à escola privada persiste com a mesma escolaridade, renda e lugar (E4);
+  a escolaridade dos pais responde por ~metade da diferença em ter diploma, e entre filhos de pais com diploma a
+  diferença é a maior (65% × 49%) (H1); incluir a origem reduz em 42% (30–53%) a parte não associada do D1 entre jovens
+  que moram com os pais (H2, critério de saída); com a mesma renda e lugar, negros moram menos em casa própria quitada
+  (−4,7 p.p.) e recebem menos rendas de capital (H3).
+
+---
+
 ## 14/10/2026 — Onda 3: Bloco D (branch `onda3/d`)
 
 - **Decisões do Felipe (20/10/2026, "pode seguir"):** fichas D1–D6 e D8 aprovadas com ressalvas; leitura do D8

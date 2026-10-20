@@ -1,0 +1,25 @@
+{
+  "esquema": "hub-racial-meta/1",
+  "arquivo": "e1_escolarizacao_idade.parquet",
+  "n_linhas": 2118,
+  "gerado_em": "2026-10-20T16:07:42.567108+00:00",
+  "codigo": {
+    "commit": "4af95aa5883d08bacda536480f2c8713174c3625-modificado",
+    "modulo": "__main__"
+  },
+  "insumos": {
+    "chave": "trimestral_v2",
+    "descricao": "PNAD Contínua trimestral, extrato v2 + deflator IBGE",
+    "hash": "9b64f579fa63981e9237190166d333a9ac546041a4df260d2c67dabf49f1ceda",
+    "n_arquivos": 228
+  },
+  "se_metodo": "linearizacao_taylor_estrato_upa",
+  "populacao": "Pessoas de 5 a 29 anos (Branca, Negra, Indígena; todas, não só P1); frequência, etapa adequada (V3003 até 2015, V3003A desde 2016, harmonizados) e conclusão (VD3004)",
+  "periodo": null,
+  "familia_fdr": [
+    "periodo",
+    "indicador",
+    "raca"
+  ],
+  "nota": "p.p.; etapa adequada: 6–14 fundamental+, 15–17 médio+, 18–24 superior+; V3003/V3003A harmonizados"
+}
