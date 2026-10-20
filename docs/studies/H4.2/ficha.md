@@ -6,7 +6,7 @@
 | Onda | 6 |
 | Responsável | Felipe Santana (execução: Claude Code) |
 | Criada em / atualizada em | 2026-10-20 / 2026-10-20 |
-| Estado de publicação | **Aprovado com ressalvas** (proposto; aguarda o Felipe) |
+| Estado de publicação | **Aprovado com ressalvas** (aprovado pelo Felipe em 20/10/2026) |
 | PR | `onda6/integracao` |
 
 > Seções 1–9 escritas **antes** de rodar (20/10/2026). Refaz `transicao_desemprego_emprego` e

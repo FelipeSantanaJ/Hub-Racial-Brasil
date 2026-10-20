@@ -53,10 +53,10 @@ de publicação. Estudos entram aqui quando a ficha é criada, não quando o res
 | G3 | Lei 12.990 e o funcionalismo federal | Q | 5 | Bloqueado (por dado) | [G3/ficha.md](G3/ficha.md) | Onda 5 |
 | G2 | Cotas → conclusão e renda | Q | 5 | Bloqueado (por dado) | [G2/ficha.md](G2/ficha.md) | Onda 5 |
 | G5 | Transferências e o hiato | Q | 5 | Bloqueado (por dado) | [G5/ficha.md](G5/ficha.md) | Onda 5 |
-| D4.4 | Segregação residencial Branca × Negra e renda do bairro (Censo 2022, setores) | D | 6 | Aprovado com ressalvas (proposto) | [D4.4/ficha.md](D4.4/ficha.md) | Onda 6 |
-| I1 | Censo 2022 × PNADC: hiato de renda e composição racial batem? | D | 6 | Aprovado com ressalvas (proposto) | [I1/ficha.md](I1/ficha.md) | Onda 6 |
-| H3.4 | Riqueza imobiliária por raça (aluguel estimado da POF), com intervalo | D/C | 6 | Aprovado com ressalvas (proposto) | [H3.4/ficha.md](H3.4/ficha.md) | Onda 6 |
-| H4.2 | Transições trimestrais: desemprego → emprego, carteira (painel da PNADC) | C | 6 | Aprovado com ressalvas (proposto) | [H4.2/ficha.md](H4.2/ficha.md) | Onda 6 |
+| D4.4 | Segregação residencial Branca × Negra e renda do bairro (Censo 2022, setores) | D | 6 | Aprovado com ressalvas | [D4.4/ficha.md](D4.4/ficha.md) | Onda 6 |
+| I1 | Censo 2022 × PNADC: hiato de renda e composição racial batem? | D | 6 | Aprovado com ressalvas | [I1/ficha.md](I1/ficha.md) | Onda 6 |
+| H3.4 | Riqueza imobiliária por raça (aluguel estimado da POF), com intervalo | D/C | 6 | Aprovado com ressalvas | [H3.4/ficha.md](H3.4/ficha.md) | Onda 6 |
+| H4.2 | Transições trimestrais: desemprego → emprego, carteira (painel da PNADC) | C | 6 | Aprovado com ressalvas | [H4.2/ficha.md](H4.2/ficha.md) | Onda 6 |
 
 O que já existe no Hub e a qual pergunta corresponde está em
 [`docs/auditoria/mapa_cobertura_plano.md`](../auditoria/mapa_cobertura_plano.md).

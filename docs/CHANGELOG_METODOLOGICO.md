@@ -7,6 +7,9 @@ calculá-lo: data, o quê, por quê, impacto. Mais recente primeiro.
 
 ## 20/10/2026 — Onda 6: integração (branch `onda6/integracao`)
 
+- **Decisões do Felipe (20/10/2026, "sim pra todos"):** fichas D4.4, I1, H3.4 e H4.2 aprovadas com ressalvas; PR #15
+  liberado; gráficos da Onda 6 no deck publicado; seguir com os próximos passos (Rambachan–Roth no G1; Censo com
+  acesso controlado e LAI do G3 documentados para pedido do Felipe).
 - **Autorização:** Onda 6 autorizada pelo Felipe em 20/10/2026 ("está tudo autorizado"), incluindo o Censo 2022.
 - **Fonte nova — Censo 2022:** o "Bloqueado (GovBR)" estava desatualizado. O FTP do IBGE publica os agregados por setor
   censitário (cor ou raça, básico, rendimento do responsável) e os microdados da amostra de acesso público (só UF;
