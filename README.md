@@ -21,9 +21,9 @@ deflator oficial do IBGE, agregações por raça/gênero/faixa etária/geografia
 descritivas, decomposições, distribuição, primeira identificação causal e testes
 automatizados.
 🔧 **Auditoria científica e plano de análise em andamento (out/2026).** A Rodada 1 encontrou um erro no
-erro-padrão (corrigido: ver "O que é validado" abaixo e [docs/auditoria/](docs/auditoria/)). Ondas 1, 2 e 3 do
-[plano de análise](docs/PLANO_DE_ANALISE.md) concluídas; Onda 4 (educação e origem): parte da PNAD
-Contínua concluída, com fichas em [docs/studies](docs/studies/INDICE.md).
+erro-padrão (corrigido: ver "O que é validado" abaixo e [docs/auditoria/](docs/auditoria/)). Ondas 1 a 4 do
+[plano de análise](docs/PLANO_DE_ANALISE.md) concluídas (Onda 4: educação, origem e patrimônio, com PNAD Contínua,
+INEP e POF), com fichas em [docs/studies](docs/studies/INDICE.md); Onda 5 (políticas e causalidade) em andamento.
 ⏳ **Etapas 2 a 6: não iniciadas.** Ver [docs/PLANO.md](docs/PLANO.md).
 
 > **Leitura principal (13/10/2026):** o hiato racial de renda caiu de 2012 a 2026, mas **em degrau** (−5 p.p. em
@@ -132,7 +132,9 @@ continuam publicadas para comparação, mas a referência do Hub passa a ser o D
 (maior na base e no topo que na mediana) aparece na janela recente, mas qual extremo é maior depende da banda do
 kernel — o Hub não afirma nem "teto de vidro" nem "piso pegajoso" ([D1](docs/studies/D1/ficha.md), D1.3).
 
-### Educação e origem (Onda 4, parte com a PNAD Contínua)
+### Educação, origem e patrimônio (Onda 4)
+
+![Conclusão por idade](docs/img/onda4_e1_conclusao_por_idade.png)
 
 Até os 14 anos, crianças brancas e negras frequentam a escola na mesma proporção; aos 15, 10% a mais das brancas já
 estão no ensino médio. Desde 2012, a diferença de ensino médio completo aos 19 anos caiu de 21 para 13 pontos, mas a
@@ -144,12 +146,22 @@ observáveis ([H2](docs/studies/H2/ficha.md)). Com a mesma renda e no mesmo luga
 própria quitada e recebem menos aluguel e rendimentos de aplicações ([H3](docs/studies/H3/ficha.md)). Tudo o que usa
 a origem vale só para quem mora com os pais (viés de corresidência medido nas fichas).
 
+![Diploma por origem](docs/img/onda4_h1_superior_por_origem.png)
+
+![Parte não associada com e sem origem](docs/img/onda4_h2_residuo_com_origem.png)
+
+![SAEB](docs/img/onda4_e3_saeb_inse_escola.png)
+
 Com dados do INEP e da POF: no 9º ano, estudantes negros têm proficiência 0,4 desvio-padrão abaixo dos brancos no SAEB,
 e entre um terço e metade disso persiste com o mesmo nível socioeconômico e na mesma escola ([E3](docs/studies/E3/ficha.md));
 metade dos ingressantes das federais é negra, mas em Medicina são 32% ([E6](docs/studies/E6/ficha.md)); na rede pública
 do mesmo município, alunos brancos e negros estudam em escolas com a mesma infraestrutura — a diferença nacional vem de
 onde moram ([E7](docs/studies/E7/ficha.md)); e, com a mesma renda, pessoas negras têm menos carro e computador em casa
 ([H3.2](docs/studies/H3.2/ficha.md)).
+
+![Infraestrutura das escolas](docs/img/onda4_e7_infraestrutura_municipio.png)
+
+![Patrimônio com a mesma renda](docs/img/onda4_h3_patrimonio_condicional.png)
 
 ### O topo 10% dos negros ficou muito mais escolarizado — mas o hiato lá em cima persiste
 
