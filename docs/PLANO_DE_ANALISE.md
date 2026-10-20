@@ -385,7 +385,7 @@ Usa variáveis que **ainda não estão extraídas** (frequência escolar, atraso
 |---|---|---|
 | **PNAD Contínua** | A, B, C, D (C), E1–E2 parcial | Em uso |
 | PNADC — módulos educação/mobilidade | E1, E5, H | Verificar disponibilidade |
-| Censo 2022 | D4.4, E7, segregação, indígenas em amostra grande | Bloqueado (GovBR) |
+| Censo 2022 | D4.4, E7, segregação, indígenas em amostra grande | Agregados por setor e microdados da amostra (acesso público, só UF) no FTP do IBGE: em uso na Onda 6 (verificado em 20/10/2026); município/área de ponderação só no acesso controlado |
 | Censo da Educação Superior (INEP) | E6, G1 | Não iniciado |
 | Censo Escolar e SAEB (INEP) | E2–E4, E7 | Não iniciado |
 | ENEM / ENADE (INEP) | E6, acesso | Não iniciado |
@@ -406,7 +406,7 @@ Usa variáveis que **ainda não estão extraídas** (frequência escolar, atraso
 | **3** | Bloco D completo (OB aninhado, Gelbach/Shapley, RIF, território) | D1–D8 com resíduo rotulado; sensibilidade rodada |
 | **4** | **Bloco E (educação) + Bloco H (origem, mobilidade, patrimônio)**. Extração de variáveis escolares e da ligação filhos–pais; fontes INEP; POF | Primeiro estudo educacional; H1–H2 com viés de corresidência quantificado; H2.2 compara o resíduo de D1 com e sem origem |
 | **5** | Bloco G (políticas, com dado administrativo) | EMD calculado por desenho; só rodar o que tiver poder |
-| **6** | Integração (Censo 2022 se destravado, riqueza via fontes externas, H3.4, H4.2) | A decidir após Onda 5 |
+| **6** | Integração (Censo 2022 se destravado, riqueza via fontes externas, H3.4, H4.2) | Fichas D4.4, I1, H3.4 e H4.2 com resultados; mapa de cobertura atualizado (definido em 20/10/2026, ao abrir a Onda 6) |
 
 Dentro da Onda 4, **H1 e E5 compartilham a mesma base** (ligação filhos–pais): construir uma vez.
 
