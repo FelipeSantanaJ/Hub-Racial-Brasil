@@ -7,6 +7,11 @@ calculá-lo: data, o quê, por quê, impacto. Mais recente primeiro.
 
 ## 14/10/2026 — Onda 3: Bloco D (branch `onda3/d`)
 
+- **Decisões do Felipe (20/10/2026, "pode seguir"):** fichas D1–D6 e D8 aprovadas com ressalvas; leitura do D8
+  adotada (a parte não associada fica entre 0 e ~9 log-pontos e não é robusta a omitidas); gráficos `onda3_*` no deck
+  publicado; textos antigos que citavam o resíduo do OB de 3 controles (≈ 23%) e "piso pegajoso / teto de vidro"
+  passam a remeter ao D1; PR #10 liberado; Onda 4 autorizada.
+
 - **Estudos novos** (fichas D1–D6 com hipóteses escritas e commitadas antes de rodar; D8 de síntese;
   `src/processing/bloco_d.py`, `bloco_d_estrutura.py`, `graficos_onda3.py`). D7 fica coberto por C4–C6.
 - **Decomposição de referência do Hub passa a ser o D1** (E0–E8 com idade, sexo, instrução, território, horas,
@@ -25,7 +30,7 @@ calculá-lo: data, o quê, por quê, impacto. Mais recente primeiro.
   82% do hiato condicional persiste dentro da mesma CBO-4; 28% do hiato nacional é composição entre UFs; com os
   controles, pessoas negras não têm menos carteira, mas são empregadoras 2,4 p.p. menos; indígenas seguem com menos
   carteira e previdência.
-- Gráficos novos: `onda3_d1_contribuicoes.png`, `onda3_d1_serie_aninhada.png` (README). Deck publicado não alterado.
+- Gráficos novos: `onda3_d1_contribuicoes.png`, `onda3_d1_serie_aninhada.png` (README e, desde 20/10, deck publicado: seção "Leitura principal (Ondas 1 a 3)", 638 slides; legendas do OB antigo remetem ao D1).
 
 ---
 

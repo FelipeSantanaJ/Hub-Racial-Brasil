@@ -5,8 +5,8 @@
 | ID no plano | `D6.1`, `D6.2` (coortes: B4) (`docs/PLANO_DE_ANALISE.md`, Bloco D) |
 | Onda | 3 |
 | Responsável | Felipe Santana (execução: Claude Code) |
-| Criada em / atualizada em | 2026-10-14 / 2026-10-14 |
-| Estado de publicação | **Aprovado com ressalvas** (proposto; aguarda o Felipe) |
+| Criada em / atualizada em | 2026-10-14 / 2026-10-20 |
+| Estado de publicação | **Aprovado com ressalvas** (aprovado pelo Felipe em 20/10/2026) |
 | PR | `onda3/d` |
 
 > Seções 1–9 escritas **antes** de rodar (14/10/2026).

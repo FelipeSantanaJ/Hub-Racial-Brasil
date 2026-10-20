@@ -22,7 +22,7 @@ descritivas, decomposições, distribuição, primeira identificação causal e 
 automatizados.
 🔧 **Auditoria científica e plano de análise em andamento (out/2026).** A Rodada 1 encontrou um erro no
 erro-padrão (corrigido: ver "O que é validado" abaixo e [docs/auditoria/](docs/auditoria/)). Ondas 1, 2 e 3 do
-[plano de análise](docs/PLANO_DE_ANALISE.md) concluídas (a Onda 3 aguarda aprovação das fichas), com fichas em [docs/studies](docs/studies/INDICE.md).
+[plano de análise](docs/PLANO_DE_ANALISE.md) concluídas, com fichas em [docs/studies](docs/studies/INDICE.md).
 ⏳ **Etapas 2 a 6: não iniciadas.** Ver [docs/PLANO.md](docs/PLANO.md).
 
 > **Leitura principal (13/10/2026):** o hiato racial de renda caiu de 2012 a 2026, mas **em degrau** (−5 p.p. em
@@ -285,7 +285,7 @@ Para conferir que uma regeneração não mudou estimativas pontuais:
 | Multiplicidade | `significativo_fdr` (Benjamini-Hochberg por família) em toda tabela com p-valor | `src/inference/multiplicidade.py` |
 | Funções estatísticas | Testes automatizados, inclusive golden-file da pipeline e guarda contra a fórmula antiga | `tests/`, CI |
 | Desenhos causais (cotas) | **Não validados**: resultados exploratórios; nenhum teste do Desenho B sobrevive à correção de multiplicidade | `docs/auditoria/rodada1.md` (R2, R3) |
-| Decomposição Oaxaca-Blinder | Implementação correta; **especificação insuficiente** (faltam região, horas, sexo, informalidade) | R5 da auditoria |
+| Decomposição do hiato | Refeita na Onda 3 ([D1](docs/studies/D1/ficha.md)): 8 blocos, Gelbach/Shapley, sensibilidade a omitidas; o OB antigo (3 controles) fica só para comparação | R5 da auditoria; D1, D8 |
 | Gráficos com IC/asterisco | **Desatualizados** até a regeneração | `docs/auditoria/graficos_a_regenerar.md` |
 
 ## Limitações conhecidas

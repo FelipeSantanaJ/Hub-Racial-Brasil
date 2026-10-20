@@ -1,5 +1,5 @@
 """Deck final da Etapa 1 — junta:
-  0. Leitura principal das Ondas 1 e 2 (estudos com ficha em docs/studies) — `ONDAS`
+  0. Leitura principal das Ondas 1 a 3 (estudos com ficha em docs/studies) — `ONDAS`
   1. Árvore cruzada de renda por raça (itens 1-10) — `manifesto['arvore']`
   2. Topo 10% / base 10% / quartis com limiares Brasil / gênero / raça×gênero — `manifesto['extremos']`
   3. Ponteiro pra tabela de crescimento (arquivo à parte)
@@ -37,8 +37,8 @@ OUTRAS = [
     ("É ocupação, ou é cor da pele? — decomposição do hiato",
      "Quanto idade, escolaridade e ocupação explicam do hiato Branca vs. Negra.", [
         ("decomposicao_hiato_ocupacional.png", "Padronização direta: 66% bruto → 31% (+escolaridade) → 25% (+ocupação, residual). Ocupação sozinha: 34%."),
-        ("oaxaca_blinder_decomposicao.png", "Regressão (Oaxaca-Blinder) com teste de significância: resíduo +23% (p<0,001; parte não associada às covariáveis, não é medida de discriminação)."),
-        ("oaxaca_blinder_quantis.png", "O resíduo não é uniforme: ~15% na mediana, ~35% na base (piso pegajoso), ~34% no topo (teto de vidro)."),
+        ("oaxaca_blinder_decomposicao.png", "Especificação antiga (3 controles): resíduo +23%. A referência atual é o D1 (Onda 3): 0,094 lp com 8 blocos, frágil a omitidas."),
+        ("oaxaca_blinder_quantis.png", "Especificação antiga: resíduo em U por quantil. No D1 (Onda 3) a ordem base × topo depende da banda: nem piso pegajoso nem teto de vidro afirmados."),
         ("renda_por_raca_ocupacao.png", "Dentro de CADA categoria ocupacional, Branca ganha mais que Negra."),
      ]),
     ("Raça × A × B — combinações com ocupação (pooled 8 trimestres)",
@@ -111,6 +111,10 @@ ONDAS = [
         ("onda1_t2_pobreza_meio_sm.png", "Abaixo de ½ salário mínimo per capita: 29% das pessoas negras e 15% das brancas em 2025 (T2)."),
         ("onda1_t4_topo_base_domiciliar.png", "Chance de estar entre os 10% mais ricos: ~1/4 da de pessoas brancas, sem mudança desde 2012 (T4)."),
      ]),
+    ("Por que a diferença existe? (Onda 3, Bloco D)", "Gelbach e Shapley; parte não associada às covariáveis (R5). Fichas D1–D8.", [
+        ("onda3_d1_contribuicoes.png", "Cerca de 78% do hiato está associado a instrução, território, ocupação, vínculo e horas; os três primeiros pesam ≈ 20% cada (D1)."),
+        ("onda3_d1_serie_aninhada.png", "O hiato bruto caiu em 2022; a parte não associada (≈ 0,09 lp) ficou parada e não é robusta a omitidas (D1, D8)."),
+     ]),
     ("Raça × gênero (Onda 2, Bloco C)", "Fichas C1–C6.", [
         ("onda2_c1_celulas_pct_homem_branco.png", "Entre ocupados, mulheres negras ganham 47% do que ganham homens brancos; entre todos os adultos, 32% (C1)."),
         ("onda2_c3_shapley_raca_genero.png", "Da distância homem branco − mulher negra entre ocupados, ~2/3 se associam a raça e ~1/3 a gênero (Shapley; C3)."),
@@ -125,7 +129,7 @@ FONTE_ANUAL = ("Fonte: IBGE, PNAD Contínua anual (Visita 1; Visita 5 em 2020–
 
 
 def secao_ondas(prs, n):
-    A.slide_divisor(prs, "Leitura principal (Ondas 1 e 2)",
+    A.slide_divisor(prs, "Leitura principal (Ondas 1 a 3)",
                     "Estudos com ficha, hipóteses escritas antes de rodar e IC design-based (docs/studies).")
     n += 1
     for titulo, nota, imgs in ONDAS:

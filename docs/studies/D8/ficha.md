@@ -5,8 +5,8 @@
 | ID no plano | `D8.1`, `D8.2`, `D8.3` (`docs/PLANO_DE_ANALISE.md`, Bloco D) |
 | Onda | 3 |
 | Responsável | Felipe Santana (execução: Claude Code) |
-| Criada em / atualizada em | 2026-10-14 / 2026-10-14 |
-| Estado de publicação | **Aprovado com ressalvas** (proposto; aguarda o Felipe) |
+| Criada em / atualizada em | 2026-10-14 / 2026-10-20 |
+| Estado de publicação | **Aprovado com ressalvas** (aprovado pelo Felipe em 20/10/2026) |
 | PR | `onda3/d` |
 
 > Ficha de síntese, escrita **depois** dos resultados de D1–D6 (não tem hipóteses próprias; as hipóteses estão nas

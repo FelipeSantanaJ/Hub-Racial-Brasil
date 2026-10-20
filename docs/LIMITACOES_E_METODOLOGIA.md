@@ -154,6 +154,12 @@ trimestres) para trazer essa coluna — usada na decomposição do hiato racial 
 
 ## Aprofundamento estatístico: Oaxaca-Blinder, RIF, segregação, quebra estrutural
 
+> **Onda 3 (20/10/2026):** a decomposição de referência é a do [D1](studies/D1/ficha.md) (`src/processing/bloco_d.py`:
+> E0–E8, Gelbach com EP que inclui a incerteza de β, Shapley, RIF-OB com três bandas, Oster e Cinelli-Hazlett). O que
+> segue descreve a implementação antiga (`pnadc_core.decomposicao_oaxaca_blinder`, 3 controles), mantida para
+> comparação. Armadilha nova: "serviços domésticos" (`VD4010` = 11) é idêntico a "doméstico" (`VD4009` 03/04) —
+> com os dois na mesma regressão, contribuições por bloco ficam indeterminadas.
+
 - **Decomposição de Oaxaca-Blinder** (`pnadc_core.decomposicao_oaxaca_blinder`): os pesos
   amostrais (V1028) entram como pesos analíticos da regressão WLS (statsmodels). Na versão
   inicial, o erro-padrão do teste de significância (`residuo_restrito_erro_padrao`) vinha
