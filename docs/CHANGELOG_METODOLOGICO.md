@@ -7,6 +7,9 @@ calculá-lo: data, o quê, por quê, impacto. Mais recente primeiro.
 
 ## 20/10/2026 — Onda 4, parte 2: INEP e POF (branch `onda4/inep-pof`)
 
+- **Decisões do Felipe (20/10/2026):** fichas E3, E6, E7 e H3.2 aprovadas com ressalvas; PR #12 liberado para
+  mesclar. Gráficos da Onda 4 no deck e Onda 5 (Bloco G) ainda dependem de decisão.
+
 - **Fontes novas (download autorizado pelo Felipe em 20/10/2026):** SAEB 2023, Censo Escolar 2024, Censo da Educação
   Superior 2014 e 2023 (INEP) e POF 2017–2018 (IBGE), em `data/raw/externos/` (não versionado); extração das colunas
   usadas em `src/ingestion/externos_educacao.py`. Totais conferidos com os números oficiais (ingressantes, matrículas,

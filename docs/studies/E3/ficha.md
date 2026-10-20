@@ -6,7 +6,7 @@
 | Onda | 4 (parte 2, fontes do INEP) |
 | Responsável | Felipe Santana (execução: Claude Code) |
 | Criada em / atualizada em | 2026-10-20 / 2026-10-20 |
-| Estado de publicação | **Aprovado com ressalvas** (proposto; aguarda o Felipe) |
+| Estado de publicação | **Aprovado com ressalvas** (aprovado pelo Felipe em 20/10/2026) |
 | PR | `onda4/inep-pof` |
 
 > Seções 1–9 escritas **antes** de rodar (20/10/2026). Download autorizado pelo Felipe em 20/10/2026.
