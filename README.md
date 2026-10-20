@@ -22,8 +22,8 @@ descritivas, decomposições, distribuição, primeira identificação causal e 
 automatizados.
 🔧 **Auditoria científica e plano de análise em andamento (out/2026).** A Rodada 1 encontrou um erro no
 erro-padrão (corrigido: ver "O que é validado" abaixo e [docs/auditoria/](docs/auditoria/)). Ondas 1, 2 e 3 do
-[plano de análise](docs/PLANO_DE_ANALISE.md) concluídas; Onda 4 (educação e origem) com a parte da PNAD
-Contínua feita e aguardando aprovação, com fichas em [docs/studies](docs/studies/INDICE.md).
+[plano de análise](docs/PLANO_DE_ANALISE.md) concluídas; Onda 4 (educação e origem): parte da PNAD
+Contínua concluída, com fichas em [docs/studies](docs/studies/INDICE.md).
 ⏳ **Etapas 2 a 6: não iniciadas.** Ver [docs/PLANO.md](docs/PLANO.md).
 
 > **Leitura principal (13/10/2026):** o hiato racial de renda caiu de 2012 a 2026, mas **em degrau** (−5 p.p. em

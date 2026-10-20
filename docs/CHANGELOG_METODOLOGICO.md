@@ -7,6 +7,9 @@ calculá-lo: data, o quê, por quê, impacto. Mais recente primeiro.
 
 ## 20/10/2026 — Onda 4, parte PNADC: Blocos E e H (branch `onda4/e-h`)
 
+- **Decisões do Felipe (20/10/2026, "pode seguir"):** fichas E1, E4, H1, H2 e H3 aprovadas com ressalvas; download de
+  SAEB, Censo Escolar, Censo da Educação Superior e POF autorizado (parte 2 da Onda 4); PR #11 liberado.
+
 - **Estudos novos** (fichas E1, E4, H1, H2, H3 com hipóteses commitadas antes de rodar; `src/processing/bloco_eh.py`).
   SAEB, Censo Escolar, Censo da Educação Superior e POF (E3, E6, H3.2, parte de E2/E4) **não feitos**: exigem baixar
   fontes externas, sem autorização ainda. Nenhum número já publicado muda.
