@@ -1,5 +1,7 @@
 # Datahub de Análise Racial no Brasil
 
+> Leitura principal em revisão (ver [docs/auditoria](docs/auditoria/)).
+
 Datahub aberto que compara historicamente três grupos — população **negra** (preta + parda),
 **branca** e **indígena** no Brasil (Amarela sempre explicitada, nunca descartada) — renda,
 escolaridade, mercado de trabalho, saúde e moradia, de forma agregada e segmentada por

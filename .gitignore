@@ -1,5 +1,7 @@
-# Dados brutos (microdados baixados do IBGE) — nunca versionados
-data/raw/
+# Dados brutos (microdados baixados do IBGE) — nunca versionados.
+# Exceção: o inventário data/raw/MANIFEST.md (fonte, data, tamanho, SHA-256) é versionado.
+data/raw/*
+!data/raw/MANIFEST.md
 
 # Python
 __pycache__/
