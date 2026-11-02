@@ -16,7 +16,7 @@ Status possíveis: NAO_INICIADA · EM_ANDAMENTO · AGUARDANDO_APROVACAO · APROV
 | Fase | Conteúdo | Status | Branch / PR | Início | Fim | Aprovação do Felipe (data e mensagem) |
 |---|---|---|---|---|---|---|
 | P | Pedidos de acesso (LAI, Censo, POF) | A_FAZER_FELIPE | — | | | — |
-| 0 | Baseline e ambiente | APROVADA | rumo8/fase0 | 01/11/2026 | 01/11/2026 | 01/11/2026: "aprovo a fase 0" — aprovada por Felipe |
+| 0 | Baseline e ambiente | APROVADA | rumo8/fase0 · PR #17 | 01/11/2026 | 01/11/2026 | 01/11/2026: "aprovo a fase 0" — aprovada por Felipe |
 | 1 | Inferência e engenharia | NAO_INICIADA | rumo8/fase1 | | | |
 | 2 | Estimando, população e rivais da queda de 2021 | NAO_INICIADA | rumo8/fase2 | | | |
 | 3 | Decomposição, mediadoras e escala | NAO_INICIADA | rumo8/fase3 | | | |
